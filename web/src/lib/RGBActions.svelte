@@ -3,9 +3,17 @@
   import ColorBlock from "./ColorBlock.svelte";
   import RgbEdit from "./RGBEdit.svelte";
   import { onMount } from "svelte";
+  import { randomNumber } from "@/utils";
 
   $: a = 1;
-  $: rgb = new RGB(64, 55, 107);
+  // $: rgb = new RGB(randomNumber(0, 255), randomNumber(0, 255), randomNumber(0, 255));
+  $: rgb = (() => {
+    const rgb = new RGB(randomNumber(0, 255), randomNumber(0, 255), randomNumber(0, 255));
+    const hsl = rgb.toHSL();
+    hsl.l = 0.8;
+
+    return hsl.toRGB();
+  })();
 
   $: numericRgb = rgb.toNumeric();
   $: numericRgbRgb = RGB.fromRGB(numericRgb);
@@ -19,7 +27,14 @@
   $: hsv = rgb.toHSV();
   $: hsvRgb = hsv.toRGB();
 
-  // $: xyz = rgb.toXYZ();
+  $: hwb = rgb.toHWB();
+  $: hwbRgb = hwb.toRGB();
+
+  $: xyz = rgb.toXYZ();
+  $: xyzRgb = xyz.toRGB();
+
+  $: lab = rgb.toLAB();
+  $: labRgb = lab.toXYZ().toRGB();
 
   // $: xyzsAndLabs = Object.keys(illuminants).map((key) => {
   //   const xyz = rgb.toXYZ(key as keyof typeof illuminants);
@@ -43,9 +58,10 @@
     //   for (let g = 0; g < 256; g++) {
     //     for (let b = 0; b < 256; b++) {
     //       const rgb = new RGB(r, g, b);
-    //       const hsl = rgb.toHSV();
-    //       if (hsl.toRGB().toString() !== rgb.toString()) {
-    //         console.log("Error HSL", hsl.toString(), rgb.toString());
+    //       const out = rgb.toHWB();
+    //       const outRGB = out.toRGB();
+    //       if (rgb.toString() !== outRGB.toString()) {
+    //         console.log(`${rgb.toString()} !== ${outRGB.toString()}`, out.toString());
     //       }
     //     }
     //   }
@@ -69,7 +85,7 @@
       <ColorBlock name="RGB → HEX" color={rgb.toHex()} />
       <ColorBlock name="HEX → RGB" color={rgb.toString()} />
 
-      <ColorBlock name="RGB → CMYK" info={cmyk.toString()} color={cmyk.toHex()} />
+      <ColorBlock name="RGB → CMYK" info={cmyk.toString()} color={cmykRgb.toHex()} />
       <ColorBlock name="CMYK → RGB" color={cmykRgb.toString()} />
 
       <ColorBlock name="RGB → HSL" color={hsl.toString()} />
@@ -77,6 +93,15 @@
 
       <ColorBlock name="RGB → HSV" info={hsv.toString()} color={hsvRgb.toString()} />
       <ColorBlock name="HSV → RGB" color={hsvRgb.toString()} />
+
+      <ColorBlock name="RGB → HWB" color={hwb.toString()} />
+      <ColorBlock name="HWB → RGB" color={hwbRgb.toString()} />
+
+      <ColorBlock name="RGB → XYZ (D65)" color={xyz.toString("D65")} />
+      <ColorBlock name="XYZ (D65) → RGB" color={xyzRgb.toString()} />
+
+      <ColorBlock name="RGB → LAB (D65)" color={lab.toString()} />
+      <ColorBlock name="LAB (D65) → RGB" color={labRgb.toString()} />
 
       <!-- <div class="col-span-3 my-2 px-4">XYZ and LAB</div>
 

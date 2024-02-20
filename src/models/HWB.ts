@@ -1,0 +1,129 @@
+// https://en.wikipedia.org/wiki/HSL_and_HSV
+// http://alvyray.com/Papers/CG/hwb2rgb.htm
+
+import { clamp, round } from "../utils";
+import { HSV } from "./HSV";
+import { RGB } from "./RGB";
+
+class HWBBase extends Float32Array {
+  public get h() {
+    return this[0];
+  }
+
+  public set h(h: number) {
+    this[0] = clamp(h, 0, 360);
+  }
+
+  public get w() {
+    return this[1];
+  }
+
+  public set w(w: number) {
+    this[1] = clamp(w, 0, 1);
+  }
+
+  public get b() {
+    return this[2];
+  }
+
+  public set b(b: number) {
+    this[2] = clamp(b, 0, 1);
+  }
+
+  /**
+   * @param h - [0, 360]
+   * @param w - [0, 1]
+   * @param b - [0, 1]
+   */
+  constructor(h: number, w: number, b: number) {
+    super(3);
+
+    this[0] = h;
+    this[1] = w;
+    this[2] = b;
+  }
+
+  public toString() {
+    const [h, w, b] = [round(this.h, 2), round(this.w * 100, 2), round(this.b * 100, 2)];
+
+    return `hwb(${h}deg ${w}% ${b}%)`;
+  }
+}
+
+class HWBConversions extends HWBBase {
+  /**
+   * @param r - [0, 1]
+   * @param g - [0, 1]
+   * @param b - [0, 1]
+   */
+  static fromRGB(r: number, g: number, b: number): HWB {
+    // Find the minimum and maximum values of R, G and B.
+    const whiteness = Math.min(r, g, b);
+    const max = Math.max(r, g, b);
+
+    const blackness = 1 - max;
+
+    if (whiteness === max) {
+      return new HWB(0, whiteness, blackness);
+    }
+
+    const f = r === whiteness ? g - b : g === whiteness ? b - r : r - g;
+    const i = r === whiteness ? 3 : g === whiteness ? 5 : 1;
+
+    let h = i - f / (max - whiteness);
+
+    /**
+     * The Hue value you get needs to be multiplied by 60 to convert it to degrees on the color circle
+     * If Hue becomes negative you need to add 360 to, because a circle has 360 degrees.
+     */
+    h *= 60;
+    if (h < 0) h += 360;
+
+    return new HWB(h, whiteness, blackness);
+  }
+
+  public toRGB() {
+    // Ensure hue is within 0-360 degrees
+    let [h, w, b] = [(this.h % 360) / 60, this.w, this.b];
+
+    if (h === 6) h = 0;
+
+    const v = 1 - b;
+    const i = Math.floor(h);
+
+    let factorial = h - i;
+    if (i % 2 !== 0) factorial = 1 - factorial;
+
+    const n = w + factorial * (v - w); // linear interpolation between w and v
+
+    const rgb: [r: number, g: number, b: number] = (() => {
+      switch (i) {
+        case 0:
+          return [v, n, w];
+
+        case 1:
+          return [n, v, w];
+
+        case 2:
+          return [w, v, n];
+
+        case 3:
+          return [w, n, v];
+
+        case 4:
+          return [n, w, v];
+
+        default:
+          return [v, w, n];
+      }
+    })();
+
+    return RGB.fromNormalized(...rgb);
+  }
+
+  public toHSV(): HSV {
+    return new HSV(this.h, 1 - this.w / (1 - this.b), 1 - this.b);
+  }
+}
+
+export class HWB extends HWBConversions {}

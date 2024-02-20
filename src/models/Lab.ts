@@ -1,11 +1,9 @@
 // https://en.wikipedia.org/wiki/CIELAB_color_space
 
 import { clamp, round } from "../utils";
-import type { CMYK } from "./CMYK";
-import type { HSL } from "./HSL";
-import type { RGB } from "./RGB";
-import { XYZ, illuminants, type XYZIlluminant } from "./XYZ";
+import { XYZ } from "./XYZ";
 
+// TODO: Not perfect
 class LabBase extends Float32Array {
   public get l() {
     return this[0];
@@ -31,16 +29,12 @@ class LabBase extends Float32Array {
     this[2] = b;
   }
 
-  public get references(): XYZIlluminant {
-    return illuminants[this.illuminant] ?? illuminants.D65;
-  }
-
   /**
    * @param l - [0, 100]
    * @param a
    * @param b
    */
-  constructor(l: number, a: number, b: number, readonly illuminant: keyof typeof illuminants) {
+  constructor(l: number, a: number, b: number, readonly illuminant: keyof typeof XYZ.Illuminants) {
     super(3);
 
     this[0] = l;
@@ -55,7 +49,7 @@ class LabBase extends Float32Array {
 
 class LabConversions extends LabBase {
   public toXYZ(): XYZ {
-    const references = this.references;
+    const references = XYZ.getReferences(this.illuminant);
 
     const y = (this.l + 16) / 116;
     const x = this.a / 500 + y;
@@ -70,31 +64,7 @@ class LabConversions extends LabBase {
       return (value - 16 / 116) / 7.787;
     };
 
-    return new XYZ(
-      calibrate(x) * references[0],
-      calibrate(y) * references[1],
-      calibrate(z) * references[2],
-      this.illuminant
-    );
-  }
-
-  public toRGB(): RGB {
-    return this.toXYZ().toRGB();
-  }
-
-  // TODO
-  public toHex() {
-    return this.toRGB().toHex();
-  }
-
-  // TODO
-  public toHSL(): HSL {
-    return this.toRGB().toHSL();
-  }
-
-  // TODO
-  public toCMYK(): CMYK {
-    return this.toRGB().toCMYK();
+    return new XYZ(calibrate(x) * references[0], calibrate(y) * references[1], calibrate(z) * references[2]);
   }
 }
 
