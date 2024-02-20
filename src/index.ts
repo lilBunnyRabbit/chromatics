@@ -1,7 +1,14 @@
-/**
- * Returns greeting for the provided name.
- * @param name
- */
-export function getHello(name: string) {
-  return `Hello ${name}!`;
-}
+export * from "./models";
+
+/*
+--- HEX
+--- RGB
+--- HSL
+--- HSV
+HSI
+LCH
+??? LAB
+-- Numeric RGB
+Temparature
+GL
+*/
