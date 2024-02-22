@@ -7,7 +7,7 @@
   - https://www.imageeprocessing.com/2013/05/converting-rgb-image-to-hsi.html
   - https://www.had2know.org/technology/hsi-rgb-color-converter-equations.html
 - [ ] HunterLAB
-- [ ] HWB
+- [x] HWB
   - https://dirask.com/snippets/JavaScript-convert-RGB-to-HWB-color-model-1XB6rp
   - https://en.wikipedia.org/wiki/HWB_color_model
 - [ ] ICC
@@ -29,7 +29,9 @@
   - https://en.wikipedia.org/wiki/YPbPr
 - [ ] YUV
 - [ ] GL
-- [ ] RGB (float)
+- [x] RGB (float)
+- [ ] TSL
+  - https://en.wikipedia.org/wiki/TSL_color_space
 
 # Calculations
 - [ ] Temparature

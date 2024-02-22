@@ -1,8 +1,13 @@
 // https://en.wikipedia.org/wiki/HSL_and_HSV
 
+import { rgbToHueChroma } from "@/utils/hue.util";
 import { clamp, round } from "../utils";
 import { HWB } from "./HWB";
 import { RGB } from "./RGB";
+import { NormalizedRGB } from "./NormalizedRGB";
+import { HSL } from "./HSL";
+import { HueModel } from "./helpers/HueModel";
+import { HSI } from "./HSI";
 
 class HSVBase extends Float32Array {
   public get h() {
@@ -50,59 +55,13 @@ class HSVBase extends Float32Array {
 }
 
 class HSVConversions extends HSVBase {
-  /**
-   * @param r - [0, 1]
-   * @param g - [0, 1]
-   * @param b - [0, 1]
-   */
-  static fromRGB(r: number, g: number, b: number): HSV {
-    // Find the minimum and maximum values of R, G and B.
-    const min = Math.min(r, g, b);
-    const max = Math.max(r, g, b);
-    const delta = max - min;
-
-    // Value is the maximum of R, G, B
-    const v = max;
-
-    if (delta === 0) {
-      return new HSV(0, 0, v);
-    }
-
-    const s = delta / max;
-
-    let h = 0;
-    switch (max) {
-      case r:
-        // because, depending on the RGB values and which component is the maximum, the initial calculation of hue could be negative, and the (g < b ? 6 : 0) adjustment is a way to ensure the hue starts from the correct segment of the color wheel before any final adjustments.
-        h = (g - b) / delta + (g < b ? 6 : 0);
-        break;
-      case g:
-        h = (b - r) / delta + 2;
-        break;
-      case b:
-        h = (r - g) / delta + 4;
-        break;
-    }
-
-    /**
-     * The Hue value you get needs to be multiplied by 60 to convert it to degrees on the color circle
-     * If Hue becomes negative you need to add 360 to, because a circle has 360 degrees.
-     */
-    h *= 60;
-    if (h < 0) h += 360;
-
-    return new HSV(h, s, v);
-  }
-
-  public toRGB() {
+  public toRGB__OLD(): NormalizedRGB {
     // If there is no Saturation it means that it’s a shade of grey. So in that case we just need to convert the Luminance and set R,G and B to that level.F
-    if (this.s === 0) {
-      return RGB.fromNormalized(this.v, this.v, this.v);
+    if (!this.s) {
+      return new NormalizedRGB(this.v, this.v, this.v);
     }
 
-    let [h, s, v] = [this.h / 60, this.s, this.v];
-
-    if (h === 6) h = 0;
+    const [h, s, v] = [this.h / 60, this.s, this.v];
 
     const i = Math.floor(h);
     const factorial = h - i;
@@ -113,6 +72,7 @@ class HSVConversions extends HSVBase {
 
     const rgb: [r: number, g: number, b: number] = (() => {
       switch (i) {
+        case 6:
         case 0:
           return [v, t, p];
 
@@ -133,7 +93,28 @@ class HSVConversions extends HSVBase {
       }
     })();
 
-    return RGB.fromNormalized(...rgb);
+    return new NormalizedRGB(...rgb);
+  }
+
+  public toRGB(): NormalizedRGB {
+    const hue = this.h / 60;
+
+    const chroma = this.v * this.s;
+    const interChroma = chroma * (1 - Math.abs((hue % 2) - 1));
+    const offset = this.v - chroma;
+
+    return HueModel.chromaToRGB(hue, chroma, interChroma, offset);
+  }
+
+  public toHSI(): HSI {
+    return this.toRGB().toHSI();
+  }
+
+  public toHSL() {
+    const l = this.v * (1 - this.s / 2);
+    const s = l === 0 || l === 1 ? 0 : (this.v - l) / Math.min(l, 1 - l);
+
+    return new HSL(this.h, s, l);
   }
 
   public toHWB(): HWB {

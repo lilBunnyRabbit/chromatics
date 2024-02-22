@@ -4,10 +4,12 @@
 import type { Color, ColorBase } from "../types";
 import { clamp, isArray, isNumber, isObject } from "../utils";
 import { CMYK } from "./CMYK";
+import { HSI } from "./HSI";
 import { HSL } from "./HSL";
 import { HSV } from "./HSV";
 import { HWB } from "./HWB";
 import { Lab } from "./Lab";
+import { NormalizedRGB } from "./NormalizedRGB";
 import { XYZ } from "./XYZ";
 
 export type RGBLike = RGB | [r: number, g: number, b: number] | Record<"r" | "g" | "b", number> | string | number;
@@ -99,10 +101,6 @@ class RGBBase extends Uint8ClampedArray implements ColorBase {
     return new RGB(isNaN(r) ? 0 : r, isNaN(g) ? 0 : g, isNaN(b) ? 0 : b);
   }
 
-  static fromNormalized(r: number, g: number, b: number) {
-    return new RGB(r * 255, g * 255, b * 255);
-  }
-
   public clone(): this {
     return new (this.constructor as new (...args: ConstructorParameters<typeof RGBBase>) => this)(
       this.r,
@@ -111,8 +109,8 @@ class RGBBase extends Uint8ClampedArray implements ColorBase {
     );
   }
 
-  public normalize(): [r: number, g: number, b: number] {
-    return [this.r / 255, this.g / 255, this.b / 255];
+  public equals(comparator: typeof this): boolean {
+    return this.every((v, i) => comparator[i] === v);
   }
 
   /**
@@ -151,27 +149,40 @@ class RGBBase extends Uint8ClampedArray implements ColorBase {
   public toNumeric() {
     return (this.r << 16) + (this.g << 8) + this.b;
   }
+
+  // TODO: Temporary
+  public toArray() {
+    return [this.r, this.g, this.b];
+  }
 }
 
 class RGBConversions extends RGBBase {
+  public toNormalized(): NormalizedRGB {
+    return new NormalizedRGB(this.r / 255, this.g / 255, this.b / 255);
+  }
+
   public toCMYK(): CMYK {
-    return CMYK.fromRGB(...this.normalize());
+    return this.toNormalized().toCMYK();
+  }
+
+  public toHSI(): HSI {
+    return this.toNormalized().toHSI();
   }
 
   public toHSL(): HSL {
-    return HSL.fromRGB(...this.normalize());
+    return this.toNormalized().toHSL();
   }
 
   public toHSV(): HSV {
-    return HSV.fromRGB(...this.normalize());
+    return this.toNormalized().toHSV();
   }
 
   public toHWB(): HWB {
-    return HWB.fromRGB(...this.normalize());
+    return this.toNormalized().toHWB();
   }
 
   public toXYZ(): XYZ {
-    return XYZ.fromRGB(...this.normalize());
+    return this.toNormalized().toXYZ();
   }
 
   public toLAB(illuminant?: keyof typeof XYZ.Illuminants): Lab {

@@ -17,3 +17,11 @@ export function randomNumber(min: number, max: number) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export function timeExecution(cb: () => any) {
+  const start = performance.now();
+
+  cb();
+
+  return performance.now() - start;
+}

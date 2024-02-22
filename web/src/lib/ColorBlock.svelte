@@ -1,7 +1,7 @@
 <script lang="ts">
   export let color: string;
   export let name: string;
-  export let info: string | number | undefined = undefined;
+  export let info: any = undefined;
 </script>
 
 <h3 class="whitespace-nowrap pl-4 h-full py-1" style:background-color={color}>
@@ -9,7 +9,7 @@
 </h3>
 <div class="pl-8 h-full py-1 whitespace-nowrap" style:background-color={color}>
   <p>
-    {#if info}
+    {#if info !== undefined}
       {info}
     {:else}
       {color}

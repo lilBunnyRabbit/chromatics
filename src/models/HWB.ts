@@ -2,8 +2,10 @@
 // http://alvyray.com/Papers/CG/hwb2rgb.htm
 
 import { clamp, round } from "../utils";
+import { HSI } from "./HSI";
+import { HSL } from "./HSL";
 import { HSV } from "./HSV";
-import { RGB } from "./RGB";
+import { NormalizedRGB } from "./NormalizedRGB";
 
 class HWBBase extends Float32Array {
   public get h() {
@@ -51,74 +53,16 @@ class HWBBase extends Float32Array {
 }
 
 class HWBConversions extends HWBBase {
-  /**
-   * @param r - [0, 1]
-   * @param g - [0, 1]
-   * @param b - [0, 1]
-   */
-  static fromRGB(r: number, g: number, b: number): HWB {
-    // Find the minimum and maximum values of R, G and B.
-    const whiteness = Math.min(r, g, b);
-    const max = Math.max(r, g, b);
-
-    const blackness = 1 - max;
-
-    if (whiteness === max) {
-      return new HWB(0, whiteness, blackness);
-    }
-
-    const f = r === whiteness ? g - b : g === whiteness ? b - r : r - g;
-    const i = r === whiteness ? 3 : g === whiteness ? 5 : 1;
-
-    let h = i - f / (max - whiteness);
-
-    /**
-     * The Hue value you get needs to be multiplied by 60 to convert it to degrees on the color circle
-     * If Hue becomes negative you need to add 360 to, because a circle has 360 degrees.
-     */
-    h *= 60;
-    if (h < 0) h += 360;
-
-    return new HWB(h, whiteness, blackness);
+  public toRGB(): NormalizedRGB {
+    return this.toHSV().toRGB();
   }
 
-  public toRGB() {
-    // Ensure hue is within 0-360 degrees
-    let [h, w, b] = [(this.h % 360) / 60, this.w, this.b];
+  public toHSI(): HSI {
+    return this.toRGB().toHSI();
+  }
 
-    if (h === 6) h = 0;
-
-    const v = 1 - b;
-    const i = Math.floor(h);
-
-    let factorial = h - i;
-    if (i % 2 !== 0) factorial = 1 - factorial;
-
-    const n = w + factorial * (v - w); // linear interpolation between w and v
-
-    const rgb: [r: number, g: number, b: number] = (() => {
-      switch (i) {
-        case 0:
-          return [v, n, w];
-
-        case 1:
-          return [n, v, w];
-
-        case 2:
-          return [w, v, n];
-
-        case 3:
-          return [w, n, v];
-
-        case 4:
-          return [n, w, v];
-
-        default:
-          return [v, w, n];
-      }
-    })();
-
-    return RGB.fromNormalized(...rgb);
+  public toHSL(): HSL {
+    return this.toHSV().toHSL();
   }
 
   public toHSV(): HSV {
