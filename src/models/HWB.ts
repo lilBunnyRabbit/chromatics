@@ -66,7 +66,8 @@ class HWBConversions extends HWBBase {
   }
 
   public toHSV(): HSV {
-    return new HSV(this.h, 1 - this.w / (1 - this.b), 1 - this.b);
+    const s = this.b === 1 ? 0 : 1 - this.w / (1 - this.b);
+    return new HSV(this.h, s, 1 - this.b);
   }
 }
 
