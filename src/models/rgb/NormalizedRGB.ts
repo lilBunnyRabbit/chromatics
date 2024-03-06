@@ -7,6 +7,7 @@ import { HWB } from "../hue/HWB";
 import { Lab } from "../perceptual/Lab";
 import { RGB } from "./RGB";
 import { XYZ } from "../perceptual/XYZ";
+import { HueModel } from "../hue/HueModel";
 
 class NormalizedRGBBase extends Float32Array {
   public get r() {
@@ -107,53 +108,8 @@ class NormalizedRGBConversions extends NormalizedRGBBase {
     return new CMYK(c, m, y, k);
   }
 
-  private toHueChroma() {
-    // Find the minimum and maximum values of R, G and B.
-    const min = Math.min(this.r, this.g, this.b);
-    const max = Math.max(this.r, this.g, this.b);
-    const chroma = max - min;
-
-    let hue = 0;
-
-    // Achromatic
-    if (!chroma) {
-      return { min, max, chroma, hue };
-    }
-
-    /**
-     * The Hue formula is depending on what RGB color channel is the max value. The three different formulas are:
-     * If Red is max, then Hue = (G - B) / chroma
-     * If Green is max, then Hue = 2.0 + (B - R) / chroma
-     * If Blue is max, then Hue = 4.0 + (R - G) / chroma
-     */
-    switch (max) {
-      case this.r:
-        // because, depending on the RGB values and which component is the maximum,
-        // the initial calculation of hue could be negative, and the (g < b ? 6 : 0)
-        // adjustment is a way to ensure the hue starts from the correct segment of the color wheel
-        // before any final adjustments.
-        hue = (this.g - this.b) / chroma + (this.g < this.b ? 6 : 0);
-        break;
-      case this.g:
-        hue = (this.b - this.r) / chroma + 2;
-        break;
-      case this.b:
-        hue = (this.r - this.g) / chroma + 4;
-        break;
-    }
-
-    /**
-     * The Hue value you get needs to be multiplied by 60 to convert it to degrees on the color circle
-     * If Hue becomes negative you need to add 360 to, because a circle has 360 degrees.
-     */
-    hue *= 60;
-    // if (hue < 0) hue += 360; // Redundant since we already do (g < b ? 6 : 0)
-
-    return { min, max, chroma, hue };
-  }
-
   public toHSI(): HSI {
-    const { hue, chroma, min } = this.toHueChroma();
+    const { hue, chroma, min } = HueModel.rgbToChroma(this);
 
     // The simplest definition is just the arithmetic mean, i.e. average, of the three components, in the HSI model called intensity (fig. 12a). This is simply the projection of a point onto the neutral axis – the vertical height of a point in our tilted cube. The advantage is that, together with Euclidean-distance calculations of hue and chroma, this representation preserves distances and angles from the geometry of the RGB cube.[23][25]
     const intensity = (this.r + this.g + this.b) / 3;
@@ -170,7 +126,7 @@ class NormalizedRGBConversions extends NormalizedRGBBase {
   }
 
   public toHSL(): HSL {
-    const { hue, chroma, min, max } = this.toHueChroma();
+    const { hue, chroma, min, max } = HueModel.rgbToChroma(this);
 
     // Now calculate the Luminace value by adding the max and min values and divide by 2.
     const lightness = (min + max) / 2;
@@ -197,7 +153,7 @@ class NormalizedRGBConversions extends NormalizedRGBBase {
   }
 
   public toHSV(): HSV {
-    const { hue, chroma, max } = this.toHueChroma();
+    const { hue, chroma, max } = HueModel.rgbToChroma(this);
 
     // Value is the maximum of R, G, B
     const value = max;
@@ -213,7 +169,7 @@ class NormalizedRGBConversions extends NormalizedRGBBase {
   }
 
   public toHWB(): HWB {
-    const { hue, chroma, min, max } = this.toHueChroma();
+    const { hue, chroma, min, max } = HueModel.rgbToChroma(this);
 
     const whiteness = min;
     const blackness = 1 - max;
