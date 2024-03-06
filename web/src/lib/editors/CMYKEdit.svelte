@@ -3,8 +3,6 @@
   import EditorBase from "./EditorBase.svelte";
 
   export let cmyk: CMYK = new CMYK(0, 0, 0, 0);
-
-  $: console.log(cmyk);
 </script>
 
 <EditorBase class={$$props.class} name="CMYK" color={cmyk.toRGB().toString()}>

@@ -23,6 +23,7 @@
   - https://en.wikipedia.org/wiki/XvYCC
 - [ ] YCbCr
   - https://en.wikipedia.org/wiki/YCbCr
+  - https://www.microsemi.com/document-portal/doc_view/135317-ug0639-color-space-conversion-user-guide#:~:text=After%20scaling%2C%20the%20RGB%20to,%3D%20298.082*Y%2F256%20%2D
 - [ ] YIQ
   - https://en.wikipedia.org/wiki/YIQ
 - [ ] YPbPr
