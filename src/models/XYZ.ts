@@ -1,5 +1,3 @@
-// https://en.wikipedia.org/wiki/CIE_1931_color_space
-
 import { round } from "../utils";
 import { Lab } from "./Lab";
 import { NormalizedRGB } from "./NormalizedRGB";

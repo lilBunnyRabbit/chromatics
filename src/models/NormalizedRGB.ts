@@ -1,6 +1,3 @@
-// https://en.wikipedia.org/wiki/RGB_color_spaces
-// https://en.wikipedia.org/wiki/RGB_color_model
-
 import { clamp, round } from "../utils";
 import { CMYK } from "./CMYK";
 import { HSI } from "./HSI";

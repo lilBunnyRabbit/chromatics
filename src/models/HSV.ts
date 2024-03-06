@@ -1,5 +1,3 @@
-// https://en.wikipedia.org/wiki/HSL_and_HSV
-
 import { clamp, round } from "../utils";
 import { HSI } from "./HSI";
 import { HSL } from "./HSL";

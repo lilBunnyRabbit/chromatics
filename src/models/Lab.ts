@@ -1,5 +1,3 @@
-// https://en.wikipedia.org/wiki/CIELAB_color_space
-
 import { clamp, round } from "../utils";
 import { XYZ } from "./XYZ";
 

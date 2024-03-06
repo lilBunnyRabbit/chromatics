@@ -1,6 +1,3 @@
-// https://en.wikipedia.org/wiki/RGB_color_spaces
-// https://en.wikipedia.org/wiki/RGB_color_model
-
 import type { Color, ColorBase } from "../types";
 import { clamp, isArray, isNumber, isObject } from "../utils";
 import { CMYK } from "./CMYK";

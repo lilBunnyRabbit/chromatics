@@ -1,6 +1,3 @@
-// https://en.wikipedia.org/wiki/HSL_and_HSV
-// https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
-
 import { clamp, round } from "../utils";
 import { HSI } from "./HSI";
 import { HSV } from "./HSV";
