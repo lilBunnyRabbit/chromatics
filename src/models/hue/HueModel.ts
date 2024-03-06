@@ -1,4 +1,4 @@
-import { NormalizedRGB } from "../NormalizedRGB";
+import { NormalizedRGB } from "../rgb/NormalizedRGB";
 
 export class HueModel {
   static chromaToRGB(hue: number, chroma: number, interChroma: number, offset: number): NormalizedRGB {

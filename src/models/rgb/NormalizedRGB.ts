@@ -1,12 +1,12 @@
-import { clamp, round } from "../utils";
-import { CMYK } from "./CMYK";
-import { HSI } from "./HSI";
-import { HSL } from "./HSL";
-import { HSV } from "./HSV";
-import { HWB } from "./HWB";
-import { Lab } from "./Lab";
+import { clamp, round } from "../../utils";
+import { CMYK } from "../print/CMYK";
+import { HSI } from "../hue/HSI";
+import { HSL } from "../hue/HSL";
+import { HSV } from "../hue/HSV";
+import { HWB } from "../hue/HWB";
+import { Lab } from "../perceptual/Lab";
 import { RGB } from "./RGB";
-import { XYZ } from "./XYZ";
+import { XYZ } from "../perceptual/XYZ";
 
 class NormalizedRGBBase extends Float32Array {
   public get r() {

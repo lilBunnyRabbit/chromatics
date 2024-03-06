@@ -1,11 +1,8 @@
-// https://en.wikipedia.org/wiki/HSL_and_HSV
-// http://alvyray.com/Papers/CG/hwb2rgb.htm
-
-import { clamp, round } from "../utils";
+import { clamp, round } from "../../utils";
 import { HSI } from "./HSI";
 import { HSL } from "./HSL";
 import { HSV } from "./HSV";
-import { NormalizedRGB } from "./NormalizedRGB";
+import { NormalizedRGB } from "../rgb/NormalizedRGB";
 
 class HWBBase extends Float32Array {
   public get h() {

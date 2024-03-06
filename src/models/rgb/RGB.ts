@@ -1,13 +1,13 @@
-import type { Color, ColorBase } from "../types";
-import { clamp, isArray, isNumber, isObject } from "../utils";
-import { CMYK } from "./CMYK";
-import { HSI } from "./HSI";
-import { HSL } from "./HSL";
-import { HSV } from "./HSV";
-import { HWB } from "./HWB";
-import { Lab } from "./Lab";
+import type { Color, ColorBase } from "../../types";
+import { clamp, isArray, isNumber, isObject } from "../../utils";
+import { CMYK } from "../print/CMYK";
+import { HSI } from "../hue/HSI";
+import { HSL } from "../hue/HSL";
+import { HSV } from "../hue/HSV";
+import { HWB } from "../hue/HWB";
+import { Lab } from "../perceptual/Lab";
 import { NormalizedRGB } from "./NormalizedRGB";
-import { XYZ } from "./XYZ";
+import { XYZ } from "../perceptual/XYZ";
 
 export type RGBLike = RGB | [r: number, g: number, b: number] | Record<"r" | "g" | "b", number> | string | number;
 

@@ -1,7 +1,5 @@
-// https://en.wikipedia.org/wiki/CMYK_color_model
-
-import { clamp, round } from "../utils";
-import { NormalizedRGB } from "./NormalizedRGB";
+import { clamp, round } from "../../utils";
+import { NormalizedRGB } from "../rgb/NormalizedRGB";
 
 // TODO:
 // export type CMYKLike = 0;

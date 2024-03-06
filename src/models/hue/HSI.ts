@@ -1,11 +1,9 @@
-// https://en.wikipedia.org/wiki/HSL_and_HSV
-
-import { clamp, round } from "../utils";
+import { clamp, round } from "../../utils";
 import { HSL } from "./HSL";
 import { HSV } from "./HSV";
 import { HWB } from "./HWB";
-import { NormalizedRGB } from "./NormalizedRGB";
-import { HueModel } from "./helpers/HueModel";
+import { NormalizedRGB } from "../rgb/NormalizedRGB";
+import { HueModel } from "./HueModel";
 
 class HSIBase extends Float32Array {
   public get h() {

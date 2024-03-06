@@ -1,6 +1,6 @@
-import { round } from "../utils";
+import { round } from "../../utils";
 import { Lab } from "./Lab";
-import { NormalizedRGB } from "./NormalizedRGB";
+import { NormalizedRGB } from "../rgb/NormalizedRGB";
 
 export type XYZReferences = [x2: number, y2: number, z2: number, x10: number, y10: number, z10: number];
 

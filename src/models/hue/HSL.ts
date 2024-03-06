@@ -1,9 +1,9 @@
-import { clamp, round } from "../utils";
+import { clamp, round } from "../../utils";
 import { HSI } from "./HSI";
 import { HSV } from "./HSV";
 import { HWB } from "./HWB";
-import { NormalizedRGB } from "./NormalizedRGB";
-import { HueModel } from "./helpers/HueModel";
+import { NormalizedRGB } from "../rgb/NormalizedRGB";
+import { HueModel } from "./HueModel";
 
 class HSLBase extends Float32Array {
   public get h() {

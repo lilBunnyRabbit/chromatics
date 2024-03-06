@@ -1,4 +1,4 @@
-import { clamp, round } from "../utils";
+import { clamp, round } from "../../utils";
 import { XYZ } from "./XYZ";
 
 // TODO: Not perfect?

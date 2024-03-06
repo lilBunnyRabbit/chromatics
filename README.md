@@ -1,2 +1,3 @@
-# npm-package-template
-Template repository for creating `npm` packages.
+# Chromatics
+
+[TODO and Research](./src/models/TODO.md)
