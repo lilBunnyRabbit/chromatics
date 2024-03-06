@@ -1,13 +1,11 @@
 // https://en.wikipedia.org/wiki/HSL_and_HSV
 
-import { rgbToHueChroma } from "@/utils/hue.util";
 import { clamp, round } from "../utils";
-import { HWB } from "./HWB";
-import { RGB } from "./RGB";
-import { NormalizedRGB } from "./NormalizedRGB";
-import { HSL } from "./HSL";
-import { HueModel } from "./helpers/HueModel";
 import { HSI } from "./HSI";
+import { HSL } from "./HSL";
+import { HWB } from "./HWB";
+import { NormalizedRGB } from "./NormalizedRGB";
+import { HueModel } from "./helpers/HueModel";
 
 class HSVBase extends Float32Array {
   public get h() {
@@ -55,6 +53,36 @@ class HSVBase extends Float32Array {
 }
 
 class HSVConversions extends HSVBase {
+  public toRGB(): NormalizedRGB {
+    const hue = this.h / 60;
+
+    const chroma = this.v * this.s;
+    const interChroma = chroma * (1 - Math.abs((hue % 2) - 1));
+    const offset = this.v - chroma;
+
+    return HueModel.chromaToRGB(hue, chroma, interChroma, offset);
+  }
+
+  public toHSI(): HSI {
+    return this.toRGB().toHSI();
+  }
+
+  public toHSL() {
+    const l = this.v * (1 - this.s / 2);
+    const s = l === 0 || l === 1 ? 0 : (this.v - l) / Math.min(l, 1 - l);
+
+    return new HSL(this.h, s, l);
+  }
+
+  public toHWB(): HWB {
+    return new HWB(this.h, (1 - this.s) * this.v, 1 - this.v);
+  }
+}
+
+export class HSV extends HSVConversions {}
+
+// Other conversions
+/*
   public toRGB__OLD(): NormalizedRGB {
     // If there is no Saturation it means that it’s a shade of grey. So in that case we just need to convert the Luminance and set R,G and B to that level.F
     if (!this.s) {
@@ -95,31 +123,4 @@ class HSVConversions extends HSVBase {
 
     return new NormalizedRGB(...rgb);
   }
-
-  public toRGB(): NormalizedRGB {
-    const hue = this.h / 60;
-
-    const chroma = this.v * this.s;
-    const interChroma = chroma * (1 - Math.abs((hue % 2) - 1));
-    const offset = this.v - chroma;
-
-    return HueModel.chromaToRGB(hue, chroma, interChroma, offset);
-  }
-
-  public toHSI(): HSI {
-    return this.toRGB().toHSI();
-  }
-
-  public toHSL() {
-    const l = this.v * (1 - this.s / 2);
-    const s = l === 0 || l === 1 ? 0 : (this.v - l) / Math.min(l, 1 - l);
-
-    return new HSL(this.h, s, l);
-  }
-
-  public toHWB(): HWB {
-    return new HWB(this.h, (1 - this.s) * this.v, 1 - this.v);
-  }
-}
-
-export class HSV extends HSVConversions {}
+*/

@@ -6,7 +6,7 @@ import { NormalizedRGB } from "./NormalizedRGB";
 
 export type XYZReferences = [x2: number, y2: number, z2: number, x10: number, y10: number, z10: number];
 
-// TODO: Not perfect
+// TODO: Not perfect?
 class XYZBase extends Float32Array {
   /**
    * Observer	2° (CIE 1931) - x2, y2, z2

@@ -3,7 +3,7 @@
 import { clamp, round } from "../utils";
 import { XYZ } from "./XYZ";
 
-// TODO: Not perfect
+// TODO: Not perfect?
 class LabBase extends Float32Array {
   public get l() {
     return this[0];
