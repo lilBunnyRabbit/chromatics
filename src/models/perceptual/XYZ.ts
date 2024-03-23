@@ -1,6 +1,6 @@
 import { round } from "../../utils";
 import { Lab } from "./Lab";
-import { NormalizedRGB } from "../rgb/NormalizedRGB";
+import { RGB } from "../rgb/RGB";
 
 export type XYZReferences = [x2: number, y2: number, z2: number, x10: number, y10: number, z10: number];
 
@@ -69,9 +69,9 @@ class XYZBase extends Float32Array {
   constructor(x: number, y: number, z: number) {
     super(3);
 
-    this[0] = x;
-    this[1] = y;
-    this[2] = z;
+    this.x = x;
+    this.y = y;
+    this.z = z;
   }
 
   public toString(illuminant?: keyof typeof XYZ.Illuminants) {
@@ -97,7 +97,7 @@ class XYZBase extends Float32Array {
 }
 
 class XYZConversions extends XYZBase {
-  public toRGB(): NormalizedRGB {
+  public toRGB(): RGB {
     const [x, y, z] = [this.x / 100, this.y / 100, this.z / 100];
 
     const rgb = [
@@ -112,7 +112,7 @@ class XYZConversions extends XYZBase {
       return 12.92 * value;
     }) as [r: number, g: number, b: number];
 
-    return new NormalizedRGB(...rgb);
+    return new RGB(...rgb);
   }
 
   public toLAB(illuminant: keyof typeof XYZ.Illuminants = "D65"): Lab {

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { RGB } from "@/models";
+  import { RGB255 } from "@/models";
   import EditorBase from "./EditorBase.svelte";
 
-  export let rgb: RGB = new RGB(0, 0, 0);
+  export let rgb: RGB255 = new RGB255(0, 0, 0);
   export let a: number | undefined = undefined;
 </script>
 

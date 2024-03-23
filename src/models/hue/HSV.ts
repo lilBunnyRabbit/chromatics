@@ -2,7 +2,7 @@ import { clamp, round } from "../../utils";
 import { HSI } from "./HSI";
 import { HSL } from "./HSL";
 import { HWB } from "./HWB";
-import { NormalizedRGB } from "../rgb/NormalizedRGB";
+import { RGB } from "../rgb/RGB";
 import { HueModel } from "./HueModel";
 
 class HSVBase extends Float32Array {
@@ -38,9 +38,9 @@ class HSVBase extends Float32Array {
   constructor(h: number, s: number, v: number) {
     super(3);
 
-    this[0] = h;
-    this[1] = s;
-    this[2] = v;
+    this.h = h;
+    this.s = s;
+    this.v = v;
   }
 
   public toString() {
@@ -51,7 +51,7 @@ class HSVBase extends Float32Array {
 }
 
 class HSVConversions extends HSVBase {
-  public toRGB(): NormalizedRGB {
+  public toRGB(): RGB {
     const hue = this.h / 60;
 
     const chroma = this.v * this.s;

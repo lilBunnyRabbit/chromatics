@@ -38,3 +38,8 @@
 - https://hue.tools/
 - https://github.com/ajalt/colormath/blob/master
 - https://products.aspose.com/svg/net/color-converter/rgb-to-hwb/
+
+# BUGS
+
+- HSI: I=1 -> rgb 200%
+- XYZ: -G, 200% B

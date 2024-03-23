@@ -2,7 +2,7 @@ import { clamp, round } from "../../utils";
 import { HSI } from "./HSI";
 import { HSL } from "./HSL";
 import { HSV } from "./HSV";
-import { NormalizedRGB } from "../rgb/NormalizedRGB";
+import { RGB } from "../rgb/RGB";
 
 class HWBBase extends Float32Array {
   public get h() {
@@ -37,9 +37,9 @@ class HWBBase extends Float32Array {
   constructor(h: number, w: number, b: number) {
     super(3);
 
-    this[0] = h;
-    this[1] = w;
-    this[2] = b;
+    this.h = h;
+    this.w = w;
+    this.b = b;
   }
 
   public toString() {
@@ -50,7 +50,7 @@ class HWBBase extends Float32Array {
 }
 
 class HWBConversions extends HWBBase {
-  public toRGB(): NormalizedRGB {
+  public toRGB(): RGB {
     return this.toHSV().toRGB();
   }
 

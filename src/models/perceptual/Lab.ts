@@ -35,9 +35,9 @@ class LabBase extends Float32Array {
   constructor(l: number, a: number, b: number, readonly illuminant: keyof typeof XYZ.Illuminants) {
     super(3);
 
-    this[0] = l;
-    this[1] = a;
-    this[2] = b;
+    this.l = l;
+    this.a = a;
+    this.b = b;
   }
 
   public toString(): string {

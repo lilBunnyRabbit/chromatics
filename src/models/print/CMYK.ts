@@ -1,5 +1,5 @@
 import { clamp, round } from "../../utils";
-import { NormalizedRGB } from "../rgb/NormalizedRGB";
+import { RGB } from "../rgb/RGB";
 
 // TODO:
 // export type CMYKLike = 0;
@@ -46,10 +46,10 @@ class CMYKBase extends Float32Array {
   constructor(c: number, m: number, y: number, k: number) {
     super(4);
 
-    this[0] = c;
-    this[1] = m;
-    this[2] = y;
-    this[3] = k;
+    this.c = c;
+    this.m = m;
+    this.y = y;
+    this.k = k;
   }
 
   public toString() {
@@ -88,7 +88,7 @@ class CMYConversions extends CMYKBase {
    *    - This step creates a new RGB color object with the derived red, green, and blue components, suitable for use in digital media that utilizes the RGB color model.
    */
   public toRGB() {
-    return new NormalizedRGB((1 - this.c) * (1 - this.k), (1 - this.m) * (1 - this.k), (1 - this.y) * (1 - this.k));
+    return new RGB((1 - this.c) * (1 - this.k), (1 - this.m) * (1 - this.k), (1 - this.y) * (1 - this.k));
   }
 }
 

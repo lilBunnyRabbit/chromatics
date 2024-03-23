@@ -1,4 +1,4 @@
-import type { CMYK, HSI, HSL, HSV, HWB, RGB } from "@/models";
+import type { CMYK, HSI, HSL, HSV, HWB, RGB255 } from "@/models";
 
 type ColorKeys = "rgb" | "cmyk" | "hsi" | "hsl" | "hsv" | "hwb";
 
@@ -9,7 +9,7 @@ type ColorDef = {
 };
 
 function convertCMYK(cmyk: CMYK): ColorDef {
-  const rgb = cmyk.toRGB().toUint8().toString();
+  const rgb = cmyk.toRGB().toRGB255().toString();
 
   return {
     name: "CMYK",
@@ -23,7 +23,7 @@ function convertCMYK(cmyk: CMYK): ColorDef {
 }
 
 function convertHSI(hsi: HSI): ColorDef {
-  const rgb = hsi.toRGB().toUint8().toString();
+  const rgb = hsi.toRGB().toRGB255().toString();
 
   return {
     name: "HSI",
@@ -43,7 +43,7 @@ function convertHSL(hsl: HSL): ColorDef {
     name: "HSL",
     width: "205px",
     conversions: {
-      rgb: hsl.toRGB().toUint8().toString(),
+      rgb: hsl.toRGB().toRGB255().toString(),
       hsl: hsl.toString(),
       hsv: { value: hsv.toString(), color: hsv.toRGB().toString() },
     },
@@ -51,7 +51,7 @@ function convertHSL(hsl: HSL): ColorDef {
 }
 
 function converHSV(hsv: HSV): ColorDef {
-  const rgb = hsv.toRGB().toUint8().toString();
+  const rgb = hsv.toRGB().toRGB255().toString();
 
   return {
     name: "HSV",
@@ -78,7 +78,7 @@ function convertHWB(hwb: HWB): ColorDef {
   };
 }
 
-export function convertFromRGB(rgb: RGB): Record<ColorKeys, ColorDef> {
+export function convertFromRGB(rgb: RGB255): Record<ColorKeys, ColorDef> {
   const cmyk = rgb.toCMYK();
   const hsi = rgb.toHSI();
   const hsl = rgb.toHSL();

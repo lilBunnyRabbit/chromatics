@@ -1,23 +1,21 @@
-import type { Color, ColorBase } from "../../types";
-import { clamp, isArray, isNumber, isObject } from "../../utils";
+import { clamp, round } from "../../utils";
 import { CMYK } from "../print/CMYK";
 import { HSI } from "../hue/HSI";
 import { HSL } from "../hue/HSL";
 import { HSV } from "../hue/HSV";
 import { HWB } from "../hue/HWB";
 import { Lab } from "../perceptual/Lab";
-import { NormalizedRGB } from "./NormalizedRGB";
+import { RGB255 } from "./RGB255";
 import { XYZ } from "../perceptual/XYZ";
+import { HueModel } from "../hue/HueModel";
 
-export type RGBLike = RGB | [r: number, g: number, b: number] | Record<"r" | "g" | "b", number> | string | number;
-
-class RGBBase extends Uint8ClampedArray implements ColorBase {
+class RGBBase extends Float32Array {
   public get r() {
     return this[0];
   }
 
   public set r(r: number) {
-    this[0] = r;
+    this[0] = clamp(r, 0, 1);
   }
 
   public get g() {
@@ -25,7 +23,7 @@ class RGBBase extends Uint8ClampedArray implements ColorBase {
   }
 
   public set g(g: number) {
-    this[1] = g;
+    this[1] = clamp(g, 0, 1);
   }
 
   public get b() {
@@ -33,7 +31,7 @@ class RGBBase extends Uint8ClampedArray implements ColorBase {
   }
 
   public set b(b: number) {
-    this[2] = b;
+    this[2] = clamp(b, 0, 1);
   }
 
   /**
@@ -44,58 +42,25 @@ class RGBBase extends Uint8ClampedArray implements ColorBase {
   constructor(r: number, g: number, b: number) {
     super(3);
 
-    this[0] = r;
-    this[1] = g;
-    this[2] = b;
-  }
+    // Handling RGB values above 1:
+    // -----------------------------
+    // Avoiding weird colours - see the comment of Giacomo Catenazzi.
+    // Find the maximum between R, G, B, and if the value is above 1, divide the 3 channels with such numbers.
+    // normalizing the RGB values if any of them fall outside the [0, 1] range
+    const max = Math.max(r, g, b);
 
-  static fromRGB(rgb: RGBLike) {
-    if (rgb instanceof RGBBase) {
-      return new RGB(rgb.r, rgb.g, rgb.b);
+    if (max > 1) {
+      // TODO: Temporary Message
+      console.warn("Normalized RGB!");
+
+      this.r = r / max;
+      this.g = g / max;
+      this.b = b / max;
+    } else {
+      this.r = r;
+      this.g = g;
+      this.b = b;
     }
-
-    if (isArray(rgb)) {
-      return new RGB(...rgb);
-    }
-
-    if (isObject(rgb)) {
-      return new RGB(rgb.r, rgb.g, rgb.b);
-    }
-
-    if (isNumber(rgb)) {
-      const [r, g, b] = [(rgb >> 16) & 0xff, (rgb >> 8) & 0xff, rgb & 0xff];
-
-      return new RGB(isNaN(r) ? 0 : r, isNaN(g) ? 0 : g, isNaN(b) ? 0 : b);
-    }
-
-    const regex = /\(\s*(?<r>\d*\.?\d*)\s*,\s*(?<g>\d*\.?\d*)\s*,\s*(?<b>\d*\.?\d*)\s*\)/;
-
-    const groups = regex.exec(rgb)?.groups ?? {};
-
-    const [r, g, b] = [Number.parseFloat(groups.r), Number.parseFloat(groups.g), Number.parseFloat(groups.b)];
-
-    return new RGB(isNaN(r) ? 0 : r, isNaN(g) ? 0 : g, isNaN(b) ? 0 : b);
-  }
-
-  static fromHex(hex: string) {
-    let raw = hex.replace(/^#/, "");
-
-    // Check if the hex color is in the short form (e.g., #FFF) and convert it to the long form (e.g., #FFFFFF)
-    if (raw.length === 3) {
-      raw = raw
-        .split("")
-        .map((char) => char + char)
-        .join("");
-    }
-
-    // Parse the r, g, b values
-    const [r, g, b] = [
-      Number.parseInt(raw.substring(0, 2), 16),
-      Number.parseInt(raw.substring(2, 4), 16),
-      Number.parseInt(raw.substring(4, 6), 16),
-    ];
-
-    return new RGB(isNaN(r) ? 0 : r, isNaN(g) ? 0 : g, isNaN(b) ? 0 : b);
   }
 
   public clone(): this {
@@ -106,80 +71,149 @@ class RGBBase extends Uint8ClampedArray implements ColorBase {
     );
   }
 
-  public equals(comparator: typeof this): boolean {
-    return this.every((v, i) => comparator[i] === v);
-  }
-
   /**
    * @param [alpha] - [0, 1]
    */
   public toString(alpha?: number) {
-    if (alpha === undefined) {
-      return `rgb(${this.r}, ${this.g}, ${this.b})`;
-    }
-
-    return `rgba(${this.r}, ${this.g}, ${this.b}, ${clamp(alpha, 0, 1)})`;
-  }
-
-  /**
-   * @param [alpha] - [0, 1]
-   */
-  public toHex(alpha?: number) {
-    const [r, g, b] = [
-      this.r.toString(16).toUpperCase().padStart(2, "0"),
-      this.g.toString(16).toUpperCase().padStart(2, "0"),
-      this.b.toString(16).toUpperCase().padStart(2, "0"),
-    ];
+    const [r, g, b] = [round(this.r * 100, 2), round(this.g * 100, 2), round(this.b * 100, 2)];
 
     if (alpha === undefined) {
-      return `#${r}${g}${b}`;
+      return `rgb(${r}%, ${g}%, ${b}%)`;
     }
 
-    const a = Math.round(clamp(alpha, 0, 1) * 255)
-      .toString(16)
-      .toUpperCase()
-      .padStart(2, "0");
-
-    return `#${r}${g}${b}${a}`;
-  }
-
-  public toNumeric() {
-    return (this.r << 16) + (this.g << 8) + this.b;
-  }
-
-  // TODO: Temporary
-  public toArray() {
-    return [this.r, this.g, this.b];
+    return `rgba(${r}%, ${g}%, ${b}%, ${clamp(alpha, 0, 1)})`;
   }
 }
 
 class RGBConversions extends RGBBase {
-  public toNormalized(): NormalizedRGB {
-    return new NormalizedRGB(this.r / 255, this.g / 255, this.b / 255);
+  public toRGB255(): RGB255 {
+    return new RGB255(this.r * 255, this.g * 255, this.b * 255);
   }
 
+  /**
+   * Converts the current RGB color instance to a CMYK color format.
+   *
+   * Steps:
+   * 1. Normalize the RGB values (r, g, b) to the range of 0 to 1 by dividing each by 255.
+   *    - This is done to convert the typical color representation from a 0-255 range to a 0-1 range, making it easier to work with in calculations.
+   *
+   * 2. Calculate the black (K) component of the CMYK color model.
+   *    - Formula for K: K = 1 - max(R, G, B)
+   *    - The value of K is the inverse of the maximum normalized RGB value. This represents the black component necessary to accurately reproduce the color without using pure black.
+   *
+   * 3. Calculate the cyan (C), magenta (M), and yellow (Y) components.
+   *    - Formula for C: C = (1 - R - K) / (1 - K)
+   *    - Formula for M: M = (1 - G - K) / (1 - K)
+   *    - Formula for Y: Y = (1 - B - K) / (1 - K)
+   *    - These formulas calculate each color component's contribution to the final color, adjusted for the amount of black (K) calculated in the previous step. The formulas account for the subtractive color model used in CMYK, where colors are created by subtracting light from white.
+   *
+   * 4. Return a new CMYK object with the calculated C, M, Y, and K values.
+   *    - This step creates a new CMYK color object, which can be used in contexts where the CMYK color model is required, such as printing.
+   *
+   */
   public toCMYK(): CMYK {
-    return this.toNormalized().toCMYK();
+    const k = 1 - Math.max(this.r, this.g, this.b);
+    if (k === 1) {
+      return new CMYK(0, 0, 0, k);
+    }
+
+    const c = (1 - this.r - k) / (1 - k);
+    const m = (1 - this.g - k) / (1 - k);
+    const y = (1 - this.b - k) / (1 - k);
+
+    return new CMYK(c, m, y, k);
   }
 
   public toHSI(): HSI {
-    return this.toNormalized().toHSI();
+    const { hue, chroma, min } = HueModel.rgbToChroma(this);
+
+    // The simplest definition is just the arithmetic mean, i.e. average, of the three components, in the HSI model called intensity (fig. 12a). This is simply the projection of a point onto the neutral axis – the vertical height of a point in our tilted cube. The advantage is that, together with Euclidean-distance calculations of hue and chroma, this representation preserves distances and angles from the geometry of the RGB cube.[23][25]
+    const intensity = (this.r + this.g + this.b) / 3;
+
+    // Achromatic
+    if (!chroma) {
+      return new HSI(0, 0, intensity);
+    }
+
+    // The HSI model commonly used for computer vision, which takes H2 as a hue dimension and the component average I ("intensity") as a lightness dimension, does not attempt to "fill" a cylinder by its definition of saturation. Instead of presenting color choice or modification interfaces to end users, the goal of HSI is to facilitate separation of shapes in an image. Saturation is therefore defined in line with the psychometric definition: chroma relative to lightness
+    const saturation = !intensity ? 0 : 1 - min / intensity;
+
+    return new HSI(hue, saturation, intensity);
   }
 
   public toHSL(): HSL {
-    return this.toNormalized().toHSL();
+    const { hue, chroma, min, max } = HueModel.rgbToChroma(this);
+
+    // Now calculate the Luminace value by adding the max and min values and divide by 2.
+    const lightness = (min + max) / 2;
+
+    /**
+     * The next step is to find the Saturation.
+     * If the min and max value are the same, it means that there is no saturation. If all RGB values are equal you have a shade of grey. Depending on how bright it’s somewhere between black and white. If there is no Saturation, we don’t need to calculate the Hue. So we set it to 0 degrees.
+     * But in our case min and max are not equal which means there is Saturation.
+     */
+    // Achromatic
+    if (!chroma) {
+      return new HSL(0, 0, lightness);
+    }
+
+    /**
+     * Now we know that there is Saturation we need to do check the level of the Luminance in order to select the correct formula.
+     */
+    let saturation = 0;
+    if (lightness !== 0 && lightness !== 1) {
+      saturation = (max - lightness) / Math.min(lightness, 1 - lightness);
+    }
+
+    return new HSL(hue, saturation, lightness);
   }
 
   public toHSV(): HSV {
-    return this.toNormalized().toHSV();
+    const { hue, chroma, max } = HueModel.rgbToChroma(this);
+
+    // Value is the maximum of R, G, B
+    const value = max;
+
+    // Achromatic
+    if (!chroma) {
+      return new HSV(0, 0, value);
+    }
+
+    const saturation = chroma / max;
+
+    return new HSV(hue, saturation, value);
   }
 
   public toHWB(): HWB {
-    return this.toNormalized().toHWB();
+    const { hue, chroma, min, max } = HueModel.rgbToChroma(this);
+
+    const whiteness = min;
+    const blackness = 1 - max;
+
+    if (!chroma) {
+      return new HWB(0, whiteness, blackness);
+    }
+
+    return new HWB(hue, whiteness, blackness);
   }
 
+  // X, Y and Z output refer to a D65/2° standard illuminant.
   public toXYZ(): XYZ {
-    return this.toNormalized().toXYZ();
+    const rgb = this.map((value) => {
+      if (value > 0.04045) {
+        value = ((value + 0.055) / 1.055) ** 2.4;
+      } else {
+        value /= 12.92;
+      }
+
+      return value * 100;
+    });
+
+    return new XYZ(
+      rgb[0] * 0.4124 + rgb[1] * 0.3576 + rgb[2] * 0.1805,
+      rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722,
+      rgb[0] * 0.0193 + rgb[1] * 0.1192 + rgb[2] * 0.9505
+    );
   }
 
   public toLAB(illuminant?: keyof typeof XYZ.Illuminants): Lab {
@@ -187,18 +221,4 @@ class RGBConversions extends RGBBase {
   }
 }
 
-export class RGB extends RGBConversions implements Color {
-  static sum(...rgbs: RGB[]): RGB {
-    const per = 1 / rgbs.length;
-
-    let [r, g, b] = [0, 0, 0];
-
-    for (const rgb of rgbs) {
-      r += rgb.r * per;
-      g += rgb.g * per;
-      b += rgb.b * per;
-    }
-
-    return new RGB(r, g, b);
-  }
-}
+export class RGB extends RGBConversions {}

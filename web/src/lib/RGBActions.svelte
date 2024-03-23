@@ -1,29 +1,29 @@
 <script lang="ts">
-  import { RGB, XYZ } from "@/models";
+  import { RGB255, XYZ } from "@/models";
   import { randomNumber } from "@/utils";
   import { objectKeys } from "../utils/object.util";
   import ColorElement from "./ColorElement.svelte";
   import { convertFromRGB } from "./colorConvert";
-  import RgbEdit from "./editors/RGBEdit.svelte";
+  import RgbEdit from "./editors-old/RGBEdit.svelte";
 
   $: a = 1;
   // $: rgb = new RGB(randomNumber(0, 255), randomNumber(0, 255), randomNumber(0, 255));
   $: rgb = (() => {
-    const rgb = new RGB(randomNumber(0, 255), randomNumber(0, 255), randomNumber(0, 255));
+    const rgb = new RGB255(randomNumber(0, 255), randomNumber(0, 255), randomNumber(0, 255));
     const hsl = rgb.toHSL();
     hsl.l = 0.8;
 
-    return hsl.toRGB().toUint8();
+    return hsl.toRGB().toRGB255();
   })();
 
   $: colors = convertFromRGB(rgb);
 
   function runTest() {
     console.group("Starting Test");
-    const test = (rgb: RGB) => {
+    const test = (rgb: RGB255) => {
       const errors: Record<string, any> = {};
 
-      const hex = RGB.fromHex(rgb.toHex());
+      const hex = RGB255.fromHex(rgb.toHex());
       if (!rgb.equals(hex)) errors.hex = hex.toArray();
 
       // const numeric = RGB.fromRGB(rgb.toNumeric());
@@ -61,7 +61,7 @@
       console.log(`Test r = ${r}, errors = ${errors.length}`);
       for (let g = 0; g < 256; g++) {
         for (let b = 0; b < 256; b++) {
-          const error = test(new RGB(r, g, b));
+          const error = test(new RGB255(r, g, b));
           if (error) {
             errors.push(error);
           }
@@ -85,16 +85,16 @@
         illuminant: "",
         conversions: {
           xyz: rgb.toXYZ().toString(),
-          xyzRgb: rgb.toXYZ().toRGB().toUint8().toString(),
+          xyzRgb: rgb.toXYZ().toRGB().toRGB255().toString(),
           lab: "",
           labRgb: "",
         },
       },
       ...objectKeys(XYZ.Illuminants).map((illuminant) => {
         const xyz = rgb.toXYZ();
-        const xyzRgb = xyz.toRGB().toUint8();
+        const xyzRgb = xyz.toRGB().toRGB255();
         const lab = xyz.toLAB(illuminant);
-        const labRgb = lab.toXYZ().toRGB().toUint8();
+        const labRgb = lab.toXYZ().toRGB().toRGB255();
 
         return {
           illuminant,

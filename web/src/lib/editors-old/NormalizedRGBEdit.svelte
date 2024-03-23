@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { NormalizedRGB, RGB } from "@/models";
+  import { RGB, RGB255 } from "@/models";
   import EditorBase from "./EditorBase.svelte";
 
-  export let rgb: NormalizedRGB = new NormalizedRGB(0, 0, 0);
+  export let rgb: RGB = new RGB(0, 0, 0);
   export let a: number | undefined = undefined;
 </script>
 

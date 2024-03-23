@@ -1,2 +1,2 @@
-export * from "./NormalizedRGB";
 export * from "./RGB";
+export * from "./RGB255";

@@ -1,7 +1,7 @@
-import { NormalizedRGB } from "../rgb/NormalizedRGB";
+import { RGB } from "../rgb/RGB";
 
 export class HueModel {
-  static rgbToChroma(rgb: NormalizedRGB) {
+  static rgbToChroma(rgb: RGB) {
     // Find the minimum and maximum values of R, G and B.
     const min = Math.min(rgb.r, rgb.g, rgb.b);
     const max = Math.max(rgb.r, rgb.g, rgb.b);
@@ -46,8 +46,11 @@ export class HueModel {
     return { min, max, chroma, hue };
   }
 
-  static chromaToRGB(hue: number, chroma: number, interChroma: number, offset: number): NormalizedRGB {
+  static chromaToRGB(hue: number, chroma: number, interChroma: number, offset: number): RGB {
     const hueInt = Math.floor(hue);
+
+    const c = chroma + offset;
+    const x = interChroma + offset;
 
     // Then we can, again, find a point (R1, G1, B1) along the bottom three faces of the RGB cube,
     // with the same hue and chroma as our color (using the intermediate value X
@@ -56,26 +59,26 @@ export class HueModel {
       switch (hueInt) {
         case 6:
         case 0:
-          return [chroma, interChroma, 0];
+          return [c, x, offset];
 
         case 1:
-          return [interChroma, chroma, 0];
+          return [x, c, offset];
 
         case 2:
-          return [0, chroma, interChroma];
+          return [offset, c, x];
 
         case 3:
-          return [0, interChroma, chroma];
+          return [offset, x, c];
 
         case 4:
-          return [interChroma, 0, chroma];
+          return [x, offset, c];
 
         default:
-          return [chroma, 0, interChroma];
+          return [c, offset, x];
       }
     };
 
     // Finally, we can find R, G, and B by adding the same amount to each component, to match lightness:
-    return new NormalizedRGB(...(hueToRgb().map((v) => v + offset) as [r: number, g: number, b: number]));
+    return new RGB(...hueToRgb());
   }
 }
