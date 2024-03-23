@@ -3,8 +3,9 @@
   import ColorEditor from "./ColorEditor.svelte";
   import ColorInput from "./ColorInput.svelte";
   import { writable } from "svelte/store";
+  import { randomNumber } from "@/utils";
 
-  const initialColor = new RGB255(255, 255, 255);
+  const initialColor = new RGB255(randomNumber(0, 255), randomNumber(0, 255), randomNumber(0, 255));
 
   $: base = initialColor.toRGB();
 
