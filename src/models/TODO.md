@@ -38,8 +38,76 @@
 - https://hue.tools/
 - https://github.com/ajalt/colormath/blob/master
 - https://products.aspose.com/svg/net/color-converter/rgb-to-hwb/
+- https://facelessuser.github.io/coloraide/manipulation/
 
-# BUGS
+# Short TODO
 
-- HSI: I=1 -> rgb 200%
-- XYZ: -G, 200% B
+## Hue Models
+
+- ✅ HSI
+- ✅ HSL
+- ✅ HSV
+- ✅ HWB
+- HSLuv
+- HPLuv
+
+## Other Models
+
+- ANSI (16 and 256)
+- GL
+- TSL
+- ISO-CIE Color Encodings
+- SCOTDIC
+- Coloroid
+
+## Device-Independent and Perceptual Models
+
+- ✅ CIE Lab
+- LCHab
+- CIE LCh
+- LUV
+- LCHuv
+- ✅ CIE XYZ
+- Oklab
+- Oklch
+- JzAzBz
+- CIECAMO2
+- CAM16
+- Osa-UCS
+
+## Print and Color Difference Models
+
+- ✅ CMY
+- ✅ CMYK
+- HunterLAB
+- ICC-based color profiles
+- Munsell Color System
+- NCS
+- RAL Color Space
+
+## RGB
+
+- ✅ RGB
+- ✅ Normalized RGB
+- sRGB
+- Linear sRGB
+- ACES
+- ACEScc
+- ACEScct
+- ACEScg
+- Adobe RGB
+- BT.2020 / REC.2020
+- BT.709 / REC.709
+- DCI P3
+- Display P3
+- ROMM RGB / ProPhoto RGB
+
+## Video
+
+- xvYCC
+- ✅ YCbCr
+- YPbPr
+- YUV
+- ICtCp
+- YIQ
+- sYCC

@@ -1,3 +1,4 @@
+export * from "./Matrix";
 export * from "./type.util";
 
 export function clamp(value: number, min: number, max: number) {

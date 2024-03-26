@@ -1,6 +1,6 @@
 # Print and Color Difference Models
 
-## CMY
+## [CMY](./CMY.ts)
 
 | Parameter | Name    | Range | Description            |
 | --------- | ------- | ----- | ---------------------- |
@@ -12,6 +12,8 @@
 | -------------------- | --------------------------------------------------------------------------------------------- |
 | **Color Mixing**     | Combining varying percentages of cyan, magenta, and yellow to produce a wide range of colors. |
 | **Inversion to RGB** | Converting CMY values back to RGB by inverting each percentage.                               |
+
+- https://www.blackice.com/colorspaceCYMK.htm
 
 ## [CMYK](./CMYK.ts)
 
@@ -33,7 +35,7 @@ Essential for applications targeting printed materials, as it corresponds to the
 - https://en.wikipedia.org/wiki/CMYK_color_model
 - https://ajalt.github.io/colormath/api/colormath/com.github.ajalt.colormath.model/-c-m-y-k/
 
-##  HunterLAB
+## HunterLAB
 
 | Parameter | Name        | Range  | Description                       |
 | --------- | ----------- | ------ | --------------------------------- |
@@ -48,7 +50,7 @@ Essential for applications targeting printed materials, as it corresponds to the
 
 - https://en.wikipedia.org/wiki/Hunter_Lab
 
-##  ICC-based color profiles
+## ICC-based color profiles
 
 | Parameter | Name       | Range | Description                              |
 | --------- | ---------- | ----- | ---------------------------------------- |

@@ -40,6 +40,15 @@ class LabBase extends Float32Array {
     this.b = b;
   }
 
+  public clone(): this {
+    return new (this.constructor as new (...args: ConstructorParameters<typeof LabBase>) => this)(
+      this.l,
+      this.a,
+      this.b,
+      this.illuminant
+    );
+  }
+
   public toString(): string {
     return `lab(${round(this.l, 4)} ${round(this.a, 4)} ${round(this.b, 4)})`;
   }

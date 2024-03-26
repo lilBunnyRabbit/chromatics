@@ -1,6 +1,6 @@
 import { round } from "../../utils";
-import { Lab } from "./Lab";
 import { RGB } from "../rgb/RGB";
+import { Lab } from "./Lab";
 
 export type XYZReferences = [x2: number, y2: number, z2: number, x10: number, y10: number, z10: number];
 
@@ -72,6 +72,14 @@ class XYZBase extends Float32Array {
     this.x = x;
     this.y = y;
     this.z = z;
+  }
+
+  public clone(): this {
+    return new (this.constructor as new (...args: ConstructorParameters<typeof XYZBase>) => this)(
+      this.x,
+      this.y,
+      this.z
+    );
   }
 
   public toString(illuminant?: keyof typeof XYZ.Illuminants) {

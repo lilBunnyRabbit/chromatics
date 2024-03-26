@@ -1,8 +1,8 @@
 import { clamp, round } from "../../utils";
+import { RGB } from "../rgb/RGB";
 import { HSI } from "./HSI";
 import { HSV } from "./HSV";
 import { HWB } from "./HWB";
-import { RGB } from "../rgb/RGB";
 import { HueModel } from "./HueModel";
 
 class HSLBase extends Float32Array {
@@ -41,6 +41,14 @@ class HSLBase extends Float32Array {
     this.h = h;
     this.s = s;
     this.l = l;
+  }
+
+  public clone(): this {
+    return new (this.constructor as new (...args: ConstructorParameters<typeof HSLBase>) => this)(
+      this.h,
+      this.s,
+      this.l
+    );
   }
 
   public toString() {

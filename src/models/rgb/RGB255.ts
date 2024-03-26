@@ -1,5 +1,5 @@
-import type { Color, ColorBase } from "../../types";
-import { clamp, isArray, isNumber, isObject } from "../../utils";
+import type { Color, ColorBase } from "@/types";
+import { Matrix, clamp, isArray, isNumber, isObject } from "@/utils";
 import { HSI } from "../hue/HSI";
 import { HSL } from "../hue/HSL";
 import { HSV } from "../hue/HSV";
@@ -7,7 +7,9 @@ import { HWB } from "../hue/HWB";
 import { Lab } from "../perceptual/Lab";
 import { XYZ } from "../perceptual/XYZ";
 import { CMYK } from "../print/CMYK";
+import { YCbCr255 } from "../video/YCbCr255";
 import { RGB } from "./RGB";
+import { CMY } from "../print/CMY";
 
 export type RGB255Like = RGB255 | [r: number, g: number, b: number] | Record<"r" | "g" | "b", number> | string | number;
 
@@ -158,6 +160,10 @@ class RGB255Conversions extends RGB255Base {
     return new RGB(this.r / 255, this.g / 255, this.b / 255);
   }
 
+  public toCMY(): CMY {
+    return this.toRGB().toCMY();
+  }
+
   public toCMYK(): CMYK {
     return this.toRGB().toCMYK();
   }
@@ -184,6 +190,17 @@ class RGB255Conversions extends RGB255Base {
 
   public toLAB(illuminant?: keyof typeof XYZ.Illuminants): Lab {
     return this.toXYZ().toLAB(illuminant);
+  }
+
+  private matYCbCr = new Matrix(
+    [0.299, 0.587, 0.114],
+    [-0.168935, -0.331665, 0.50059],
+    [0.499813, -0.418531, -0.081282]
+  );
+
+  public toYCbCr255(): YCbCr255 {
+    const yCbCr = this.matYCbCr.dot([this.r, this.g, this.b]).sum([0, 128, 128]);
+    return new YCbCr255(yCbCr[0], yCbCr[1], yCbCr[2]);
   }
 }
 

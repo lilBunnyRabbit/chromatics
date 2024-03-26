@@ -8,6 +8,7 @@ import { Lab } from "../perceptual/Lab";
 import { RGB255 } from "./RGB255";
 import { XYZ } from "../perceptual/XYZ";
 import { HueModel } from "../hue/HueModel";
+import { CMY } from "../print/CMY";
 
 class RGBBase extends Float32Array {
   public get r() {
@@ -88,6 +89,10 @@ class RGBBase extends Float32Array {
 class RGBConversions extends RGBBase {
   public toRGB255(): RGB255 {
     return new RGB255(this.r * 255, this.g * 255, this.b * 255);
+  }
+
+  public toCMY(): CMY {
+    return new CMY(1 - this.r, 1 - this.g, 1 - this.b);
   }
 
   /**

@@ -1,6 +1,6 @@
 # RGB Models
 
-## [RGB](./RGB.ts)
+## [RGB](./RGB255.ts)
 
 | Parameter | Name  | Range | Description         |
 | --------- | ----- | ----- | ------------------- |
@@ -23,7 +23,7 @@ The RGB model is fundamental for any digital color manipulation, as it directly 
 - https://en.wikipedia.org/wiki/RGB_color_spaces
 - https://en.wikipedia.org/wiki/RGB_color_model
 
-## [Normalized RGB](./NormalizedRGB.ts)
+## [Normalized RGB](./RGB.ts)
 
 | Parameter | Name  | Range | Description                    |
 | --------- | ----- | ----- | ------------------------------ |

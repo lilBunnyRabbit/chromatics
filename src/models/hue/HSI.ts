@@ -43,6 +43,14 @@ class HSIBase extends Float32Array {
     this.i = i;
   }
 
+  public clone(): this {
+    return new (this.constructor as new (...args: ConstructorParameters<typeof HSIBase>) => this)(
+      this.h,
+      this.s,
+      this.i
+    );
+  }
+
   public toString() {
     const [h, s, i] = [round(this.h, 2), round(this.s * 100, 2), round(this.i * 100, 2)];
 

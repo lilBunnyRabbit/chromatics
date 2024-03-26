@@ -43,6 +43,14 @@ class HSVBase extends Float32Array {
     this.v = v;
   }
 
+  public clone(): this {
+    return new (this.constructor as new (...args: ConstructorParameters<typeof HSVBase>) => this)(
+      this.h,
+      this.s,
+      this.v
+    );
+  }
+
   public toString() {
     const [h, s, v] = [round(this.h, 2), round(this.s * 100, 2), round(this.v * 100, 2)];
 

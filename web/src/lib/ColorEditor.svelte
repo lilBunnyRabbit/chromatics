@@ -11,7 +11,7 @@
   style:outline-color={color}
 >
   <h2 class="text-center text-xl">{name}</h2>
-  <div class="grid grid-cols-[min-content,1fr,100px] gap-x-2 gap-y-1 items-center">
+  <div class="grid grid-cols-[min-content,1fr,128px] gap-x-2 gap-y-2 items-center">
     <slot />
   </div>
 </div>

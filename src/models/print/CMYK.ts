@@ -1,8 +1,6 @@
 import { clamp, round } from "../../utils";
 import { RGB } from "../rgb/RGB";
-
-// TODO:
-// export type CMYKLike = 0;
+import { CMY } from "./CMY";
 
 class CMYKBase extends Float32Array {
   public get c() {
@@ -52,6 +50,15 @@ class CMYKBase extends Float32Array {
     this.k = k;
   }
 
+  public clone(): this {
+    return new (this.constructor as new (...args: ConstructorParameters<typeof CMYKBase>) => this)(
+      this.c,
+      this.m,
+      this.y,
+      this.k
+    );
+  }
+
   public toString() {
     const [c, m, y, k] = [
       round(this.c * 100, 2),
@@ -87,8 +94,12 @@ class CMYConversions extends CMYKBase {
    * 5. Return a new RGB object with the calculated R, G, and B values.
    *    - This step creates a new RGB color object with the derived red, green, and blue components, suitable for use in digital media that utilizes the RGB color model.
    */
-  public toRGB() {
+  public toRGB(): RGB {
     return new RGB((1 - this.c) * (1 - this.k), (1 - this.m) * (1 - this.k), (1 - this.y) * (1 - this.k));
+  }
+
+  public toCMY(): CMY {
+    return new CMY(this.c + this.k, this.m + this.k, this.y + this.k);
   }
 }
 
