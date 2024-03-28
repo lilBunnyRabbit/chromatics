@@ -1,11 +1,9 @@
 <script lang="ts">
+  import ColorEditor from "$lib/components/ColorEditor.svelte";
+  import ColorInput from "$lib/components/ColorInput.svelte";
   import { CMY, CMYK, HSI, HSL, HSV, HWB, Lab, RGB255, XYZ, YCbCr255 } from "@lib/models";
   import { randomNumber } from "@lib/utils";
   import { writable } from "svelte/store";
-  import ColorEditor from "../../components/ColorEditor.svelte";
-  import ColorInput from "../../components/ColorInput.svelte";
-
-  console.log({ RGB255 });
 
   const initialColor = new RGB255(randomNumber(0, 255), randomNumber(0, 255), randomNumber(0, 255));
 

@@ -1,8 +1,8 @@
 <script lang="ts">
+  import ColorElement from "$lib/components/ColorElement.svelte";
+  import { objectKeys } from "$lib/utils";
   import { RGB255, XYZ } from "@lib/models";
   import { randomNumber } from "@lib/utils";
-  import { objectKeys } from "../utils/object.util";
-  import ColorElement from "./ColorElement.svelte";
   import { convertFromRGB } from "./colorConvert";
   import RgbEdit from "./editors-old/RGBEdit.svelte";
 
@@ -110,7 +110,7 @@
   })();
 </script>
 
-<div class="flex flex-col">
+<div class="w-full h-full p-6 flex flex-col">
   <button class="mb-4 border w-fit px-4" on:click={runTest}>Run Test</button>
 
   <div class="flex items-start gap-4">
