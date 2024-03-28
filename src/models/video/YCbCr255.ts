@@ -1,4 +1,4 @@
-import { Matrix } from "@/utils";
+import { Matrix } from "../../utils";
 import { RGB255 } from "../rgb";
 
 class YCbCr255Base extends Uint8ClampedArray {

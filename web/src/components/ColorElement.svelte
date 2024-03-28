@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { isString } from "@/utils";
+  import { isString } from "@lib/utils";
 
   export let element: string | { value: string | number; color: string } | undefined;
 </script>

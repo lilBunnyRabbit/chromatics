@@ -1,4 +1,4 @@
-import { CMYK, HSL, RGB255 } from "@/models";
+import { CMYK, HSL, RGB255 } from "../models";
 
 export interface ColorBase {
   toString(): string;

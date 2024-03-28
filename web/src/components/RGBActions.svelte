@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { RGB255, XYZ } from "@/models";
-  import { randomNumber } from "@/utils";
+  import { RGB255, XYZ } from "@lib/models";
+  import { randomNumber } from "@lib/utils";
   import { objectKeys } from "../utils/object.util";
   import ColorElement from "./ColorElement.svelte";
   import { convertFromRGB } from "./colorConvert";

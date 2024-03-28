@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RGB255 } from "@/models";
+  import { RGB255 } from "@lib/models";
   import EditorBase from "./EditorBase.svelte";
 
   export let rgb: RGB255 = new RGB255(0, 0, 0);

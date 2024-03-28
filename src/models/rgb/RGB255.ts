@@ -1,5 +1,5 @@
-import type { Color, ColorBase } from "@/types";
-import { Matrix, clamp, isArray, isNumber, isObject } from "@/utils";
+import type { Color, ColorBase } from "../../types";
+import { Matrix, clamp, isArray, isNumber, isObject } from "../../utils";
 import { HSI } from "../hue/HSI";
 import { HSL } from "../hue/HSL";
 import { HSV } from "../hue/HSV";
