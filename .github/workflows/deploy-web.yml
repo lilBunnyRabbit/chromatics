@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages - WEB
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -7,20 +7,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build_site:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./web
-
-    permissions:
-      pages: write
-      id-token: write
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,8 +41,21 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # this should match the `pages` option in your adapter-static options
-          path: "./web/build/"
+          path: "web/build/"
 
+  deploy:
+    needs: build_site
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
