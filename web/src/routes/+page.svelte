@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { HSI, HSL, RGB255 } from "@lib/models";
+  import { base } from "$app/paths";
+  import { HSI } from "@lib/models";
   import { randomNumber } from "@lib/utils";
 
-  const base = new HSI(randomNumber(0, 360), 1, 0.5);
-  const color = base.toRGB();
-  const color2 = new HSI((base.h + 180) % 360, base.s, base.i).toRGB();
+  const baseColor = new HSI(randomNumber(0, 360), 1, 0.5);
+  const color = baseColor.toRGB();
+  const color2 = new HSI((baseColor.h + 180) % 360, baseColor.s, baseColor.i).toRGB();
 </script>
 
 <div class="w-full h-full grid grid-rows-[1fr,2fr,1fr] p-6">
@@ -18,8 +19,8 @@
   <div>
     <h3>Pages: (Temporary)</h3>
     <ul class="list-disc list-inside [&_a]:underline [&_a]:text-blue-300">
-      <li><a href="/builder">Color Builder</a></li>
-      <li><a href="/rgb-playground">RGB Playground</a></li>
+      <li><a href="{base}/builder">Color Builder</a></li>
+      <li><a href="{base}/rgb-playground">RGB Playground</a></li>
     </ul>
   </div>
 </div>
