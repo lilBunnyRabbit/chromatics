@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_site:
+  deploy:
     runs-on: ubuntu-latest
     defaults:
       run:
