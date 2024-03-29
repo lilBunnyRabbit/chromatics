@@ -2,6 +2,132 @@
 
 [TODO and Research](./src/models/TODO.md)
 
+## Implemented
+```mermaid
+graph TD
+  subgraph HueModels[Hue Models]
+    HSI
+    HSL
+    HSV
+    HWB
+  end
+
+  subgraph PerceptualModels[Perceptual Models]
+    Lab
+    XYZ
+  end
+
+  subgraph PrintModels[Print Models]
+    CMY
+    CMYK
+  end
+
+  subgraph RGBModels[RGB Models]
+    RGB
+    RGB255
+  end
+
+  subgraph VideoModels[Video Models]
+    YCbCr255
+  end
+
+  VideoModels ~~~ RGBModels ~~~ HueModels ~~~ PerceptualModels
+  PrintModels ~~~ RGBModels
+
+  HSI <--> RGB
+
+  HSL <--> RGB
+
+  HSV <--> RGB
+  HSV <--> HWB
+
+  HWB <--> RGB
+
+  Lab <-- A, B, C, D50, D55,
+  D65, D75, E, F1, F2,
+  F3, F4, F5, F6, F7,
+  F8, F9, F10, F11, F12 --> XYZ
+
+  XYZ <--> RGB
+
+  CMY <--> RGB
+  CMY <--> CMYK
+
+  CMYK <--> RGB
+
+  RGB --> RGB255
+
+  RGB255 <--> YCbCr255
+```
+
+## TODO
+```mermaid
+graph LR
+  subgraph HueModels[Hue Models]
+    HSLuv
+    HPLuv
+  end
+
+  subgraph OtherModels[Other Models]
+    ANSI
+    ~~~ GL
+    ~~~ TSL
+    ISO-CIE
+    ~~~ SCOTDIC
+    ~~~ Coloroid
+  end
+
+  subgraph PerceptualModels[Perceptual Models]
+    LCHab
+    ~~~ LCh
+    ~~~ LUV
+    ~~~ LCHuv
+    ~~~ Oklab
+    ~~~ Oklch
+    JzAzBz
+    ~~~ JzCzHz
+    ~~~ CIECAM02
+    ~~~ CAM16
+    ~~~ Osa-UCS
+  end
+
+  subgraph PrintModels[Print Models]
+    HunterLAB
+    ~~~ ICC
+    Munsell
+    ~~~ NCS
+    RAL
+  end
+
+  subgraph RGBModels[RGB Models]
+    LinearsRGB[Linear sRGB]
+    ~~~ ACES
+    ~~~ ACEScc
+    ~~~ ACEScct
+    ~~~ ACEScg
+    AdobeRGB[Adobe RGB]
+    ~~~ BT2020[BT.2020 / REC.2020]
+    ~~~ BT709[BT.709 / REC.709]
+    ~~~ P3[DCI P3]
+    ~~~ ROMM[ROMM RGB / ProPhoto RGB]
+  end
+
+  subgraph VideoModels[Vide Models]
+    xcYCC
+    ~~~ YCbCr
+    ~~~ YPbPr
+    ~~~ YUV
+    ICtCp
+    ~~~ YIQ
+    ~~~ sYCC
+  end
+
+
+  PerceptualModels ~~~ RGBModels
+  PrintModels ~~~ HueModels
+  OtherModels ~~~ VideoModels
+```
+
 ---
 
 [![npm version](https://img.shields.io/npm/v/@lilbunnyrabbit/<package-name>.svg)](https://www.npmjs.com/package/@lilbunnyrabbit/<package-name>)

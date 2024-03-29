@@ -39,6 +39,7 @@
 - https://github.com/ajalt/colormath/blob/master
 - https://products.aspose.com/svg/net/color-converter/rgb-to-hwb/
 - https://facelessuser.github.io/coloraide/manipulation/
+- https://github.com/mm2/Little-CMS
 
 # Short TODO
 
