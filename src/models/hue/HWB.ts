@@ -57,6 +57,9 @@ class HWBBase extends Float32Array {
   }
 }
 
+/**
+ * @deprecated
+ */
 class HWBConversions extends HWBBase {
   public toRGB(): RGB {
     return this.toHSV().toRGB();

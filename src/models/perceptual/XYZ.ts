@@ -104,6 +104,9 @@ class XYZBase extends Float32Array {
   }
 }
 
+/**
+ * @deprecated
+ */
 class XYZConversions extends XYZBase {
   public toRGB(): RGB {
     const [x, y, z] = [this.x / 100, this.y / 100, this.z / 100];

@@ -155,6 +155,9 @@ class RGB255Base extends Uint8ClampedArray implements ColorBase {
   }
 }
 
+/**
+ * @deprecated
+ */
 class RGB255Conversions extends RGB255Base {
   public toRGB(): RGB {
     return new RGB(this.r / 255, this.g / 255, this.b / 255);

@@ -40,6 +40,11 @@
 - https://products.aspose.com/svg/net/color-converter/rgb-to-hwb/
 - https://facelessuser.github.io/coloraide/manipulation/
 - https://github.com/mm2/Little-CMS
+- https://culorijs.org/
+- https://tympanus.net/codrops/2021/12/07/coloring-with-code-a-programmatic-approach-to-design/
+
+# Brainstorming
+- Enable dynamic, site-wide color customization by binding colors directly to the Chromata color model, allowing users to globally adjust hues, brightness, saturation, and more—creating a unique, personalized 'you' mode beyond traditional light/dark themes.
 
 # Short TODO
 

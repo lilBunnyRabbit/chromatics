@@ -1,6 +1,7 @@
 <script lang="ts">
   import { base } from "$app/paths";
   import { HSI } from "@lib/models";
+  import "@lib/conversion/testing";
   import { randomNumber } from "@lib/utils";
 
   const baseColor = new HSI(randomNumber(0, 360), 1, 0.5);

@@ -58,6 +58,9 @@ class HSIBase extends Float32Array {
   }
 }
 
+/**
+ * @deprecated
+ */
 class HSIConversions extends HSIBase {
   public toRGB(): RGB {
     const hue = this.h / 60;

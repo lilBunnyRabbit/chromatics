@@ -86,6 +86,9 @@ class RGBBase extends Float32Array {
   }
 }
 
+/**
+ * @deprecated
+ */
 class RGBConversions extends RGBBase {
   public toRGB255(): RGB255 {
     return new RGB255(this.r * 255, this.g * 255, this.b * 255);

@@ -71,6 +71,9 @@ class CMYKBase extends Float32Array {
   }
 }
 
+/**
+ * @deprecated
+ */
 class CMYConversions extends CMYKBase {
   /**
    * Converts the current CMYK color instance to an RGB color format.

@@ -54,6 +54,9 @@ class LabBase extends Float32Array {
   }
 }
 
+/**
+ * @deprecated
+ */
 class LabConversions extends LabBase {
   public toXYZ(): XYZ {
     const references = XYZ.getReferences(this.illuminant);

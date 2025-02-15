@@ -55,6 +55,9 @@ class CMYBase extends Float32Array {
   }
 }
 
+/**
+ * @deprecated
+ */
 class CMYConversions extends CMYBase {
   public toRGB(): RGB {
     return new RGB(1 - this.c, 1 - this.m, 1 - this.y);

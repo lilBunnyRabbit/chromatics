@@ -58,6 +58,9 @@ class HSVBase extends Float32Array {
   }
 }
 
+/**
+ * @deprecated
+ */
 class HSVConversions extends HSVBase {
   public toRGB(): RGB {
     const hue = this.h / 60;
