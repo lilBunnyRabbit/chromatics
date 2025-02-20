@@ -62,11 +62,16 @@ export const ColorBlock: React.FC<ColorBlockProps> = ({ model, color, parameters
   return (
     <div
       className={cn(
-        "grid grid-cols-1 grid-rows-[min-content,4rem,min-content,min-content] rounded-lg min-w-72 overflow-y-hidden",
+        "grid grid-cols-1 grid-rows-[min-content,4rem,min-content,min-content] rounded-lg min-w-72 overflow-y-hidden hover:outline hover:outline-4",
         label && "grid-rows-[min-content,min-content,4rem,min-content,min-content]"
       )}
+      style={{
+        outlineColor: color,
+      }}
     >
-      {label && <div className="text-sm text-white/80 bg-black/90 rounded-t-lg font-light px-3 pt-1 pb-0.5">{label}</div>}
+      {label && (
+        <div className="text-sm text-white/80 bg-black/90 rounded-t-lg font-light px-3 pt-1 pb-0.5">{label}</div>
+      )}
 
       {to ? (
         <Link to={to} className="px-3 py-2 flex justify-between items-center bg-black">

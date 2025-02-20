@@ -141,7 +141,7 @@ export default function ParsingRoute() {
               {example.hex}
             </div> */}
 
-            <div className="flex flex-col gap-2 max-w-full overflow-y-auto">
+            <div className="flex flex-col gap-2 max-w-full">
               {parsed
                 .filter((p) => !isNullable(p.result))
                 .map((p, j) => {

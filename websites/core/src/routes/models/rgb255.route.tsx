@@ -2,7 +2,7 @@ import { AutoColorBlock } from "@/components/color-block";
 import { ColorButton } from "@/components/color-button";
 import { ColorSlider, SliderBackgroundCheck } from "@/components/color-slider";
 import { Button } from "@/components/ui/button";
-import { conversionRegistry, RGB255 } from "@lilbunnyrabbit/chromatics";
+import { conversionRegistry, parserRegistry, RGB255 } from "@lilbunnyrabbit/chromatics";
 import React from "react";
 
 const conversions = [...conversionRegistry.getRegistry().get(RGB255)!.entries()];
@@ -26,13 +26,17 @@ export default function RGB255Route() {
           RGB 255 <Button onClick={() => setRgb(RGB255.random())}>Random</Button>
         </h2>
 
-        <div className="mt-8 grid grid-cols-[min-content,1fr] grid-rows-[repeat(3,3rem)] whitespace-nowrap gap-x-4 items-center">
+        <div className="mt-8 grid grid-cols-[min-content,1fr] grid-rows-[repeat(4,3rem)] whitespace-nowrap gap-x-4 items-center">
           <div className="text-sm font-mono mb-2">Red</div>
           <div
             className="rounded-t-lg px-4 h-full flex items-center"
-            style={{
-              backgroundColor: color,
-            }}
+            style={
+              rgb.a === 255
+                ? {
+                    backgroundColor: color,
+                  }
+                : {}
+            }
           >
             <ColorSlider
               model={rgb}
@@ -52,9 +56,13 @@ export default function RGB255Route() {
           <div className="text-sm font-mono mb-2">Green</div>
           <div
             className="px-4 h-full flex items-center"
-            style={{
-              backgroundColor: color,
-            }}
+            style={
+              rgb.a === 255
+                ? {
+                    backgroundColor: color,
+                  }
+                : {}
+            }
           >
             <ColorSlider
               model={rgb}
@@ -74,9 +82,13 @@ export default function RGB255Route() {
           <div className="text-sm font-mono mb-2">Blue</div>{" "}
           <div
             className="rounded-b-lg px-4 h-full flex items-center"
-            style={{
-              backgroundColor: color,
-            }}
+            style={
+              rgb.a === 255
+                ? {
+                    backgroundColor: color,
+                  }
+                : {}
+            }
           >
             <ColorSlider
               model={rgb}
@@ -88,6 +100,23 @@ export default function RGB255Route() {
                 setRgb((rgb) => {
                   const clone = rgb.clone();
                   clone.b = value[0];
+                  return clone;
+                })
+              }
+            />
+          </div>
+          <div className="text-sm font-mono mb-2">Alpha</div>{" "}
+          <div className="px-4 h-full flex items-center">
+            <ColorSlider
+              model={rgb}
+              min={0}
+              max={255}
+              value={[rgb.a]}
+              indexChange={(model, index: number) => ((model as RGB255).a = index * 4)}
+              onValueChange={(value) =>
+                setRgb((rgb) => {
+                  const clone = rgb.clone();
+                  clone.a = value[0];
                   return clone;
                 })
               }
@@ -136,6 +165,9 @@ export default function RGB255Route() {
             <div>[{rgb.toArray().join(", ")}]</div>
           </div>
         </div>
+
+        <h4 className="mt-8 mb-2">Parse</h4>
+        <ParserInput onSubmit={(model) => setRgb(model)} />
       </div>
 
       <div className="flex flex-col gap-y-4 max-h-full overflow-y-auto">
@@ -148,3 +180,39 @@ export default function RGB255Route() {
     </div>
   );
 }
+
+interface ParserInputProps {
+  onSubmit: (model: RGB255) => void;
+}
+
+const ParserInput: React.FC<ParserInputProps> = ({ onSubmit }) => {
+  const [value, setValue] = React.useState("");
+
+  const onSend = () => {
+    if (!value) return;
+
+    const parsed = parserRegistry.parseFor(RGB255, value);
+
+    if (parsed) {
+      onSubmit(parsed);
+      setValue("");
+    }
+  };
+
+  return (
+    <div>
+      <input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.code === "Enter") {
+            onSend();
+          }
+        }}
+      />
+      <Button type="button" disabled={!value} onClick={onSend}>
+        Parse
+      </Button>
+    </div>
+  );
+};
