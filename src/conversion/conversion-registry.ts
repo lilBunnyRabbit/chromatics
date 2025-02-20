@@ -1,10 +1,17 @@
+import registerConverters from "../models/model.converter";
 import { Constructor, ConversionFunction, ConversionFunctionFor } from "./conversion.type";
+
+// TODO: this is mostly all AI
 
 // Registry for conversion functions.
 export class ConversionRegistry {
-  private static registry = new Map<Function, Map<Function, ConversionFunction<any, any, any>>>();
+  readonly registry = new Map<Function, Map<Function, ConversionFunction<any, any, any>>>();
 
-  static register<From, To>(from: Constructor<From>, to: Constructor<To>, converter: ConversionFunction<From, To>) {
+  constructor() {
+    registerConverters(this);
+  }
+
+  public register<From, To>(from: Constructor<From>, to: Constructor<To>, converter: ConversionFunction<From, To>) {
     let targetMap = this.registry.get(from);
     if (!targetMap) {
       targetMap = new Map();
@@ -13,15 +20,15 @@ export class ConversionRegistry {
     targetMap.set(to, converter);
   }
 
-  static getConversion<From, To>(from: Constructor<From>, to: Constructor<To>) {
+  public getConversion<From, To>(from: Constructor<From>, to: Constructor<To>) {
     return this.registry.get(from)?.get(to) as ConversionFunctionFor<From, To> | undefined;
   }
 
-  static getRegistry() {
+  public getRegistry() {
     return this.registry;
   }
 
-  static converter<From>(from: Constructor<From>) {
+  public converter<From>(from: Constructor<From>) {
     const fromMap = this.registry.get(from);
 
     return <To>(to: Constructor<To>) => {
@@ -30,12 +37,4 @@ export class ConversionRegistry {
   }
 }
 
-// export class Converter {
-//   convert<Target>(target: { new (...args: any[]): Target }, inputs: any[], ...args: any[]): Target[] {
-//     return inputs.map((input) => {
-//       const fn = ConversionRegistry.getConversion(input.constructor, target);
-//       if (!fn) throw new Error(`No conversion from ${input.constructor.name} to ${target.name}`);
-//       return fn(input, ...args);
-//     });
-//   }
-// }
+export const conversionRegistry = new ConversionRegistry();

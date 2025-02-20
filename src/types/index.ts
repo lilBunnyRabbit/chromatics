@@ -1,14 +1,7 @@
-import { CMYK, HSL, RGB255 } from "../models";
+export type Constructor<T, Args extends any[] = any[]> = new (...args: Args) => T;
 
-export interface ColorBase {
-  toString(): string;
+export interface ColorModel {
   clone(): this;
+  equals(comparator: unknown): boolean;
+  toString(...args: unknown[]): string;
 }
-
-export interface ColorConversions {
-  toRGB(): RGB255;
-  toCMYK(): CMYK;
-  toHSL(): HSL;
-}
-
-export interface Color {}

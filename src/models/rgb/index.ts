@@ -1,2 +1,2 @@
-export * from "./RGB";
-export * from "./RGB255";
+export * from "./rgb";
+export * from "./rgb255";

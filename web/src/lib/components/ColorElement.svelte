@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { isString } from "@lib/utils";
-
   export let element: string | { value: string | number; color: string } | undefined;
 </script>
 
 {#if !element}
   <td></td>
-{:else if isString(element)}
+{:else if typeof element === "string"}
   <td style:background-color={element}><div>{element}</div></td>
 {:else}
   <td style:background-color={element.color}><div>{element.value}</div></td>

@@ -1,0 +1,7 @@
+- [ ] Implementa alpha on all models
+- [ ] Implement parsers
+- [ ] Registers should be initialized classes instead of static
+- [ ] On register init the converters/parsers should be loaded
+- [ ] Limit registration based on env values?
+- [ ] Remove converters from models
+- [ ] 
