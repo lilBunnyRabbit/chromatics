@@ -36,8 +36,8 @@
   - [ ] RAL Color Space
 
 - [ ] **RGB Models**
-  - [ ] RGB255
-  - [ ] Normalized RGB
+  - [x] RGB255
+  - [x] Normalized RGB
   - [ ] sRGB
   - [ ] Linear sRGB
   - [ ] ACES

@@ -12,8 +12,13 @@ export function roundAndClamp(value: number, min: number, max: number) {
   return clamp(Math.round(value), min, max);
 }
 
-export function round(value: number, decimals: number) {
-  return Number.parseFloat(value.toFixed(decimals));
+export function round(value: number, decimals: number): number {
+  const factor = Math.pow(10, decimals);
+  return Math.round(value * factor) / factor;
+}
+
+export function round2(num: number): number {
+  return Math.round(num * 100) / 100;
 }
 
 export function randomNumber(min: number, max: number) {

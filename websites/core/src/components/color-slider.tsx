@@ -4,9 +4,9 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { ColorModel } from "@lilbunnyrabbit/chromatics";
 
-const ColorSlider = React.forwardRef<
+const ColorSlider__OLD = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> & SliderBackgroundProps
+  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> & ModelBackgroundProps
 >(({ className, model, indexChange, ...props }, ref) => {
   return (
     <SliderPrimitive.Root
@@ -20,25 +20,25 @@ const ColorSlider = React.forwardRef<
       <SliderPrimitive.Thumb
         className="block h-6 w-3 rounded-lg border border-white bg-black shadow focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
         style={{
-          backgroundColor: model.toString(),
+          backgroundColor: model.toCSS(),
         }}
       />
     </SliderPrimitive.Root>
   );
 });
-ColorSlider.displayName = SliderPrimitive.Root.displayName;
+ColorSlider__OLD.displayName = SliderPrimitive.Root.displayName;
 
-export { ColorSlider };
+export { ColorSlider__OLD };
 
-interface SliderBackgroundProps {
+interface ModelBackgroundProps {
   model: ColorModel;
   indexChange: (model: ColorModel, index: number) => void;
 }
 
-const SliderBackground = ({ model, indexChange }: SliderBackgroundProps) => {
+const SliderBackground = ({ model, indexChange }: ModelBackgroundProps) => {
   const clone = model.clone();
 
-  console.log("SliderBackground", clone);
+  // console.log("SliderBackground", clone);
 
   return (
     <svg
@@ -50,35 +50,75 @@ const SliderBackground = ({ model, indexChange }: SliderBackgroundProps) => {
     >
       {Array.from({ length: 64 }).map((_, i) => {
         indexChange(clone, i);
-        return <rect key={`r-${i}`} x={i} y={0} width="1" height="1" fill={clone.toString()} />;
+        return <rect key={`r-${i}`} x={i} y={0} width="1" height="1" fill={clone.toCSS()} />;
       })}
     </svg>
   );
 };
 
-interface SliderBackgroundCheckProps<T extends ColorModel> {
-  model: T;
-  slices: number;
-  getIndexColor: (model: T, index: number) => string;
-}
+const ColorSlider = React.forwardRef<
+  React.ElementRef<typeof SliderPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> & { model: ColorModel; label?: React.ReactNode }
+>(({ className, model, children, label, ...props }, ref) => {
+  return (
+    <>
+      {label && <div className="bg-black px-2 py-1 rounded-lg font-mono text-sm text-center">{label}</div>}
 
-export const SliderBackgroundCheck = <T extends ColorModel>({
+      <SliderPrimitive.Root
+        ref={ref}
+        className={cn("relative flex w-full touch-none select-none items-center", className)}
+        {...props}
+      >
+        <SliderPrimitive.Track className="relative h-3 w-full grow overflow-hidden rounded-full">
+          {children}
+        </SliderPrimitive.Track>
+        <SliderPrimitive.Thumb
+          className="block h-6 w-3 rounded-lg border border-white bg-black shadow focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
+          style={{
+            backgroundColor: model.toCSS(),
+          }}
+        />
+      </SliderPrimitive.Root>
+
+      {typeof props.value?.[0] === "number" && (
+        <div className="bg-black px-2 py-1 rounded-lg font-mono text-sm text-center min-w-[66.42px]">
+          {Number.parseFloat(props.value[0].toFixed(2))}
+        </div>
+      )}
+    </>
+  );
+});
+ColorSlider.displayName = SliderPrimitive.Root.displayName;
+
+export { ColorSlider };
+
+export function ModelBackground<const T extends number, TModel extends ColorModel>({
   model,
-  slices,
-  getIndexColor,
-}: SliderBackgroundCheckProps<T>) => {
+  modify,
+  steps,
+  className,
+}: {
+  model: TModel;
+  steps: T;
+  modify(model: TModel, index: number, steps: T): void;
+  className?: string;
+}) {
+  const clone = model.clone() as TModel;
+
+  // console.log("SliderBackground", clone);
+
   return (
     <svg
-      viewBox={`0 0 ${slices} 1`}
-      className="w-full h-4"
+      viewBox={`0 0 ${steps} 1`}
+      className={cn("w-full h-4", className)}
       preserveAspectRatio="none"
       shapeRendering="optimizespeed"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {Array.from({ length: slices }).map((_, i) => {
-        const color = getIndexColor(model, i);
-        return <rect key={`r-${i}`} x={i} y={0} width="1" height="1" fill={color} />;
+      {Array.from({ length: steps }).map((_, i) => {
+        modify(clone, i, steps);
+        return <rect key={`step-${i}`} x={i} y={0} width="1" height="1" fill={clone.toCSS()} />;
       })}
     </svg>
   );
-};
+}

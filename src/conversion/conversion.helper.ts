@@ -1,5 +1,5 @@
 import { Constructor } from "../types";
-import { ConversionRegistry } from "./conversion-registry";
+import { conversionRegistry, ConversionRegistry } from "./conversion-registry";
 import { ConversionFunction } from "./conversion.type";
 
 export class ConversionHelper {

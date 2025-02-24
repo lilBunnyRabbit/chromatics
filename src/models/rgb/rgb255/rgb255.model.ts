@@ -1,7 +1,8 @@
 import { ColorModel, Constructor } from "../../../types";
-import { randomInt, round } from "../../../utils";
+import { randomInt, round2 } from "../../../utils";
+import { RGB255Conversion } from "./rgb255.conversion";
 
-class RGB255Base extends Uint8ClampedArray {
+class RGB255Base extends Uint8ClampedArray implements ColorModel {
   public get r() {
     return this[0];
   }
@@ -66,7 +67,11 @@ class RGB255Base extends Uint8ClampedArray {
       return `rgb(${this.r}, ${this.g}, ${this.b})`;
     }
 
-    return `rgba(${this.r}, ${this.g}, ${this.b}, ${round(this.a / 255, 2)})`;
+    return `rgba(${this.r}, ${this.g}, ${this.b}, ${round2(this.a / 255)})`;
+  }
+
+  public toCSS() {
+    return this.toString();
   }
 
   /**
@@ -92,7 +97,16 @@ class RGB255Base extends Uint8ClampedArray {
   }
 }
 
-export class RGB255 extends RGB255Base implements ColorModel {
+export class RGB255 extends RGB255Base {
+  private _toProxy?: RGB255Conversion;
+  public get to() {
+    if (!this._toProxy) {
+      this._toProxy = new RGB255Conversion(this);
+    }
+
+    return this._toProxy;
+  }
+
   /**
    * Inverts the color.
    */

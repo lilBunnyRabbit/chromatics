@@ -1,7 +1,8 @@
 import { ColorModel, Constructor } from "../../../types";
-import { clamp01, randomFloat, round } from "../../../utils";
+import { clamp01, randomFloat, round2 } from "../../../utils";
+import { RGBConversion } from "./rgb.conversion";
 
-class RGBBase extends Float32Array {
+class RGBBase extends Float32Array implements ColorModel {
   public get r() {
     return this[0];
   }
@@ -56,7 +57,7 @@ class RGBBase extends Float32Array {
       this.b = b / max;
 
       // TODO: Temporary Message
-      console.warn("Normalized RGB!", { r, g, b }, "to", { r: this.r, g: this.g, b: this.b });
+      // console.warn("Normalized RGB!", { r, g, b }, "to", { r: this.r, g: this.g, b: this.b });
     } else {
       this.r = r;
       this.g = g;
@@ -82,13 +83,17 @@ class RGBBase extends Float32Array {
    * @param [alpha] - [0, 1]
    */
   public toString() {
-    const [r, g, b] = [round(this.r * 100, 2), round(this.g * 100, 2), round(this.b * 100, 2)];
+    const [r, g, b] = [round2(this.r * 100), round2(this.g * 100), round2(this.b * 100)];
 
     if (this.a === 1) {
       return `rgb(${r}%, ${g}%, ${b}%)`;
     }
 
-    return `rgba(${r}%, ${g}%, ${b}%, ${round(this.a * 100, 2)}%)`;
+    return `rgba(${r}%, ${g}%, ${b}%, ${round2(this.a * 100)}%)`;
+  }
+
+  public toCSS() {
+    return this.toString();
   }
 
   public toArray() {
@@ -96,7 +101,16 @@ class RGBBase extends Float32Array {
   }
 }
 
-export class RGB extends RGBBase implements ColorModel {
+export class RGB extends RGBBase {
+  private _toProxy?: RGBConversion;
+  public get to() {
+    if (!this._toProxy) {
+      this._toProxy = new RGBConversion(this);
+    }
+
+    return this._toProxy;
+  }
+
   // Invert the color (normalized, so each channel becomes 1 - channel)
   public invert(): RGB {
     return new RGB(1 - this.r, 1 - this.g, 1 - this.b, this.a);
