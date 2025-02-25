@@ -1,4 +1,5 @@
 import { RGB } from "../..";
+import { CMYK } from "../cmyk/cmyk.model";
 import { CMY } from "./cmy.model";
 
 export class CMYConversion {
@@ -8,10 +9,10 @@ export class CMYConversion {
     return new RGB(1 - this.cmy.c, 1 - this.cmy.m, 1 - this.cmy.y, this.cmy.a);
   }
 
-  //   public toCMYK(): CMYK {
-  //     const k = Math.min(this.c, this.m, this.y);
-  //     return new CMYK(this.c - k, this.m - k, this.y - k, k);
-  //   }
+  public CMYK(): CMYK {
+    const k = Math.min(this.cmy.c, this.cmy.m, this.cmy.y);
+    return new CMYK(this.cmy.c - k, this.cmy.m - k, this.cmy.y - k, k, this.cmy.a);
+  }
 }
 
 // /**

@@ -53,7 +53,7 @@ export default function RGBRoute() {
                 model={rgb}
                 min={0}
                 max={1}
-                step={0.005}
+                step={0.01}
                 value={[rgb.r]}
                 indexChange={(model, index: number) => ((model as RGB255).r = index / 64)}
                 onValueChange={(value) =>
@@ -80,7 +80,7 @@ export default function RGBRoute() {
                 model={rgb}
                 min={0}
                 max={1}
-                step={0.005}
+                step={0.01}
                 value={[rgb.g]}
                 indexChange={(model, index: number) => ((model as RGB255).g = index / 64)}
                 onValueChange={(value) =>
@@ -107,7 +107,7 @@ export default function RGBRoute() {
                 model={rgb}
                 min={0}
                 max={1}
-                step={0.005}
+                step={0.01}
                 value={[rgb.b]}
                 indexChange={(model, index: number) => ((model as RGB255).b = index / 64)}
                 onValueChange={(value) =>
@@ -125,7 +125,7 @@ export default function RGBRoute() {
                 model={rgb}
                 min={0}
                 max={1}
-                step={0.005}
+                step={0.01}
                 value={[rgb.a]}
                 indexChange={(model, index: number) => ((model as RGB255).a = index / 64)}
                 onValueChange={(value) =>

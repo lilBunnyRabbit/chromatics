@@ -16,21 +16,13 @@ export const RGBEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
   });
 
   return (
-    <ModelEditor
-      color={model.toCSS()}
-      title={
-        <>
-          RGB
-          <div>{model.toString()}</div>
-        </>
-      }
-    >
+    <ModelEditor color={model.toCSS()} title="RGB">
       <ColorSlider
         label="Red"
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.r]}
         onValueChange={(value) => setCloneModel((clone) => (clone.r = value[0]))}
       >
@@ -42,7 +34,7 @@ export const RGBEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.g]}
         onValueChange={(value) => setCloneModel((clone) => (clone.g = value[0]))}
       >
@@ -54,7 +46,7 @@ export const RGBEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.b]}
         onValueChange={(value) => setCloneModel((clone) => (clone.b = value[0]))}
       >
@@ -66,7 +58,7 @@ export const RGBEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.a]}
         onValueChange={(value) => setCloneModel((clone) => (clone.a = value[0]))}
       >
@@ -90,15 +82,7 @@ export const RGB255Editor = ({ rgb, isActive, onRGB }: EditorProps) => {
   });
 
   return (
-    <ModelEditor
-      color={model.toHex()}
-      title={
-        <>
-          RGB255
-          <div>{model.toString()}</div>
-        </>
-      }
-    >
+    <ModelEditor color={model.toHex()} title="RGB255">
       <ColorSlider
         label="Red"
         model={model}

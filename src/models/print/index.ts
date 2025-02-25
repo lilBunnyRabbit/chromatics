@@ -1,2 +1,2 @@
 export * from "./cmy";
-// export * from "./cmyk";
+export * from "./cmyk";

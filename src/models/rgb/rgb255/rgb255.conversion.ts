@@ -1,3 +1,5 @@
+import { Matrix } from "../../../utils";
+import { YCbCr255 } from "../../video/ycbcr255";
 import { RGB } from "../rgb";
 import { RGB255 } from "./rgb255.model";
 
@@ -12,10 +14,21 @@ import { RGB255 } from "./rgb255.model";
 // implements ConversionInstance<RGB255Conversions>
 
 export class RGB255Conversion {
+  static matYCbCr = new Matrix(
+    [0.299, 0.587, 0.114],
+    [-0.168935, -0.331665, 0.50059],
+    [0.499813, -0.418531, -0.081282]
+  );
+
   constructor(private rgb: RGB255) {}
 
   public RGB(): RGB {
     return new RGB(this.rgb.r / 255, this.rgb.g / 255, this.rgb.b / 255, this.rgb.a / 255);
+  }
+
+  public YCbCr255(): YCbCr255 {
+    const yCbCr = RGB255Conversion.matYCbCr.dot([this.rgb.r, this.rgb.g, this.rgb.b]).sum([0, 128, 128]);
+    return new YCbCr255(yCbCr[0], yCbCr[1], yCbCr[2], this.rgb.a);
   }
 }
 

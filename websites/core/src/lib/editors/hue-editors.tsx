@@ -16,15 +16,7 @@ export const HSIEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
   });
 
   return (
-    <ModelEditor
-      color={model.toCSS()}
-      title={
-        <>
-          HSI
-          <div>{model.toString()}</div>
-        </>
-      }
-    >
+    <ModelEditor color={model.toCSS()} title="HSI">
       <ColorSlider
         label="Hue"
         model={model}
@@ -42,7 +34,7 @@ export const HSIEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.s]}
         onValueChange={(value) => setCloneModel((clone) => (clone.s = value[0]))}
       >
@@ -54,7 +46,7 @@ export const HSIEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.i]}
         onValueChange={(value) => setCloneModel((clone) => (clone.i = value[0]))}
       >
@@ -78,15 +70,7 @@ export const HSLEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
   });
 
   return (
-    <ModelEditor
-      color={model.toCSS()}
-      title={
-        <>
-          HSL
-          <div>{model.toString()}</div>
-        </>
-      }
-    >
+    <ModelEditor color={model.toCSS()} title="HSL">
       <ColorSlider
         label="Hue"
         model={model}
@@ -104,7 +88,7 @@ export const HSLEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.s]}
         onValueChange={(value) => setCloneModel((clone) => (clone.s = value[0]))}
       >
@@ -116,7 +100,7 @@ export const HSLEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.l]}
         onValueChange={(value) => setCloneModel((clone) => (clone.l = value[0]))}
       >
@@ -140,15 +124,7 @@ export const HSVEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
   });
 
   return (
-    <ModelEditor
-      color={model.toCSS()}
-      title={
-        <>
-          HSV
-          <div>{model.toString()}</div>
-        </>
-      }
-    >
+    <ModelEditor color={model.toCSS()} title="HSV">
       <ColorSlider
         label="Hue"
         model={model}
@@ -166,7 +142,7 @@ export const HSVEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.s]}
         onValueChange={(value) => setCloneModel((clone) => (clone.s = value[0]))}
       >
@@ -178,7 +154,7 @@ export const HSVEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.v]}
         onValueChange={(value) => setCloneModel((clone) => (clone.v = value[0]))}
       >
@@ -202,15 +178,7 @@ export const HWBEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
   });
 
   return (
-    <ModelEditor
-      color={model.toCSS()}
-      title={
-        <>
-          HWB
-          <div>{model.toString()}</div>
-        </>
-      }
-    >
+    <ModelEditor color={model.toCSS()} title="HWB">
       <ColorSlider
         label="Hue"
         model={model}
@@ -228,7 +196,7 @@ export const HWBEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.w]}
         onValueChange={(value) => setCloneModel((clone) => (clone.w = value[0]))}
       >
@@ -240,7 +208,7 @@ export const HWBEditor = ({ rgb, isActive, onRGB }: EditorProps) => {
         model={model}
         min={0}
         max={1}
-        step={0.005}
+        step={0.01}
         value={[model.b]}
         onValueChange={(value) => setCloneModel((clone) => (clone.b = value[0]))}
       >

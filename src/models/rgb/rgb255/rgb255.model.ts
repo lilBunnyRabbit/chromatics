@@ -111,7 +111,11 @@ export class RGB255 extends RGB255Base {
    * Inverts the color.
    */
   public invert() {
-    return new RGB255(255 - this.r, 255 - this.g, 255 - this.b, this.a);
+    this.r = 255 - this.r;
+    this.g = 255 - this.g;
+    this.b = 255 - this.b;
+
+    return this;
   }
 
   static random() {
@@ -121,12 +125,20 @@ export class RGB255 extends RGB255Base {
   // AI
   public grayscale(): RGB255 {
     const gray = Math.round(0.299 * this.r + 0.587 * this.g + 0.114 * this.b);
-    return new RGB255(gray, gray, gray, this.a);
+    this.r = gray;
+    this.g = gray;
+    this.b = gray;
+
+    return this;
   }
 
   // Adjust brightness by a scaling factor (e.g. factor > 1 brightens, < 1 darkens)
   public brighten(value: number): RGB255 {
-    return new RGB255(this.r + value, this.g + value, this.b + value, this.a);
+    this.r += value;
+    this.g += value;
+    this.b += value;
+
+    return this;
   }
 }
 

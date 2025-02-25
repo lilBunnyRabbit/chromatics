@@ -73,7 +73,8 @@ export const ModelEditor = ({ color, title, children }: ModelEditorProps) => {
       <div className="bg-black">
         <div className="flex flex-col gap-4 p-2" style={{ backgroundColor: color }}>
           <div className="px-4 py-2 bg-black text-sm rounded-lg flex items-center justify-between">
-            {title} {color}
+            <div>{title}</div>
+            <div>{color}</div>
           </div>
 
           <div className="grid grid-cols-[min-content,1fr,min-content] whitespace-nowrap gap-x-4 gap-y-2 items-center">

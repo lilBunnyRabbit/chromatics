@@ -1,6 +1,7 @@
 import { HSI, HSL, HSV, HWB, RGB255 } from "../../";
 import { HueHelper } from "../../hue/helpers/hue.helper";
 import { CMY } from "../../print/cmy";
+import { CMYK } from "../../print/cmyk/cmyk.model";
 import { RGB } from "./rgb.model";
 
 export class RGBConversion {
@@ -85,6 +86,40 @@ export class RGBConversion {
 
   public CMY(): CMY {
     return new CMY(1 - this.rgb.r, 1 - this.rgb.g, 1 - this.rgb.b, this.rgb.a);
+  }
+
+  /**
+   * Converts the current RGB color instance to a CMYK color format.
+   *
+   * Steps:
+   * 1. Normalize the RGB values (r, g, b) to the range of 0 to 1 by dividing each by 255.
+   *    - This is done to convert the typical color representation from a 0-255 range to a 0-1 range, making it easier to work with in calculations.
+   *
+   * 2. Calculate the black (K) component of the CMYK color model.
+   *    - Formula for K: K = 1 - max(R, G, B)
+   *    - The value of K is the inverse of the maximum normalized RGB value. This represents the black component necessary to accurately reproduce the color without using pure black.
+   *
+   * 3. Calculate the cyan (C), magenta (M), and yellow (Y) components.
+   *    - Formula for C: C = (1 - R - K) / (1 - K)
+   *    - Formula for M: M = (1 - G - K) / (1 - K)
+   *    - Formula for Y: Y = (1 - B - K) / (1 - K)
+   *    - These formulas calculate each color component's contribution to the final color, adjusted for the amount of black (K) calculated in the previous step. The formulas account for the subtractive color model used in CMYK, where colors are created by subtracting light from white.
+   *
+   * 4. Return a new CMYK object with the calculated C, M, Y, and K values.
+   *    - This step creates a new CMYK color object, which can be used in contexts where the CMYK color model is required, such as printing.
+   *
+   */
+  public CMYK(): CMYK {
+    const k = 1 - Math.max(this.rgb.r, this.rgb.g, this.rgb.b);
+    if (k === 1) {
+      return new CMYK(0, 0, 0, k, this.rgb.a);
+    }
+
+    const c = (1 - this.rgb.r - k) / (1 - k);
+    const m = (1 - this.rgb.g - k) / (1 - k);
+    const y = (1 - this.rgb.b - k) / (1 - k);
+
+    return new CMYK(c, m, y, k, this.rgb.a);
   }
 }
 

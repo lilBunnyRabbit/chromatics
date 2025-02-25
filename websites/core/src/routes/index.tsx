@@ -8,6 +8,7 @@ import ParsingRoute from "./parsing.route";
 import RGB255Route from "./models/rgb255.route";
 import RGBRoute from "./models/rgb.route";
 import PlaygroundRoute from "./playground.route";
+import ImageRoute from "./image.route";
 
 export default function AppRoutes() {
   return (
@@ -17,6 +18,7 @@ export default function AppRoutes() {
           <Route index element={<TestingRoute />} />
           <Route path="parsing" element={<ParsingRoute />} />
           <Route path="playground" element={<PlaygroundRoute />} />
+          <Route path="image" element={<ImageRoute />} />
           <Route path="models">
             <Route path="rgb255" element={<RGB255Route />} />
             <Route path="rgb" element={<RGBRoute />} />

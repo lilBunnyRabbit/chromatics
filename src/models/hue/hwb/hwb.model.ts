@@ -2,7 +2,7 @@ import { ColorModel, Constructor } from "../../../types";
 import { clamp, clamp01, round2 } from "../../../utils";
 import { HWBConversion } from "./hwb.conversion";
 
-class HWBBase extends Float32Array {
+class HWBBase extends Float32Array implements ColorModel {
   public get h() {
     return this[0];
   }
@@ -17,6 +17,7 @@ class HWBBase extends Float32Array {
 
   public set w(w: number) {
     this[1] = clamp01(w);
+    this.normalize();
   }
 
   public get b() {
@@ -25,6 +26,7 @@ class HWBBase extends Float32Array {
 
   public set b(b: number) {
     this[2] = clamp01(b);
+    this.normalize();
   }
 
   public get a() {
@@ -33,6 +35,14 @@ class HWBBase extends Float32Array {
 
   public set a(a: number) {
     this[3] = clamp01(a);
+  }
+
+  private normalize() {
+    const total = this.w + this.b;
+    if (total > 1) {
+      this[1] = this.w / total;
+      this[2] = this.b / total;
+    }
   }
 
   /**
@@ -63,13 +73,17 @@ class HWBBase extends Float32Array {
   }
 
   public toString() {
-    const [h, s, i] = [round2(this.h), round2(this.w * 100), round2(this.b * 100)];
+    const [h, w, b] = [round2(this.h), round2(this.w * 100), round2(this.b * 100)];
 
     if (this.a === 1) {
-      return `hwb(${h}deg ${s}% ${i}%)`;
+      return `hwb(${h}deg ${w}% ${b}%)`;
     }
 
-    return `hwb(${h}deg ${s}% ${i}% / ${round2(this.a * 100)}%)`;
+    return `hwb(${h}deg ${w}% ${b}% / ${round2(this.a * 100)}%)`;
+  }
+
+  public toCSS() {
+    return this.toString();
   }
 
   public toArray() {
@@ -77,7 +91,7 @@ class HWBBase extends Float32Array {
   }
 }
 
-export class HWB extends HWBBase implements ColorModel {
+export class HWB extends HWBBase {
   private _toProxy?: HWBConversion;
   public get to() {
     if (!this._toProxy) {
@@ -85,9 +99,5 @@ export class HWB extends HWBBase implements ColorModel {
     }
 
     return this._toProxy;
-  }
-
-  public toCSS() {
-    return this.to.RGB().toCSS();
   }
 }
