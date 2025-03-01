@@ -1,4 +1,4 @@
-import { HSI, HSL, HSV, HWB, RGB255 } from "../../";
+import { HSI, HSL, HSV, HWB, LinearRGB, RGB255 } from "../../";
 import { HueHelper } from "../../hue/helpers/hue.helper";
 import { CMY } from "../../print/cmy";
 import { CMYK } from "../../print/cmyk/cmyk.model";
@@ -9,6 +9,20 @@ export class RGBConversion {
 
   public RGB255(): RGB255 {
     return new RGB255(this.rgb.r * 255, this.rgb.g * 255, this.rgb.b * 255, this.rgb.a * 255);
+  }
+
+  // TODO: Check AI
+  public LinearRGB(): LinearRGB {
+    const linearizeChannel = (c: number): number => {
+      return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    };
+
+    return new LinearRGB(
+      linearizeChannel(this.rgb.r),
+      linearizeChannel(this.rgb.g),
+      linearizeChannel(this.rgb.b),
+      this.rgb.a
+    );
   }
 
   public HSI(): HSI {

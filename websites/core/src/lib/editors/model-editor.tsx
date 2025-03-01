@@ -1,6 +1,7 @@
 import { ColorModel, RGB } from "@lilbunnyrabbit/chromatics";
 import React from "react";
 import { useEditor } from "./editor-provider";
+import { cn } from "../utils";
 
 export interface AllEditorProps {
   rgb: RGB;
@@ -64,12 +65,18 @@ export function useModelEditor<T extends ColorModel>({
 export interface ModelEditorProps {
   color: string;
   title?: React.ReactNode;
+  className?: string;
   children: React.ReactNode;
 }
 
-export const ModelEditor = ({ color, title, children }: ModelEditorProps) => {
+export const ModelEditor = ({ color, title, className, children }: ModelEditorProps) => {
   return (
-    <div className="min-w-80 rounded-xl overflow-hidden h-fit font-mono shadow-[8px_8px_8px_0px_rgba(0,0,0,0.27)]">
+    <div
+      className={cn(
+        "min-w-80 rounded-xl overflow-hidden h-fit font-mono shadow-[8px_8px_8px_0px_rgba(0,0,0,0.27)]",
+        className
+      )}
+    >
       <div className="bg-black">
         <div className="flex flex-col gap-4 p-2" style={{ backgroundColor: color }}>
           <div className="px-4 py-2 bg-black text-sm rounded-lg flex items-center justify-between">

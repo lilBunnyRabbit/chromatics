@@ -33,22 +33,22 @@ export default function ImageRoute() {
       // const hsi = rgb255.to.RGB().to.HWB();
       const hsi = rgb255.to.YCbCr255();
 
-      hsi.cb = 0;
+      // hsi.cb = 0;
 
-      const rgb = hsi.to.RGB255();
+      // const rgb = hsi.to.RGB255();
 
-      data[i] = rgb.r;
-      data[i + 1] = rgb.g;
-      data[i + 2] = rgb.b;
-      data[i + 3] = rgb.a;
+      // data[i] = rgb.r;
+      // data[i + 1] = rgb.g;
+      // data[i + 2] = rgb.b;
+      // data[i + 3] = rgb.a;
 
       // const value = 255 - Math.round((hsi.w + hsi.b) * 255);
       // const value = 255 -((hsi.cb + hsi.cr)/2);
 
-      // data[i] = value;
-      // data[i + 1] = value;
-      // data[i + 2] = value;
-      // data[i + 3] = rgb255.a;
+      data[i] = 0;
+      data[i + 1] = hsi.y;
+      data[i + 2] = 0;
+      data[i + 3] = rgb255.a;
     }
     ctx.putImageData(imageData, 0, 0);
   }, [imageFile]);

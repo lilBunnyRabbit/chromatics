@@ -88,8 +88,19 @@ class RGB255Base extends Uint8ClampedArray implements ColorModel {
     return `#${hex(this.r)}${hex(this.g)}${hex(this.b)}${hex(this.a)}`;
   }
 
+  static fromNumeric(value: number) {
+    const [r, g, b] = [
+      (value >> 16) & 0xff,
+      (value >> 8) & 0xff,
+      value & 0xff
+    ];
+    // Use 255 for full opacity
+    return new RGB255(isNaN(r) ? 0 : r, isNaN(g) ? 0 : g, isNaN(b) ? 0 : b, 255);
+  }
+  
   public toNumeric() {
-    return (this.r << 16) + (this.g << 8) + this.b;
+    // Bitwise OR is equivalent to addition here, but more idiomatic.
+    return (this.r << 16) | (this.g << 8) | this.b;
   }
 
   public toArray() {

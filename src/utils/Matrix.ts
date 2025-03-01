@@ -1,3 +1,5 @@
+// https://glmatrix.net/
+
 export type MatrixLike = Array<Array<number>>;
 
 export class Matrix extends Array<Array<number>> {

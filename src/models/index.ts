@@ -2,3 +2,4 @@ export * from "./hue";
 export * from "./print";
 export * from "./rgb";
 export * from "./video";
+export * from "./perceptual";

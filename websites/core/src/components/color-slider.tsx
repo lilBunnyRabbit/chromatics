@@ -3,6 +3,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { ColorModel } from "@lilbunnyrabbit/chromatics";
+import { round2 } from "../../../../src/utils";
 
 const ColorSlider__OLD = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -82,7 +83,7 @@ const ColorSlider = React.forwardRef<
 
       {typeof props.value?.[0] === "number" && (
         <div className="bg-black px-2 py-1 rounded-lg font-mono text-sm text-center min-w-[66.42px]">
-          {Number.parseFloat(props.value[0].toFixed(2))}
+          {round2(props.value[0])}
         </div>
       )}
     </>
