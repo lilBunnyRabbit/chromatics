@@ -1,10 +1,10 @@
 import { Rgb255Editor } from "@/lib/models/rgb255.editor";
-import { conversionRegistry, parserRegistry, RGB255 } from "@lilbunnyrabbit/chromatics";
+import { conversionRegistry, HSL, parserRegistry, RGB255 } from "@lilbunnyrabbit/chromatics";
 import React from "react";
 
 const conversions = conversionRegistry.getRegistry().get(RGB255);
 
-export default function TestingRoute() {
+export function TestingRoute2() {
   const [rgb, setRgb] = React.useState<RGB255>(new RGB255(16, 150, 150));
 
   const conversionEntries = React.useMemo(() => [...conversions!.entries()], []);
@@ -135,3 +135,60 @@ const ParseTest: React.FC = () => {
     </div>
   );
 };
+
+function parseFloat(value: string): number {
+  if (!value) return 0;
+
+  if (value.endsWith("%")) {
+    const sliced = value.slice(0, -1);
+    return Number.parseFloat(sliced) / 100;
+  }
+
+  return Number.parseFloat(value);
+}
+
+export default function TestingRoute() {
+  const [input, setInput] = React.useState("");
+
+  const color = React.useMemo(() => {
+    const { h, s, l, a } =
+      input.match(/^\s*(?<h>\d*\.?\d*)\s*,?\s*(?<s>\d*\.?\d*%?)\s*,?\s*(?<l>\d*\.?\d*%?)\s*,?\s*(?<a>\d*\.?\d*%?)\s*/)
+        ?.groups ?? {};
+
+    if (h && s && l) {
+      const hsl = new HSL(parseFloat(h), parseFloat(s), parseFloat(l), parseFloat(a || "1"));
+      const rgb = hsl.to.RGB().to.RGB255();
+      return { hsl, rgb };
+    }
+  }, [input]);
+
+  return (
+    <div className="w-full h-full min-h-dvh flex items-center justify-center flex-col gap-8">
+      <input
+        className="max-w-4xl w-full bg-white text-black px-4 py-2 outline-none"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+      ></input>
+
+      {color && (
+        <div className="grid grid-cols-2 grid-rows-2 gap-x-8">
+          <div className="text-4xl">{color.hsl.toCSS()}</div>
+          <div
+            className="uppercase min-h-20"
+            style={{
+              background: color.hsl.toCSS(),
+            }}
+          ></div>
+
+          <div className="select-all text-4xl uppercase">{color.rgb.toHex().toUpperCase()}</div>
+          <div
+            className="uppercase min-h-20"
+            style={{
+              background: color.rgb.toHex(),
+            }}
+          ></div>
+        </div>
+      )}
+    </div>
+  );
+}
