@@ -39,6 +39,15 @@ Color Utility & Design Tool Websites
 - http://colorsafe.co/
 - https://color-contrast-checker.deque.com/
 - https://hue.tools/
+- https://huetone.ardov.me/
+- https://javisperez.github.io/tailwindcolorshades/
+- https://materialpalettes.com/
+- https://tailwindcolor.com/
+- https://smart-swatch.netlify.app/
+- https://contrastchecker.com/
+- https://www.whocanuse.com/
+- https://webaim.org/resources/contrastchecker/
+- https://tweakcn.com/editor/theme
 
 Resources
 <!-- - https://blog.shahednasser.com/7-javascript-color-libraries-and-which-should-you-choose/ -->
