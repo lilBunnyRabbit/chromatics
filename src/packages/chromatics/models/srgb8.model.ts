@@ -1,8 +1,9 @@
 import { type ColorModel, type ColorModelConstructor, type Constructor } from "../utils/types";
 import { round2 } from "../utils/math";
-import registry from "../conversions";
+import registry from "../conversion-registry";
+import { ColorModelBase } from "../utils/base";
 
-export class Srgb8 implements ColorModel {
+export class Srgb8 extends ColorModelBase {
   static ref = Symbol("srgb8");
 
   private channels: Uint8ClampedArray;
@@ -46,15 +47,9 @@ export class Srgb8 implements ColorModel {
    * @param a - [0, 255]
    */
   constructor(r: number, g: number, b: number, a: number = 255) {
+    super();
+
     this.channels = new Uint8ClampedArray([r, g, b, a]);
-  }
-
-  static from(model: ColorModel) {
-    return registry.get(this, model)(model);
-  }
-
-  public to(model: ColorModelConstructor) {
-    return registry.get(this, model)(this);
   }
 
   public clone(): this {

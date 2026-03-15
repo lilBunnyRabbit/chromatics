@@ -1,8 +1,9 @@
 import { type ColorModel, type Constructor, type ColorModelConstructor } from "../utils/types";
 import { clamp01, round2 } from "../utils/math";
-import registry from "../conversions";
+import registry from "../conversion-registry";
+import { ColorModelBase } from "../utils/base";
 
-export class Srgb implements ColorModel {
+export class Srgb extends ColorModelBase {
   static ref = Symbol("srgb");
 
   private channels: Float32Array;
@@ -46,6 +47,8 @@ export class Srgb implements ColorModel {
    * @param a - [0, 1]
    */
   constructor(r: number, g: number, b: number, a: number = 1) {
+    super();
+
     // Handling RGB values above 1:
     // -----------------------------
     // Avoiding weird colours - see the comment of Giacomo Catenazzi.
@@ -61,14 +64,6 @@ export class Srgb implements ColorModel {
     } else {
       this.channels = new Float32Array([r, g, b, a]);
     }
-  }
-
-  static from(model: ColorModel) {
-    return registry.get(this, model)(model);
-  }
-
-  public to(model: ColorModelConstructor) {
-    return registry.get(this, model)(this);
   }
 
   public clone(): this {

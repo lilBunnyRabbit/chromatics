@@ -18,6 +18,12 @@ export type Constructor<T, Args extends any[] = any[]> = new (...args: Args) => 
 //   abstract toString(...args: unknown[]): string;
 // }
 
+export type ColorModelInstance<T extends ColorModel | ColorModelConstructor> = T extends ColorModelConstructor<infer U>
+  ? U
+  : T extends ColorModel
+  ? T
+  : never;
+
 export interface ColorModel {
   clone(): this;
   toString(...args: unknown[]): string;

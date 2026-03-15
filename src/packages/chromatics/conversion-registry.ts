@@ -1,7 +1,7 @@
-import { type ColorModelConstructor, type ColorModel } from "./utils/types";
+import { type ColorModelConstructor, type ColorModel, type ColorModelInstance } from "./utils/types";
 
 export class ConversionRegistry {
-  private registry: Map<symbol, Map<symbol, (model: ColorModel) => ColorModel>> = new Map();
+  private registry: Map<symbol, Map<symbol, (model: any) => any>> = new Map();
 
   public register<T extends ColorModelConstructor, U extends ColorModelConstructor>({
     from,
@@ -22,7 +22,7 @@ export class ConversionRegistry {
   public get<T extends ColorModelConstructor, U extends ColorModelConstructor>(
     from: ColorModel | ColorModelConstructor,
     to: ColorModel | ColorModelConstructor
-  ): (model: InstanceType<T>) => InstanceType<U> {
+  ): (model: ColorModelInstance<T>) => ColorModelInstance<U> {
     const fromRef = this.getRef(from);
     if (!fromRef) {
       throw new Error(`Invalid target model: from does not have a ref property`);
@@ -43,7 +43,7 @@ export class ConversionRegistry {
       throw new Error(`No conversions found for from "${fromRef.toString()}" to "${toRef.toString()}"`);
     }
 
-    return conversion as (model: InstanceType<T>) => InstanceType<U>;
+    return conversion as (model: ColorModelInstance<T>) => ColorModelInstance<U>;
   }
 
   public getRef(model: ColorModel | ColorModelConstructor): symbol | null {
