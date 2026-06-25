@@ -1,0 +1,241 @@
+{
+  "main": {
+    "id": "5910c4cb4021c37d",
+    "type": "split",
+    "children": [
+      {
+        "id": "b688b9c861018716",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "add121a52064de8c",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      },
+      {
+        "id": "f9d9388d4ec2bcfb",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "141da500e0ec8f5b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "06-Reference/Research/Chromatic Adaptation.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Chromatic Adaptation"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "bebc2e45e5cd667b",
+    "type": "split",
+    "children": [
+      {
+        "id": "a5b6ba54f109dde8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "19dcc73ef79c93d2",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "c44561aa929f7e6b",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "2c9da847138cac91",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "22c219662136bc61",
+    "type": "split",
+    "children": [
+      {
+        "id": "c8f3571df2be7edd",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c7aa6459412e3e1c",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "06-Reference/Research/Chromatic Adaptation.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Chromatic Adaptation"
+            }
+          },
+          {
+            "id": "1062d5598b92f96b",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "06-Reference/Research/Chromatic Adaptation.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Chromatic Adaptation"
+            }
+          },
+          {
+            "id": "0cdd9088c7d8ce1b",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "9dd92611da492bfc",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "743ac7f74b9e1268",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "06-Reference/Research/Chromatic Adaptation.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Chromatic Adaptation"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "141da500e0ec8f5b",
+  "lastOpenFiles": [
+    "05-Archive/Investigation Report.md",
+    "06-Reference/Color Models/Perceptual/HunterLAB.md",
+    "06-Reference/Color Models/Perceptual/CIE 1960 UCS.md",
+    "06-Reference/Color Models/Hue/HCL.md",
+    "03-DSL/DSL Gaps & Bugs.md",
+    "04-Product/Ideas Backlog.md",
+    "04-Product/Existing Products.md",
+    "04-Product/Dynamic Theme.md",
+    "02-Knowledge/Resources.md",
+    "02-Knowledge/Color Theory.md",
+    "02-Knowledge/Brand Color Design.md",
+    "06-Reference/Color Systems/RGB Systems/HKS.md",
+    "06-Reference/Color Systems/RGB Systems/Federal Standard 595C.md",
+    "06-Reference/Color Systems/RGB Systems/DIC Color System.md",
+    "06-Reference/Color Systems/RGB Systems/British Standard Colour (BS).md",
+    "06-Reference/Color Systems/RGB Systems/ANSI Color System.md",
+    "06-Reference/Color Systems/Other Systems/Werner's Nomenclature of Colours.md",
+    "06-Reference/Color Systems/Other Systems/Trumatch.md",
+    "06-Reference/Color Systems/Other Systems/Toyo Color Finder.md",
+    "06-Reference/Color Systems/Other Systems/SCOTDIC.md",
+    "06-Reference/Color Systems/Other Systems/RAL.md",
+    "06-Reference/Color Systems/Other Systems/PCCS (Practical Color Coordinate System).md",
+    "06-Reference/Color Systems/Other Systems/Ostwald Color System.md",
+    "06-Reference/Color Systems/Other Systems/ISO-CIE.md",
+    "06-Reference/Color Systems/Other Systems/ISCC-NBS.md",
+    "06-Reference/Color Systems/Other Systems/ICC profile.md",
+    "06-Reference/Color Systems/RGB Systems",
+    "06-Reference/Color Systems/Other Systems",
+    "06-Reference/Color Systems/Hue Systems",
+    "06-Reference/Color Models/Video",
+    "06-Reference/Color Models/RGB",
+    "06-Reference/Color Models/Print",
+    "06-Reference/Color Models/Perceptual",
+    "06-Reference/Color Models/Other",
+    "06-Reference/Color Models/Hue",
+    "06-Reference/Research"
+  ]
+}
