@@ -47,6 +47,7 @@ updated: 2026-06-24
 - [[DSL Gaps & Bugs]] — concrete defects (P0: `shift`/`derive` are dead) and fixes.
 
 ### 04 · Product
+- [[Implementation Plan]] — 🛠️ **the active build blueprint** (chosen architecture + phased plan with acceptance gates). Start here to build.
 - [[Unified Product Plan]] — **the centerpiece**: the DSL authoring app + the display/analysis app, joined.
 - [[Feature Specs]] — per-feature specs: autocomplete, live preview, contrast matrix, CVD, real-example preview, save, export.
 - [[Product Architecture]] — stack, module layout, and the data flow from source → scheme → surfaces.
