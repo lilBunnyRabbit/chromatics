@@ -8,7 +8,7 @@ import { getModel, hex, ColorValue, type DSLValue } from '../models/index.js';
 import { num, color, lerpInMode, assertSameModel } from '../models/util.js';
 import { wcagContrast, differenceCiede2000 } from '../models/registry.js';
 import { preview } from './preview.js';
-import { scale, tokenFn } from './tokens.js';
+import { scale, tokenFn, tokens } from './tokens.js';
 import { component } from './components.js';
 import { themeFn } from './theme.js';
 
@@ -63,7 +63,9 @@ export function createEnvironment(): Map<string, DSLValue> {
 	// Preview namespace — preview.gradient(a, b), preview.pair(fg, bg), …
 	env.set('preview', preview as unknown as DSLValue);
 
-	// Design-system namespaces — scale.text(16), token('font', …), component.button({…})
+	// Design-system namespaces — tokens.text(16) / token('font', …) / component.button({…})
+	// `tokens` is canonical; `scale` + the free `token` stay as compatibility aliases.
+	env.set('tokens', tokens as unknown as DSLValue);
 	env.set('scale', scale as unknown as DSLValue);
 	env.set('token', tokenFn);
 	env.set('component', component as unknown as DSLValue);

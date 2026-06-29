@@ -3,6 +3,7 @@ import type { Node } from 'estree';
 import { isColorValue, ModelView } from '../models/index.js';
 import { num } from '../models/util.js';
 import { createEnvironment } from './environment.js';
+import { rolesConfig } from './theme.js';
 import type { DSLValue, DSLFunction, PlainObject } from '../models/index.js';
 
 // --- Types ---
@@ -35,6 +36,9 @@ class Scope {
 	order: string[] = [];
 	private env: Map<string, DSLValue>;
 	currentDeps: Set<string> = new Set();
+	/** Inside a `preview { … }` / `component { … }` block, the namespace whose
+	 *  members resolve as bare identifiers (so `ramp(c)` means `preview.ramp(c)`). */
+	overlay: Record<string, DSLValue> | null = null;
 
 	constructor() {
 		this.env = createEnvironment();
@@ -47,11 +51,24 @@ class Scope {
 			this.currentDeps.add(name);
 			return userVar.value;
 		}
+		// Bare namespace members inside a block (not tracked as deps)
+		if (this.overlay && Object.prototype.hasOwnProperty.call(this.overlay, name)) {
+			return this.overlay[name];
+		}
 		// Then built-in environment
 		const envVal = this.env.get(name);
 		if (envVal !== undefined) return envVal;
 
 		throw new Error(`Undefined variable: ${name}`);
+	}
+
+	/** A builtin namespace object (`preview`, `component`), if it is one. */
+	namespace(label: string): Record<string, DSLValue> | undefined {
+		const v = this.env.get(label);
+		if (v && typeof v === 'object' && !Array.isArray(v)) {
+			return v as Record<string, DSLValue>;
+		}
+		return undefined;
 	}
 
 	set(name: string, value: DSLValue, deps: string[], line: number, node: Node): void {
@@ -288,6 +305,36 @@ function evalNode(node: Node, scope: Scope): DSLValue {
 	}
 }
 
+/**
+ * Block sugar: `preview { … }` and `component { … }` aren't valid JS, but the
+ * labeled-statement form `preview: { … }` is. We turn the single whitespace
+ * between the keyword and `{` into a colon — a length-preserving edit, so every
+ * acorn character offset (the adapter slices the *original* source with them)
+ * and every line number stays exactly as the user typed it. Only a keyword that
+ * begins a statement (line start, indentation only) is rewritten, so
+ * `preview.ramp(…)` and strings are never touched.
+ */
+const BLOCK_SUGAR = /(^|\n)([ \t]*)(preview|component|tokens|roles)[ \t]([ \t]*\{)/g;
+function desugarBlocks(source: string): string {
+	return source.replace(BLOCK_SUGAR, (_m, nl, indent, kw, rest) => `${nl}${indent}${kw}:${rest}`);
+}
+
+const lineOf = (node: unknown): number =>
+	(node as { loc?: { start: { line: number } } }).loc?.start.line ?? 1;
+
+type LabeledNode = Node & {
+	type: string;
+	label?: { name: string };
+	body?: Node & { type: string; body?: Node[] };
+};
+
+type AssignNode = {
+	type: string;
+	operator?: string;
+	left?: { type: string; name?: string };
+	right?: { type: string; name?: string; value?: unknown };
+};
+
 export function evaluate(source: string): EvalResult {
 	const scope = new Scope();
 	const errors: EvalError[] = [];
@@ -295,7 +342,7 @@ export function evaluate(source: string): EvalResult {
 	// Parse the full source
 	let program: acorn.Program;
 	try {
-		program = acorn.parse(source, {
+		program = acorn.parse(desugarBlocks(source), {
 			ecmaVersion: 2020,
 			sourceType: 'module',
 			locations: true
@@ -311,15 +358,87 @@ export function evaluate(source: string): EvalResult {
 
 	// Evaluate each statement
 	for (const stmt of program.body) {
+		const s = stmt as unknown as LabeledNode;
+
+		// A `preview { … }` / `component { … }` block: evaluate its assignments
+		// with the namespace overlaid, but record each as a top-level variable so
+		// the scheme sees them exactly as the flat `name = preview.x(…)` form.
+		if (s.type === 'LabeledStatement') {
+			const label = s.label?.name;
+			if (
+				label !== 'preview' &&
+				label !== 'component' &&
+				label !== 'tokens' &&
+				label !== 'roles'
+			) {
+				errors.push({
+					message: `Unknown block '${label}'. Use 'tokens { … }', 'component { … }', 'preview { … }' or 'roles { … }'.`,
+					line: lineOf(s)
+				});
+				continue;
+			}
+			if (s.body?.type !== 'BlockStatement') {
+				errors.push({ message: `'${label}' must be followed by a { … } block`, line: lineOf(s) });
+				continue;
+			}
+
+			// roles { role = colorName } — a MAPPING block: each line binds a theme
+			// role to a color *by name* (the RHS is captured, not evaluated), and the
+			// whole block aggregates into one theme-config variable.
+			if (label === 'roles') {
+				const map: [string, string][] = [];
+				for (const inner of s.body.body ?? []) {
+					try {
+						const e =
+							(inner as { type: string; expression?: AssignNode }).expression ??
+							(inner as unknown as AssignNode);
+						if (
+							(inner as { type: string }).type !== 'ExpressionStatement' ||
+							e?.type !== 'AssignmentExpression' ||
+							e.operator !== '=' ||
+							e.left?.type !== 'Identifier'
+						) {
+							throw new Error('each line maps a role, e.g. `primary = primary`');
+						}
+						const role = e.left.name as string;
+						const r = e.right;
+						let target: string;
+						if (r?.type === 'Identifier') target = r.name as string;
+						else if (r?.type === 'Literal' && typeof r.value === 'string') target = r.value;
+						else throw new Error(`role '${role}' must map to a color name`);
+						map.push([role, target]);
+					} catch (err: unknown) {
+						errors.push({ message: (err as Error).message, line: lineOf(inner) });
+					}
+				}
+				scope.set('roles', rolesConfig(map), [], lineOf(s), s as unknown as Node);
+				continue;
+			}
+
+			// Builder blocks (preview / component / tokens): bare member calls.
+			const ns = scope.namespace(label);
+			if (!ns) {
+				errors.push({ message: `'${label}' is not a namespace`, line: lineOf(s) });
+				continue;
+			}
+			const prev = scope.overlay;
+			scope.overlay = ns;
+			for (const inner of s.body.body ?? []) {
+				try {
+					evalNode(inner, scope);
+				} catch (e: unknown) {
+					errors.push({ message: (e as Error).message, line: lineOf(inner) });
+				}
+			}
+			scope.overlay = prev;
+			continue;
+		}
+
 		try {
 			evalNode(stmt as unknown as Node, scope);
 		} catch (e: unknown) {
 			const err = e as Error;
-			const loc = (stmt as unknown as { loc?: { start: { line: number } } }).loc;
-			errors.push({
-				message: err.message,
-				line: loc?.start.line ?? 1
-			});
+			errors.push({ message: err.message, line: lineOf(stmt) });
 		}
 	}
 

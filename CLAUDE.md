@@ -30,7 +30,7 @@ Run from the **repo root** (the Bash shell cwd can drift into subdirs — `cd` f
 ```sh
 bun install
 bun run dev            # dev server
-bun test               # unit tests (bun:test) — currently 239 across 19 files
+bun test               # unit tests (bun:test) — currently 250 across 21 files
 bun run check          # svelte-kit sync + svelte-check (expect 0 errors / 0 warnings)
 bunx vite build        # static build → build/  (also: bun run build)
 bun run format         # prettier --write
@@ -53,11 +53,11 @@ The hybrid "A+C" design. Immutable, OKLCH-stored color values + a data-driven mo
 
 ### DSL — `src/lib/dsl/`
 
-- `evaluator.ts` — acorn parse → controlled AST walk (no raw `eval`); per-statement try/catch; returns `EvalResult`.
+- `evaluator.ts` — acorn parse → controlled AST walk (no raw `eval`); per-statement try/catch; returns `EvalResult`. Also desugars **block scoping** — `tokens { … }` / `component { … }` / `preview { … }` / `roles { … }` (a length-preserving rewrite to a labeled statement, so offsets/line numbers are untouched). The first three are **builder** blocks: the namespace's members are called **bare** (`ramp(c)` ≡ `preview.ramp(c)`) and each line becomes a top-level variable. `roles { role = color }` is a **mapping** block: the RHS is captured as a color *name* (not evaluated) and the block aggregates into one `roles` theme-config variable. The dotted forms (`preview.x`, `tokens.x`, `token()`, `scale.x`, `theme({…})`) all still work.
 - `environment.ts` — constructors generated from `manifest.constructors` + free fns (`mix`/`contrast`/`deltaE`/math).
 - `manifest.ts` — **the single source of truth**: constructors/builtins/members/docs, built from `allModels()` + `CHANNELS`. An anti-drift test asserts everything stays in sync.
 - `lang.ts` / `complete.ts` / `hover.ts` / `swatch-deco.ts` / `editor-bindings.ts` — CodeMirror language, autocomplete, hover docs, inline color markers, and the bindings the editor consumes.
-- `preview.ts` — `preview.*` primitives that render as cards. `components.ts` / `tokens.ts` / `theme.ts` — `component.*` / `scale.*`+`token()` / `theme()` namespaces for the styleguide.
+- `preview.ts` — `preview.*` primitives that render as cards. `components.ts` / `tokens.ts` / `theme.ts` — the `component.*` / `tokens.*` / `theme()` namespaces for the styleguide. **`tokens.*`** is the canonical design-token namespace (`text`/`space`/`radius`/`shadow` + `token()` for arbitrary groups); `scale.*` and the free `token()` are kept as back-compat aliases. `tokens`/`component`/`preview` each work as a dotted namespace **or** a builder `name { … }` block; `roles { role = color }` is a mapping block (alias of `theme({…})`).
 - `model-docs.ts`, `channel-docs.ts`, `encyclopedia.ts` — vault-distilled copy for docs & `/models`.
 - `color.ts` — **legacy**, kept only as a test parity oracle; dead in the app.
 

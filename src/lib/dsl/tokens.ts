@@ -52,3 +52,18 @@ export const SCALE_SIGNATURES: Record<string, { sig: string; doc: string }> = {
 
 export const TOKEN_DOC =
 	'token(family, map, unit?) — define an arbitrary token group (e.g. font, border)';
+
+/**
+ * The unified `tokens` namespace — the canonical home for non-color design
+ * tokens. It joins the `scale.*` generators with `token(…)` for arbitrary
+ * groups, so every token surface lives under one name (and one `tokens { … }`
+ * block). `scale.*` and the free `token(…)` stay as aliases for compatibility.
+ */
+export const tokens = { ...scale, token: tokenFn } as unknown as Record<string, DSLFunction>;
+
+export const TOKENS_SIGNATURES: Record<string, { sig: string; doc: string }> = {
+	...SCALE_SIGNATURES,
+	token: { sig: '(family, map, unit?)', doc: 'Arbitrary token group (font, border, …)' }
+};
+
+export const TOKENS_DOC = 'tokens.* — design tokens: text, space, radius, shadow, token(…)';

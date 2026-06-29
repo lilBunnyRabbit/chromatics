@@ -42,7 +42,7 @@ error   = hex("#e74c3c")
 - **Channel accessors** on any color regardless of how it was made — `c.ok_c`, `c.lab_a`, `c.h`, `c.r` … and per-model views: `c.oklch`, `c.hsl`, `c.lab`.
 - **Operations** — `lighten` / `darken`, `rotate`, `saturate`, `mix`, `tint` / `shade` / `tone`, `gamutMap`, harmony helpers, and more (each model contributes its own).
 - **Scheme output** — name your colors and they become a role-mapped scheme you can export or theme with.
-- **`preview.*` primitives** that render straight into live preview cards.
+- **Design surfaces as blocks** — `tokens { … }` (type/space/radius/shadow + custom token groups), `component { … }` (button/card/type specs), `preview { … }` (cards that render in the Inspector) and `roles { primary = brand, … }` (bind theme roles to your named colors). Inside a block you call the primitives bare — no repeated `preview.` / `component.` prefix; the dotted forms (`preview.x`, `theme({…})`, …) still work too.
 - A CodeMirror editor with autocompletion, hover docs, inline diagnostics and shareable URLs.
 
 ### 🧪 The studio

@@ -7,9 +7,9 @@
 import { allModels, CHANNELS } from '../models/index.js';
 import type { ModelDef, MethodDef, ParamDef, ChannelDef, ModelStatus } from '../models/index.js';
 import { PREVIEW_SIGNATURES } from './preview.js';
-import { SCALE_SIGNATURES, TOKEN_DOC } from './tokens.js';
+import { SCALE_SIGNATURES, TOKEN_DOC, TOKENS_SIGNATURES, TOKENS_DOC } from './tokens.js';
 import { COMPONENT_SIGNATURES } from './components.js';
-import { THEME_DOC } from './theme.js';
+import { THEME_DOC, ROLES_DOC } from './theme.js';
 
 export interface ConstructorInfo {
 	name: string;
@@ -56,10 +56,12 @@ export const BUILTIN_DOCS: Record<string, string> = {
 	floor: 'floor(n) → number',
 	ceil: 'ceil(n) → number',
 	preview: 'preview.* — values that render as cards in the Inspector',
-	scale: 'scale.* — non-color token generators (text, space, radius, shadow)',
+	tokens: TOKENS_DOC,
+	scale: 'scale.* — token generators (alias of tokens.*)',
 	token: TOKEN_DOC,
 	component: 'component.* — component specs that render in the Styleguide tab',
-	theme: THEME_DOC
+	theme: THEME_DOC,
+	roles: ROLES_DOC
 };
 
 const BUILTINS = [
@@ -74,10 +76,12 @@ const BUILTINS = [
 	'floor',
 	'ceil',
 	'preview',
+	'tokens',
 	'scale',
 	'token',
 	'component',
-	'theme'
+	'theme',
+	'roles'
 ];
 
 function sig(params: ParamDef[]): string {
@@ -182,6 +186,7 @@ export function buildManifest(
 		});
 		viewMembers.set(id, members);
 	};
+	registerNamespace('tokens', TOKENS_SIGNATURES);
 	registerNamespace('scale', SCALE_SIGNATURES);
 	registerNamespace('component', COMPONENT_SIGNATURES);
 

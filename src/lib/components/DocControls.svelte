@@ -15,6 +15,7 @@
 	let renaming = $state(false);
 	let renameValue = $state('');
 	let menuOpen = $state(false);
+	let templatesOpen = $state(false);
 	let confirmId = $state<string | null>(null);
 	let notice = $state('');
 	let fileInput: HTMLInputElement;
@@ -80,6 +81,10 @@
 		sel.value = '';
 		menuOpen = false;
 	}
+	function useTemplate(name: string) {
+		docs.newFromExample(name);
+		templatesOpen = false;
+	}
 
 	function requestDelete() {
 		confirmId = docs.activeId;
@@ -114,6 +119,7 @@
 	function onKey(e: KeyboardEvent) {
 		if (e.key !== 'Escape') return;
 		if (confirmId) confirmId = null;
+		else if (templatesOpen) templatesOpen = false;
 		else if (menuOpen) menuOpen = false;
 		else if (renaming) cancelRename();
 	}
@@ -175,6 +181,67 @@
 
 		<div class="dc-menu-host">
 			<button
+				class="btn dc-templates"
+				onclick={() => (templatesOpen = !templatesOpen)}
+				title="Start a new document from a template"
+				aria-haspopup="menu"
+				aria-expanded={templatesOpen}
+			>
+				<svg
+					viewBox="0 0 24 24"
+					width="14"
+					height="14"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"
+					><rect x="3" y="3" width="7" height="7" rx="1" /><rect
+						x="14"
+						y="3"
+						width="7"
+						height="7"
+						rx="1"
+					/><rect x="3" y="14" width="7" height="7" rx="1" /><rect
+						x="14"
+						y="14"
+						width="7"
+						height="7"
+						rx="1"
+					/></svg
+				>
+				Templates
+				<svg
+					class="dc-caret"
+					viewBox="0 0 24 24"
+					width="12"
+					height="12"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2.4"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg
+				>
+			</button>
+			{#if templatesOpen}
+				<button
+					class="dc-scrim"
+					aria-label="Close templates"
+					onclick={() => (templatesOpen = false)}
+				></button>
+				<div class="dc-pop dc-pop-scroll" role="menu" aria-label="New from template">
+					<div class="dc-pop-head">New from template</div>
+					{#each exampleNames as n (n)}
+						<button class="dc-pop-item" role="menuitem" onclick={() => useTemplate(n)}>{n}</button>
+					{/each}
+				</div>
+			{/if}
+		</div>
+
+		<div class="dc-menu-host">
+			<button
 				class="icon-btn"
 				onclick={() => (menuOpen = !menuOpen)}
 				title="Document actions"
@@ -193,16 +260,6 @@
 				<button class="dc-scrim" aria-label="Close menu" onclick={() => (menuOpen = false)}
 				></button>
 				<div class="dc-pop" role="menu" aria-label="Document actions">
-					<div class="dc-pop-head">New from template</div>
-					<select
-						class="select dc-pop-select"
-						onchange={pickTemplate}
-						aria-label="New from template"
-					>
-						<option value="">Choose…</option>
-						{#each exampleNames as n (n)}<option value={n}>{n}</option>{/each}
-					</select>
-					<div class="dc-pop-sep"></div>
 					<button
 						class="dc-pop-item"
 						role="menuitem"
@@ -408,9 +465,23 @@
 		color: var(--text-faint);
 		padding: 4px 6px 2px;
 	}
-	.dc-pop-select {
-		width: 100%;
-		margin-bottom: 2px;
+	.dc-templates {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		color: var(--accent);
+		border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+	}
+	.dc-templates:hover {
+		background: color-mix(in srgb, var(--accent) 12%, transparent);
+		border-color: var(--accent);
+	}
+	.dc-caret {
+		opacity: 0.7;
+	}
+	.dc-pop-scroll {
+		max-height: 320px;
+		overflow-y: auto;
 	}
 	.dc-pop-sep {
 		height: 1px;

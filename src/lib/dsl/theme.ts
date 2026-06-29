@@ -30,16 +30,28 @@ const KEY_ALIASES: Record<string, keyof Roles> = {
 	border: 'border'
 };
 
-export const themeFn: DSLFunction = (...a) => {
-	const src = a[0];
-	const cfg = src && typeof src === 'object' && !Array.isArray(src) ? (src as PlainObject) : {};
+/**
+ * Build a theme config from `role → colorName` pairs, normalising the role key
+ * (hyphen / camel / snake) and dropping anything that isn't a known role. Shared
+ * by the `theme({…})` builtin and the `roles { … }` block so both agree.
+ */
+export function rolesConfig(entries: Iterable<[string, unknown]>): DSLValue {
 	const roles: Partial<Record<keyof Roles, string>> = {};
-	for (const [k, v] of Object.entries(cfg)) {
+	for (const [k, v] of entries) {
 		const rk = KEY_ALIASES[k];
 		if (rk && typeof v === 'string') roles[rk] = v;
 	}
 	return { __theme: true, roles } as unknown as DSLValue;
+}
+
+export const themeFn: DSLFunction = (...a) => {
+	const src = a[0];
+	const cfg = src && typeof src === 'object' && !Array.isArray(src) ? (src as PlainObject) : {};
+	return rolesConfig(Object.entries(cfg));
 };
 
 export const THEME_DOC =
 	'theme({ bg, fg, primary, surface, primaryFg, … }) — map named colors to theme roles';
+
+export const ROLES_DOC =
+	'roles { primary = brand, bg = surface, … } — bind theme roles to your named colors';
