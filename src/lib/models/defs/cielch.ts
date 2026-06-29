@@ -1,6 +1,6 @@
-/** CIE LCh — cylindrical CIE Lab. Carries the ΔE family too. */
+/** CIE LCh — cylindrical CIE Lab. Carries the ΔE family + LCh-native harmony. */
 import { register, defineModel, type CuloriColor } from '../registry';
-import { LAB_OPS } from '../families';
+import { LAB_OPS, mkHarmonyNative } from '../families';
 import { p } from '../util';
 
 register(
@@ -19,6 +19,7 @@ register(
 			{ key: 'lch_c', localKey: 'c', label: 'C*', culoriField: 'c', range: [0, 150] },
 			{ key: 'lch_h', localKey: 'h', label: 'h', culoriField: 'h', range: [0, 360] }
 		],
+		ownMethods: [...mkHarmonyNative('lch')],
 		inherit: LAB_OPS
 	})
 );

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { app } from '$lib/state/app.svelte';
-	import { OKLCH, type ColorValue } from '$lib/models';
-	import { uniqueName } from '$lib/dsl/emit';
+	import { RAMP_MODELS, rampColors } from '$lib/models';
+	import { uniqueName, round } from '$lib/dsl/emit';
 	import { takenNames, insert } from './shared';
 
 	const entries = $derived(app.scheme.entries);
@@ -9,38 +9,34 @@
 	const idx = $derived(Math.min(baseIdx, Math.max(0, entries.length - 1)));
 	const base = $derived(entries[idx]);
 
-	type Stop = { k: string; l: number; t: number };
-	// Tailwind-style scale: shade key → OKLCH lightness and HCT tone.
-	const STOPS: Stop[] = [
-		{ k: '50', l: 0.97, t: 95 },
-		{ k: '100', l: 0.93, t: 90 },
-		{ k: '200', l: 0.86, t: 80 },
-		{ k: '300', l: 0.77, t: 70 },
-		{ k: '400', l: 0.67, t: 60 },
-		{ k: '500', l: 0.58, t: 50 },
-		{ k: '600', l: 0.5, t: 42 },
-		{ k: '700', l: 0.42, t: 35 },
-		{ k: '800', l: 0.34, t: 25 },
-		{ k: '900', l: 0.26, t: 16 },
-		{ k: '950', l: 0.19, t: 10 }
-	];
+	let modelId = $state('oklch');
+	const rm = $derived(RAMP_MODELS.find((m) => m.id === modelId) ?? RAMP_MODELS[0]);
 
-	let mode = $state<'oklch' | 'hct'>('oklch');
-
-	function deriveOklch(c: ColorValue, l: number): ColorValue {
-		return OKLCH(l, c.channel('ok_c'), c.channel('ok_h')).gamutMapped;
-	}
-	function deriveHct(c: ColorValue, t: number): ColorValue {
-		const fn = c.view('hct').member('atTone') as unknown as (t: number) => ColorValue;
-		return fn(t);
-	}
 	const results = $derived.by(() => {
 		if (!base) return [];
-		return STOPS.map((s) => ({
-			k: s.k,
-			color: mode === 'oklch' ? deriveOklch(base.color, s.l) : deriveHct(base.color, s.t)
-		}));
+		return rampColors(base.color, modelId).map((s) => ({ k: s.key, color: s.color }));
 	});
+
+	// DSL expression for one shade — each model rebuilt from the base's channels
+	// in that model, varying only its lightness axis. Matches rampColors().
+	function stepExpr(id: string, b: string, v: number): string {
+		switch (id) {
+			case 'lab':
+				return `LAB(${round(v, 2)}, ${b}.lab_a, ${b}.lab_b)`;
+			case 'hct':
+				return `${b}.hct.atTone(${round(v, 1)})`;
+			case 'okhsl':
+				return `OKHSL(${b}.okhsl_h, ${b}.okhsl_s, ${round(v, 3)})`;
+			case 'hsluv':
+				return `HSLUV(${b}.hsluv_h, ${b}.hsluv_s, ${round(v, 2)})`;
+			case 'hsl':
+				return `HSL(${b}.h, ${b}.s, ${round(v, 3)})`;
+			case 'hsv':
+				return `HSV(${b}.hsv_h, ${b}.hsv_s, ${round(v, 3)})`;
+			default:
+				return `${b}.oklch.atLightness(${round(v, 3)}).oklch.gamutMap()`;
+		}
+	}
 
 	function apply() {
 		if (!base) return;
@@ -49,16 +45,9 @@
 		const lines = results.map((r, i) => {
 			const name = uniqueName(`${prefix}_${r.k}`, taken);
 			taken.add(name);
-			const expr =
-				mode === 'oklch'
-					? `${base.name}.oklch.atLightness(${STOPS[i].l}).oklch.gamutMap()`
-					: `${base.name}.hct.atTone(${STOPS[i].t})`;
-			return `${name} = ${expr}`;
+			return `${name} = ${stepExpr(modelId, base.name, rm.stops[i])}`;
 		});
-		insert(
-			lines,
-			`Tonal ramp (${mode === 'oklch' ? 'OKLCH lightness' : 'HCT tone'}) from ${base.name}`
-		);
+		insert(lines, `Tonal ramp (${rm.label}) from ${base.name}`);
 	}
 </script>
 
@@ -73,30 +62,30 @@
 					{#each entries as e, i (e.name)}<option value={i}>{e.name}</option>{/each}
 				</select>
 			</label>
-			<div class="seg">
-				<button class="seg-item {mode === 'oklch' ? 'active' : ''}" onclick={() => (mode = 'oklch')}
-					>OKLCH lightness</button
-				>
-				<button class="seg-item {mode === 'hct' ? 'active' : ''}" onclick={() => (mode = 'hct')}
-					>HCT tone</button
-				>
-			</div>
+			<label class="field">
+				<span>Model</span>
+				<select class="select" bind:value={modelId}>
+					{#each RAMP_MODELS as m (m.id)}<option value={m.id}>{m.label}</option>{/each}
+				</select>
+			</label>
 			<button class="btn btn-accent" onclick={apply}>Insert {results.length} steps</button>
 		</div>
 
 		<div class="ramp">
 			{#each results as r (r.k)}
 				<div class="step">
-					<span class="block" style="background:{r.color.hex}"></span>
+					<span class="block" style="background:{r.color.gamutMapped.hex}"></span>
 					<span class="lbl">{r.k}</span>
-					<span class="hx">{r.color.hex}</span>
+					<span class="hx">{r.color.gamutMapped.hex}</span>
 				</div>
 			{/each}
 		</div>
 		<p class="hint">
-			{mode === 'oklch'
-				? 'Even perceptual lightness steps at the base hue — gamut-mapped at the extremes.'
-				: 'Material-style tones (CAM16 hue & chroma held, L* tone varied).'}
+			{rm.note
+				? rm.note
+				: rm.perceptual
+					? `Even ${rm.label.toLowerCase()} steps at the base hue — gamut-mapped at the extremes.`
+					: `${rm.label} steps (non-perceptual).`}
 		</p>
 	{/if}
 </div>
@@ -167,13 +156,6 @@
 		}
 		.field {
 			width: 100%;
-		}
-		.seg {
-			width: 100%;
-		}
-		.seg-item {
-			flex: 1;
-			min-height: 40px;
 		}
 		.btn-accent {
 			margin-left: 0;

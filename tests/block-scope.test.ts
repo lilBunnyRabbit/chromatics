@@ -38,7 +38,9 @@ describe('enclosingBlock', () => {
 
 	test('braces and keywords inside strings are ignored', () => {
 		expect(enclosingBlock('x = "a } preview {"\n')).toBeNull();
-		expect(enclosingBlock('tokens {\n  font = token("f", { x: "} preview {" })\n  ')).toBe('tokens');
+		expect(enclosingBlock('tokens {\n  font = token("f", { x: "} preview {" })\n  ')).toBe(
+			'tokens'
+		);
 	});
 
 	test('a block keyword in a comment does not open a block', () => {

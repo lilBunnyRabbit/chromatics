@@ -1,6 +1,6 @@
 /** Extra hue / cylindrical spaces, including the perceptual ok-hue spaces. */
 import { register, defineModel, type CuloriColor } from '../registry';
-import { HUE_OPS, LAB_OPS, mkRotateHueNative } from '../families';
+import { HUE_OPS, LAB_OPS, mkRotateHueNative, mkHarmonyNative } from '../families';
 import { p } from '../util';
 
 register(
@@ -38,7 +38,7 @@ register(
 			{ key: 'okhsl_s', localKey: 's', label: 'Saturation', culoriField: 's', range: [0, 1] },
 			{ key: 'okhsl_l', localKey: 'l', label: 'Lightness', culoriField: 'l', range: [0, 1] }
 		],
-		ownMethods: [mkRotateHueNative('okhsl')],
+		ownMethods: [...mkHarmonyNative('okhsl')],
 		inherit: LAB_OPS
 	})
 );

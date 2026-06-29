@@ -8,7 +8,7 @@
  * Each function returns `{ __preview: <type>, ...refs }` where the refs are the
  * actual ColorValues — the render components do the drawing.
  */
-import { color, num, str } from '../models/util.js';
+import { color, num, str, obj } from '../models/util.js';
 import type { DSLValue, DSLFunction, PlainObject } from '../models/index.js';
 
 /** A rendered-preview descriptor (a plain object marked with `__preview`). */
@@ -30,25 +30,40 @@ function def(build: (a: DSLValue[]) => PlainObject): DSLFunction {
 const colorsOf = (a: DSLValue[]) => a.map((x) => color(x));
 const optStr = (v: DSLValue | undefined, d: string) => (v === undefined ? d : str(v));
 const optInt = (v: DSLValue | undefined, d: number) => (v === undefined ? d : Math.round(num(v)));
+/** A plain options object if `v` is one, else null (strings/numbers/colors → null). */
+const asOpts = (v: DSLValue | undefined): PlainObject | null => {
+	if (v === undefined) return null;
+	try {
+		return obj(v);
+	} catch {
+		return null;
+	}
+};
 
 export const preview: Record<string, DSLFunction> = {
 	// — Relationships —
-	gradient: def(([from, to, space, stops]) => ({
-		__preview: 'gradient',
-		from: color(from),
-		to: color(to),
-		space: optStr(space, 'oklab'),
-		stops: optInt(stops, 7)
-	})),
+	// gradient(from, to, space?, stops?) OR gradient(from, to, { space, hue, stops })
+	gradient: def(([from, to, space, stops]) => {
+		const o = asOpts(space);
+		return {
+			__preview: 'gradient',
+			from: color(from),
+			to: color(to),
+			space: o ? optStr(o.space, 'oklab') : optStr(space, 'oklab'),
+			hue: o ? optStr(o.hue, 'shorter') : 'shorter',
+			stops: o ? optInt(o.stops, 7) : optInt(stops, 7)
+		};
+	}),
 	ramp: def(([base, mode]) => ({
 		__preview: 'ramp',
 		base: color(base),
 		mode: optStr(mode, 'oklch')
 	})),
-	harmony: def(([base, scheme]) => ({
+	harmony: def(([base, scheme, model]) => ({
 		__preview: 'harmony',
 		base: color(base),
-		scheme: optStr(scheme, 'complementary')
+		scheme: optStr(scheme, 'complementary'),
+		model: optStr(model, 'oklch')
 	})),
 	mix: def(([from, to, steps]) => ({
 		__preview: 'mix',
@@ -100,9 +115,18 @@ export const PREVIEW_MEMBERS = Object.keys(preview);
 
 /** Signatures + one-line docs for each member (autocomplete / highlighter / docs). */
 export const PREVIEW_SIGNATURES: Record<string, { sig: string; doc: string }> = {
-	gradient: { sig: '(from, to, space?, stops?)', doc: 'Gradient bar between two colors' },
-	ramp: { sig: '(base, mode?)', doc: 'Tonal 50–950 ramp from one color' },
-	harmony: { sig: '(base, scheme?)', doc: 'Harmony colors off a base hue' },
+	gradient: {
+		sig: '(from, to, space?, stops?)',
+		doc: 'Gradient bar — space or { space, hue, stops } (hue: shorter/longer/increasing/decreasing)'
+	},
+	ramp: {
+		sig: '(base, model?)',
+		doc: 'Tonal 50–950 ramp (model: oklch/lab/hct/okhsl/hsluv/hsl/hsv)'
+	},
+	harmony: {
+		sig: '(base, scheme?, model?)',
+		doc: 'Harmony off a base hue (model: which hue wheel to rotate on)'
+	},
 	mix: { sig: '(from, to, steps?)', doc: 'Discrete blend steps' },
 	pair: { sig: '(fg, bg)', doc: 'Type specimen + WCAG & APCA contrast' },
 	cvd: { sig: '(color)', doc: 'Color under color-vision deficiencies' },

@@ -5,7 +5,7 @@
  *    best perceptual colour-difference metrics (its headline `deltaE`).
  */
 import { register, defineModel, type CuloriColor } from '../registry';
-import { mkRotateHueNative, mkDeltaEuclidean } from '../families';
+import { mkRotateHueNative, mkHarmonyNative, mkDeltaEuclidean } from '../families';
 import { p } from '../util';
 
 register(
@@ -25,7 +25,7 @@ register(
 			{ key: 'cam16_c', localKey: 'c', label: 'C (chroma)', culoriField: 'c', range: [0, 150] },
 			{ key: 'cam16_h', localKey: 'h', label: 'h (hue)', culoriField: 'h', range: [0, 360] }
 		],
-		ownMethods: [mkRotateHueNative('cam16')]
+		ownMethods: [...mkHarmonyNative('cam16')]
 	})
 );
 

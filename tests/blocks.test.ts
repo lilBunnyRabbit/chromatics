@@ -133,9 +133,9 @@ roles = theme({ bg: "bg", fg: "fg", primary: "primary", primaryFg: "fg" })`);
 		expect(flat.errors).toEqual([]);
 		// the RHS is captured as a NAME (string), not evaluated to a color value
 		expect(block.variables.get('roles')!.value).toEqual(flat.variables.get('roles')!.value);
-		expect((block.variables.get('roles')!.value as { roles: Record<string, string> }).roles).toEqual(
-			{ bg: 'bg', fg: 'fg', primary: 'primary', primaryFg: 'fg' }
-		);
+		expect(
+			(block.variables.get('roles')!.value as { roles: Record<string, string> }).roles
+		).toEqual({ bg: 'bg', fg: 'fg', primary: 'primary', primaryFg: 'fg' });
 	});
 
 	test('role keys normalise (snake/camel) and unknown keys drop', () => {

@@ -13,6 +13,19 @@ export { ColorValue, isColorValue } from './value';
 export type { DSLValue, DSLFunction, PlainObject } from './value';
 export { ModelView } from './view';
 export { getModel, getModelByMode, allModels, CHANNELS } from './registry';
+export {
+	INTERP_SPACES,
+	HUE_MODELS,
+	RAMP_MODELS,
+	RAMP_SHADES,
+	SCHEME_OFFSETS,
+	interpSpace,
+	hueModel,
+	rampModel,
+	harmonyColors,
+	rampColors
+} from './spaces';
+export type { InterpSpace, HueModel, RampModel, RampStep, HarmonySwatch } from './spaces';
 export { formatOwnModel } from './format';
 export type { ModelDef, MethodDef, ChannelDef, ParamDef, Family, ModelStatus } from './types';
 

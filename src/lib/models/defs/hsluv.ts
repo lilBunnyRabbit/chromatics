@@ -5,7 +5,7 @@
  * HPLuv trades gamut coverage for constant perceived saturation (pastels).
  */
 import { register, defineModel, type CuloriColor } from '../registry';
-import { mkRotateHueNative } from '../families';
+import { mkRotateHueNative, mkHarmonyNative } from '../families';
 import { ColorValue } from '../value';
 import { method, num, clamp01, p } from '../util';
 
@@ -27,7 +27,7 @@ register(
 			{ key: 'hsluv_l', localKey: 'l', label: 'Lightness', culoriField: 'l', range: [0, 100] }
 		],
 		ownMethods: [
-			mkRotateHueNative('hsluv'),
+			...mkHarmonyNative('hsluv'),
 			method(
 				'saturate',
 				[p('amount')],

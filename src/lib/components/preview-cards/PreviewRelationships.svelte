@@ -1,73 +1,87 @@
 <script lang="ts">
-	import { lerpInMode, wrapHue } from '$lib/models/util';
-	import { OKLCH } from '$lib/models';
+	import { lerpInMode, type HueStrategy } from '$lib/models/util';
+	import { interpSpace, rampColors, harmonyColors, type ColorValue } from '$lib/models';
+	import { deltaE2000 } from '$lib/analysis/similarity';
 
 	let { data }: { data: any } = $props();
 
+	const r1 = (n: number) => Math.round(n * 10) / 10;
+
 	// ── gradient ──────────────────────────────────────────────
-	const spaceToMode: Record<string, string> = {
-		oklab: 'oklab',
-		oklch: 'oklch',
-		linear: 'lrgb'
-	};
+	const gradientSpace = $derived(interpSpace(data?.space ?? 'oklab'));
 
-	const gradientMode = $derived(spaceToMode[data?.space] ?? 'oklab');
-
-	// stops + 2 discrete chips: from, intermediates, to
+	// stops + 2 discrete chips: from, intermediates, to. Each chip is gamut-mapped
+	// (perceptual midpoints that leave sRGB clamp by chroma, not by hue twist) and
+	// flagged `oog` if the raw interpolated color was outside sRGB before mapping.
 	const gradientChips = $derived.by(() => {
 		if (data?.__preview !== 'gradient') return [];
 		const n = Math.max(0, data.stops | 0);
-		const out: string[] = [data.from.hex];
+		const hue = (data.hue ?? 'shorter') as HueStrategy;
+		const chip = (c: ColorValue) => ({ hex: c.gamutMapped.hex, oog: !c.inGamut });
+		const out = [chip(data.from)];
 		for (let i = 1; i <= n; i++) {
 			const t = i / (n + 1);
-			out.push(lerpInMode(data.from, data.to, gradientMode, t).hex);
+			out.push(chip(lerpInMode(data.from, data.to, gradientSpace.mode, t, hue)));
 		}
-		out.push(data.to.hex);
+		out.push(chip(data.to));
 		return out;
 	});
 
-	const gradientCSS = $derived(`linear-gradient(90deg, ${gradientChips.join(', ')})`);
+	const gradientCSS = $derived(
+		`linear-gradient(90deg, ${gradientChips.map((c) => c.hex).join(', ')})`
+	);
+	const gradientCaption = $derived.by(() => {
+		const cyl = gradientSpace.cylindrical && (data?.hue ?? 'shorter') !== 'shorter';
+		const base = cyl ? `${gradientSpace.label} · ${data.hue} hue` : gradientSpace.label;
+		const oog = gradientChips.filter((c) => c.oog).length;
+		return oog > 0 ? `${base} · ${oog} out of sRGB` : base;
+	});
 
 	// ── ramp ──────────────────────────────────────────────────
-	const RAMP_L = [0.97, 0.93, 0.86, 0.77, 0.67, 0.58, 0.5, 0.42, 0.34, 0.26, 0.19];
-	const RAMP_SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
-
 	const rampSteps = $derived.by(() => {
 		if (data?.__preview !== 'ramp') return [];
-		const c = data.base.channel('ok_c');
-		const h = data.base.channel('ok_h');
-		return RAMP_L.map((L, i) => ({
-			hex: OKLCH(L, c, h).gamutMapped.hex,
-			shade: RAMP_SHADES[i]
+		return rampColors(data.base, data.mode).map((s) => ({
+			hex: s.color.gamutMapped.hex,
+			shade: s.shade,
+			oog: !s.color.inGamut,
+			color: s.color as ColorValue
 		}));
 	});
 
-	// ── harmony ───────────────────────────────────────────────
-	const SCHEME_OFFSETS: Record<string, number[]> = {
-		complementary: [180],
-		analogous: [-30, 30],
-		triadic: [120, 240],
-		split: [150, 210],
-		tetradic: [90, 180, 270]
-	};
+	// Perceptual spacing between adjacent shades (ΔE2000) + how many left sRGB —
+	// makes the model choice legible (an even ramp has tight ΔE min↔max).
+	const rampCaption = $derived.by(() => {
+		const steps = rampSteps;
+		if (steps.length < 2) return data?.mode ?? '';
+		let min = Infinity;
+		let max = 0;
+		for (let i = 1; i < steps.length; i++) {
+			const dE = deltaE2000(steps[i - 1].color, steps[i].color);
+			if (dE < min) min = dE;
+			if (dE > max) max = dE;
+		}
+		const oog = steps.filter((s) => s.oog).length;
+		const base = `${data.mode} · ΔE ${r1(min)}–${r1(max)}`;
+		return oog > 0 ? `${base} · ${oog} out of sRGB` : base;
+	});
 
+	// ── harmony ───────────────────────────────────────────────
 	const harmony = $derived.by(() => {
 		if (data?.__preview !== 'harmony') return null;
-		const l = data.base.channel('ok_l');
-		const c = data.base.channel('ok_c');
-		const h = data.base.channel('ok_h');
-		const offsets = SCHEME_OFFSETS[data.scheme] ?? [180];
 		const R = 80;
 		const pt = (hue: number) => {
 			const a = ((hue - 90) * Math.PI) / 180;
 			return { x: Math.cos(a) * R, y: Math.sin(a) * R };
 		};
-		const base = { hex: data.base.hex, hue: h, ...pt(h) };
-		const derived = offsets.map((deg) => {
-			const hue = wrapHue(h + deg);
-			return { hex: OKLCH(l, c, hue).gamutMapped.hex, hue, ...pt(hue) };
-		});
-		return { base, derived, swatches: [base, ...derived] };
+		const swatches = harmonyColors(data.base, data.scheme, data.model).map((s) => ({
+			hex: s.color.gamutMapped.hex,
+			hue: s.hue,
+			isBase: s.base,
+			...pt(s.hue)
+		}));
+		const base = swatches.find((s) => s.isBase) ?? swatches[0];
+		const derived = swatches.filter((s) => !s.isBase);
+		return { base, derived, swatches };
 	});
 
 	// ── mix ───────────────────────────────────────────────────
@@ -77,7 +91,7 @@
 		const out: { hex: string }[] = [];
 		for (let i = 0; i < n; i++) {
 			const t = n === 1 ? 0 : i / (n - 1);
-			out.push({ hex: lerpInMode(data.from, data.to, 'oklab', t).hex });
+			out.push({ hex: lerpInMode(data.from, data.to, 'oklab', t).gamutMapped.hex });
 		}
 		return out;
 	});
@@ -87,21 +101,31 @@
 	{#if data.__preview === 'gradient'}
 		<div class="bar" style:background={gradientCSS}></div>
 		<div class="chips">
-			{#each gradientChips as hex, i (i)}
-				<span class="chip" style:background={hex}></span>
+			{#each gradientChips as c, i (i)}
+				<span
+					class="chip"
+					class:oog={c.oog}
+					style:background={c.hex}
+					title={c.oog ? 'outside sRGB — shown gamut-mapped' : ''}
+				></span>
 			{/each}
 		</div>
-		<div class="caption">{data.space}</div>
+		<div class="caption">{gradientCaption}</div>
 	{:else if data.__preview === 'ramp'}
 		<div class="ramp">
 			{#each rampSteps as step (step.shade)}
 				<div class="ramp-col">
-					<span class="ramp-block" style:background={step.hex}></span>
+					<span
+						class="ramp-block"
+						class:oog={step.oog}
+						style:background={step.hex}
+						title={step.oog ? 'outside sRGB — shown gamut-mapped' : ''}
+					></span>
 					<span class="ramp-label">{step.shade}</span>
 				</div>
 			{/each}
 		</div>
-		<div class="caption">{data.mode}</div>
+		<div class="caption">{rampCaption}</div>
 	{:else if data.__preview === 'harmony'}
 		{#if harmony}
 			<div class="harmony">
@@ -128,7 +152,7 @@
 					{/each}
 				</div>
 			</div>
-			<div class="caption">{data.scheme}</div>
+			<div class="caption">{data.scheme} · {data.model}</div>
 		{/if}
 	{:else if data.__preview === 'mix'}
 		<div class="mix">
@@ -199,6 +223,13 @@
 		font-size: 9px;
 		color: var(--text-muted);
 		margin-top: 3px;
+	}
+
+	/* out-of-sRGB marker (shared by gradient chips + ramp blocks) */
+	.chip.oog,
+	.ramp-block.oog {
+		outline: 2px dashed color-mix(in srgb, var(--text) 55%, transparent);
+		outline-offset: -3px;
 	}
 
 	/* harmony */

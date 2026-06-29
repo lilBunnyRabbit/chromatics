@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { app } from '$lib/state/app.svelte';
 	import { lerpInMode } from '$lib/models/util';
+	import { INTERP_SPACES, getModelByMode } from '$lib/models';
 	import { uniqueName, round } from '$lib/dsl/emit';
 	import { takenNames, insert } from './shared';
 
@@ -12,32 +13,30 @@
 	const a = $derived(entries[ai]);
 	const b = $derived(entries[bi]);
 
-	const SPACES = {
-		oklab: { label: 'OKLab', mode: 'oklab' },
-		oklch: { label: 'OKLCH', mode: 'oklch' },
-		linear: { label: 'Linear', mode: 'lrgb' }
-	} as const;
-	let space = $state<keyof typeof SPACES>('oklab');
+	let spaceId = $state('oklab');
+	const space = $derived(INTERP_SPACES.find((s) => s.id === spaceId) ?? INTERP_SPACES[0]);
+	// The DSL view name for this space's mode (oklab→oklab, lrgb→lin, rgb→srgb…),
+	// so the generated mix() converts both operands into the right model.
+	const viewId = $derived(getModelByMode(space.mode)?.id ?? 'oklch');
 	let stops = $state(3); // intermediate colors
 
 	function expr(t: number): string {
 		const r = round(t, 3);
 		// Mix in the chosen space; convert BOTH operands into it so the same-model
 		// rule holds regardless of how a and b were authored.
-		if (space === 'oklab') return `mix(${a.name}.oklab, ${b.name}.oklab, ${r})`;
-		if (space === 'oklch') return `mix(${a.name}.oklch, ${b.name}.oklch, ${r})`;
-		return `mix(${a.name}.lin, ${b.name}.lin, ${r})`;
+		return `mix(${a.name}.${viewId}, ${b.name}.${viewId}, ${r})`;
 	}
 
-	// Preview = A, the intermediate stops, then B.
+	// Preview = A, the intermediate stops, then B — all gamut-mapped by chroma
+	// (not naive RGB clip) so out-of-gamut endpoints don't hue-twist the bar.
 	const ramp = $derived.by(() => {
 		if (!a || !b) return [];
-		const out = [{ hex: a.color.hex, t: 0 }];
+		const out = [{ hex: a.color.gamutMapped.hex, t: 0 }];
 		for (let i = 1; i <= stops; i++) {
 			const t = i / (stops + 1);
-			out.push({ hex: lerpInMode(a.color, b.color, SPACES[space].mode, t).hex, t });
+			out.push({ hex: lerpInMode(a.color, b.color, space.mode, t).gamutMapped.hex, t });
 		}
-		out.push({ hex: b.color.hex, t: 1 });
+		out.push({ hex: b.color.gamutMapped.hex, t: 1 });
 		return out;
 	});
 	const css = $derived(`linear-gradient(90deg, ${ramp.map((s) => s.hex).join(', ')})`);
@@ -59,7 +58,7 @@
 			taken.add(name);
 			lines.push(`${name} = ${expr(t)}`);
 		}
-		insert(lines, `${SPACES[space].label} gradient ${a.name} → ${b.name}`);
+		insert(lines, `${space.label} gradient ${a.name} → ${b.name}`);
 	}
 </script>
 
@@ -82,8 +81,8 @@
 			</label>
 			<label class="field">
 				<span>Space</span>
-				<select class="select" bind:value={space}>
-					{#each Object.entries(SPACES) as [id, s] (id)}<option value={id}>{s.label}</option>{/each}
+				<select class="select" bind:value={spaceId}>
+					{#each INTERP_SPACES as s (s.id)}<option value={s.id}>{s.label}</option>{/each}
 				</select>
 			</label>
 			<label class="field">

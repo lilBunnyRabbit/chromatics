@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { app } from '$lib/state/app.svelte';
-	import { OKLCH, type ColorValue } from '$lib/models';
-	import { wrapHue } from '$lib/models/util';
+	import { HUE_MODELS, type ColorValue } from '$lib/models';
+	import { rotateHueInMode, wrapHue } from '$lib/models/util';
 	import { uniqueName } from '$lib/dsl/emit';
 	import { takenNames, insert, oklchText } from './shared';
 
@@ -9,6 +9,12 @@
 	let baseIdx = $state(0);
 	const idx = $derived(Math.min(baseIdx, Math.max(0, entries.length - 1)));
 	const base = $derived(entries[idx]);
+
+	// Which hue wheel to rotate on — OKLCH/HSL/CAM16/… give different harmonies.
+	let modelId = $state('oklch');
+	const hm = $derived(HUE_MODELS.find((m) => m.id === modelId) ?? HUE_MODELS[0]);
+	const hueOf = (c: ColorValue) =>
+		(c.project(hm.mode) as unknown as Record<string, number | undefined>).h ?? 0;
 
 	type Scheme = { label: string; offsets: { n: string; d: number }[] };
 	const SCHEMES: Record<string, Scheme> = {
@@ -45,18 +51,24 @@
 	};
 	let scheme = $state<keyof typeof SCHEMES>('complementary');
 
-	function derive(c: ColorValue, deg: number): ColorValue {
-		return OKLCH(c.channel('ok_l'), c.channel('ok_c'), wrapHue(c.channel('ok_h') + deg))
-			.gamutMapped;
-	}
+	const baseHue = $derived(base ? wrapHue(hueOf(base.color)) : 0);
 	const results = $derived.by(() => {
 		if (!base) return [];
 		return SCHEMES[scheme].offsets.map((o) => ({
 			name: o.n,
 			deg: o.d,
-			color: derive(base.color, o.d)
+			color: rotateHueInMode(base.color, hm.mode, o.d).gamutMapped,
+			hue: wrapHue(baseHue + o.d)
 		}));
 	});
+
+	// Codegen rotates on the chosen model's own wheel; OKLCH keeps its idiomatic
+	// gamutMap(), other models use the root `.gamutMapped` accessor.
+	function harmExpr(b: string, deg: number): string {
+		return modelId === 'oklch'
+			? `${b}.oklch.rotateHue(${deg}).oklch.gamutMap()`
+			: `${b}.${modelId}.rotateHue(${deg}).gamutMapped`;
+	}
 
 	function apply() {
 		if (!base) return;
@@ -64,9 +76,9 @@
 		const lines = results.map((r) => {
 			const name = uniqueName(r.name, taken);
 			taken.add(name);
-			return `${name} = ${base.name}.oklch.rotateHue(${r.deg}).oklch.gamutMap()`;
+			return `${name} = ${harmExpr(base.name, r.deg)}`;
 		});
-		insert(lines, `${SCHEMES[scheme].label} harmony from ${base.name}`);
+		insert(lines, `${SCHEMES[scheme].label} harmony (${hm.label}) from ${base.name}`);
 	}
 </script>
 
@@ -88,6 +100,12 @@
 						>{/each}
 				</select>
 			</label>
+			<label class="field">
+				<span>Wheel</span>
+				<select class="select" bind:value={modelId}>
+					{#each HUE_MODELS as m (m.id)}<option value={m.id}>{m.label}</option>{/each}
+				</select>
+			</label>
 			<button class="btn btn-accent" onclick={apply}
 				>Insert {results.length} color{results.length > 1 ? 's' : ''}</button
 			>
@@ -96,7 +114,7 @@
 		<div class="wheel-row">
 			<svg class="wheel" viewBox="-110 -110 220 220" width="180" height="180">
 				<circle cx="0" cy="0" r="100" fill="none" stroke="var(--border)" />
-				{#each [base.color.channel('ok_h')] as bh (bh)}
+				{#each [baseHue] as bh (bh)}
 					{@const a = ((bh - 90) * Math.PI) / 180}
 					<line
 						x1="0"
@@ -116,7 +134,7 @@
 					/>
 				{/each}
 				{#each results as r (r.name)}
-					{@const a = ((r.color.channel('ok_h') - 90) * Math.PI) / 180}
+					{@const a = ((r.hue - 90) * Math.PI) / 180}
 					<line
 						x1="0"
 						y1="0"

@@ -54,7 +54,10 @@ describe('diffCascade', () => {
 
 	test('survives several consecutive invalid states', () => {
 		const base = new Map<string, string>();
-		diffCascade(base, E(['brand', '#aaa'], ['accent', '#bbb']), { hasErrors: false, primed: false });
+		diffCascade(base, E(['brand', '#aaa'], ['accent', '#bbb']), {
+			hasErrors: false,
+			primed: false
+		});
 		for (let i = 0; i < 3; i++) {
 			diffCascade(base, E(), { hasErrors: true, primed: true });
 		}

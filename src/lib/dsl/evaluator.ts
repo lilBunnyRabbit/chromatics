@@ -365,12 +365,7 @@ export function evaluate(source: string): EvalResult {
 		// the scheme sees them exactly as the flat `name = preview.x(…)` form.
 		if (s.type === 'LabeledStatement') {
 			const label = s.label?.name;
-			if (
-				label !== 'preview' &&
-				label !== 'component' &&
-				label !== 'tokens' &&
-				label !== 'roles'
-			) {
+			if (label !== 'preview' && label !== 'component' && label !== 'tokens' && label !== 'roles') {
 				errors.push({
 					message: `Unknown block '${label}'. Use 'tokens { … }', 'component { … }', 'preview { … }' or 'roles { … }'.`,
 					line: lineOf(s)

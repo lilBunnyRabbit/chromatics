@@ -74,8 +74,39 @@ export function makeOklch(l: number, c: number, h: number): CuloriColor {
 
 // --- color helpers shared across families ---
 
-/** Channel-wise linear interpolation in a culori mode (hue takes the short arc). */
-export function lerpInMode(a: ColorValue, b: ColorValue, mode: string, t: number): ColorValue {
+/**
+ * Hue interpolation strategy for cylindrical spaces — mirrors culori's hue
+ * fixup. `shorter` takes the short arc (the historic default); `longer` the
+ * long way round; `increasing`/`decreasing` force a monotonic sweep (full
+ * spectrum even when the endpoints share a hue).
+ */
+export type HueStrategy = 'shorter' | 'longer' | 'increasing' | 'decreasing';
+
+/** Signed hue delta from h1→h2 under the chosen fixup, in degrees. */
+function hueDelta(h1: number, h2: number, strategy: HueStrategy): number {
+	const fwd = wrapHue(h2 - h1); // 0..360 going forward (counter-clockwise)
+	switch (strategy) {
+		case 'longer':
+			return fwd !== 0 && fwd < 180 ? fwd - 360 : fwd;
+		case 'increasing':
+			return fwd;
+		case 'decreasing':
+			// Match culori (and `increasing`): equal hues stay flat, not a full sweep.
+			return fwd === 0 ? 0 : fwd - 360;
+		case 'shorter':
+		default:
+			return fwd > 180 ? fwd - 360 : fwd;
+	}
+}
+
+/** Channel-wise linear interpolation in a culori mode (hue per `strategy`). */
+export function lerpInMode(
+	a: ColorValue,
+	b: ColorValue,
+	mode: string,
+	t: number,
+	hue: HueStrategy = 'shorter'
+): ColorValue {
 	const ca = a.project(mode) as unknown as Record<string, number | undefined> & { mode: string };
 	const cb = b.project(mode) as unknown as Record<string, number | undefined>;
 	const out: Record<string, unknown> = { mode };
@@ -83,15 +114,27 @@ export function lerpInMode(a: ColorValue, b: ColorValue, mode: string, t: number
 		if (k === 'mode') continue;
 		const va = ca[k] ?? 0;
 		const vb = cb[k] ?? 0;
-		out[k] = k === 'h' ? lerpHue(va, vb, t) : va * (1 - t) + vb * t;
+		out[k] = k === 'h' ? lerpHue(va, vb, t, hue) : va * (1 - t) + vb * t;
 	}
 	return ColorValue.from(out as unknown as CuloriColor);
 }
-export function lerpHue(h1: number, h2: number, t: number): number {
-	let diff = h2 - h1;
-	if (diff > 180) diff -= 360;
-	if (diff < -180) diff += 360;
-	return wrapHue(h1 + diff * t);
+export function lerpHue(
+	h1: number,
+	h2: number,
+	t: number,
+	strategy: HueStrategy = 'shorter'
+): number {
+	return wrapHue(h1 + hueDelta(h1, h2, strategy) * t);
+}
+
+/**
+ * Rotate a color's hue inside an arbitrary cylindrical model: project into
+ * `mode`, bump its `h` field, rebuild as that mode (stays stored natively in
+ * `mode`). The characteristic per-model move shared by harmony ops + the card.
+ */
+export function rotateHueInMode(self: ColorValue, mode: string, deg: number): ColorValue {
+	const c = self.project(mode) as unknown as Record<string, number | undefined> & { mode: string };
+	return ColorValue.from({ ...c, h: wrapHue((c.h ?? 0) + deg) } as unknown as CuloriColor);
 }
 
 /** OKLCH shortest-arc mix — the legacy `Color.mix` behaviour (parity). */

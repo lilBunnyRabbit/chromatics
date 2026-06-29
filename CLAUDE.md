@@ -30,7 +30,7 @@ Run from the **repo root** (the Bash shell cwd can drift into subdirs — `cd` f
 ```sh
 bun install
 bun run dev            # dev server
-bun test               # unit tests (bun:test) — currently 273 across 22 files
+bun test               # unit tests (bun:test) — currently 295 across 24 files
 bun run check          # svelte-kit sync + svelte-check (expect 0 errors / 0 warnings)
 bunx vite build        # static build → build/  (also: bun run build)
 bun run format         # prettier --write
@@ -47,17 +47,18 @@ The hybrid "A+C" design. Immutable, OKLCH-stored color values + a data-driven mo
 - `value.ts` — `ColorValue` (immutable; canonical `_oklch`; lazy `project(mode)` cache; `channel`/`view`/`member` dispatch; `.hex/.inGamut/.gamutMapped/.toCSS`). **Channel accessors and per-model views (`c.oklch`, `c.lab`, `c.ok_h`, …) are resolved dynamically at runtime via `member()` — they are NOT on the static TS type.** In typed `.ts`/`.svelte` code, `c.oklch.lighten(…)` will fail `svelte-check`; only the DSL evaluator reaches them. If you need a value's hex in component code, derive it through the DSL (`evaluate`) or use typed methods.
 - `view.ts` — `ModelView`, the single runtime class (channel → method → cross-model re-entry).
 - `registry.ts` — the **only** culori importer; `toMode/getModel/allModels/CHANNELS/register/defineModel` + gamut helpers.
-- `types.ts`, `families.ts`, `util.ts` — model/method/channel defs, op-tables + factories, coercions.
+- `types.ts`, `families.ts`, `util.ts` — model/method/channel defs, op-tables + factories, coercions. `families.ts` has `mkHarmonyNative(mode)` (the per-model rotateHue/complementary/triadic/analogous set); `util.ts` has `lerpInMode(…, hueStrategy)` + `rotateHueInMode` (the model-generic interpolate/rotate primitives).
+- `spaces.ts` — **the "pick a model" source of truth** for the three model-parameterized studio derivations: `INTERP_SPACES` (gradient/mix), `HUE_MODELS` + `harmonyColors()` (per-model harmony), `RAMP_MODELS` + `rampColors()` (tonal ramps). Curated lists the DSL cards + Studio pickers both read; an anti-drift test (`derivations.test.ts`) checks every mode resolves. OKLCH stays the default everywhere; colors round-trip back to native storage and gamut-map at display.
 - `defs/*.ts` — one file (or group) per model; `defs/index.ts` barrel side-effect-registers all. `modes/` holds custom culori modes.
 - **~100 registered models & systems** (stable + experimental + coming-soon stubs). Adding a model is a pure data file that auto-surfaces everywhere via the DSL manifest (proven by an anti-drift test).
 
 ### DSL — `src/lib/dsl/`
 
-- `evaluator.ts` — acorn parse → controlled AST walk (no raw `eval`); per-statement try/catch; returns `EvalResult`. Also desugars **block scoping** — `tokens { … }` / `component { … }` / `preview { … }` / `roles { … }` (a length-preserving rewrite to a labeled statement, so offsets/line numbers are untouched). The first three are **builder** blocks: the namespace's members are called **bare** (`ramp(c)` ≡ `preview.ramp(c)`) and each line becomes a top-level variable. `roles { role = color }` is a **mapping** block: the RHS is captured as a color *name* (not evaluated) and the block aggregates into one `roles` theme-config variable. The dotted forms (`preview.x`, `tokens.x`, `token()`, `scale.x`, `theme({…})`) all still work.
+- `evaluator.ts` — acorn parse → controlled AST walk (no raw `eval`); per-statement try/catch; returns `EvalResult`. Also desugars **block scoping** — `tokens { … }` / `component { … }` / `preview { … }` / `roles { … }` (a length-preserving rewrite to a labeled statement, so offsets/line numbers are untouched). The first three are **builder** blocks: the namespace's members are called **bare** (`ramp(c)` ≡ `preview.ramp(c)`) and each line becomes a top-level variable. `roles { role = color }` is a **mapping** block: the RHS is captured as a color _name_ (not evaluated) and the block aggregates into one `roles` theme-config variable. The dotted forms (`preview.x`, `tokens.x`, `token()`, `scale.x`, `theme({…})`) all still work.
 - `environment.ts` — constructors generated from `manifest.constructors` + free fns (`mix`/`contrast`/`deltaE`/math).
 - `manifest.ts` — **the single source of truth**: constructors/builtins/members/docs, built from `allModels()` + `CHANNELS`. An anti-drift test asserts everything stays in sync.
 - `lang.ts` / `complete.ts` / `hover.ts` / `swatch-deco.ts` / `block-scope.ts` / `editor-bindings.ts` — CodeMirror language, autocomplete, hover docs, inline color markers, the **block-aware editor** seam, and the bindings the editor consumes. `block-scope.ts` (manifest-driven, no drift) tells both the highlighter and autocomplete which `label { … }` block wraps the cursor: inside a builder block the bare members highlight as methods + complete first; inside `roles {}` role keys complete on the left, named colors on the right.
-- `preview.ts` — `preview.*` primitives that render as cards. `components.ts` / `tokens.ts` / `theme.ts` — the `component.*` / `tokens.*` / `theme()` namespaces for the styleguide. **`tokens.*`** is the canonical design-token namespace (`text`/`space`/`radius`/`shadow` + `token()` for arbitrary groups); `scale.*` and the free `token()` are kept as back-compat aliases. `tokens`/`component`/`preview` each work as a dotted namespace **or** a builder `name { … }` block; `roles { role = color }` is a mapping block (alias of `theme({…})`).
+- `preview.ts` — `preview.*` primitives that render as cards. Three relationship previews are **model-parameterized** (idiomatic per-primitive arg): `gradient(from, to, space?|{space,hue,stops})` (any `INTERP_SPACES` space + hue strategy `shorter/longer/increasing/decreasing`), `ramp(base, model?)` (any `RAMP_MODELS` lightness axis — the once-dead `mode` arg, now live), `harmony(base, scheme?, model?)` (any `HUE_MODELS` wheel). `c.ramp(model?)` also returns **real colors** (feeds `tokens`/`roles`), and the curated hue models gain the full `c.<model>.triadic()` etc. set. The ramp/gradient cards flag **out-of-sRGB** stops (dashed marker) and the ramp shows **ΔE2000 spacing** between shades (perceptual evenness). The Studio **Harmony / Ramp / Gradient** tools (`components/tools/`) each carry the matching model/space picker and generate model-aware DSL. `components.ts` / `tokens.ts` / `theme.ts` — the `component.*` / `tokens.*` / `theme()` namespaces for the styleguide. **`tokens.*`** is the canonical design-token namespace (`text`/`space`/`radius`/`shadow` + `token()` for arbitrary groups); `scale.*` and the free `token()` are kept as back-compat aliases. `tokens`/`component`/`preview` each work as a dotted namespace **or** a builder `name { … }` block; `roles { role = color }` is a mapping block (alias of `theme({…})`).
 - `model-docs.ts`, `channel-docs.ts`, `encyclopedia.ts` — vault-distilled copy for docs & `/models`.
 - `color.ts` — **legacy**, kept only as a test parity oracle; dead in the app.
 
@@ -88,11 +89,11 @@ The hybrid "A+C" design. Immutable, OKLCH-stored color values + a data-driven mo
 
 ### Routes
 
-| Route     | What                                                     |
-| --------- | -------------------------------------------------------- |
-| `/`       | The studio — editor + analysis tabs                      |
+| Route     | What                                                                                         |
+| --------- | -------------------------------------------------------------------------------------------- |
+| `/`       | The studio — editor + analysis tabs                                                          |
 | `/models` | Encyclopedia of all color models & systems (+ 2-D gamut plane & 3-D `ModelViewer` per model) |
-| `/mixer`  | Cross-model mixer — one color, every model, live sliders |
+| `/mixer`  | Cross-model mixer — one color, every model, live sliders                                     |
 
 Examples live in `src/routes/examples/` (Overview, Simple, Conversions, Showcase, Previews, Design System, Dynamic Theme); `examples/index.ts` orders them (first = default on load). The old Brand Dark/Light templates were removed; the Brand Dark source survives as `tests/fixtures/brand-dark.ts`, the parity oracle for the golden-hex + role-mapping tests.
 

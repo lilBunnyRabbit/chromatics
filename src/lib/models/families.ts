@@ -16,6 +16,7 @@ import {
 	optNum,
 	oklchMix,
 	assertSameModel,
+	rotateHueInMode,
 	p
 } from './util';
 import {
@@ -290,11 +291,49 @@ export function mkRotateHueNative(mode: string): MethodDef {
 		[p('degrees')],
 		'color',
 		'Rotate hue within this model space',
-		(self, [d]) => {
-			const c = self.project(mode) as unknown as Record<string, number | undefined>;
-			return ColorValue.from({ ...c, h: wrapHue((c.h ?? 0) + num(d)) } as unknown as CuloriColor);
-		}
+		(self, [d]) => rotateHueInMode(self, mode, num(d))
 	);
+}
+
+/**
+ * The full harmony set (rotateHue/complementary/triadic/analogous) computed in
+ * a model's OWN hue geometry. Spreading this into a cylindrical model makes
+ * `c.<model>.triadic()` rotate on that model's wheel — so OKLCH, HSL, CAM16,
+ * LCh, … give visibly different harmonies from the same base. Each result is
+ * stored natively in `mode`; gamut-mapping for display happens at the edge.
+ */
+export function mkHarmonyNative(mode: string): MethodDef[] {
+	const rot = (self: ColorValue, deg: number) => rotateHueInMode(self, mode, deg);
+	return [
+		mkRotateHueNative(mode),
+		method(
+			'complementary',
+			[],
+			'color',
+			'The opposite hue (180°)',
+			(self) => rot(self, 180),
+			tag('hue')
+		),
+		method(
+			'triadic',
+			[],
+			'colors',
+			'Three evenly spaced hues',
+			(self) => [self, rot(self, 120), rot(self, 240)],
+			tag('hue')
+		),
+		method(
+			'analogous',
+			[p('angle', 'number', { optional: true })],
+			'colors',
+			'Neighbouring hues either side',
+			(self, [a]) => {
+				const ang = a === undefined ? 30 : num(a);
+				return [rot(self, -ang), self, rot(self, ang)];
+			},
+			tag('hue')
+		)
+	];
 }
 
 /** A model's native Euclidean ΔE (e.g. ΔEz for JzAzBz, ΔE99 for DIN99o). */

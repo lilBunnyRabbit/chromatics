@@ -12,10 +12,13 @@ fg      = OKLCH(0.96, 0.01, 264)
 wide    = OKLCH(0.72, 0.32, 150)   // beyond sRGB on purpose
 
 preview {
-  // ── Relationships ──
-  brand_ramp      = ramp(brand)
+  // ── Relationships ── (each derivation can pick the model it works in)
+  brand_ramp      = ramp(brand)                        // OKLCH lightness (default)
+  brand_ramp_lab  = ramp(brand, "lab")                 // …or any model's lightness axis
   brand_to_accent = gradient(brand, accent, "oklab", 7)
-  triad           = harmony(brand, "triadic")
+  spectrum        = gradient(brand, accent, { space: "lch", hue: "longer" })
+  triad           = harmony(brand, "triadic")          // rotate on the OKLCH wheel
+  triad_hsl       = harmony(brand, "triadic", "hsl")   // …vs the classic HSL wheel
   blend           = mix(brand, accent, 5)
 
   // ── Accessibility ──
