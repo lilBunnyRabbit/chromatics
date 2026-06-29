@@ -42,14 +42,16 @@ and reduce on-screen noise.
       (text/space/radius/shadow + custom groups); `scale.*` / `token()` kept as aliases.
 - [x] **Discoverable templates.** The template picker was buried in the kebab menu; it's
       now a visible "Templates" button in the top bar.
+- [x] **Block-aware editor.** Inside a `preview {}` / `component {}` / `tokens {}` block,
+      the bare members autocomplete (and highlight as methods); the block header reads as a
+      namespace. Inside `roles {}`, role keys complete on the left, your named colors on the
+      right. Driven by the one manifest (`block-scope.ts`), so it never drifts.
 
 ## Next — make the first 10 seconds land, cut the friction
 
 - [ ] **Onboarding to the thesis.** Welcome modal + first load lead with the 5-line
       relationship example; "edit `brand`, watch it cascade" as the hero interaction
       (highlight what changed on edit).
-- [ ] **Block-aware editor.** Autocomplete and syntax highlight bare members inside a
-      `preview {}` / `component {}` block (today they complete as plain identifiers).
 - [ ] **Non-color tokens as relationships.** Spacing / radius / type scales derived from
       one base, the same way colors are — the design-system maintainer's daily surface.
       (Compare notes with the designer who's built this from the design side.)

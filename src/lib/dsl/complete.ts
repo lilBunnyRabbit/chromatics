@@ -3,9 +3,12 @@
  *  - at expression start  → constructors + builtins + live user variables
  *  - after `value.`       → channel accessors, view names, flat shortcuts
  *  - after `value.view.`  → ONLY that view's channels + methods
+ *  - inside a `preview {}` / `component {}` / `tokens {}` block → that block's
+ *    bare members surface first; inside `roles {}` → role keys then color names
  */
 import type { CompletionContext, CompletionResult, Completion } from '@codemirror/autocomplete';
 import { manifest, type MemberInfo } from './manifest.js';
+import { enclosingBlock, blockMembers, ROLE_KEYS } from './block-scope.js';
 
 const KIND_TO_TYPE: Record<MemberInfo['kind'], string> = {
 	method: 'method',
@@ -50,7 +53,27 @@ export function chromaCompletions(getVars: () => string[]) {
 		// expression start
 		const word = ctx.matchBefore(/\w+/);
 		if (!word && !ctx.explicit) return null;
-		const options: Completion[] = [
+		const from = word ? word.from : ctx.pos;
+
+		// Block-aware: what (if anything) encloses the cursor?
+		const before = ctx.state.sliceDoc(0, ctx.pos);
+		const block = enclosingBlock(before);
+
+		// `roles { role = colorName }` — roles on the left, named colors on the right.
+		if (block === 'roles') {
+			const lineBefore = before.slice(before.lastIndexOf('\n') + 1);
+			const options: Completion[] = lineBefore.includes('=')
+				? getVars().map((v) => ({ label: v, type: 'variable' }))
+				: ROLE_KEYS.map((r) => ({ label: r, type: 'property', info: 'theme role', boost: 50 }));
+			return { from, options, validFor: /\w*/ };
+		}
+
+		const options: Completion[] = [];
+		// Inside a builder block, that block's members come first.
+		const members = block ? blockMembers(block) : null;
+		if (members) options.push(...members.map((m) => ({ ...toCompletion(m), boost: 50 })));
+
+		options.push(
 			...manifest.constructors.map(
 				(c): Completion => ({
 					label: c.name,
@@ -61,7 +84,7 @@ export function chromaCompletions(getVars: () => string[]) {
 			),
 			...manifest.builtins.map((b): Completion => ({ label: b, type: 'function' })),
 			...getVars().map((v): Completion => ({ label: v, type: 'variable' }))
-		];
-		return { from: word ? word.from : ctx.pos, options, validFor: /\w*/ };
+		);
+		return { from, options, validFor: /\w*/ };
 	};
 }
