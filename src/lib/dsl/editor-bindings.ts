@@ -5,7 +5,7 @@
  * behaviour without duplicating the (non-trivial) hover logic.
  */
 import { app } from '$lib/state/app.svelte';
-import { isColorValue } from '$lib/models';
+import { isColorValue, formatOwnModel } from '$lib/models';
 import { chromaCompletions } from './complete';
 import { chromaHover } from './hover';
 import { chromaSwatches, type SwatchMode } from './swatch-deco';
@@ -26,9 +26,9 @@ export const hover = chromaHover((name) => {
 	const e = app.scheme.byName.get(name);
 	if (e) {
 		const c = e.color;
-		const r2 = (n: number, d: number) => Math.round(n * d) / d;
-		const ok = `oklch(${r2(c.channel('ok_l'), 1000)} ${r2(c.channel('ok_c'), 10000)} ${r2(c.channel('ok_h'), 100)})`;
-		return { hex: c.hex, text: `${c.hex} · ${ok}` };
+		// Show the color in its OWN model (how it was authored), not always OKLCH.
+		const own = formatOwnModel(c, e.model);
+		return { hex: c.hex, text: own === c.hex ? c.hex : `${c.hex} · ${own}` };
 	}
 	const v = app.result.variables.get(name);
 	if (v && !isColorValue(v.value)) {

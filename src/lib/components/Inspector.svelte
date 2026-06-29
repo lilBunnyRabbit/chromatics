@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Scheme, SchemeEntry } from '$lib/scheme/types';
-	import { getModel, getModelByMode, ColorValue } from '$lib/models';
+	import { ColorValue, formatOwnModel } from '$lib/models';
 	import type { DSLValue } from '$lib/dsl/evaluator.js';
 	import { nearestName } from '$lib/color-names';
 	import { isPreview } from '$lib/dsl/preview';
@@ -56,17 +56,8 @@
 		['RGB', fmtRgb(c)],
 		['HSL', fmtHsl(c)]
 	];
-	const rNum = (v: number) => String(Math.round(v * 1000) / 1000);
 	/** The variable's value in its OWN model, shown top-right (e.g. hwb(…), lab(…)). */
-	function modelVal(e: SchemeEntry): string {
-		const c = e.color;
-		if (e.model === 'hex') return c.hex;
-		const def = getModel(c.model) ?? getModelByMode(c.model);
-		if (!def || !def.channels.length) return c.hex;
-		const proj = c.project(def.mode) as unknown as Record<string, number | undefined>;
-		const vals = def.channels.map((ch) => rNum((proj[ch.culoriField] ?? 0) * (ch.scale ?? 1)));
-		return `${def.id}(${vals.join(' ')})`;
-	}
+	const modelVal = (e: SchemeEntry): string => formatOwnModel(e.color, e.model);
 </script>
 
 <div class="insp scroll">
