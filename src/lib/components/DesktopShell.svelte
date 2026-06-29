@@ -4,14 +4,13 @@
 	import Matrix from '$lib/components/Matrix.svelte';
 	import Preview from '$lib/components/Preview.svelte';
 	import Styleguide from '$lib/components/Styleguide.svelte';
-	import ModelViewer from '$lib/components/ModelViewer.svelte';
 	import Studio from '$lib/components/Studio.svelte';
 	import Validate from '$lib/components/Validate.svelte';
 	import Docs from '$lib/components/Docs.svelte';
 	import ExportPanel from '$lib/components/ExportPanel.svelte';
 	import DocControls from '$lib/components/DocControls.svelte';
 	import { app } from '$lib/state/app.svelte';
-	import { ui, type Tab } from '$lib/state/ui.svelte';
+	import { ui, type Tab, PRIMARY_TABS, ADVANCED_TABS, isAdvancedTab } from '$lib/state/ui.svelte';
 	import { welcome } from '$lib/state/welcome.svelte';
 	import { completion, hover, makeSwatches } from '$lib/dsl/editor-bindings';
 	import type { SwatchMode } from '$lib/dsl/swatch-deco';
@@ -21,6 +20,7 @@
 	let showDocs = $state(false);
 	function onKey(e: KeyboardEvent) {
 		if (e.key === 'Escape' && showDocs) showDocs = false;
+		if (e.key === 'Escape' && moreOpen) moreOpen = false;
 	}
 
 	// Editor colour-marker style — live-swappable from the editor header.
@@ -34,16 +34,31 @@
 	];
 	const swatch = $derived(makeSwatches(ui.swatchMode));
 
-	const TABS: { id: Tab; label: string }[] = [
-		{ id: 'inspector', label: 'Inspector' },
-		{ id: 'studio', label: 'Studio' },
-		{ id: 'preview', label: 'Preview' },
-		{ id: 'styleguide', label: 'Styleguide' },
-		{ id: 'matrix', label: 'Matrix' },
-		{ id: 'validate', label: 'Validate' },
-		{ id: 'explore', label: '3D Explore' },
-		{ id: 'export', label: 'Export' }
-	];
+	const LABELS: Record<Tab, string> = {
+		inspector: 'Inspector',
+		studio: 'Studio',
+		preview: 'Preview',
+		styleguide: 'Styleguide',
+		matrix: 'Matrix',
+		validate: 'Validate',
+		export: 'Export'
+	};
+	const primaryTabs = PRIMARY_TABS.map((id) => ({ id, label: LABELS[id] }));
+	const advancedTabs = ADVANCED_TABS.map((id) => ({ id, label: LABELS[id] }));
+
+	// Advanced tabs live behind a "More" overflow menu so the bar stays calm for
+	// newcomers. When one is active the button reads as active and shows its name.
+	let moreOpen = $state(false);
+	let moreWrap = $state<HTMLElement | null>(null);
+	const moreActive = $derived(isAdvancedTab(ui.tab));
+	const moreLabel = $derived(moreActive ? LABELS[ui.tab] : 'More');
+	function pickAdvanced(id: Tab) {
+		ui.tab = id;
+		moreOpen = false;
+	}
+	function onMorePointerDown(e: PointerEvent) {
+		if (moreOpen && moreWrap && !moreWrap.contains(e.target as Node)) moreOpen = false;
+	}
 
 	let shareLabel = $state('Share');
 
@@ -73,7 +88,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={onKey} />
+<svelte:window onkeydown={onKey} onpointerdown={onMorePointerDown} />
 
 <div class="app">
 	<!-- Top bar -->
@@ -93,9 +108,6 @@
 		<button class="btn" onclick={share}>{shareLabel}</button>
 		<a class="btn" href="{base}/mixer" title="Cross-model color mixer">Mixer</a>
 		<a class="btn" href="{base}/models" title="Color models & systems encyclopedia">Models</a>
-		<button class="btn {showDocs ? 'btn-accent' : ''}" onclick={() => (showDocs = !showDocs)}
-			>API</button
-		>
 		<button
 			class="icon-btn"
 			onclick={() => (welcome.open = true)}
@@ -157,6 +169,27 @@
 			<section class="editor-pane" style="width: {ui.editorWidth}%">
 				<div class="pane-head">
 					<span class="pane-title">Editor</span>
+					<button
+						class="btn btn-api {showDocs ? 'btn-accent' : ''}"
+						onclick={() => (showDocs = !showDocs)}
+						aria-pressed={showDocs}
+						title="DSL API reference — constructors, channels, methods & functions"
+					>
+						<svg
+							width="14"
+							height="14"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1" /><path
+								d="M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 1 2 2 2 2 0 0 1-2 2v5a2 2 0 0 1-2 2h-1"
+							/></svg
+						>
+						API reference
+					</button>
 					<div class="spacer"></div>
 					<select
 						class="select swatch-pick"
@@ -234,12 +267,35 @@
 		<section class="analyze-pane">
 			<div class="pane-head">
 				<div class="seg">
-					{#each TABS as t (t.id)}
+					{#each primaryTabs as t (t.id)}
 						<button
 							class="seg-item {ui.tab === t.id ? 'active' : ''}"
 							onclick={() => (ui.tab = t.id)}>{t.label}</button
 						>
 					{/each}
+					<div class="more-wrap" bind:this={moreWrap}>
+						<button
+							class="seg-item seg-more {moreActive ? 'active' : ''} {moreOpen ? 'open' : ''}"
+							aria-haspopup="menu"
+							aria-expanded={moreOpen}
+							onclick={() => (moreOpen = !moreOpen)}
+							title="More analysis views"
+						>
+							{moreLabel}<span class="seg-caret">▾</span>
+						</button>
+						{#if moreOpen}
+							<div class="more-menu" role="menu">
+								{#each advancedTabs as t (t.id)}
+									<button
+										class="more-menu-item {ui.tab === t.id ? 'active' : ''}"
+										role="menuitemradio"
+										aria-checked={ui.tab === t.id}
+										onclick={() => pickAdvanced(t.id)}>{t.label}</button
+									>
+								{/each}
+							</div>
+						{/if}
+					</div>
 				</div>
 				<div class="spacer"></div>
 				<span class="chip"
@@ -259,8 +315,6 @@
 					<Preview />
 				{:else if ui.tab === 'styleguide'}
 					<Styleguide />
-				{:else if ui.tab === 'explore'}
-					<ModelViewer seed={app.scheme.entries[0]?.color.hex ?? '#3aa0ff'} />
 				{:else}
 					<ExportPanel />
 				{/if}

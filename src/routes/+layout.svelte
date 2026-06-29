@@ -1,7 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import { onMount } from 'svelte';
-	import { ui, type Tab } from '$lib/state/ui.svelte';
+	import { ui, isTab } from '$lib/state/ui.svelte';
 	import { welcome } from '$lib/state/welcome.svelte';
 	import Welcome from '$lib/components/Welcome.svelte';
 
@@ -17,7 +17,7 @@
 				const p = JSON.parse(raw);
 				if (typeof p.editorWidth === 'number') ui.editorWidth = p.editorWidth;
 				if (typeof p.editorCollapsed === 'boolean') ui.editorCollapsed = p.editorCollapsed;
-				if (p.tab) ui.tab = p.tab as Tab;
+				if (isTab(p.tab)) ui.tab = p.tab;
 				if (p.swatchMode) ui.swatchMode = p.swatchMode;
 			}
 		} catch {

@@ -30,7 +30,7 @@ Run from the **repo root** (the Bash shell cwd can drift into subdirs — `cd` f
 ```sh
 bun install
 bun run dev            # dev server
-bun test               # unit tests (bun:test) — currently 267 across 22 files
+bun test               # unit tests (bun:test) — currently 273 across 22 files
 bun run check          # svelte-kit sync + svelte-check (expect 0 errors / 0 warnings)
 bunx vite build        # static build → build/  (also: bun run build)
 bun run format         # prettier --write
@@ -65,7 +65,7 @@ The hybrid "A+C" design. Immutable, OKLCH-stored color values + a data-driven mo
 
 - `analysis/` — `contrast`/`wcag`/`apca` (WCAG 2 + APCA), `cvd` (color-vision sim), `similarity` (ΔE), `print` (CMYK proof), `quantize` (image→palette).
 - `scheme/` — `adapter` (`EvalResult`→`Scheme`), `roles` (role mapping + audit), `tokens`, `components`, `theme-config`.
-- `export/` — CSS / DTCG / Tailwind / Markdown (`index.ts`), swatch SVG/PNG (`swatch.ts`), styleguide (`styleguide.ts`).
+- `export/` — CSS / DTCG / Tailwind / Markdown (`index.ts`), swatch SVG/PNG (`swatch.ts`), styleguide (`styleguide.ts`). Colors serialize through one `serializeColor(entry, ColorFormat)` seam: **as-defined** (authoring model when it's valid CSS — see `isCssColor` — else a selectable fallback model) or **single model** (`CSS_COLOR_MODELS`); long floats rounded.
 - `mixer/engine.ts` — shared by `/mixer` and `/models`. `render/resolve.ts` — shared ref resolver.
 - `persistence/` — `documents` (the per-doc store: `DocEnvelope`s keyed by a stable id + a rebuildable index; debounced autosave, idempotent migration, library import/export — pure & unit-tested), `url-hash` (shareable links), `local-storage` (first-run welcome flag). Keys: `chromatics:doc:<id>`, `chromatics:index`, `chromatics:active`, `chromatics:schema`, `chromatics:theme`, `chromatics:ui`, `chromatics:welcomed`. Legacy `chromatics:last` / `chromatics:scheme:<name>` are migrated into documents on first load (left in place one release as a safety copy).
 
@@ -80,9 +80,9 @@ The hybrid "A+C" design. Immutable, OKLCH-stored color values + a data-driven mo
 
 - `+layout.svelte` — applies/persists theme + ui prefs; flips `ui.isMobile` via `matchMedia` **after mount** (SSR/first render stays desktop → no hydration mismatch); renders the global `<Welcome/>`.
 - `+page.svelte` — mount-gated shell chooser: `DesktopShell` vs mobile `MobileShell`.
-- `DesktopShell.svelte` — top bar (`DocControls`, Share, Mixer/Models links, API docs, **?** welcome, theme) + drag-resizable/collapsible editor + tabbed analysis pane.
+- `DesktopShell.svelte` — top bar (`DocControls`, Share, Mixer/Models links, **?** welcome, theme) + drag-resizable/collapsible editor (its header carries the **API reference** toggle → `Docs` overlay) + tabbed analysis pane. The Inspector's "watch it cascade" flash diffs through `$lib/util/cascade` (`diffCascade`), which retains its baseline while the scheme is mid-edit-invalid so the flash survives an error blip.
 - `DocControls.svelte` — shared document bar/sheet (`variant: 'bar' | 'sheet'`): recency switcher, inline rename, Saved/Saving chip, Save/New, new-from-template, duplicate, delete-with-confirm, library import/export, storage + cross-tab chips. Driven entirely by the `docs` store; used by both shells so save UX never drifts.
-- Analysis tabs (shared by both shells via `ui.tab`): **Inspector · Studio · Preview · Styleguide · Matrix · Validate · 3D Explore (`ModelViewer`) · Export**. Plus `Docs.svelte` (DSL reference overlay).
+- Analysis tabs (shared by both shells via `ui.tab`): progressive disclosure splits them into `PRIMARY_TABS` (**Inspector · Studio · Preview · Styleguide · Export**) and `ADVANCED_TABS` (**Matrix · Validate**), defined in `ui.svelte.ts`. Desktop shows the primary set + a "More" overflow popover for advanced; mobile shows the first four primary in the bottom bar + the rest in the More sheet. Plus `Docs.svelte` (DSL reference overlay). The 3-D **`ModelViewer`** is **not** a tab — it lives on `/models`, pinned to the selected model.
 - `components/mobile/` — `MobileShell` + `BottomTabBar` (5 slots) + `MoreSheet` (overflow + app actions) + `MobileEditorSheet` + `Sheet`.
 - `Welcome.svelte` — first-run **welcome showcase modal** (rendered in `+layout`). Hero "color as code" card + a feature grid; each card jumps to the relevant tab/route and loads a tailored example. Auto-opens once (`hasWelcomed`/`markWelcomed`), re-openable from the **?** button in every header. A11y: `role=dialog`, focus trap, Esc/backdrop close, body-scroll lock.
 
@@ -91,7 +91,7 @@ The hybrid "A+C" design. Immutable, OKLCH-stored color values + a data-driven mo
 | Route     | What                                                     |
 | --------- | -------------------------------------------------------- |
 | `/`       | The studio — editor + analysis tabs                      |
-| `/models` | Interactive encyclopedia of all color models & systems   |
+| `/models` | Encyclopedia of all color models & systems (+ 2-D gamut plane & 3-D `ModelViewer` per model) |
 | `/mixer`  | Cross-model mixer — one color, every model, live sliders |
 
 Examples live in `src/routes/examples/` (Overview, Simple, Conversions, Showcase, Previews, Design System, Dynamic Theme); `examples/index.ts` orders them (first = default on load). The old Brand Dark/Light templates were removed; the Brand Dark source survives as `tests/fixtures/brand-dark.ts`, the parity oracle for the golden-hex + role-mapping tests.

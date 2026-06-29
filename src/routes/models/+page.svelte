@@ -9,6 +9,7 @@
 	import { ui } from '$lib/state/ui.svelte';
 	import { welcome } from '$lib/state/welcome.svelte';
 	import GamutPlane from '$lib/components/GamutPlane.svelte';
+	import ModelViewer from '$lib/components/ModelViewer.svelte';
 
 	const SEED = '#3aa0ff';
 
@@ -90,6 +91,7 @@
 	let query = $state('');
 	let mobileDetail = $state(false); // mobile: list vs detail view
 	let showGamut = $state(false); // gamut map collapsed by default
+	let show3d = $state(false); // 3D model viewer collapsed by default
 
 	const def = $derived(getModel(selectedId) as ModelDef);
 	const enc = $derived(ENCYCLOPEDIA[selectedId]);
@@ -228,6 +230,14 @@
 
 	// The 2-D gamut plane works for any constructable model with ≥2 channels.
 	const canPlane = $derived(!!def?.ctor && def.channels.length >= 2 && def.family !== 'system');
+	// The 3-D viewer needs a constructable, 3-channel model (it plots a point cloud).
+	const can3d = $derived(
+		!!def?.backed &&
+			!!def?.ctor &&
+			def.channels.length === 3 &&
+			def.family !== 'system' &&
+			def.family !== 'other'
+	);
 	function pickPlane(xi: number, xVal: number, yi: number, yVal: number) {
 		vals[xi] = xVal;
 		vals[yi] = yVal;
@@ -566,6 +576,24 @@
 							{#if showGamut}
 								<div class="gamut-body">
 									<GamutPlane {def} {vals} markerColor={curHex ?? '#888'} onpick={pickPlane} />
+								</div>
+							{/if}
+						</div>
+					{/if}
+
+					{#if can3d}
+						<div class="gamut">
+							<button
+								class="gamut-toggle"
+								onclick={() => (show3d = !show3d)}
+								aria-expanded={show3d}
+							>
+								<span class="caret" class:open={show3d}>▸</span>
+								{show3d ? 'Hide 3D view' : 'Show 3D view · rotate this model in space'}
+							</button>
+							{#if show3d}
+								<div class="gamut-body">
+									<ModelViewer seed={curHex ?? '#3aa0ff'} pinnedId={def.id} compact />
 								</div>
 							{/if}
 						</div>

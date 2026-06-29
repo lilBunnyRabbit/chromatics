@@ -1,6 +1,15 @@
 <script lang="ts">
 	import { app } from '$lib/state/app.svelte';
-	import { exportScheme, toSwatchSVG, EXPORT_FORMATS, type ExportFormat } from '$lib/export';
+	import {
+		exportScheme,
+		toSwatchSVG,
+		EXPORT_FORMATS,
+		COLOR_FORMATTED,
+		CSS_COLOR_MODELS,
+		type ExportFormat,
+		type ColorFormat,
+		type ColorFormatMode
+	} from '$lib/export';
 	import { toStyleguideCss, toStyleguideHtml, type StyleguideInput } from '$lib/export/styleguide';
 
 	type Fmt = ExportFormat | 'sg-css' | 'sg-html';
@@ -12,6 +21,18 @@
 
 	let format = $state<Fmt>('css');
 	let swatchBg = $state('#fbfcfd');
+
+	// Color representation — applies to the plain token formats (css/tokens/tw/md).
+	let colorMode = $state<ColorFormatMode>('as-defined');
+	let fallbackModel = $state('hex'); // used by "as-defined" for non-CSS colors
+	let singleModel = $state('oklch'); // used by "single model"
+	const colorFormat = $derived<ColorFormat>(
+		colorMode === 'single'
+			? { mode: 'single', model: singleModel }
+			: { mode: 'as-defined', model: fallbackModel }
+	);
+	const showColorFmt = $derived(COLOR_FORMATTED.has(format as ExportFormat));
+
 	const swatchBgOptions = $derived([
 		{ label: 'Light', value: '#fbfcfd' },
 		{ label: 'White', value: '#ffffff' },
@@ -32,7 +53,7 @@
 				? toStyleguideCss(sgInput)
 				: format === 'sg-html'
 					? toStyleguideHtml(sgInput)
-					: exportScheme(app.scheme, format)
+					: exportScheme(app.scheme, format, colorFormat)
 	);
 	let copied = $state(false);
 
@@ -122,6 +143,37 @@
 				<span class="ex-actions">
 					<button class="btn" onclick={downloadHtml}>Download HTML</button>
 				</span>
+			{:else if showColorFmt}
+				<span class="ex-actions">
+					<div class="fmt-toggle" role="group" aria-label="Color representation">
+						<button
+							class="fmt-opt {colorMode === 'as-defined' ? 'active' : ''}"
+							onclick={() => (colorMode = 'as-defined')}
+							title="Keep each color in the model it was authored in (when it's valid CSS)"
+							>As defined</button
+						>
+						<button
+							class="fmt-opt {colorMode === 'single' ? 'active' : ''}"
+							onclick={() => (colorMode = 'single')}
+							title="Convert every color into one model">Single model</button
+						>
+					</div>
+					{#if colorMode === 'single'}
+						<label class="ex-bg-field">
+							<span>Model</span>
+							<select class="select" bind:value={singleModel}>
+								{#each CSS_COLOR_MODELS as m (m.id)}<option value={m.id}>{m.label}</option>{/each}
+							</select>
+						</label>
+					{:else}
+						<label class="ex-bg-field">
+							<span>Fallback</span>
+							<select class="select" bind:value={fallbackModel}>
+								{#each CSS_COLOR_MODELS as m (m.id)}<option value={m.id}>{m.label}</option>{/each}
+							</select>
+						</label>
+					{/if}
+				</span>
 			{/if}
 		</div>
 		{#if format === 'swatch'}
@@ -202,6 +254,35 @@
 		gap: 6px;
 		font-size: 11px;
 		color: var(--text-muted);
+	}
+	.fmt-toggle {
+		display: inline-flex;
+		border: 1px solid var(--border);
+		border-radius: var(--radius-xs);
+		overflow: hidden;
+		background: var(--surface);
+	}
+	.fmt-opt {
+		padding: 4px 10px;
+		font-size: 11px;
+		font-weight: 500;
+		color: var(--text-muted);
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		transition:
+			background 0.12s,
+			color 0.12s;
+	}
+	.fmt-opt + .fmt-opt {
+		border-left: 1px solid var(--border);
+	}
+	.fmt-opt:hover {
+		color: var(--text);
+	}
+	.fmt-opt.active {
+		background: var(--accent);
+		color: var(--accent-fg);
 	}
 	.ex-swatch {
 		overflow: auto;

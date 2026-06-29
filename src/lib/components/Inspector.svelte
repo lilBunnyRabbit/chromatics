@@ -3,6 +3,7 @@
 	import { ColorValue, formatOwnModel } from '$lib/models';
 	import type { DSLValue } from '$lib/dsl/evaluator.js';
 	import { nearestName } from '$lib/color-names';
+	import { diffCascade } from '$lib/util/cascade';
 	import { isPreview } from '$lib/dsl/preview';
 	import PreviewCard from './preview-cards/PreviewCard.svelte';
 
@@ -58,6 +59,29 @@
 	];
 	/** The variable's value in its OWN model, shown top-right (e.g. hwb(…), lab(…)). */
 	const modelVal = (e: SchemeEntry): string => formatOwnModel(e.color, e.model);
+
+	// "Edit a color, watch it cascade" — briefly flag colors whose value changed
+	// after an edit. The diff lives in a pure helper so an invalid intermediate
+	// edit (which momentarily empties the scheme) doesn't wipe the baseline and
+	// swallow the flash on recovery. See $lib/util/cascade.
+	let changed = $state<Set<string>>(new Set());
+	const baseline = new Map<string, string>();
+	let primed = false;
+	let clearTimer: ReturnType<typeof setTimeout> | undefined;
+	$effect(() => {
+		const hits = diffCascade(
+			baseline,
+			scheme.entries.map((e) => ({ name: e.name, hex: e.color.hex })),
+			{ hasErrors: scheme.errors.length > 0, primed }
+		);
+		primed = true;
+		if (hits.size) {
+			changed = hits;
+			clearTimeout(clearTimer);
+			clearTimer = setTimeout(() => (changed = new Set()), 900);
+		}
+	});
+	$effect(() => () => clearTimeout(clearTimer));
 </script>
 
 <div class="insp scroll">
@@ -66,6 +90,7 @@
 			{#each scheme.entries as e (e.name)}
 				<button
 					class="pal"
+					class:changed={changed.has(e.name)}
 					style="background: {e.color.toCSS()}"
 					title="{e.name} · {e.color.hex}"
 					onclick={() => copy(e.color.hex)}
@@ -80,6 +105,7 @@
 				<div class="row">
 					<button
 						class="sw"
+						class:changed={changed.has(e.name)}
 						style="background: {e.color.toCSS()}"
 						onclick={() => copy(e.color.hex)}
 						title="copy hex"
@@ -178,6 +204,35 @@
 	}
 	.pal:hover {
 		flex: 1.6;
+	}
+	/* "Watch it cascade" — flash colors whose value changed after an edit. */
+	@keyframes chroma-flash {
+		0% {
+			box-shadow: inset 0 0 0 3px var(--accent);
+		}
+		100% {
+			box-shadow: inset 0 0 0 3px transparent;
+		}
+	}
+	@keyframes chroma-ring {
+		0% {
+			box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 75%, transparent);
+		}
+		100% {
+			box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 0%, transparent);
+		}
+	}
+	.pal.changed {
+		animation: chroma-flash 0.9s ease-out;
+	}
+	.sw.changed {
+		animation: chroma-ring 0.9s ease-out;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.pal.changed,
+		.sw.changed {
+			animation: none;
+		}
 	}
 	.grid {
 		display: grid;

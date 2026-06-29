@@ -7,7 +7,10 @@ import {
 	toTailwind,
 	toMarkdown,
 	exportScheme,
-	kebab
+	serializeColor,
+	isCssColor,
+	kebab,
+	type ColorFormat
 } from '../src/lib/export';
 import { encodeHash, decodeHash } from '../src/lib/persistence/url-hash';
 
@@ -55,6 +58,63 @@ describe('exporters', () => {
 	test('kebab', () => {
 		expect(kebab('bg_dark')).toBe('bg-dark');
 		expect(kebab('primaryFg')).toBe('primary-fg');
+	});
+});
+
+describe('color representation', () => {
+	test('isCssColor accepts CSS forms, rejects color(--custom) / color(cmyk)', () => {
+		expect(isCssColor('#6c5ce7')).toBe(true);
+		expect(isCssColor('oklch(0.6 0.1 250)')).toBe(true);
+		expect(isCssColor('hsl(250 60% 50%)')).toBe(true);
+		expect(isCssColor('color(display-p3 0.4 0.3 0.9)')).toBe(true);
+		expect(isCssColor('color(xyz-d65 0.2 0.1 0.7)')).toBe(true);
+		expect(isCssColor('color(--hsv 250 0.6 0.9)')).toBe(false);
+		expect(isCssColor('color(cmyk 0.5 0.6 0 0.1)')).toBe(false);
+	});
+
+	test('as-defined keeps the authoring model (oklch stays oklch, hex stays hex)', () => {
+		const fmt: ColorFormat = { mode: 'as-defined', model: 'hex' };
+		const bg = scheme.byName.get('bg')!;
+		const brand = scheme.byName.get('brand')!;
+		expect(serializeColor(bg, fmt).startsWith('oklch(')).toBe(true);
+		expect(serializeColor(brand, fmt)).toBe('#6c5ce7');
+	});
+
+	test('single model normalises every color to one model', () => {
+		const css = toCssVars(scheme, { mode: 'single', model: 'hex' });
+		// every value is a hex literal
+		for (const line of css.split('\n').filter((l) => l.includes('--'))) {
+			expect(line.trim()).toMatch(/: #[0-9a-f]{6};$/i);
+		}
+		const oklchCss = toCssVars(scheme, { mode: 'single', model: 'oklch' });
+		for (const line of oklchCss.split('\n').filter((l) => l.includes('--'))) {
+			expect(line).toContain('oklch(');
+		}
+	});
+
+	test('as-defined falls back when the authoring model is not valid CSS', () => {
+		const SRC2 = `vivid = HSV(280, 0.8, 0.9)`;
+		const s2 = schemeFromEvalResult(evaluate(SRC2), SRC2);
+		const e = s2.byName.get('vivid')!;
+		expect(e.model).toBe('hsv');
+		// HSV serialises as color(--hsv …) → not valid CSS → fallback to hex
+		expect(serializeColor(e, { mode: 'as-defined', model: 'hex' })).toMatch(/^#[0-9a-f]{6}$/i);
+		// a different fallback is honoured
+		expect(serializeColor(e, { mode: 'as-defined', model: 'oklch' }).startsWith('oklch(')).toBe(
+			true
+		);
+	});
+
+	test('serialized colors round long floats (clean output)', () => {
+		const css = toCssVars(scheme, { mode: 'single', model: 'oklch' });
+		expect(css).toContain('oklch(');
+		// no value should carry 6+ decimal places
+		expect(css.match(/\d+\.\d{6,}/g)).toBeNull();
+	});
+
+	test('exportScheme threads the color format through', () => {
+		const fmt: ColorFormat = { mode: 'single', model: 'oklch' };
+		expect(exportScheme(scheme, 'css', fmt)).toBe(toCssVars(scheme, fmt));
 	});
 });
 

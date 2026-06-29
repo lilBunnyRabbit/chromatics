@@ -127,12 +127,12 @@
 	// echoing what the code beside it does. Purely cosmetic (aria-hidden).
 	const HERO_SWATCHES = ['#1b1733', '#2a2350', '#6c5ce7', '#9b8cff', '#d7d0ff'];
 
-	const HERO_CODE = `brand   = hex("#6c5ce7")
+	const HERO_CODE = `brand   = hex("#6c5ce7")   // ← edit this
 
-bg      = OKLCH(0.17, brand.ok_c * 0.3, brand.ok_h)
-surface = bg.lighten(0.05)
 primary = brand.oklch.gamutMap()
-accent  = brand.oklch.rotate(150)`;
+accent  = primary.rotate(-150)
+bg      = OKLCH(0.17, brand.ok_c * 0.3, brand.ok_h)
+surface = bg.lighten(0.05)`;
 
 	// ── open / focus management ──
 	let dialogEl = $state<HTMLDivElement | null>(null);
@@ -366,7 +366,7 @@ accent  = brand.oklch.rotate(150)`;
 							cta: '',
 							icon: 'code',
 							accent: '#5b5bd6',
-							example: 'Simple',
+							example: 'Overview',
 							tab: 'inspector'
 						})}
 				>
@@ -374,11 +374,11 @@ accent  = brand.oklch.rotate(150)`;
 						<span class="wc-eyebrow">The DSL</span>
 						<h3 class="wc-hero-title">Color, as code</h3>
 						<p class="wc-hero-desc">
-							Declare one brand color and derive a whole palette from it. Change the seed and
-							everything downstream recomputes — across any color model.
+							Declare one brand color and derive a whole palette from it. Edit the seed and watch
+							the rest cascade — every dependent color updates and the changes flash in the palette.
 						</p>
 						<span class="wc-hero-cta"
-							>Try the editor
+							>Edit a color, watch it cascade
 							<svg
 								viewBox="0 0 24 24"
 								fill="none"

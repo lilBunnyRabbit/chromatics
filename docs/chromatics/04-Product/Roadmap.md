@@ -163,9 +163,13 @@ Related: [[Accessibility]], [[Color Science & Algorithms]], [[Unified Product Pl
 
 - **Model-specific chromatics methods** — add a thin layer on top of culori for the utilities culori doesn't expose well: `hct.tonalPalette`, `oklch.gamutMap`, `lab.deltaE`, APCA contrast, Brettel CVD. This is the encyclopedia's genuine differentiator and requires **re-deriving zero converters**. (See [[Build vs Buy]] / [[Architecture Decisions]]: do *not* let the from-scratch engine rewrite block this.)
 - **Two-way UI→code editing R&D** — the headline differentiator everywhere in the planning/spec, with **zero supporting algorithm design and zero code** today. Source-mapping is half-present (`Variable` carries its AST `node`) but nothing consumes it. **Start with the spec's Option A: break-link-and-warn** — editing a *literal* swatch in the UI replaces its expression with a literal and shows "This will break the link to `bg`." Defer Option C (formula + picker side-by-side); skip Option B (inverse-solve) entirely.
+  - **Superseded — see [[#CD-15 — Visual ↔ code round-trip]].** The "break-link-and-warn" start is replaced by **span-preserving in-place rewrite**: edit the authored literal/arg rather than flattening the expression, so relationships survive. Feasible now because the source-mapping it depends on is no longer half-present.
 
 > [!tip] Acceptance gate
 > Picking a new color on a swatch backed by a **literal** rewrites that line's source to the new literal and surfaces a break-link warning; computed (formula-backed) swatches remain read-only until a later phase.
+
+> [!info] Depth for the niche (proposed ADRs)
+> Beyond two-way editing, the post-MVP "depth" directions now have recorded decisions in the [[Decision Log]], all resting on one shared foundation: **[[#CD-12 — Shared spine: pure scheme derivation + a validated source-rewrite layer]]** (build first) → **[[#CD-13 — Design-system mode as a first-class flow]]** (roles → light/dark → components → tokens) · **[[#CD-14 — Scheme diff & versioning]]** (snapshot, diff, shareable/embeddable) · **[[#CD-15 — Visual ↔ code round-trip]]**.
 
 Related: [[Open Questions]], [[Architecture Decisions]], [[Build vs Buy]], [[Decision Log]].
 

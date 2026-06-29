@@ -1,15 +1,15 @@
 ---
 tags: [decision-log, adr, architecture, dsl, engine, strategy]
 status: living
-updated: 2026-06-24
+updated: 2026-06-29
 ---
 
 # Decision Log
 
-ADR-style log of the load-bearing decisions behind Chromatics. Each entry has an ID (`CD-NN`), a status (`Decided` | `Reversed` | `Open`), a date, and the usual Context / Decision / Rationale / Consequences. Decisions trace to real artifacts (branches, files, the [[Investigation Report]] synthesis). For the deeper reasoning behind individual entries see [[Build vs Buy]] and [[Architecture Decisions]]; for unresolved forks see [[Open Questions]].
+ADR-style log of the load-bearing decisions behind Chromatics. Each entry has an ID (`CD-NN`), a status (`Decided` | `Reversed` | `Open` | `Proposed`), a date, and the usual Context / Decision / Rationale / Consequences. Decisions trace to real artifacts (branches, files, the [[Investigation Report]] synthesis). For the deeper reasoning behind individual entries see [[Build vs Buy]] and [[Architecture Decisions]]; for unresolved forks see [[Open Questions]].
 
 > [!note] How to read this
-> Status reflects the *evidence*, not aspiration. Where the shipped code (`color-testing/test-dsl`) and a spec disagree, the code wins and the spec is marked as needing correction. "Decided" means an artifact actually commits to it; "Open" means the synthesis (`investigation.json`) still lists it as an unresolved fork — those link [[Open Questions]].
+> Status reflects the *evidence*, not aspiration. Where the shipped code (`color-testing/test-dsl`) and a spec disagree, the code wins and the spec is marked as needing correction. "Decided" means an artifact actually commits to it; "Open" means the synthesis (`investigation.json`) still lists it as an unresolved fork — those link [[Open Questions]]. **"Proposed"** (CD-12 onward) is accepted *direction* for roadmap work not yet built — it records the intended decision and its load-bearing constraints, to be promoted to "Decided" when an artifact commits. See [[Roadmap]].
 
 ## Index
 
@@ -26,6 +26,10 @@ ADR-style log of the load-bearing decisions behind Chromatics. Each entry has an
 | [[#CD-09 — Consolidate the working DSL in color-testing (for now)]] | Repo of record | Decided |
 | [[#CD-10 — chromatics is the published library long-term]] | Library home | Open |
 | [[#CD-11 — Unified product: merge master display + test-dsl DSL]] | Unified product | Open |
+| [[#CD-12 — Shared spine: pure scheme derivation + a validated source-rewrite layer]] | Shared spine: derive + rewrite | Proposed |
+| [[#CD-13 — Design-system mode as a first-class flow]] | Design-system mode | Proposed |
+| [[#CD-14 — Scheme diff & versioning]] | Scheme diff & versioning | Proposed |
+| [[#CD-15 — Visual ↔ code round-trip]] | Visual ↔ code round-trip | Proposed |
 
 ---
 
@@ -205,6 +209,102 @@ ADR-style log of the load-bearing decisions behind Chromatics. Each entry has an
 **Consequences.** Also pulls in the still-unbuilt headline features: **two-way UI↔code editing** (zero code, zero supporting algorithm research — scope deliberately, start with Option A break-link-and-warn), **export** (CSS vars / JSON tokens / Tailwind), and **URL-hash persistence**. All tracked in [[Feature Specs]] / [[Roadmap]] and as open items in [[Open Questions]].
 
 **Related:** [[Unified Product Plan]], [[Product Architecture]], [[Feature Specs]], [[Roadmap]].
+
+---
+
+## CD-12 — Shared spine: pure scheme derivation + a validated source-rewrite layer
+**Status:** Proposed · **Date:** 2026-06-29
+
+**Context.** Three "depth for the niche" roadmap items — first-class design-system mode (CD-13), scheme diff & versioning (CD-14), and visual↔code round-trip (CD-15), all in [[Roadmap]] — each need two capabilities the codebase does not yet expose cleanly: **(a)** render a Scheme *headlessly* from a `{source, settings}` pair, off Svelte's reactive graph; and **(b)** write changes *back into the DSL source* without corrupting it. Today the `source → result → scheme → roles/audit/tokens/components` chain lives only as `$derived` getters inside `state/app.svelte.ts` (see [[Product Architecture]]), and source mutation is ad-hoc (`dsl/emit.ts` `appendStatements`/`insert`).
+
+**Decision.** Build two shared seams **first**, before any of the three features:
+1. **`src/lib/scheme/derive.ts` — `deriveScheme(source, settings): RenderedScheme`** — a pure function bundling `evaluate → schemeFromEvalResult → resolveRoles/cssVars/auditPairs → tokens/components`. `app.svelte.ts`'s `$derived` chain is refactored to call it **1:1, zero behaviour change**, so the live UI and any headless caller run the *same* code.
+2. **A validated, block-aware source-rewrite layer** — `dsl/source-span.ts` (a conservative literal-span gate) + `dsl/patch.ts` (`replaceSpan` / `editCallArg` / `upsertRoleLine` / `upsertTokensLine`), where every result is **re-parsed via `evaluate` before commit and aborts on parse error**. The existing `emit.ts insert()` (append) stays the third point on the rewrite spectrum.
+
+**Rationale.** This is the one investment that pays off in all three features while preserving Chromatics' core invariant — the DSL source stays the single editable root, and nothing derived is ever persisted or mutated (see [[#CD-02 — OKLCH as the canonical color workspace]] and [[Architecture Decisions]] §1). A single `deriveScheme` is the **anti-drift cornerstone** of diffing (both sides of a diff derive identically); a single validated rewrite layer means no feature can splice broken source. Extracting it as a behaviour-preserving refactor is low-risk because the existing test suite guards it.
+
+**Consequences.**
+- **Build-order keystone.** `derive.ts` lands first, gated by `bun test` + `bun run check` + `bunx vite build`; then design-system mode P0 (CD-13); then the rewrite layer; then light/dark (CD-13 P1); then diff/versioning (CD-14). Each later feature consumes a seam built earlier.
+- `RenderedScheme` becomes the home for the `dark*` outputs introduced by CD-13, so CD-14 (diff) and `export/` inherit dual-mode rendering for free instead of re-deriving.
+- **Risk:** the extraction must be strict 1:1 — any drift between `derive.ts` and the live `$derived` chain would silently corrupt every diff. Mitigated by landing it as a pure refactor under green gates before any feature work.
+
+**Related:** [[#CD-13 — Design-system mode as a first-class flow]], [[#CD-14 — Scheme diff & versioning]], [[#CD-15 — Visual ↔ code round-trip]], [[Architecture Decisions]], [[Product Architecture]], [[Roadmap]].
+
+---
+
+## CD-13 — Design-system mode as a first-class flow
+**Status:** Proposed · **Date:** 2026-06-29
+
+**Context.** The pieces of a design system already exist as scattered DSL namespaces (`roles {}`, `theme()`, `tokens.*`, `component.*`) and analysis tabs, but there is no opinionated end-to-end flow, and there is **no light/dark theming** today (see [[Product Architecture]], [[Feature Specs]]).
+
+**Decision.** Reframe the **Styleguide tab as "Design System"** — a guided flow (Roles → Light/Dark → Components → Tokens → Handoff) layered over the *same* derived state, **not** a new pipeline. Step completeness is purely `$derived`; each unfinished step offers a one-click **Scaffold** that emits real DSL through the rewrite layer (CD-12) — auto role assignment → a `roles {}` block, default tokens → a `tokens {}` block. **Light/dark is modelled strictly as role-binding:** a new manifest-registered `theme.dark({…})` / `theme.light({…})` builtin re-points `bg/fg/surface/border` onto already-named colors, and both modes re-resolve through the existing `resolveRoles/cssVars/auditPairs`. Keep the tab id `styleguide`.
+
+**Rationale.** A "mode" should be a richer *view* over derived state, not a fork of the Scheme — consistent with the single-source invariant ([[#CD-02 — OKLCH as the canonical color workspace]]). Modelling dark as re-binding (not a second Scheme) means zero new evaluation path and full audit reuse; adding `theme.dark()` as a manifest builtin keeps highlight / complete / anti-drift green **without touching the block desugarer** (see [[Architecture Decisions]] §5, [[DSL Spec]]).
+
+**Consequences.**
+- New: `scheme/flow.ts` (pure step model + scaffold strings), `scheme/modes.ts` (`effectiveRolesFor`, `modeFragilePairs`), `components/system/FlowSteps.svelte`. `app.svelte.ts` gains `dark*` `$derived` siblings (no new mutable state); these live inside CD-12's `RenderedScheme`.
+- Data: `ThemeConfig` gains `mode?: 'light' | 'dark'`; optional persisted active `mode` in `DocSettings` (additive, undefined = light). Dual-mode CSS (`:root` + `.dark`) + DTCG `modes` at handoff.
+- **Scope guard (MVP):** dark = roles-only re-pointing; per-mode tokens/components are out. The object-RHS form `roles { bg = { light, dark } }` is deferred (touches the evaluator/highlighter).
+- **Risks:** scaffold collisions (detect an existing block → relabel "Edit in source"); dangling dark targets fall back to base (needs a hint, not a silent no-op); keep `dark*` out of the CVD `simScheme` map to avoid combinatorial recompute.
+- **Phasing:** P0 guided flow, single theme · P1 light/dark + worst-of-both audit (mode-fragile pairs) · P2 handoff bundle + "derive dark from light" (OKLCH lightness inversion) + auto-adjust contrast (see *Unresolved* below).
+
+> [!question] Unresolved — auto-adjust values to preserve accessibility scores
+> **Idea (under exploration, not yet decided — still being thought through).** Make accessibility a *maintained invariant*, not a one-shot report: when a role changes (e.g. the user edits **bg**), any pair that drops below its target (say **bg/fg** or **bg/primary** falling out of **AAA**) auto-adjusts the *dependent* value's `ok_l` (and, if needed, `ok_c`) to climb back over the threshold — a live extension of the Phase-5 `enforceContrast` idea ([[Roadmap]] Phase 5) across the whole role graph, not just at generation time.
+>
+> **Open design questions (the "still thinking" part):**
+> - **Where it runs.** *(a) Solve-at-derive-time* — a pure, non-destructive pass inside `deriveScheme` (CD-12) nudges flagged roles to clear the threshold without touching source: keeps the DSL canonical and is reversible, but the rendered value then *diverges from the authored expression*. *(b) Rewrite-source* — emit the adjusted value back through the CD-15 rewrite layer: source stays truthful, but it mutates the user's relationships. Lean (a) for an MVP; (b) only on explicit "bake in".
+> - **Which side yields.** If editing **bg** breaks **bg/fg**, do we move **fg**, or was **bg** the intent? Needs a notion of *pinned* (the value just edited / explicitly locked) vs *free-to-adjust* roles — likely a per-role lock toggle, with the just-edited value pinned by default.
+> - **Formula conflict.** If **fg** is *defined as* a formula of **bg** (`fg = bg.oklch.…`), auto-nudging **fg** fights its own definition. Options: adjust a parameter *inside* the formula, treat formula-bound roles as locked and move a different free role, or surface "can't satisfy — here's why".
+> - **Constraint solving.** Many roles depend on **bg**; fixing one pair can break another → a small constraint system over the role graph, with real risks of conflict, no-solution, and oscillation. Must be **deterministic and idempotent** (re-running converges), prefer the minimal `ok_l` change, and respect gamut.
+> - **Scope of the score.** Which target (AA vs AAA, body vs large text), which pairs, and **per-mode** — light *and* dark (worst-of-both, tying into the mode-fragile-pair audit above).
+> - **UX.** Automatic vs *suggested* (one-click "fix" from an audit row — the existing P2 seed). Automatic risks surprising the user; suggested keeps them in control. Likely default: suggest, opt-in to auto.
+>
+> Mechanism depends on CD-12 (derive-time solve) and/or CD-15 (source rewrite); to be tracked in [[Open Questions]] once shaped.
+
+**Related:** [[#CD-12 — Shared spine: pure scheme derivation + a validated source-rewrite layer]], [[#CD-14 — Scheme diff & versioning]], [[Roadmap]], [[Feature Specs]], [[Product Architecture]].
+
+---
+
+## CD-14 — Scheme diff & versioning
+**Status:** Proposed · **Date:** 2026-06-29
+
+**Context.** Users want to see what a brand-color change does across the whole derived system, checkpoint versions, and share/embed them (see [[Roadmap]]). A scheme is fully determined by `{source, settings}` — exactly the blob `state/docs.svelte.ts` `snapshotKey()` already serialises for dirty-tracking.
+
+**Decision.** A "version" is a frozen `{source, settings}` snapshot; **nothing derived is stored**. Diffing = re-derive both snapshots via `deriveScheme()` (CD-12) and compare. Store versions as an additive `versions?: SchemeVersion[]` on the existing `DocEnvelope` (no new storage key; rides library export/import; capped, pinned exempt). Add a **History** tab + a **Snapshot** button in `DocControls`; the diff renders Palette (ΔE, L/C/H), Roles (re-target + dangling), and the headline **Contrast** section (audit pairs that crossed a WCAG band). Share via a new `persistence/url-hash.ts` `~2` payload that **captures settings**.
+
+**Rationale.** Snapshots-not-derived preserves the single-source invariant and makes the accessibility delta ("Muted text 4.6 → 3.9, AA → fail") the headline payoff. Reusing `DocEnvelope` + `migrate()`'s additive tolerance avoids a schema bump. The `~2` link incidentally **closes the known gap** where `~0`/`~1` share links drop the creator's roles/opacities.
+
+**Consequences.**
+- New: `scheme/diff.ts` (`diffSchemes`), `components/History.svelte`, `export/diff-card.ts` (self-contained SVG, cloned from `export/swatch.ts`). Depends entirely on CD-12's `derive.ts`.
+- Shape: `SchemeVersion { id, label, note?, source, settings, createdAt, pinned?, parentId? }`. **Restore** writes back through `app.source` (auto-snapshots first → non-destructive).
+- Once CD-13 lands light/dark, the diff must compare **both modes**; because `dark*` lives in `RenderedScheme`, it inherits this.
+- **Risks:** derivation drift (mitigated by CD-12); localStorage quota (cap + pinned + deflate-on-pressure, reusing url-hash's `CompressionStream`); audit pairs are label-keyed (treat missing/added labels as add/remove rows, never crash).
+- **Phasing:** P0 `derive.ts` extraction + `diff.ts` + minimal History (contrast-regression list) · P1 full Palette/Roles diff + `~2` share + embeddable diff card · P2 version-vs-version, live diff-as-you-type, brand-knob scrubber, scriptable `preview.diff()`.
+
+**Related:** [[#CD-12 — Shared spine: pure scheme derivation + a validated source-rewrite layer]], [[#CD-13 — Design-system mode as a first-class flow]], [[#CD-15 — Visual ↔ code round-trip]], [[Roadmap]], [[Product Architecture]].
+
+---
+
+## CD-15 — Visual ↔ code round-trip
+**Status:** Proposed · **Date:** 2026-06-29
+
+**Context.** Chromatics is one-directional today (code → visuals). A two-way edit was flagged as a headline gap in [[#CD-11 — Unified product: merge master display + test-dsl DSL]]. The round-trip is ~90% wired already: the evaluator keeps each variable's acorn node (character offsets) and `desugarBlocks` is length-preserving, so `node.right.start/.end` map 1:1 onto `app.source`.
+
+**Decision.** Visual surfaces (color picker, role dropdown, token slider, draggable harmony node) rewrite the **exact source span they came from** via the validated rewrite layer (CD-12) — never append blindly, never mutate the Scheme. A conservative gate (`dsl/source-span.ts`) emits a span **only** when the RHS is a constructor call with all-literal args; derived colors (`brand.oklch.rotateHue(30)`) expose their numeric arg instead of being flattened. Every patch is **re-parsed before commit**.
+
+> [!decision] Supersedes the old "break-link-and-warn" sketch
+> [[#CD-11 — Unified product: merge master display + test-dsl DSL]] / [[Feature Specs]] proposed starting with *"Option A: break the link and warn"* on a visual edit. This decision replaces that with **span-preserving in-place rewrite** — relationships survive, because we edit the literal/arg rather than flattening the expression.
+
+**Rationale.** Splicing the authored span keeps the relationship graph intact and the DSL the single source of truth ([[#CD-02 — OKLCH as the canonical color workspace]]). The infrastructure already exists (acorn offsets on `Variable.node`, length-preserving desugar, `swatch-deco` def-site widgets), so the work is a thin tool + one safe splice primitive — **not** new algorithm research.
+
+**Consequences.**
+- New: `dsl/source-span.ts` (the safety gate), `dsl/patch.ts` (splices), `dsl/edit-intent.ts` (minimal patch by value-shape), `components/tools/Edit.svelte`, `state/selection.svelte.ts` (cursor↔entry). `SchemeEntry` gains `span?` + a `valueShape: 'literal' | 'ctor' | 'derived' | 'other'`.
+- No new DSL syntax, no new persisted keys — edits flow into `app.source` and ride existing autosave / url-hash / library.
+- P2: the UI-only `app.roles` overrides become a staging buffer that **commits into the `roles {}` block** — finally landing roles in the DSL instead of parallel UI state.
+- **Risks:** gate conservatism is the whole safety story (a span escaping for a non-literal expression would destroy a relationship); offset drift (resolve every patch against the live editor doc at commit, never a cached offset); block-desugar interplay (re-find blocks on the original source via `enclosingBlock`); coalesce drag frames into one undo group on pointer-up.
+- **Phasing:** P0 literal-only in-place hex/ctor edits (derived read-only) · P1 ctor channel args + `rotateHue(n)` arg without flattening, CodeMirror transaction for native undo, swatch-click picker, draggable harmony node · P2 block-aware role/token upserts, flatten/lift actions, mobile parity.
+
+**Related:** [[#CD-11 — Unified product: merge master display + test-dsl DSL]], [[#CD-12 — Shared spine: pure scheme derivation + a validated source-rewrite layer]], [[#CD-13 — Design-system mode as a first-class flow]], [[Feature Specs]], [[DSL Spec]].
 
 ---
 

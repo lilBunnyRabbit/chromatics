@@ -1,8 +1,9 @@
 <script lang="ts">
 	/**
 	 * Five-slot bottom navigation. Four primary analysis destinations plus a
-	 * "More" slot that opens the overflow sheet (Matrix / 3D Explore / Export +
+	 * "More" slot that opens the overflow sheet (Export / Matrix / Validate +
 	 * app actions). "More" reads active whenever the live tab is an overflow tab.
+	 * The four mirror PRIMARY_TABS[0..3] in ui.svelte.ts.
 	 */
 	import type { Tab } from '$lib/state/ui.svelte';
 
@@ -22,7 +23,7 @@
 		{ id: 'inspector', label: 'Palette' },
 		{ id: 'studio', label: 'Studio' },
 		{ id: 'preview', label: 'Preview' },
-		{ id: 'validate', label: 'Validate' }
+		{ id: 'styleguide', label: 'Styleguide' }
 	];
 </script>
 
@@ -104,9 +105,13 @@
 						stroke-width="2"
 						stroke-linecap="round"
 						stroke-linejoin="round"
-						><path
-							d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"
-						/><path d="m9 12 2 2 4-4" /></svg
+						><rect x="3" y="3" width="18" height="7" rx="1.5" /><rect
+							x="3"
+							y="14"
+							width="10"
+							height="7"
+							rx="1.5"
+						/><circle cx="18" cy="17.5" r="2.5" /></svg
 					>
 				{/if}
 			</span>

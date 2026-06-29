@@ -46,19 +46,21 @@ and reduce on-screen noise.
       the bare members autocomplete (and highlight as methods); the block header reads as a
       namespace. Inside `roles {}`, role keys complete on the left, your named colors on the
       right. Driven by the one manifest (`block-scope.ts`), so it never drifts.
+- [x] **Onboarding to the thesis.** The welcome hero loads the relationship example and
+      lands on the Inspector; editing a color now **flashes the swatches that changed**, so
+      "edit `brand`, watch it cascade" is something you see, not just read.
+- [x] **Token export — representation control.** Export colors **as defined** (each in its
+      authoring model when that's valid CSS, with a selectable fallback for non-CSS models)
+      or normalised to a **single model**. Applies to CSS vars / DTCG / Tailwind / Markdown;
+      long floats are rounded for clean output.
+- [x] **Trim the default surface.** The studio leads with the relationship-first tabs
+      (Inspector · Studio · Preview · Styleguide · Export); Matrix and Validate sit behind a
+      compact "More" overflow menu. The 3-D viewer is no longer a tab — it lives on the
+      `/models` encyclopedia, pinned to the model you're viewing.
 
-## Next — make the first 10 seconds land, cut the friction
-
-- [ ] **Onboarding to the thesis.** Welcome modal + first load lead with the 5-line
-      relationship example; "edit `brand`, watch it cascade" as the hero interaction
-      (highlight what changed on edit).
-- [ ] **Non-color tokens as relationships.** Spacing / radius / type scales derived from
-      one base, the same way colors are — the design-system maintainer's daily surface.
-      (Compare notes with the designer who's built this from the design side.)
-- [ ] **Token export polish.** First-class DTCG, Tailwind theme, and CSS-vars output for
-      a derived scheme — the format the dev/design-system audience actually consumes.
-- [ ] **Trim the default surface.** Progressive disclosure of advanced tabs/features so a
-      newcomer sees signal (relationships) before the firehose.
+> Scope note: **non-color tokens (spacing / type / radius scales) are explicitly out of
+> scope.** Chromatics is a color tool; `tokens {}` stays for authoring values, but deriving
+> non-color scales as relationships is not a direction we'll pursue.
 
 ## Later — depth that matches the niche
 
@@ -86,8 +88,8 @@ values, a data-driven model registry, culori behind a single seam. The plan:
 ## Open questions
 
 - **Does relationship-authoring help anyone but the author?** Early signal: yes, for devs
-  and design-system tokens. Validate by shipping token-relationships and watching whether
-  that crowd adopts it.
+  and design-system color tokens. Validate by watching whether that crowd adopts the
+  color-relationship workflow.
 - **DSL vs. GUI.** Stay code-first (it was the only thing that actually modeled
   "use part of one color in another"), but a thin visual layer that emits DSL could widen
   the door for designers without forking into hidden GUI state.

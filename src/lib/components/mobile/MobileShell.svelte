@@ -11,21 +11,22 @@
 	import Styleguide from '$lib/components/Styleguide.svelte';
 	import Matrix from '$lib/components/Matrix.svelte';
 	import Validate from '$lib/components/Validate.svelte';
-	import ModelViewer from '$lib/components/ModelViewer.svelte';
 	import ExportPanel from '$lib/components/ExportPanel.svelte';
 	import Docs from '$lib/components/Docs.svelte';
 	import BottomTabBar from './BottomTabBar.svelte';
 	import MoreSheet from './MoreSheet.svelte';
 	import MobileEditorSheet from './MobileEditorSheet.svelte';
 	import { app } from '$lib/state/app.svelte';
-	import { ui, type Tab } from '$lib/state/ui.svelte';
+	import { ui, type Tab, PRIMARY_TABS, ADVANCED_TABS } from '$lib/state/ui.svelte';
 	import { welcome } from '$lib/state/welcome.svelte';
 
 	let moreOpen = $state(false);
 	let editorOpen = $state(false);
 	let showDocs = $state(false);
 
-	const OVERFLOW: Tab[] = ['styleguide', 'matrix', 'explore', 'export'];
+	// The bottom bar shows the first four primary tabs; everything else (the
+	// remaining primary + the advanced tabs) lives in the More sheet.
+	const OVERFLOW: Tab[] = [...PRIMARY_TABS.slice(4), ...ADVANCED_TABS];
 	const moreActive = $derived(moreOpen || OVERFLOW.includes(ui.tab));
 	const errorCount = $derived(app.result.errors.length);
 
@@ -92,8 +93,6 @@
 			<Validate />
 		{:else if ui.tab === 'matrix'}
 			<Matrix />
-		{:else if ui.tab === 'explore'}
-			<ModelViewer seed={app.scheme.entries[0]?.color.hex ?? '#3aa0ff'} />
 		{:else if ui.tab === 'export'}
 			<ExportPanel />
 		{/if}

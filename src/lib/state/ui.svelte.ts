@@ -9,8 +9,19 @@ export type Tab =
 	| 'validate'
 	| 'preview'
 	| 'styleguide'
-	| 'explore'
 	| 'export';
+
+/**
+ * Progressive disclosure: the relationship-first tabs a newcomer should see
+ * first, vs. the deeper analysis tabs kept behind a "More" affordance. Shared by
+ * both shells (desktop disclosure + mobile More sheet) so the split never drifts.
+ * (The 3-D model viewer is NOT a tab — it lives on the /models encyclopedia.)
+ */
+export const PRIMARY_TABS: Tab[] = ['inspector', 'studio', 'preview', 'styleguide', 'export'];
+export const ADVANCED_TABS: Tab[] = ['matrix', 'validate'];
+export const ALL_TABS: Tab[] = [...PRIMARY_TABS, ...ADVANCED_TABS];
+export const isAdvancedTab = (t: Tab): boolean => ADVANCED_TABS.includes(t);
+export const isTab = (v: unknown): v is Tab => ALL_TABS.includes(v as Tab);
 
 export class UiStore {
 	theme = $state<Theme>('light');

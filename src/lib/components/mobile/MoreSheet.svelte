@@ -1,7 +1,7 @@
 <script lang="ts">
 	/**
 	 * Overflow + app-actions sheet for the mobile shell. Holds the analysis views
-	 * that don't fit the 5-slot bottom bar (Matrix / 3D Explore / Export) and the
+	 * that don't fit the 5-slot bottom bar (Export / Matrix / Validate) and the
 	 * chrome that lived in the desktop top bar (documents via DocControls, share,
 	 * theme, DSL reference). Self-contained: owns its own action state.
 	 */
@@ -21,10 +21,9 @@
 	let shareLabel = $state('Share');
 
 	const VIEWS: { id: Tab; label: string; desc: string }[] = [
-		{ id: 'styleguide', label: 'Styleguide', desc: 'Tokens · components' },
+		{ id: 'export', label: 'Export', desc: 'CSS · tokens · swatch' },
 		{ id: 'matrix', label: 'Matrix', desc: 'Contrast grid' },
-		{ id: 'explore', label: '3D Explore', desc: 'Gamut viewer' },
-		{ id: 'export', label: 'Export', desc: 'CSS · tokens · swatch' }
+		{ id: 'validate', label: 'Validate', desc: 'Accessibility checks' }
 	];
 
 	function pickView(id: Tab) {
@@ -45,23 +44,7 @@
 		{#each VIEWS as v (v.id)}
 			<button class="more-row" class:active={ui.tab === v.id} onclick={() => pickView(v.id)}>
 				<span class="more-ico">
-					{#if v.id === 'styleguide'}
-						<svg
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							><rect x="3" y="3" width="18" height="7" rx="1.5" /><rect
-								x="3"
-								y="14"
-								width="10"
-								height="7"
-								rx="1.5"
-							/><circle cx="18" cy="17.5" r="2.5" /></svg
-						>
-					{:else if v.id === 'matrix'}
+					{#if v.id === 'matrix'}
 						<svg
 							viewBox="0 0 24 24"
 							fill="none"
@@ -73,7 +56,7 @@
 								d="M3 9h18M3 15h18M9 3v18M15 3v18"
 							/></svg
 						>
-					{:else if v.id === 'explore'}
+					{:else if v.id === 'validate'}
 						<svg
 							viewBox="0 0 24 24"
 							fill="none"
@@ -82,8 +65,8 @@
 							stroke-linecap="round"
 							stroke-linejoin="round"
 							><path
-								d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"
-							/><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" /></svg
+								d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"
+							/><path d="m9 12 2 2 4-4" /></svg
 						>
 					{:else}
 						<svg
@@ -249,7 +232,7 @@
 			</span>
 			<span class="more-text">
 				<span class="more-label">Color models &amp; systems</span>
-				<span class="more-desc">Interactive encyclopedia · 100 spaces</span>
+				<span class="more-desc">Encyclopedia · 3D viewer · 100 spaces</span>
 			</span>
 			<svg
 				class="more-chev"
