@@ -32,7 +32,7 @@ fg      = OKLCH(0.96, 0.012, brand.ok_h)
 muted   = fg.darken(0.32)
 
 primary = brand.oklch.gamutMap()
-accent  = brand.rotate(150)
+accent  = brand.oklch.rotate(150)
 
 success = HSL(155, 0.5, 0.55)
 error   = hex("#e74c3c")
