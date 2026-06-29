@@ -1,5 +1,6 @@
-export const name = 'Brand Dark';
-
+// Test fixture: the former "Brand Dark" template, kept as the parity oracle for
+// the role-mapping and golden-hex acceptance tests after the brand templates
+// were removed from the editor examples.
 export const source = `// ── Brand Dark — dark teal, with the background chroma study ──
 // Each background step is rendered in 3 chroma modes:
 //   sat  (+chroma)  · flat (no chroma) · desat (-chroma)

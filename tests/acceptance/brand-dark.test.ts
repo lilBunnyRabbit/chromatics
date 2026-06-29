@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test';
 import { evaluate } from '../../src/lib/dsl/evaluator';
-import { source } from '../../src/routes/examples/brand-dark';
+import { source } from '../fixtures/brand-dark';
 import { isColorValue, ColorValue } from '../../src/lib/models';
 
 /**

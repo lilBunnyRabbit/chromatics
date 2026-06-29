@@ -10,7 +10,7 @@ import {
 	NONE_ROLE,
 	DEFAULT_OPACITIES
 } from '../src/lib/scheme/roles';
-import { source as brandDark } from '../src/routes/examples/brand-dark';
+import { source as brandDark } from './fixtures/brand-dark';
 import { wcagLevels } from '../src/lib/analysis/wcag';
 
 function scheme(src: string) {

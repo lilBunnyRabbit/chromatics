@@ -94,7 +94,7 @@ The hybrid "A+C" design. Immutable, OKLCH-stored color values + a data-driven mo
 | `/models` | Interactive encyclopedia of all color models & systems   |
 | `/mixer`  | Cross-model mixer — one color, every model, live sliders |
 
-Examples live in `src/routes/examples/` (Simple, Conversions, Showcase, Previews, Design System, Brand Dark/Light, Dynamic Theme); `examples/index.ts` orders them (first = default on load).
+Examples live in `src/routes/examples/` (Overview, Simple, Conversions, Showcase, Previews, Design System, Dynamic Theme); `examples/index.ts` orders them (first = default on load). The old Brand Dark/Light templates were removed; the Brand Dark source survives as `tests/fixtures/brand-dark.ts`, the parity oracle for the golden-hex + role-mapping tests.
 
 ## The research vault — `docs/chromatics/`
 
