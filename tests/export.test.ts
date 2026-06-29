@@ -80,6 +80,26 @@ describe('color representation', () => {
 		expect(serializeColor(brand, fmt)).toBe('#6c5ce7');
 	});
 
+	test('derived colors track their own model (not the fallback)', () => {
+		const SRC2 = `brand = hex("#6c5ce7")
+primary = brand.oklch.gamutMap()
+accent = primary.rotate(-150)
+copy = brand`;
+		const s = schemeFromEvalResult(evaluate(SRC2), SRC2);
+		// method-chain derivations report the model they ended up in
+		expect(s.byName.get('primary')!.model).toBe('oklch');
+		expect(s.byName.get('accent')!.model).toBe('oklch');
+		// an sRGB alias reports its friendliest literal form
+		expect(s.byName.get('copy')!.model).toBe('hex');
+		const fmt: ColorFormat = { mode: 'as-defined', model: 'hex' };
+		// as-defined now keeps the derived oklch colors as oklch(), not hex fallback
+		expect(serializeColor(s.byName.get('primary')!, fmt).startsWith('oklch(')).toBe(true);
+		expect(serializeColor(s.byName.get('accent')!, fmt).startsWith('oklch(')).toBe(true);
+		// hex literal + sRGB alias still serialize as hex
+		expect(serializeColor(s.byName.get('brand')!, fmt)).toBe('#6c5ce7');
+		expect(serializeColor(s.byName.get('copy')!, fmt)).toBe('#6c5ce7');
+	});
+
 	test('single model normalises every color to one model', () => {
 		const css = toCssVars(scheme, { mode: 'single', model: 'hex' });
 		// every value is a hex literal

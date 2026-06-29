@@ -20,16 +20,36 @@ const CTOR_MODEL: Record<string, AuthoringModel> = {
 	hex: 'hex'
 };
 
+// A color's own culori mode → authoring model, used for DERIVED colors (method
+// chains, aliases) that no direct constructor names. The engine carries a value's
+// model through every op ("HSL stays HSL", oklch ops stay oklch), so a derived
+// color reports the space it actually ended up in. sRGB maps to `hex` — its
+// friendliest literal form (an explicit `RGB(…)` still says `srgb` via CTOR_MODEL).
+const MODE_MODEL: Record<string, AuthoringModel> = {
+	oklch: 'oklch',
+	oklab: 'oklab',
+	hsl: 'hsl',
+	hsv: 'hsv',
+	hwb: 'hwb',
+	lab: 'lab',
+	lch: 'lch',
+	rgb: 'hex',
+	p3: 'p3'
+};
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/** Best-effort: a direct constructor call names the authoring model; else unknown. */
-function inferModel(node: unknown): AuthoringModel {
+/**
+ * The authoring model: a direct constructor call names it outright; otherwise the
+ * color is derived, so we report the model the evaluated value ended up in.
+ */
+function inferModel(node: unknown, color: ColorValue): AuthoringModel {
 	const rhs = (node as any)?.right;
 	if (rhs?.type === 'CallExpression' && rhs.callee?.type === 'Identifier') {
 		const m = CTOR_MODEL[rhs.callee.name as string];
 		if (m) return m;
 	}
-	return 'unknown';
+	return MODE_MODEL[color.model] ?? 'unknown';
 }
 
 /** Source slice of the RHS expression, using acorn's character offsets. */
@@ -66,7 +86,7 @@ export function schemeFromEvalResult(result: EvalResult, source: string): Scheme
 			entries.push({
 				name: v.name,
 				color: v.value as ColorValue,
-				model: inferModel(v.node),
+				model: inferModel(v.node, v.value as ColorValue),
 				deps: v.deps,
 				line: v.line,
 				description: describe(source, v.node),

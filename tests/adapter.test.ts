@@ -25,11 +25,12 @@ describe('schemeFromEvalResult', () => {
 		expect(s.entries.map((e) => e.index)).toEqual([0, 1, 2, 3]);
 	});
 
-	test('infers the authoring model from a constructor call', () => {
+	test('infers the authoring model — constructor names it, derived tracks its own', () => {
 		expect(s.byName.get('bg')?.model).toBe('oklch');
 		expect(s.byName.get('brand')?.model).toBe('hex');
 		expect(s.byName.get('success')?.model).toBe('hsl');
-		expect(s.byName.get('fg')?.model).toBe('unknown'); // method chain
+		// method chain (bg.oklch.lighten) is derived — it reports the model it ended up in
+		expect(s.byName.get('fg')?.model).toBe('oklch');
 	});
 
 	test('description = source slice of the RHS', () => {
