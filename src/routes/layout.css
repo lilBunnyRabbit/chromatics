@@ -1,0 +1,272 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   Chromatics design system — semantic tokens, light + dark.
+   Toggle by setting data-theme="dark" on <html>.
+   ============================================================ */
+:root {
+	--bg: #f7f8fa;
+	--surface: #ffffff;
+	--surface-2: #f1f3f6;
+	--surface-3: #e8ebef;
+	--border: #e6e8ec;
+	--border-strong: #d4d8de;
+	--text: #15181d;
+	--text-muted: #5c636e;
+	--text-faint: #9499a3;
+	--accent: #5b5bd6;
+	--accent-hover: #4f4fcf;
+	--accent-fg: #ffffff;
+	--accent-soft: #ecedfb;
+	--danger: #e5484d;
+	--ok: #30a46c;
+	--warn: #d98324;
+	--shadow-sm: 0 1px 2px rgba(20, 22, 28, 0.05);
+	--shadow: 0 2px 6px rgba(20, 22, 28, 0.06), 0 8px 28px rgba(20, 22, 28, 0.08);
+	--radius: 12px;
+	--radius-sm: 8px;
+	--radius-xs: 6px;
+
+	--cm-text: #2b2f36;
+	--cm-caret: #5b5bd6;
+	--cm-gutter: #b8bdc7;
+	--cm-gutter-active: #6b7280;
+	--cm-active-line: rgba(91, 91, 214, 0.05);
+	--cm-selection: rgba(91, 91, 214, 0.16);
+	--cm-selection-focus: rgba(91, 91, 214, 0.24);
+	--cm-bracket: rgba(91, 91, 214, 0.18);
+	--syn-var: #2b2f36;
+	--syn-fn: #7c3aed;
+	--syn-type: #b45309;
+	--syn-prop: #0e7490;
+	--syn-method: #047857;
+	--syn-view: #0e9488;
+	--syn-num: #c2410c;
+	--syn-str: #15803d;
+	--syn-op: #6b7280;
+	--syn-punct: #9aa0aa;
+	--syn-comment: #9aa0aa;
+
+	color-scheme: light;
+}
+
+html[data-theme='dark'] {
+	--bg: #0f1115;
+	--surface: #171a20;
+	--surface-2: #1e222a;
+	--surface-3: #262b34;
+	--border: #272c35;
+	--border-strong: #363c47;
+	--text: #e7e9ee;
+	--text-muted: #9aa1ad;
+	--text-faint: #646b77;
+	--accent: #7c7cf2;
+	--accent-hover: #8d8df5;
+	--accent-fg: #0f1115;
+	--accent-soft: rgba(124, 124, 242, 0.14);
+	--danger: #ff6369;
+	--ok: #3dd68c;
+	--warn: #f5b544;
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+	--shadow: 0 2px 8px rgba(0, 0, 0, 0.35), 0 12px 36px rgba(0, 0, 0, 0.45);
+
+	--cm-text: #c8ccd4;
+	--cm-caret: #7c7cf2;
+	--cm-gutter: #3a414c;
+	--cm-gutter-active: #8a929e;
+	--cm-active-line: rgba(255, 255, 255, 0.03);
+	--cm-selection: rgba(124, 124, 242, 0.22);
+	--cm-selection-focus: rgba(124, 124, 242, 0.32);
+	--cm-bracket: rgba(255, 255, 255, 0.12);
+	--syn-var: #c8ccd4;
+	--syn-fn: #b4a0e5;
+	--syn-type: #e5c07b;
+	--syn-prop: #7ec8e3;
+	--syn-method: #61c9a8;
+	--syn-view: #4ec9b0;
+	--syn-num: #d19a66;
+	--syn-str: #98c379;
+	--syn-op: #8888a0;
+	--syn-punct: #666680;
+	--syn-comment: #5a6270;
+
+	color-scheme: dark;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	height: 100%;
+}
+
+body {
+	background: var(--bg);
+	color: var(--text);
+	font-family:
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		sans-serif;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+.mono {
+	font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+}
+
+/* ---- reusable controls ---- */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 11px;
+	border-radius: var(--radius-xs);
+	border: 1px solid var(--border);
+	background: var(--surface);
+	color: var(--text);
+	font-size: 12.5px;
+	font-weight: 500;
+	cursor: pointer;
+	transition:
+		background 0.12s,
+		border-color 0.12s,
+		color 0.12s;
+	white-space: nowrap;
+}
+.btn:hover {
+	border-color: var(--border-strong);
+	background: var(--surface-2);
+}
+.btn:disabled {
+	opacity: 0.45;
+	cursor: default;
+}
+.btn-accent {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--accent-fg);
+}
+.btn-accent:hover {
+	background: var(--accent-hover);
+	border-color: var(--accent-hover);
+}
+.btn-ghost {
+	border-color: transparent;
+	background: transparent;
+	color: var(--text-muted);
+}
+.btn-ghost:hover {
+	background: var(--surface-2);
+	color: var(--text);
+	border-color: transparent;
+}
+.icon-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: var(--radius-xs);
+	border: 1px solid transparent;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition:
+		background 0.12s,
+		color 0.12s;
+}
+.icon-btn:hover {
+	background: var(--surface-2);
+	color: var(--text);
+}
+
+.select {
+	appearance: none;
+	padding: 5px 24px 5px 10px;
+	border-radius: var(--radius-xs);
+	border: 1px solid var(--border);
+	background: var(--surface)
+		url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239499a3' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>")
+		no-repeat right 7px center;
+	color: var(--text);
+	font-size: 12.5px;
+	cursor: pointer;
+}
+.select:hover {
+	border-color: var(--border-strong);
+}
+
+/* segmented control (tabs) */
+.seg {
+	display: inline-flex;
+	gap: 2px;
+	padding: 3px;
+	background: var(--surface-2);
+	border-radius: var(--radius-sm);
+}
+.seg-item {
+	padding: 5px 13px;
+	border: none;
+	border-radius: var(--radius-xs);
+	background: transparent;
+	color: var(--text-muted);
+	font-size: 12.5px;
+	font-weight: 500;
+	cursor: pointer;
+	transition:
+		background 0.12s,
+		color 0.12s,
+		box-shadow 0.12s;
+}
+.seg-item:hover {
+	color: var(--text);
+}
+.seg-item.active {
+	background: var(--surface);
+	color: var(--text);
+	box-shadow: var(--shadow-sm);
+}
+
+.card {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow-sm);
+}
+
+.chip {
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 7px;
+	border-radius: 99px;
+	background: var(--surface-2);
+	color: var(--text-muted);
+	font-size: 10.5px;
+	font-weight: 500;
+}
+
+/* thin scrollbars */
+.scroll::-webkit-scrollbar {
+	width: 9px;
+	height: 9px;
+}
+.scroll::-webkit-scrollbar-thumb {
+	background: var(--border-strong);
+	border-radius: 99px;
+	border: 2px solid var(--surface);
+	background-clip: padding-box;
+}
+.scroll::-webkit-scrollbar-thumb:hover {
+	background: var(--text-faint);
+	background-clip: padding-box;
+}
+.scroll::-webkit-scrollbar-track {
+	background: transparent;
+}

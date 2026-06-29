@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<defs>
+<radialGradient id="glow" cx="22%" cy="30%" r="60%"><stop offset="0%" stop-color="#7c7cf2" stop-opacity="0.18"/><stop offset="100%" stop-color="#7c7cf2" stop-opacity="0"/></radialGradient>
+<clipPath id="mclip"><rect x="140.0" y="140.0" width="220.0" height="220.0" rx="68.8" ry="68.8"/></clipPath>
+</defs>
+<rect width="1200" height="630" fill="#0f1115"/>
+<rect width="1200" height="630" fill="url(#glow)"/>
+<rect x="20" y="20" width="1160" height="590" rx="28" fill="none" stroke="#272c35" stroke-width="2"/>
+<g clip-path="url(#mclip)">
+<path d="M 250.0 250.0 L 248.3 85.0 L 260.4 85.3 Z" fill="#ff5f5d"/>
+<path d="M 250.0 250.0 L 256.9 85.1 L 269.0 86.1 Z" fill="#ff645c"/>
+<path d="M 250.0 250.0 L 265.5 85.7 L 277.5 87.3 Z" fill="#ff695b"/>
+<path d="M 250.0 250.0 L 274.1 86.8 L 286.0 89.0 Z" fill="#ff6e5b"/>
+<path d="M 250.0 250.0 L 282.6 88.3 L 294.4 91.1 Z" fill="#ff735a"/>
+<path d="M 250.0 250.0 L 291.0 90.2 L 302.6 93.6 Z" fill="#ff7859"/>
+<path d="M 250.0 250.0 L 299.3 92.6 L 310.7 96.6 Z" fill="#ff7d59"/>
+<path d="M 250.0 250.0 L 307.5 95.3 L 318.7 100.0 Z" fill="#ff8258"/>
+<path d="M 250.0 250.0 L 315.5 98.6 L 326.4 103.8 Z" fill="#ff8657"/>
+<path d="M 250.0 250.0 L 323.4 102.2 L 334.0 108.0 Z" fill="#ff8b57"/>
+<path d="M 250.0 250.0 L 331.0 106.2 L 341.3 112.6 Z" fill="#ff9056"/>
+<path d="M 250.0 250.0 L 338.4 110.7 L 348.4 117.5 Z" fill="#ff9555"/>
+<path d="M 250.0 250.0 L 345.6 115.5 L 355.2 122.9 Z" fill="#ff9a55"/>
+<path d="M 250.0 250.0 L 352.5 120.7 L 361.7 128.5 Z" fill="#ff9f54"/>
+<path d="M 250.0 250.0 L 359.1 126.2 L 367.9 134.6 Z" fill="#ffa453"/>
+<path d="M 250.0 250.0 L 365.4 132.1 L 373.8 140.9 Z" fill="#ffa953"/>
+<path d="M 250.0 250.0 L 371.5 138.3 L 379.3 147.5 Z" fill="#ffad52"/>
+<path d="M 250.0 250.0 L 377.1 144.8 L 384.5 154.4 Z" fill="#ffb251"/>
+<path d="M 250.0 250.0 L 382.5 151.6 L 389.3 161.6 Z" fill="#ffb751"/>
+<path d="M 250.0 250.0 L 387.4 158.7 L 393.8 169.0 Z" fill="#ffbc50"/>
+<path d="M 250.0 250.0 L 392.0 166.0 L 397.8 176.6 Z" fill="#ffc14f"/>
+<path d="M 250.0 250.0 L 396.2 173.6 L 401.4 184.5 Z" fill="#ffc64f"/>
+<path d="M 250.0 250.0 L 400.0 181.3 L 404.7 192.5 Z" fill="#ffcb4e"/>
+<path d="M 250.0 250.0 L 403.4 189.3 L 407.4 200.7 Z" fill="#ffd04d"/>
+<path d="M 250.0 250.0 L 406.4 197.4 L 409.8 209.0 Z" fill="#fbd34e"/>
+<path d="M 250.0 250.0 L 408.9 205.6 L 411.7 217.4 Z" fill="#f4d551"/>
+<path d="M 250.0 250.0 L 411.0 214.0 L 413.2 225.9 Z" fill="#ecd753"/>
+<path d="M 250.0 250.0 L 412.7 222.5 L 414.3 234.5 Z" fill="#e5d956"/>
+<path d="M 250.0 250.0 L 413.9 231.0 L 414.9 243.1 Z" fill="#deda58"/>
+<path d="M 250.0 250.0 L 414.7 239.6 L 415.0 251.7 Z" fill="#d6dc5b"/>
+<path d="M 250.0 250.0 L 415.0 248.3 L 414.7 260.4 Z" fill="#cfde5d"/>
+<path d="M 250.0 250.0 L 414.9 256.9 L 413.9 269.0 Z" fill="#c7e05f"/>
+<path d="M 250.0 250.0 L 414.3 265.5 L 412.7 277.5 Z" fill="#c0e262"/>
+<path d="M 250.0 250.0 L 413.2 274.1 L 411.0 286.0 Z" fill="#b9e464"/>
+<path d="M 250.0 250.0 L 411.7 282.6 L 408.9 294.4 Z" fill="#b1e667"/>
+<path d="M 250.0 250.0 L 409.8 291.0 L 406.4 302.6 Z" fill="#aae869"/>
+<path d="M 250.0 250.0 L 407.4 299.3 L 403.4 310.7 Z" fill="#a2e96c"/>
+<path d="M 250.0 250.0 L 404.7 307.5 L 400.0 318.7 Z" fill="#9beb6e"/>
+<path d="M 250.0 250.0 L 401.4 315.5 L 396.2 326.4 Z" fill="#93ed71"/>
+<path d="M 250.0 250.0 L 397.8 323.4 L 392.0 334.0 Z" fill="#8cef73"/>
+<path d="M 250.0 250.0 L 393.8 331.0 L 387.4 341.3 Z" fill="#85f176"/>
+<path d="M 250.0 250.0 L 389.3 338.4 L 382.5 348.4 Z" fill="#7df378"/>
+<path d="M 250.0 250.0 L 384.5 345.6 L 377.1 355.2 Z" fill="#76f57a"/>
+<path d="M 250.0 250.0 L 379.3 352.5 L 371.5 361.7 Z" fill="#6ef77d"/>
+<path d="M 250.0 250.0 L 373.8 359.1 L 365.4 367.9 Z" fill="#67f87f"/>
+<path d="M 250.0 250.0 L 367.9 365.4 L 359.1 373.8 Z" fill="#60fa82"/>
+<path d="M 250.0 250.0 L 361.7 371.5 L 352.5 379.3 Z" fill="#58fc84"/>
+<path d="M 250.0 250.0 L 355.2 377.1 L 345.6 384.5 Z" fill="#51fe87"/>
+<path d="M 250.0 250.0 L 348.4 382.5 L 338.4 389.3 Z" fill="#4dfe8a"/>
+<path d="M 250.0 250.0 L 341.3 387.4 L 331.0 393.8 Z" fill="#4dfb8f"/>
+<path d="M 250.0 250.0 L 334.0 392.0 L 323.4 397.8 Z" fill="#4df894"/>
+<path d="M 250.0 250.0 L 326.4 396.2 L 315.5 401.4 Z" fill="#4df599"/>
+<path d="M 250.0 250.0 L 318.7 400.0 L 307.5 404.7 Z" fill="#4df29e"/>
+<path d="M 250.0 250.0 L 310.7 403.4 L 299.3 407.4 Z" fill="#4defa3"/>
+<path d="M 250.0 250.0 L 302.6 406.4 L 291.0 409.8 Z" fill="#4deca8"/>
+<path d="M 250.0 250.0 L 294.4 408.9 L 282.6 411.7 Z" fill="#4de9ad"/>
+<path d="M 250.0 250.0 L 286.0 411.0 L 274.1 413.2 Z" fill="#4de6b2"/>
+<path d="M 250.0 250.0 L 277.5 412.7 L 265.5 414.3 Z" fill="#4de3b7"/>
+<path d="M 250.0 250.0 L 269.0 413.9 L 256.9 414.9 Z" fill="#4de0bc"/>
+<path d="M 250.0 250.0 L 260.4 414.7 L 248.3 415.0 Z" fill="#4dddc1"/>
+<path d="M 250.0 250.0 L 251.7 415.0 L 239.6 414.7 Z" fill="#4ddac6"/>
+<path d="M 250.0 250.0 L 243.1 414.9 L 231.0 413.9 Z" fill="#4dd7cb"/>
+<path d="M 250.0 250.0 L 234.5 414.3 L 222.5 412.7 Z" fill="#4dd4d0"/>
+<path d="M 250.0 250.0 L 225.9 413.2 L 214.0 411.0 Z" fill="#4dd1d5"/>
+<path d="M 250.0 250.0 L 217.4 411.7 L 205.6 408.9 Z" fill="#4dceda"/>
+<path d="M 250.0 250.0 L 209.0 409.8 L 197.4 406.4 Z" fill="#4dcbdf"/>
+<path d="M 250.0 250.0 L 200.7 407.4 L 189.3 403.4 Z" fill="#4dc8e4"/>
+<path d="M 250.0 250.0 L 192.5 404.7 L 181.3 400.0 Z" fill="#4dc5e9"/>
+<path d="M 250.0 250.0 L 184.5 401.4 L 173.6 396.2 Z" fill="#4dc2ee"/>
+<path d="M 250.0 250.0 L 176.6 397.8 L 166.0 392.0 Z" fill="#4dbff3"/>
+<path d="M 250.0 250.0 L 169.0 393.8 L 158.7 387.4 Z" fill="#4dbcf8"/>
+<path d="M 250.0 250.0 L 161.6 389.3 L 151.6 382.5 Z" fill="#4db9fd"/>
+<path d="M 250.0 250.0 L 154.4 384.5 L 144.8 377.1 Z" fill="#4fb6ff"/>
+<path d="M 250.0 250.0 L 147.5 379.3 L 138.3 371.5 Z" fill="#53b1ff"/>
+<path d="M 250.0 250.0 L 140.9 373.8 L 132.1 365.4 Z" fill="#56adff"/>
+<path d="M 250.0 250.0 L 134.6 367.9 L 126.2 359.1 Z" fill="#5aa8ff"/>
+<path d="M 250.0 250.0 L 128.5 361.7 L 120.7 352.5 Z" fill="#5ea4ff"/>
+<path d="M 250.0 250.0 L 122.9 355.2 L 115.5 345.6 Z" fill="#619fff"/>
+<path d="M 250.0 250.0 L 117.5 348.4 L 110.7 338.4 Z" fill="#659bff"/>
+<path d="M 250.0 250.0 L 112.6 341.3 L 106.2 331.0 Z" fill="#6997ff"/>
+<path d="M 250.0 250.0 L 108.0 334.0 L 102.2 323.4 Z" fill="#6d92ff"/>
+<path d="M 250.0 250.0 L 103.8 326.4 L 98.6 315.5 Z" fill="#708eff"/>
+<path d="M 250.0 250.0 L 100.0 318.7 L 95.3 307.5 Z" fill="#7489ff"/>
+<path d="M 250.0 250.0 L 96.6 310.7 L 92.6 299.3 Z" fill="#7885ff"/>
+<path d="M 250.0 250.0 L 93.6 302.6 L 90.2 291.0 Z" fill="#7b80ff"/>
+<path d="M 250.0 250.0 L 91.1 294.4 L 88.3 282.6 Z" fill="#7f7cff"/>
+<path d="M 250.0 250.0 L 89.0 286.0 L 86.8 274.1 Z" fill="#8377ff"/>
+<path d="M 250.0 250.0 L 87.3 277.5 L 85.7 265.5 Z" fill="#8673ff"/>
+<path d="M 250.0 250.0 L 86.1 269.0 L 85.1 256.9 Z" fill="#8a6eff"/>
+<path d="M 250.0 250.0 L 85.3 260.4 L 85.0 248.3 Z" fill="#8e6aff"/>
+<path d="M 250.0 250.0 L 85.0 251.7 L 85.3 239.6 Z" fill="#9266ff"/>
+<path d="M 250.0 250.0 L 85.1 243.1 L 86.1 231.0 Z" fill="#9561ff"/>
+<path d="M 250.0 250.0 L 85.7 234.5 L 87.3 222.5 Z" fill="#995dff"/>
+<path d="M 250.0 250.0 L 86.8 225.9 L 89.0 214.0 Z" fill="#9d58ff"/>
+<path d="M 250.0 250.0 L 88.3 217.4 L 91.1 205.6 Z" fill="#a054ff"/>
+<path d="M 250.0 250.0 L 90.2 209.0 L 93.6 197.4 Z" fill="#a44fff"/>
+<path d="M 250.0 250.0 L 92.6 200.7 L 96.6 189.3 Z" fill="#a84dfc"/>
+<path d="M 250.0 250.0 L 95.3 192.5 L 100.0 181.3 Z" fill="#ac4ef5"/>
+<path d="M 250.0 250.0 L 98.6 184.5 L 103.8 173.6 Z" fill="#af4fee"/>
+<path d="M 250.0 250.0 L 102.2 176.6 L 108.0 166.0 Z" fill="#b34fe7"/>
+<path d="M 250.0 250.0 L 106.2 169.0 L 112.6 158.7 Z" fill="#b750e1"/>
+<path d="M 250.0 250.0 L 110.7 161.6 L 117.5 151.6 Z" fill="#ba51da"/>
+<path d="M 250.0 250.0 L 115.5 154.4 L 122.9 144.8 Z" fill="#be51d3"/>
+<path d="M 250.0 250.0 L 120.7 147.5 L 128.5 138.3 Z" fill="#c252cc"/>
+<path d="M 250.0 250.0 L 126.2 140.9 L 134.6 132.1 Z" fill="#c653c6"/>
+<path d="M 250.0 250.0 L 132.1 134.6 L 140.9 126.2 Z" fill="#c953bf"/>
+<path d="M 250.0 250.0 L 138.3 128.5 L 147.5 120.7 Z" fill="#cd54b8"/>
+<path d="M 250.0 250.0 L 144.8 122.9 L 154.4 115.5 Z" fill="#d155b1"/>
+<path d="M 250.0 250.0 L 151.6 117.5 L 161.6 110.7 Z" fill="#d455ab"/>
+<path d="M 250.0 250.0 L 158.7 112.6 L 169.0 106.2 Z" fill="#d856a4"/>
+<path d="M 250.0 250.0 L 166.0 108.0 L 176.6 102.2 Z" fill="#dc579d"/>
+<path d="M 250.0 250.0 L 173.6 103.8 L 184.5 98.6 Z" fill="#df5796"/>
+<path d="M 250.0 250.0 L 181.3 100.0 L 192.5 95.3 Z" fill="#e35890"/>
+<path d="M 250.0 250.0 L 189.3 96.6 L 200.7 92.6 Z" fill="#e75989"/>
+<path d="M 250.0 250.0 L 197.4 93.6 L 209.0 90.2 Z" fill="#eb5982"/>
+<path d="M 250.0 250.0 L 205.6 91.1 L 217.4 88.3 Z" fill="#ee5a7b"/>
+<path d="M 250.0 250.0 L 214.0 89.0 L 225.9 86.8 Z" fill="#f25b75"/>
+<path d="M 250.0 250.0 L 222.5 87.3 L 234.5 85.7 Z" fill="#f65b6e"/>
+<path d="M 250.0 250.0 L 231.0 86.1 L 243.1 85.1 Z" fill="#f95c67"/>
+<path d="M 250.0 250.0 L 239.6 85.3 L 251.7 85.0 Z" fill="#fd5d60"/>
+</g>
+<text x="400" y="232" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif" font-size="118" font-weight="700" fill="#f3f4f7" letter-spacing="-3">Chromatics</text>
+<text x="404" y="300" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif" font-size="37" font-weight="500" fill="#9aa1ad">A scriptable color language &amp; interactive studio.</text>
+<rect x="400" y="350" width="640" height="120" rx="16" fill="#171a20" stroke="#272c35" stroke-width="1.5"/>
+<text x="430" y="398" font-family="ui-monospace, 'SF Mono', 'Menlo', 'JetBrains Mono', monospace" font-size="27" fill="#9aa1ad">brand <tspan fill="#646b77">=</tspan> hex(<tspan fill="#6c5ce7" font-weight="700">"#6c5ce7"</tspan>)</text>
+<text x="430" y="440" font-family="ui-monospace, 'SF Mono', 'Menlo', 'JetBrains Mono', monospace" font-size="27" fill="#9aa1ad">primary <tspan fill="#646b77">=</tspan> brand.oklch<tspan fill="#646b77">.</tspan>gamutMap()</text>
+<text x="400" y="540" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="500" fill="#646b77">~100 color models  ·  WCAG &amp; APCA  ·  live preview  ·  OKLCH-native</text>
+</svg>

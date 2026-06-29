@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
+		<link rel="mask-icon" href="%sveltekit.assets%/favicon.svg" color="#7c7cf2" />
+		<link rel="apple-touch-icon" href="%sveltekit.assets%/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<!-- Primary meta (per-route <title> is set via <svelte:head>) -->
+		<meta
+			name="description"
+			content="Chromatics is a scriptable color language and interactive studio. Write a tiny program that derives a whole palette from one brand color, inspect any color across ~100 color models, check accessibility (WCAG + APCA), and preview it on real UI — all in the browser. OKLCH-native."
+		/>
+		<meta name="author" content="Andraž Mesarič-Sirec" />
+		<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)" />
+		<meta name="apple-mobile-web-app-title" content="Chromatics" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Chromatics" />
+		<meta property="og:title" content="Chromatics — color as code" />
+		<meta
+			property="og:description"
+			content="A scriptable color language and interactive studio. Derive whole palettes from one brand color, inspect ~100 color models, check accessibility, and preview on real UI — all in the browser."
+		/>
+		<meta property="og:url" content="https://lilbunnyrabbit.github.io/chromatics/" />
+		<meta property="og:image" content="https://lilbunnyrabbit.github.io/chromatics/og.png" />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta
+			property="og:image:alt"
+			content="Chromatics — a scriptable color language and interactive studio"
+		/>
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="Chromatics — color as code" />
+		<meta
+			name="twitter:description"
+			content="A scriptable color language and interactive studio. Derive whole palettes from one brand color, inspect ~100 color models, check accessibility, and preview on real UI."
+		/>
+		<meta name="twitter:image" content="https://lilbunnyrabbit.github.io/chromatics/og.png" />
+
+		<script>
+			// No-flash theme: apply the saved theme before first paint.
+			try {
+				var t = localStorage.getItem('chromatics:theme') || 'light';
+				document.documentElement.setAttribute('data-theme', t);
+			} catch (e) {
+				document.documentElement.setAttribute('data-theme', 'light');
+			}
+		</script>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>
