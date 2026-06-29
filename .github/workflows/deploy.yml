@@ -1,11 +1,11 @@
 name: Deploy to GitHub Pages
 
 on:
-  # The app lives on `the-final-decision` (the canonical Chromatics branch).
+  # Deploys from `master` (the app lands here when `the-final-decision` is merged in).
   # BASE_PATH below is derived from the repo name, so the build is served at /chromatics.
   push:
     branches:
-      - the-final-decision
+      - master
   workflow_dispatch:
 
 jobs:

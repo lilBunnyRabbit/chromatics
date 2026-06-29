@@ -10,9 +10,9 @@ Also shipped **as a library**: the color engine under `src/lib/models` is export
 
 ## Repo, branch & deployment
 
-- **This is the canonical repo: `lilBunnyRabbit/chromatics`, and the app lives on the `the-final-decision` branch** — the same branch that holds the research vault (`docs/chromatics/`). That co-location is intentional: the vault planned for the app to land here (see `docs/chromatics/Home.md`).
+- **This is the canonical repo: `lilBunnyRabbit/chromatics`.** The app was first committed on the **`the-final-decision`** branch (the same branch that holds the research vault `docs/chromatics/`), and is **merged into `master`** from there. `master` is the deploy branch; `the-final-decision` is where the port + vault live together.
 - **Provenance.** The app was developed in the separate `lilBunnyRabbit/color-testing` repo (the DSL half on `test-dsl`, the display half on `master`, then merged) and **ported here**. `color-testing` is the old/abandoned location — do not push there; work happens here.
-- **Deployment.** `.github/workflows/deploy.yml` builds on push to `the-final-decision` and publishes to **GitHub Pages** at `https://lilbunnyrabbit.github.io/chromatics/`. `BASE_PATH` is derived from the repo name (`/${{ github.event.repository.name }}` → `/chromatics`), so the base path follows the repo automatically — don't hardcode it.
+- **Deployment.** `.github/workflows/deploy.yml` builds on push to **`master`** and publishes to **GitHub Pages** at `https://lilbunnyrabbit.github.io/chromatics/`. `BASE_PATH` is derived from the repo name (`/${{ github.event.repository.name }}` → `/chromatics`), so the base path follows the repo automatically — don't hardcode it. (The `github-pages` environment only allows `master`/`dev` to deploy.)
 - **Branding / meta / assets** (keep in sync if branding changes):
   - `static/favicon.svg` — the brand mark: a rounded-square **conic color wheel** matching the in-app `.brand-dot` (`conic-gradient(from 0deg, #ff5d5d, #ffd24d, #4dff88, #4db8ff, #a64dff, #ff5d5d)` in `DesktopShell.svelte` / mobile `MobileShell.svelte`).
   - `static/og.png` (1200×630, dark `#0f1115` theme) + its source `static/og.svg` — the social card referenced by the Open Graph / Twitter tags.
@@ -21,7 +21,7 @@ Also shipped **as a library**: the color engine under `src/lib/models` is export
 
 ## Stack
 
-SvelteKit 2 + **Svelte 5 runes** + TypeScript + **Bun** + CodeMirror 6 + culori + Tailwind v4 + `adapter-static` (static SPA, deployed to GitHub Pages on push to `the-final-decision`).
+SvelteKit 2 + **Svelte 5 runes** + TypeScript + **Bun** + CodeMirror 6 + culori + Tailwind v4 + `adapter-static` (static SPA, deployed to GitHub Pages on push to `master`).
 
 ## Commands / gates
 

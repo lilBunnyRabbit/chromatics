@@ -120,7 +120,7 @@ bun run check      # svelte-check + types
 bun run format     # prettier
 ```
 
-Deployed to **GitHub Pages** via GitHub Actions on every push to `the-final-decision`.
+Deployed to **GitHub Pages** via GitHub Actions on every push to `master`.
 
 ## Routes
 
