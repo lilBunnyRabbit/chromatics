@@ -44,7 +44,8 @@
 		tokens: app.tokens,
 		roles: app.effectiveRoles,
 		opacities: app.opacities,
-		components: app.components
+		components: app.components,
+		darkRoles: app.hasDarkTheme ? app.darkEffectiveRoles : undefined
 	});
 	const output = $derived(
 		format === 'swatch'

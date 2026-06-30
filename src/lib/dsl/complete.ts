@@ -8,7 +8,7 @@
  */
 import type { CompletionContext, CompletionResult, Completion } from '@codemirror/autocomplete';
 import { manifest, type MemberInfo } from './manifest.js';
-import { enclosingBlock, blockMembers, ROLE_KEYS } from './block-scope.js';
+import { enclosingBlock, blockMembers, ROLE_KEYS, MAPPING_BLOCKS } from './block-scope.js';
 
 const KIND_TO_TYPE: Record<MemberInfo['kind'], string> = {
 	method: 'method',
@@ -59,8 +59,9 @@ export function chromaCompletions(getVars: () => string[]) {
 		const before = ctx.state.sliceDoc(0, ctx.pos);
 		const block = enclosingBlock(before);
 
-		// `roles { role = colorName }` — roles on the left, named colors on the right.
-		if (block === 'roles') {
+		// `roles { role = colorName }` (+ `light {}`/`dark {}`) — roles on the left,
+		// named colors on the right.
+		if (block && MAPPING_BLOCKS.has(block)) {
 			const lineBefore = before.slice(before.lastIndexOf('\n') + 1);
 			const options: Completion[] = lineBefore.includes('=')
 				? getVars().map((v) => ({ label: v, type: 'variable' }))

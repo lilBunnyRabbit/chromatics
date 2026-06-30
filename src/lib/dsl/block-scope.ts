@@ -15,7 +15,10 @@
 import { manifest, type MemberInfo } from './manifest.js';
 
 /** Every label that opens a `label { … }` block — matches the evaluator's desugar. */
-export const BLOCK_LABELS = new Set(['preview', 'component', 'tokens', 'roles']);
+export const BLOCK_LABELS = new Set(['preview', 'component', 'tokens', 'roles', 'light', 'dark']);
+
+/** Mapping blocks (`role = colorName` lines): roles + the per-mode re-bindings. */
+export const MAPPING_BLOCKS = new Set(['roles', 'light', 'dark']);
 
 /** Builder blocks whose namespace members are called bare inside the block. */
 const BUILDER_BLOCKS = ['preview', 'component', 'tokens'] as const;

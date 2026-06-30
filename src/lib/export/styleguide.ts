@@ -22,6 +22,8 @@ export interface StyleguideInput {
 	roles: Roles;
 	opacities: Opacities;
 	components: NamedComponent[];
+	/** Dark-mode role re-binding; when present, emits a `.dark { … }` override block. */
+	darkRoles?: Roles;
 }
 
 const css = (ref: string | undefined, ctx: ResolveCtx, fallback = 'transparent') =>
@@ -43,6 +45,13 @@ function rootBlock(input: StyleguideInput): string {
 		...declList(buildTokenVars(tokens))
 	];
 	return `:root {\n${lines.join('\n')}\n}`;
+}
+
+/** `.dark { … }` — only the role vars that differ; palette + tokens stay in :root. */
+function darkBlock(input: StyleguideInput): string | null {
+	if (!input.darkRoles) return null;
+	const decls = declList(cssVars(input.scheme, input.darkRoles, input.opacities));
+	return decls.length ? `.dark {\n${decls.join('\n')}\n}` : null;
 }
 
 function buttonCss(name: string, spec: ButtonSpec, ctx: ResolveCtx): string {
@@ -86,12 +95,11 @@ function componentCss(c: NamedComponent, ctx: ResolveCtx): string {
 	return typeCss(c.name, c.spec, ctx);
 }
 
-/** :root custom properties (colors + roles + tokens) + component utility classes. */
+/** :root custom properties (colors + roles + tokens) + optional .dark + utility classes. */
 export function toStyleguideCss(input: StyleguideInput): string {
 	const ctx: ResolveCtx = { tokens: input.tokens, scheme: input.scheme, roles: input.roles };
-	const root = rootBlock(input);
 	const classes = input.components.map((c) => componentCss(c, ctx)).join('\n\n');
-	return classes ? `${root}\n\n${classes}\n` : `${root}\n`;
+	return [rootBlock(input), darkBlock(input), classes || null].filter(Boolean).join('\n\n') + '\n';
 }
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
