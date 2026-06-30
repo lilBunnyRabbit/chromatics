@@ -38,7 +38,7 @@
 		inspector: 'Inspector',
 		studio: 'Studio',
 		preview: 'Preview',
-		styleguide: 'Styleguide',
+		styleguide: 'Design System',
 		matrix: 'Matrix',
 		validate: 'Validate',
 		export: 'Export'

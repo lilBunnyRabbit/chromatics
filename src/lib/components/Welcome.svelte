@@ -68,8 +68,8 @@
 		},
 		{
 			key: 'styleguide',
-			title: 'Styleguide',
-			desc: 'Author a design system — tokens & components, rendered and auto-audited.',
+			title: 'Design System',
+			desc: 'A guided flow — roles, tokens & components, rendered and auto-audited.',
 			cta: 'Open',
 			icon: 'layout',
 			accent: '#7c3aed',

@@ -314,7 +314,7 @@ function evalNode(node: Node, scope: Scope): DSLValue {
  * begins a statement (line start, indentation only) is rewritten, so
  * `preview.ramp(…)` and strings are never touched.
  */
-const BLOCK_SUGAR = /(^|\n)([ \t]*)(preview|component|tokens|roles)[ \t]([ \t]*\{)/g;
+const BLOCK_SUGAR = /(^|\n)([ \t]*)(preview|component|tokens|roles|light|dark)[ \t]([ \t]*\{)/g;
 function desugarBlocks(source: string): string {
 	return source.replace(BLOCK_SUGAR, (_m, nl, indent, kw, rest) => `${nl}${indent}${kw}:${rest}`);
 }
@@ -335,9 +335,75 @@ type AssignNode = {
 	right?: { type: string; name?: string; value?: unknown };
 };
 
+type RoleMapResult = {
+	lines: [string, string][];
+	nested: { mode: 'light' | 'dark'; lines: [string, string][] }[];
+};
+
+/**
+ * Parse a `role = colorName` mapping-block body. With `allowNested`, also pulls
+ * out nested `light { … }` / `dark { … }` sub-blocks (one level deep) so a single
+ * `roles { … }` can hold both modes.
+ */
+function parseRoleMap(
+	body: Node[] | undefined,
+	errors: EvalError[],
+	allowNested: boolean
+): RoleMapResult {
+	const lines: [string, string][] = [];
+	const nested: { mode: 'light' | 'dark'; lines: [string, string][] }[] = [];
+	for (const inner of body ?? []) {
+		const lab = inner as LabeledNode;
+		if (lab.type === 'LabeledStatement') {
+			const m = lab.label?.name;
+			if (allowNested && (m === 'light' || m === 'dark') && lab.body?.type === 'BlockStatement') {
+				nested.push({ mode: m, lines: parseRoleMap(lab.body.body, errors, false).lines });
+			} else {
+				errors.push({
+					message: `'${m}' is not valid here — use 'light { … }' or 'dark { … }' inside 'roles { … }'.`,
+					line: lineOf(inner)
+				});
+			}
+			continue;
+		}
+		try {
+			const e =
+				(inner as { type: string; expression?: AssignNode }).expression ??
+				(inner as unknown as AssignNode);
+			if (
+				(inner as { type: string }).type !== 'ExpressionStatement' ||
+				e?.type !== 'AssignmentExpression' ||
+				e.operator !== '=' ||
+				e.left?.type !== 'Identifier'
+			) {
+				throw new Error('each line maps a role, e.g. `primary = primary`');
+			}
+			const role = e.left.name as string;
+			const r = e.right;
+			let target: string;
+			if (r?.type === 'Identifier') target = r.name as string;
+			else if (r?.type === 'Literal' && typeof r.value === 'string') target = r.value;
+			else throw new Error(`role '${role}' must map to a color name`);
+			lines.push([role, target]);
+		} catch (err: unknown) {
+			errors.push({ message: (err as Error).message, line: lineOf(inner) });
+		}
+	}
+	return { lines, nested };
+}
+
 export function evaluate(source: string): EvalResult {
 	const scope = new Scope();
 	const errors: EvalError[] = [];
+	// Accumulate light/dark role re-bindings across all roles/light/dark blocks
+	// into one `light` / `dark` theme var each (flushed after the loop), so legacy
+	// `roles { … }` (no nesting) stays byte-for-byte unchanged.
+	const darkMap: [string, string][] = [];
+	const lightMap: [string, string][] = [];
+	let darkNode: Node | null = null;
+	let lightNode: Node | null = null;
+	let darkLine = 1;
+	let lightLine = 1;
 
 	// Parse the full source
 	let program: acorn.Program;
@@ -365,9 +431,10 @@ export function evaluate(source: string): EvalResult {
 		// the scheme sees them exactly as the flat `name = preview.x(…)` form.
 		if (s.type === 'LabeledStatement') {
 			const label = s.label?.name;
-			if (label !== 'preview' && label !== 'component' && label !== 'tokens' && label !== 'roles') {
+			const MAPPING = label === 'roles' || label === 'light' || label === 'dark';
+			if (label !== 'preview' && label !== 'component' && label !== 'tokens' && !MAPPING) {
 				errors.push({
-					message: `Unknown block '${label}'. Use 'tokens { … }', 'component { … }', 'preview { … }' or 'roles { … }'.`,
+					message: `Unknown block '${label}'. Use 'tokens { … }', 'component { … }', 'preview { … }', 'roles { … }', 'light { … }' or 'dark { … }'.`,
 					line: lineOf(s)
 				});
 				continue;
@@ -377,36 +444,35 @@ export function evaluate(source: string): EvalResult {
 				continue;
 			}
 
-			// roles { role = colorName } — a MAPPING block: each line binds a theme
-			// role to a color *by name* (the RHS is captured, not evaluated), and the
-			// whole block aggregates into one theme-config variable.
-			if (label === 'roles') {
-				const map: [string, string][] = [];
-				for (const inner of s.body.body ?? []) {
-					try {
-						const e =
-							(inner as { type: string; expression?: AssignNode }).expression ??
-							(inner as unknown as AssignNode);
-						if (
-							(inner as { type: string }).type !== 'ExpressionStatement' ||
-							e?.type !== 'AssignmentExpression' ||
-							e.operator !== '=' ||
-							e.left?.type !== 'Identifier'
-						) {
-							throw new Error('each line maps a role, e.g. `primary = primary`');
+			// Mapping blocks: roles { role = colorName } binds a theme role to a color
+			// *by name* (RHS captured, not evaluated). `roles {}` is the light/base
+			// mapping (and may hold nested `light {}`/`dark {}`); top-level `light {}`/
+			// `dark {}` are the per-mode re-bindings. All re-resolve through the same
+			// audit/export — dark is pure role re-binding, not a second pipeline.
+			if (MAPPING) {
+				const { lines, nested } = parseRoleMap(s.body.body, errors, label === 'roles');
+				if (label === 'roles') {
+					scope.set('roles', rolesConfig(lines), [], lineOf(s), s as unknown as Node);
+					for (const n of nested) {
+						const bucket = n.mode === 'dark' ? darkMap : lightMap;
+						bucket.push(...n.lines);
+						if (n.mode === 'dark') {
+							darkNode = s;
+							darkLine = lineOf(s);
+						} else {
+							lightNode = s;
+							lightLine = lineOf(s);
 						}
-						const role = e.left.name as string;
-						const r = e.right;
-						let target: string;
-						if (r?.type === 'Identifier') target = r.name as string;
-						else if (r?.type === 'Literal' && typeof r.value === 'string') target = r.value;
-						else throw new Error(`role '${role}' must map to a color name`);
-						map.push([role, target]);
-					} catch (err: unknown) {
-						errors.push({ message: (err as Error).message, line: lineOf(inner) });
 					}
+				} else if (label === 'dark') {
+					darkMap.push(...lines);
+					darkNode = s;
+					darkLine = lineOf(s);
+				} else {
+					lightMap.push(...lines);
+					lightNode = s;
+					lightLine = lineOf(s);
 				}
-				scope.set('roles', rolesConfig(map), [], lineOf(s), s as unknown as Node);
 				continue;
 			}
 
@@ -435,6 +501,14 @@ export function evaluate(source: string): EvalResult {
 			const err = e as Error;
 			errors.push({ message: err.message, line: lineOf(stmt) });
 		}
+	}
+
+	// Flush the merged per-mode role maps into one `light` / `dark` theme var each.
+	if (lightMap.length) {
+		scope.set('light', rolesConfig(lightMap, 'light'), [], lightLine, lightNode as Node);
+	}
+	if (darkMap.length) {
+		scope.set('dark', rolesConfig(darkMap, 'dark'), [], darkLine, darkNode as Node);
 	}
 
 	return { variables: scope.variables, errors, order: scope.order };

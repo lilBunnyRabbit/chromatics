@@ -28,5 +28,5 @@ preview {
   darkmode   = ui(bg, fg, primary)       // mini UI mockup
 }
 
-// Next: open the Styleguide tab, or try the Design System example for
+// Next: open the Design System tab, or try the Design System example for
 // tokens + components. Everything you see is authored in this editor.`;

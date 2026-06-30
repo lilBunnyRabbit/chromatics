@@ -9,7 +9,7 @@ import type { ModelDef, MethodDef, ParamDef, ChannelDef, ModelStatus } from '../
 import { PREVIEW_SIGNATURES } from './preview.js';
 import { SCALE_SIGNATURES, TOKEN_DOC, TOKENS_SIGNATURES, TOKENS_DOC } from './tokens.js';
 import { COMPONENT_SIGNATURES } from './components.js';
-import { THEME_DOC, ROLES_DOC } from './theme.js';
+import { THEME_DOC, ROLES_DOC, THEME_SIGNATURES } from './theme.js';
 
 export interface ConstructorInfo {
 	name: string;
@@ -189,6 +189,8 @@ export function buildManifest(
 	registerNamespace('tokens', TOKENS_SIGNATURES);
 	registerNamespace('scale', SCALE_SIGNATURES);
 	registerNamespace('component', COMPONENT_SIGNATURES);
+	// theme is a callable builtin AND a namespace: theme.light({…}) / theme.dark({…})
+	registerNamespace('theme', THEME_SIGNATURES);
 
 	// flat channel accessors on a bare value (ok_l, hwb_w, lab_a, lr…)
 	for (const [key, ch] of channels) {
