@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Sitemap for the GitHub Pages project site at /chromatics/. Absolute URLs are
+	hardcoded (a static file can't read BASE_PATH) — keep them in sync if the
+	deploy URL changes (see CLAUDE.md). On a project subpath this file is NOT
+	auto-discovered via a root robots.txt; submit it in Google Search Console
+	under a URL-prefix property for https://lilbunnyrabbit.github.io/chromatics/.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+	<url>
+		<loc>https://lilbunnyrabbit.github.io/chromatics/</loc>
+		<priority>1.0</priority>
+	</url>
+	<url>
+		<loc>https://lilbunnyrabbit.github.io/chromatics/mixer</loc>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://lilbunnyrabbit.github.io/chromatics/models</loc>
+		<priority>0.8</priority>
+	</url>
+</urlset>

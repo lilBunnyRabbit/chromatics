@@ -164,7 +164,7 @@
 	</header>
 
 	<!-- Workspace -->
-	<div class="workspace" class:resizing>
+	<main class="workspace" class:resizing>
 		{#if !ui.editorCollapsed}
 			<section class="editor-pane" style="width: {ui.editorWidth}%">
 				<div class="pane-head">
@@ -268,7 +268,7 @@
 
 		<section class="analyze-pane">
 			<div class="pane-head">
-				<div class="seg">
+				<nav class="seg" aria-label="Analysis views">
 					{#each primaryTabs as t (t.id)}
 						<button
 							class="seg-item {ui.tab === t.id ? 'active' : ''}"
@@ -298,7 +298,7 @@
 							</div>
 						{/if}
 					</div>
-				</div>
+				</nav>
 				<div class="spacer"></div>
 				<span class="chip"
 					>{app.scheme.entries.length} color{app.scheme.entries.length !== 1 ? 's' : ''}</span
@@ -323,7 +323,7 @@
 			</div>
 			{#if showDocs}<Docs onclose={() => (showDocs = false)} />{/if}
 		</section>
-	</div>
+	</main>
 </div>
 
 <style>
