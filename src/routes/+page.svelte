@@ -26,7 +26,25 @@
 	});
 </script>
 
-<svelte:head><title>Chromatics — color as code</title></svelte:head>
+<svelte:head>
+	<link rel="canonical" href="https://lilbunnyrabbit.github.io/chromatics/" />
+</svelte:head>
+
+<!--
+	Crawlable heading + summary for the home route. Visually hidden (the studio UI
+	carries the visible brand wordmark) but present in the prerendered HTML — `/`
+	renders server-side, so this gives the indexable page a real <h1> + prose that
+	mirror the meta description. Don't also promote the .brand wordmark to an <h1>
+	(that would create a second h1).
+-->
+<div class="sr-only">
+	<h1>Chromatics — color as code</h1>
+	<p>
+		A scriptable color language and interactive studio. Derive a whole palette from one brand color,
+		inspect any color across ~100 color models, check accessibility (WCAG + APCA), and preview it on
+		real UI — all in the browser. OKLCH-native.
+	</p>
+</div>
 
 <!--
 	Mount-gated shell chooser. During SSR/prerender and the first client
