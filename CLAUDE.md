@@ -95,7 +95,7 @@ The hybrid "A+C" design. Immutable, OKLCH-stored color values + a data-driven mo
 | `/models` | Encyclopedia of all color models & systems (+ 2-D gamut plane & 3-D `ModelViewer` per model) |
 | `/mixer`  | Cross-model mixer — one color, every model, live sliders                                     |
 
-Examples live in `src/routes/examples/` (Overview, Simple, Conversions, Showcase, Previews, Design System, Dynamic Theme); `examples/index.ts` orders them (first = default on load). The old Brand Dark/Light templates were removed; the Brand Dark source survives as `tests/fixtures/brand-dark.ts`, the parity oracle for the golden-hex + role-mapping tests.
+Examples live in `src/routes/examples/` (Overview, Simple, Conversions, Showcase, Previews, Design System, microSaaS Dashboard, Dynamic Theme); `examples/index.ts` orders them (first = default on load). **microSaaS Dashboard** is the flagship dual-mode example: a full role/token/component design system from one brand color, with a nested `roles { … dark { } }` rebinding so light + dark ride one shared palette/audit (brand triad + semantics shared, only neutrals split into `*` / `*_d`). Components ref role names so they re-theme; named for clean CSS-var / Tailwind export (`bg-primary`, `--surface`, …) and AA-safe in both modes via auto-picked button labels. The old Brand Dark/Light templates were removed; the Brand Dark source survives as `tests/fixtures/brand-dark.ts`, the parity oracle for the golden-hex + role-mapping tests.
 
 ## The research vault — `docs/chromatics/`
 
