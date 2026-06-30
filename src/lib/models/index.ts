@@ -27,6 +27,8 @@ export {
 } from './spaces';
 export type { InterpSpace, HueModel, RampModel, RampStep, HarmonySwatch } from './spaces';
 export { formatOwnModel } from './format';
+export { ensureContrastValue, wcagTargetRatio } from './solve';
+export type { EnsureContrastOptions } from './solve';
 export type { ModelDef, MethodDef, ChannelDef, ParamDef, Family, ModelStatus } from './types';
 
 /** Build a constructor function from a model's registered `ctor`. */

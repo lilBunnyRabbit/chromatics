@@ -47,6 +47,8 @@ export interface TokenManifest {
 export const BUILTIN_DOCS: Record<string, string> = {
 	mix: 'mix(a, b, ratio?) → color — perceptual blend in OKLCH',
 	contrast: 'contrast(a, b) → number — WCAG contrast ratio (1–21)',
+	ensureContrast:
+		'ensureContrast(fg, bg, target?) → color — nearest color to fg that stays legible on bg (target: "AA" | "AAA" | "AA-large" | "AAA-large" | ratio, default "AA"); re-solves when fg/bg change',
 	deltaE: 'deltaE(a, b) → number — CIEDE2000 perceptual difference',
 	clamp: 'clamp(value, min, max) → number',
 	abs: 'abs(n) → number',
@@ -67,6 +69,7 @@ export const BUILTIN_DOCS: Record<string, string> = {
 const BUILTINS = [
 	'mix',
 	'contrast',
+	'ensureContrast',
 	'deltaE',
 	'clamp',
 	'abs',

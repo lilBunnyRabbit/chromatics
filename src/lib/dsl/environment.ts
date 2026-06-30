@@ -4,8 +4,15 @@
  * model is a pure data change — no edit here.
  */
 import { manifest } from './manifest.js';
-import { getModel, hex, ColorValue, type DSLValue } from '../models/index.js';
-import { num, color, lerpInMode, assertSameModel } from '../models/util.js';
+import {
+	getModel,
+	hex,
+	ColorValue,
+	ensureContrastValue,
+	wcagTargetRatio,
+	type DSLValue
+} from '../models/index.js';
+import { num, str, color, lerpInMode, assertSameModel } from '../models/util.js';
 import { wcagContrast, differenceCiede2000 } from '../models/registry.js';
 import { preview } from './preview.js';
 import { scale, tokenFn, tokens } from './tokens.js';
@@ -58,6 +65,14 @@ export function createEnvironment(): Map<string, DSLValue> {
 		const cb = color(b);
 		assertSameModel(ca, cb, 'deltaE');
 		return differenceCiede2000()(ca.project('lab'), cb.project('lab'));
+	});
+	// ensureContrast(fg, bg, target?) → nudge fg so it stays legible on bg. Unlike
+	// mix/contrast it does NOT require a shared model: bg is a read-only reference
+	// (we only measure against it), so any two colors compose. Default target "AA".
+	env.set('ensureContrast', (fg: DSLValue, bg: DSLValue, target?: DSLValue) => {
+		const t = target === undefined ? 'AA' : target;
+		const ratio = wcagTargetRatio(typeof t === 'number' ? t : str(t));
+		return ensureContrastValue(color(fg), color(bg), ratio);
 	});
 
 	// Preview namespace — preview.gradient(a, b), preview.pair(fg, bg), …
