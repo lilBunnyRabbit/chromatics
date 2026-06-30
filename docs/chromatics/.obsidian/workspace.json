@@ -23,12 +23,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "06-Reference/Color Models/Hue/HSL.md",
+                "file": "04-Product/Existing Products.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "HSL"
+              "title": "Existing Products"
             }
           }
         ],
@@ -196,6 +196,7 @@
   },
   "active": "141da500e0ec8f5b",
   "lastOpenFiles": [
+    "06-Reference/Color Models/Hue/HSL.md",
     "06-Reference/Color Models/Hue/HCL.md",
     "04-Product/Implementation Plan.md",
     "03-DSL/DSL Gaps & Bugs.md",
@@ -221,7 +222,6 @@
     "06-Reference/Color Systems/Other Systems/RAL.md",
     "06-Reference/Color Systems/Other Systems/PCCS (Practical Color Coordinate System).md",
     "06-Reference/Color Systems/Other Systems/Ostwald Color System.md",
-    "06-Reference/Color Systems/Other Systems/ISO-CIE.md",
     "06-Reference/Color Systems/RGB Systems",
     "06-Reference/Color Systems/Other Systems",
     "06-Reference/Color Systems/Hue Systems",

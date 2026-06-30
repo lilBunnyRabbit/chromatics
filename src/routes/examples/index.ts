@@ -6,6 +6,10 @@ import { name as conversionsName, source as conversionsSource } from './conversi
 import { name as dynamicName, source as dynamicSource } from './dynamic-theme';
 import { name as designSystemName, source as designSystemSource } from './design-system';
 import { name as microsaasName, source as microsaasSource } from './microsaas';
+import {
+	name as microsaasEnforcedName,
+	source as microsaasEnforcedSource
+} from './microsaas-enforced';
 
 export interface Example {
 	name: string;
@@ -21,5 +25,6 @@ export const examples: Example[] = [
 	{ name: previewsName, source: previewsSource },
 	{ name: designSystemName, source: designSystemSource },
 	{ name: microsaasName, source: microsaasSource },
+	{ name: microsaasEnforcedName, source: microsaasEnforcedSource },
 	{ name: dynamicName, source: dynamicSource }
 ];

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { app } from '$lib/state/app.svelte';
-	import { OKLCH, type ColorValue } from '$lib/models';
+	import { ensureContrastValue } from '$lib/models';
 	import { contrastRatio } from '$lib/analysis/contrast';
 	import { apcaContrast } from '$lib/analysis/apca';
-	import { uniqueName, round } from '$lib/dsl/emit';
+	import { uniqueName } from '$lib/dsl/emit';
 	import { takenNames, insert } from './shared';
 
 	const entries = $derived(app.scheme.entries);
@@ -15,49 +15,31 @@
 	const bg = $derived(entries[bi]);
 
 	const TARGETS = [
-		{ id: 'aa', label: 'AA (4.5)', ratio: 4.5 },
-		{ id: 'aaa', label: 'AAA (7)', ratio: 7 },
-		{ id: 'large', label: 'AA large (3)', ratio: 3 }
+		{ id: 'aa', key: 'AA', label: 'AA (4.5)', ratio: 4.5 },
+		{ id: 'aaa', key: 'AAA', label: 'AAA (7)', ratio: 7 },
+		{ id: 'large', key: 'AA-large', label: 'AA large (3)', ratio: 3 }
 	];
 	let targetId = $state('aa');
-	const target = $derived(TARGETS.find((t) => t.id === targetId)!.ratio);
+	const target = $derived(TARGETS.find((t) => t.id === targetId)!);
 
-	function solve(
-		fgc: ColorValue,
-		bgc: ColorValue,
-		want: number
-	): { color: ColorValue; l: number; changed: boolean } {
-		const c = fgc.channel('ok_c'),
-			h = fgc.channel('ok_h'),
-			l0 = fgc.channel('ok_l');
-		const make = (L: number) => OKLCH(L, c, h).gamutMapped;
-		if (contrastRatio(fgc, bgc) >= want) return { color: fgc, l: l0, changed: false };
-		for (let step = 0.01; step <= 1.001; step += 0.01) {
-			for (const L of [l0 - step, l0 + step]) {
-				if (L < 0 || L > 1) continue;
-				const cand = make(L);
-				if (contrastRatio(cand, bgc) >= want) return { color: cand, l: L, changed: true };
-			}
-		}
-		const w = make(1),
-			b = make(0);
-		return contrastRatio(w, bgc) >= contrastRatio(b, bgc)
-			? { color: w, l: 1, changed: true }
-			: { color: b, l: 0, changed: true };
-	}
-
-	const fixed = $derived.by(() => (fg && bg ? solve(fg.color, bg.color, target) : null));
+	// The very solver the emitted `ensureContrast(…)` call runs — preview == result.
+	const fixed = $derived.by(() =>
+		fg && bg ? ensureContrastValue(fg.color, bg.color, target.ratio) : null
+	);
+	const changed = $derived(!!(fg && fixed && fixed.hex !== fg.color.hex));
 	const beforeRatio = $derived(fg && bg ? contrastRatio(fg.color, bg.color) : 0);
-	const afterRatio = $derived(fixed && bg ? contrastRatio(fixed.color, bg.color) : 0);
+	const afterRatio = $derived(fixed && bg ? contrastRatio(fixed, bg.color) : 0);
 	const beforeApca = $derived(fg && bg ? apcaContrast(fg.color, bg.color) : 0);
-	const afterApca = $derived(fixed && bg ? apcaContrast(fixed.color, bg.color) : 0);
+	const afterApca = $derived(fixed && bg ? apcaContrast(fixed, bg.color) : 0);
 
 	function apply() {
-		if (!fg || !bg || !fixed || !fixed.changed) return;
+		if (!fg || !bg || !fixed || !changed) return;
 		const name = uniqueName(`${fg.name}_on_${bg.name}`, takenNames());
+		// Emit a LIVE relationship: re-solves whenever fg or bg change downstream,
+		// rather than freezing a one-off snapshot of the current lightness.
 		insert(
-			[`${name} = ${fg.name}.oklch.atLightness(${round(fixed.l, 4)}).oklch.gamutMap()`],
-			`${fg.name} adjusted to ${TARGETS.find((t) => t.id === targetId)!.label} on ${bg.name}`
+			[`${name} = ensureContrast(${fg.name}, ${bg.name}, "${target.key}")`],
+			`${fg.name} kept ${target.label} on ${bg.name}`
 		);
 	}
 </script>
@@ -87,8 +69,8 @@
 					{#each TARGETS as t (t.id)}<option value={t.id}>{t.label}</option>{/each}
 				</select>
 			</label>
-			<button class="btn btn-accent" onclick={apply} disabled={!fixed?.changed}>
-				{fixed?.changed ? 'Insert fixed color' : 'Already passes'}
+			<button class="btn btn-accent" onclick={apply} disabled={!changed}>
+				{changed ? 'Insert guarded color' : 'Already passes'}
 			</button>
 		</div>
 
@@ -100,24 +82,28 @@
 						Aa Sample text
 					</div>
 					<div class="metrics">
-						<span class="m" class:bad={beforeRatio < target}>WCAG {beforeRatio.toFixed(2)}</span>
+						<span class="m" class:bad={beforeRatio < target.ratio}
+							>WCAG {beforeRatio.toFixed(2)}</span
+						>
 						<span class="m">APCA {Math.round(beforeApca)}</span>
 					</div>
 				</div>
 				<div class="arrow">→</div>
 				<div class="side">
 					<div class="cap">After</div>
-					<div class="demo" style="background:{bg.color.hex}; color:{fixed.color.hex}">
+					<div class="demo" style="background:{bg.color.hex}; color:{fixed.hex}">
 						Aa Sample text
 					</div>
 					<div class="metrics">
-						<span class="m" class:good={afterRatio >= target}>WCAG {afterRatio.toFixed(2)}</span>
+						<span class="m" class:good={afterRatio >= target.ratio}
+							>WCAG {afterRatio.toFixed(2)}</span
+						>
 						<span class="m">APCA {Math.round(afterApca)}</span>
-						<span class="hx">{fixed.color.hex}</span>
+						<span class="hx">{fixed.hex}</span>
 					</div>
 				</div>
 			</div>
-			{#if !fixed.changed}
+			{#if !changed}
 				<p class="hint">This pair already meets the target — nothing to change.</p>
 			{/if}
 		{/if}

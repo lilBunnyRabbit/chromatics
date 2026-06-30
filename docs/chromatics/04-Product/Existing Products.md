@@ -15,6 +15,8 @@ Competitive landscape for color tooling: the web apps, libraries, and design uti
 - **Paletton** (Color Scheme Designer) — Older but still useful, focused on color-wheel relationships. Explores monochromatic, adjacent, triadic, tetradic schemes visually. Interactive previews show palettes in sample UI layouts/artworks. Strong for traditional color-theory harmonies.
 - **Colormind** — AI-powered scheme generator using deep learning trained on photos, movies, and popular designs. Supports partial palettes (lock colors, fill the rest); outputs a coherent 5-color palette, often with a UI mockup preview suggesting usage per color (background, accent, etc.).
 - **Color Hunt** — Crowdsourced collection of trendy 4-color palettes, curated by category (pastel, summer, minimal). Inspiration over generation; taps human-created palettes and design trends. Quick HEX grabs.
+- https://atmos.style/
+- 
 
 ### Contrast & Accessibility Tools
 
