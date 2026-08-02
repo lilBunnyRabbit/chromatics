@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { app } from '$lib/state/app.svelte';
 	import { ui } from '$lib/state/ui.svelte';
-	import { cssVars, NONE_ROLE, type Roles } from '$lib/scheme/roles';
+	import { cssVars, NONE_ROLE, ROLE_KEYS, type Roles } from '$lib/scheme/roles';
 	import { simulateVision, visionSimulations } from '$lib/analysis/cvd';
 	import { wcagLevels, wcagColor } from '$lib/analysis/wcag';
 	import BrandMark from './demos/BrandMark.svelte';
@@ -24,7 +24,7 @@
 	// closed until the user taps "Roles & audit".
 	let panelOpen = $state(!ui.isMobile);
 
-	// Roles auto-resolve in the store (app.effectiveRoles); no clobbering effect.
+	// Roles auto-resolve in the store (app.modeRoles); no clobbering effect.
 	const simEntries = $derived(
 		app.visionSim === 'none'
 			? app.scheme.entries
@@ -37,12 +37,24 @@
 		entries: simEntries,
 		byName: new Map(simEntries.map((e) => [e.name, e]))
 	});
-	const vars = $derived(cssVars(simScheme, app.effectiveRoles, app.opacities));
+	const vars = $derived(cssVars(simScheme, app.modeRoles, app.opacities));
 	const fails = $derived(
-		app.audit.filter(
+		app.modeAudit.filter(
 			(a) => (a.large ? wcagLevels(a.ratio).large : wcagLevels(a.ratio).normal) === 'Fail'
 		).length
 	);
+	/** Any role pinned in the previewed mode → offer a one-click reset. */
+	const overridden = $derived(ROLE_KEYS.filter((k) => app.modeOverrides[k] !== '').length);
+
+	function resetOverrides() {
+		for (const k of ROLE_KEYS) app.modeOverrides[k] = '';
+	}
+
+	/** "name #hex" for a role target, or a placeholder when it resolves to nothing. */
+	function describe(name: string): string {
+		const e = name ? app.scheme.byName.get(name) : undefined;
+		return e ? `${e.name} ${e.color.hex}` : 'none';
+	}
 
 	const roleRows: [keyof Roles, string, boolean][] = [
 		['bg', 'Background', false],
@@ -75,13 +87,33 @@
 				>
 			{/each}
 		</div>
+		<!-- Always available: the mode is a view knob over already-derived roles, so
+		     an authored theme()/roles{} never locks you into one side. -->
+		<div class="mode-toggle" role="group" aria-label="Preview mode">
+			<button
+				class="mode-btn"
+				class:on={app.previewMode === 'light'}
+				onclick={() => (app.previewMode = 'light')}>Light</button
+			>
+			<button
+				class="mode-btn"
+				class:on={app.previewMode === 'dark'}
+				class:muted={!app.hasDarkTheme}
+				title={app.hasDarkTheme
+					? 'Preview dark mode'
+					: 'No dark theme authored — dark inherits light until you override a role'}
+				onclick={() => (app.previewMode = 'dark')}>Dark</button
+			>
+		</div>
 		<select class="select" bind:value={app.visionSim}>
 			{#each visionSimulations as sim (sim.value)}<option value={sim.value}>{sim.label}</option
 				>{/each}
 		</select>
 		<div class="pv-spacer"></div>
 		<span class="pv-fails" class:bad={fails > 0}>
-			{#if fails > 0}{fails} of {app.audit.length} failing{:else}all {app.audit.length} pass{/if}
+			{app.previewMode} ·
+			{#if fails > 0}{fails} of {app.modeAudit.length} failing{:else}all {app.modeAudit.length}
+				pass{/if}
 		</span>
 		<button class="btn" onclick={() => (panelOpen = !panelOpen)}>
 			{panelOpen ? 'Hide roles' : 'Roles & audit'}
@@ -90,9 +122,18 @@
 
 	<div class="pv-body">
 		{#snippet panelBody()}
-			<div class="pv-section-title">Color Roles</div>
+			<div class="pv-section-head">
+				<span class="pv-section-title">{app.previewMode} roles</span>
+				{#if overridden > 0}
+					<button class="pv-reset" onclick={resetOverrides}>reset {overridden}</button>
+				{/if}
+			</div>
+			<!-- Per-role, per-mode: `Auto` follows the DSL role definitions (and names the
+			     color it landed on), anything else is an explicit pick that wins over them. -->
 			{#each roleRows as [key, label, optional] (key)}
-				{@const active = app.effectiveRoles[key]}
+				{@const active = app.modeRoles[key]}
+				{@const auto = app.modeAutoRoles[key]}
+				{@const pinned = app.modeOverrides[key] !== ''}
 				<div class="role-row">
 					<div
 						class="role-swatch"
@@ -101,9 +142,11 @@
 							: 'var(--border-strong)'}"
 					></div>
 					<label class="role-label"
-						>{label}
-						<select class="role-select" bind:value={app.roles[key]}>
-							<option value="">Auto</option>
+						><span class="role-name"
+							>{label}{#if pinned}<span class="role-tag">pinned</span>{/if}</span
+						>
+						<select class="role-select" bind:value={app.modeOverrides[key]}>
+							<option value="">Auto · {describe(auto)}</option>
 							{#if optional}<option value={NONE_ROLE}>None</option>{/if}
 							{#each app.scheme.entries as e (e.name)}
 								<option value={e.name}>{e.name} ({e.color.hex})</option>
@@ -122,9 +165,9 @@
 				</label>
 			{/each}
 
-			<div class="pv-section-title">Audit ({fails} failing)</div>
+			<div class="pv-section-title">Audit · {app.previewMode} ({fails} failing)</div>
 			<div class="audit-list">
-				{#each app.audit as item (item.label)}
+				{#each app.modeAudit as item (item.label)}
 					{@const level = item.large ? wcagLevels(item.ratio).large : wcagLevels(item.ratio).normal}
 					<div class="audit-row" class:audit-fail={level === 'Fail'}>
 						<div class="audit-label">{item.label}</div>
@@ -543,6 +586,52 @@
 		padding-top: 8px;
 		border-top: 1px solid var(--border);
 	}
+	.pv-section-head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 8px;
+	}
+	.pv-section-head .pv-section-title {
+		border-top: none;
+		margin-top: 0;
+		padding-top: 0;
+	}
+	.pv-reset {
+		background: none;
+		border: none;
+		padding: 0;
+		font: inherit;
+		font-size: 10px;
+		color: var(--accent);
+		cursor: pointer;
+	}
+
+	/* ── light/dark toggle (toolbar) — mirrors the Design System tab ── */
+	.mode-toggle {
+		display: inline-flex;
+		border: 1px solid var(--border-strong);
+		border-radius: 6px;
+		overflow: hidden;
+		flex-shrink: 0;
+	}
+	.mode-btn {
+		padding: 3px 10px;
+		font-size: 11px;
+		font-weight: 600;
+		background: transparent;
+		color: var(--text-muted);
+		border: none;
+		cursor: pointer;
+	}
+	.mode-btn.on {
+		background: var(--surface-2);
+		color: var(--text);
+	}
+	.mode-btn.muted:not(.on) {
+		opacity: 0.55;
+	}
+
 	.role-row {
 		display: flex;
 		align-items: center;
@@ -562,6 +651,21 @@
 		flex-direction: column;
 		gap: 2px;
 		font-size: 11px;
+	}
+	.role-name {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.role-tag {
+		font-size: 8.5px;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 14%, transparent);
+		padding: 0 4px;
+		border-radius: 3px;
 	}
 	.role-select {
 		background: var(--surface-2);

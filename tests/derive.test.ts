@@ -3,9 +3,10 @@
  *
  * deriveScheme is a 1:1 extraction of the old inlined $derived chain in
  * app.svelte.ts, so these lock the load-bearing behaviour: the role-merge
- * precedence (theme() > override > auto), the component-audit fallback, and the
- * fact that the canonical scheme is a pure function of {source, roles, opacities}
- * only — never of presentation knobs (visionSim / fgOpacity).
+ * precedence (explicit override > theme() > the name heuristic), the per-mode
+ * override layer, the component-audit fallback, and the fact that the canonical
+ * scheme is a pure function of {source, roles, darkRoles, opacities} only — never
+ * of presentation knobs (visionSim / fgOpacity).
  */
 import { test, expect, describe } from 'bun:test';
 import { deriveScheme } from '../src/lib/scheme/derive';
@@ -13,8 +14,10 @@ import { evaluate } from '../src/lib/dsl/evaluator';
 import { schemeFromEvalResult } from '../src/lib/scheme/adapter';
 import {
 	resolveRoles,
+	applyOverrides,
 	cssVars,
 	emptyRoles,
+	NONE_ROLE,
 	DEFAULT_OPACITIES,
 	type Roles
 } from '../src/lib/scheme/roles';
@@ -54,24 +57,54 @@ describe('matches the inline chain it replaced (1:1)', () => {
 
 		const scheme = schemeFromEvalResult(evaluate(designSystem), designSystem);
 		const themeRoles = themeRolesFromScheme(scheme);
-		const merged = { ...roles };
-		for (const k of Object.keys(merged) as (keyof Roles)[]) {
-			const dv = themeRoles[k];
-			if (dv !== undefined && dv !== '') merged[k] = dv;
-		}
-		const effective = resolveRoles(scheme.entries, merged);
+		const auto = resolveRoles(scheme.entries, { ...emptyRoles(), ...themeRoles });
+		const effective = applyOverrides(scheme.entries, auto, roles);
 
+		expect(r.autoRoles).toEqual(auto);
 		expect(r.effectiveRoles).toEqual(effective);
 		expect(r.themeVars).toBe(cssVars(scheme, effective, DEFAULT_OPACITIES));
 	});
+});
 
-	test('theme() wins over a UI role override', () => {
-		// design-system pins bg:"background" via theme(); an override must not win
+describe('an explicit override beats the DSL role definitions', () => {
+	// design-system pins bg:"background" via theme(); "only auto takes colors from
+	// the role definitions", so a pick must win — otherwise the viewer is locked in.
+	const pinned = deriveScheme(designSystem, {
+		roles: { ...emptyRoles(), bg: 'primary' },
+		opacities: DEFAULT_OPACITIES
+	});
+
+	test('the override is the declared intent and the rendered role', () => {
+		expect(pinned.mergedRoles.bg).toBe('primary');
+		expect(pinned.effectiveRoles.bg).toBe('primary');
+	});
+
+	test('auto still reports what the DSL would have picked', () => {
+		expect(pinned.autoRoles.bg).toBe('background');
+		expect(pinned.themeRoles.bg).toBe('background');
+	});
+
+	test('clearing the override falls back to the DSL binding', () => {
+		const r = deriveScheme(designSystem, base);
+		expect(r.effectiveRoles.bg).toBe('background');
+	});
+
+	test('a dangling override falls back to the DSL binding, not a fresh guess', () => {
 		const r = deriveScheme(designSystem, {
-			roles: { ...emptyRoles(), bg: 'primary' },
+			roles: { ...emptyRoles(), bg: 'renamed_away' },
 			opacities: DEFAULT_OPACITIES
 		});
-		expect(r.mergedRoles.bg).toBe('background');
+		expect(r.effectiveRoles.bg).toBe('background');
+	});
+
+	test('NONE_ROLE turns an optional role off even when theme() binds it', () => {
+		const withAccent = deriveScheme(designSystem, base).effectiveRoles.accent;
+		expect(withAccent).not.toBe('');
+		const off = deriveScheme(designSystem, {
+			roles: { ...emptyRoles(), accent: NONE_ROLE },
+			opacities: DEFAULT_OPACITIES
+		});
+		expect(off.effectiveRoles.accent).toBe('');
 	});
 });
 

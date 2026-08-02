@@ -8,6 +8,7 @@
 	import Sheet from './Sheet.svelte';
 	import DocControls from '$lib/components/DocControls.svelte';
 	import { app } from '$lib/state/app.svelte';
+	import { docs } from '$lib/state/docs.svelte';
 	import { ui, type Tab } from '$lib/state/ui.svelte';
 	import { encodeHash } from '$lib/persistence/url-hash';
 	import { base } from '$app/paths';
@@ -23,7 +24,8 @@
 	const VIEWS: { id: Tab; label: string; desc: string }[] = [
 		{ id: 'export', label: 'Export', desc: 'CSS · tokens · swatch' },
 		{ id: 'matrix', label: 'Matrix', desc: 'Contrast grid' },
-		{ id: 'validate', label: 'Validate', desc: 'Accessibility checks' }
+		{ id: 'validate', label: 'Validate', desc: 'Accessibility checks' },
+		{ id: 'history', label: 'History', desc: 'Snapshots · diff a change' }
 	];
 
 	function pickView(id: Tab) {
@@ -31,7 +33,7 @@
 		onclose();
 	}
 	async function share() {
-		location.hash = await encodeHash({ source: app.source });
+		location.hash = await encodeHash({ source: app.source, settings: docs.currentSettings() });
 		navigator.clipboard?.writeText(location.href);
 		shareLabel = 'Copied!';
 		setTimeout(() => (shareLabel = 'Share'), 1200);
@@ -67,6 +69,18 @@
 							><path
 								d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"
 							/><path d="m9 12 2 2 4-4" /></svg
+						>
+					{:else if v.id === 'history'}
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><path d="M3 3v5h5" /><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" /><path
+								d="M12 7v5l4 2"
+							/></svg
 						>
 					{:else}
 						<svg

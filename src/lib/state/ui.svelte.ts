@@ -9,6 +9,7 @@ export type Tab =
 	| 'validate'
 	| 'preview'
 	| 'styleguide'
+	| 'history'
 	| 'export';
 
 /**
@@ -18,7 +19,7 @@ export type Tab =
  * (The 3-D model viewer is NOT a tab — it lives on the /models encyclopedia.)
  */
 export const PRIMARY_TABS: Tab[] = ['inspector', 'studio', 'preview', 'styleguide', 'export'];
-export const ADVANCED_TABS: Tab[] = ['matrix', 'validate'];
+export const ADVANCED_TABS: Tab[] = ['matrix', 'validate', 'history'];
 export const ALL_TABS: Tab[] = [...PRIMARY_TABS, ...ADVANCED_TABS];
 export const isAdvancedTab = (t: Tab): boolean => ADVANCED_TABS.includes(t);
 export const isTab = (v: unknown): v is Tab => ALL_TABS.includes(v as Tab);
@@ -41,6 +42,21 @@ export class UiStore {
 	 */
 	mounted = $state(false);
 	isMobile = $state(false);
+
+	/**
+	 * True while the `/showcase` embed owns the page. It suppresses everything
+	 * that would leak the embed's presentation into the visitor's own studio:
+	 * the `chromatics:theme` / `chromatics:ui` writes in +layout and the
+	 * first-run welcome modal. Set in `showcase/+page.svelte`'s onMount and
+	 * cleared on destroy (client-side nav back to `/` must restore normal UX).
+	 */
+	embed = $state(false);
+	/**
+	 * Source is display-only: `insert()` (the Studio/Design-System DSL emitters)
+	 * becomes a no-op and the scaffold CTAs hide. The embed sets this while
+	 * locked so a viewer can't silently rewrite the author's scheme.
+	 */
+	sourceLocked = $state(false);
 
 	toggleTheme() {
 		this.theme = this.theme === 'light' ? 'dark' : 'light';

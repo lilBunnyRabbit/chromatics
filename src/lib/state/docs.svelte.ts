@@ -3,7 +3,8 @@
  * Svelte 5 reactivity and owns the autosave lifecycle.
  *
  * Model: there is no loose "current source". One Document is always active; its
- * `source` + per-doc settings (roles/opacities/CVD/fg-opacity) live in the `app`
+ * `source` + per-doc settings (light/dark role overrides, opacities, CVD,
+ * fg-opacity) live in the `app`
  * store (so every existing $derived chain is untouched), and a single debounced
  * effect writes them back to that document's own `chromatics:doc:<id>` slot.
  * Opening another document can never clobber the one you were editing.
@@ -13,36 +14,42 @@
  * seed-then-effect race.
  */
 import { app } from './app.svelte';
-import { emptyRoles, DEFAULT_OPACITIES } from '$lib/scheme/roles';
 import { examples } from '../../routes/examples';
 import * as store from '$lib/persistence/documents';
-import { DOC_SCHEMA_VERSION } from '$lib/persistence/documents';
+import { DOC_SCHEMA_VERSION, capVersions, newVersionId } from '$lib/persistence/documents';
 import type {
 	DocEnvelope,
 	DocIndexEntry,
 	DocSettings,
+	SchemeVersion,
 	WriteResult
 } from '$lib/persistence/documents';
 import { debounce } from '$lib/util/debounce';
 
 const SAVE_DEBOUNCE_MS = 500;
 
+/** A readable default label for a snapshot, e.g. "Jun 30, 2:45 PM". */
+function defaultVersionLabel(at: number): string {
+	try {
+		return new Date(at).toLocaleString(undefined, {
+			month: 'short',
+			day: 'numeric',
+			hour: 'numeric',
+			minute: '2-digit'
+		});
+	} catch {
+		return 'Snapshot';
+	}
+}
+
 /** Capture the per-doc options currently live in the app store. */
 function snapshotSettings(): DocSettings {
-	return {
-		roles: { ...app.roles },
-		opacities: { ...app.opacities },
-		visionSim: app.visionSim,
-		fgOpacity: app.fgOpacity
-	};
+	return app.settings();
 }
 
 /** Push a document's saved options back into the app store (defaulting holes). */
 function applySettings(s: DocSettings | undefined): void {
-	app.roles = { ...emptyRoles(), ...(s?.roles ?? {}) };
-	app.opacities = { ...DEFAULT_OPACITIES, ...(s?.opacities ?? {}) };
-	app.visionSim = s?.visionSim ?? 'none';
-	app.fgOpacity = typeof s?.fgOpacity === 'number' ? s.fgOpacity : 100;
+	app.applySettings(s);
 }
 
 /** Serialized {source, settings} — the unit of "has this doc changed?". */
@@ -61,6 +68,8 @@ export class DocStore {
 
 	/** Last value persisted to the active doc; the dirty/idempotency baseline. */
 	baseline = $state('');
+	/** Checkpointed versions of the active doc (CD-14), newest appended last. */
+	versions = $state<SchemeVersion[]>([]);
 	/** In-memory copy of the active envelope (name/origin/createdAt/exampleId). */
 	activeEnv: DocEnvelope | null = null;
 
@@ -108,10 +117,15 @@ export class DocStore {
 	}
 
 	/** Open a decoded share-link as a brand-new document (never pollutes a slot). */
-	openShared(source: string): void {
+	openShared(source: string, settings?: DocSettings): void {
 		if (!this.hydrated || !source.trim()) return;
 		this.flush();
-		this.#createAndOpen({ origin: 'shared', source });
+		this.#createAndOpen({ origin: 'shared', source, settings });
+	}
+
+	/** The per-doc settings currently live in the app store (for share links). */
+	currentSettings(): DocSettings {
+		return snapshotSettings();
 	}
 
 	// ── document lifecycle ─────────────────────────────────────────────────────
@@ -205,6 +219,110 @@ export class DocStore {
 		this.#persistActive();
 	}
 
+	// ── versions (CD-14) ─────────────────────────────────────────────────────────
+
+	/** Capture the live `{source, settings}` as a SchemeVersion (not yet stored). */
+	#buildVersion(label?: string, note?: string, parentId?: string): SchemeVersion {
+		const at = Date.now();
+		return {
+			id: newVersionId(),
+			label: label?.trim() || defaultVersionLabel(at),
+			note: note?.trim() || undefined,
+			source: app.source,
+			settings: snapshotSettings(),
+			createdAt: at,
+			parentId
+		};
+	}
+
+	/** Checkpoint the current working copy. Also flushes live edits to the doc. */
+	snapshot(label?: string, note?: string): SchemeVersion | null {
+		if (!this.hydrated || !this.activeEnv) return null;
+		const v = this.#buildVersion(label, note);
+		this.#commitVersions(capVersions([...this.versions, v]));
+		return v;
+	}
+
+	/**
+	 * Restore a version's `{source, settings}` into the working copy. Non-destructive:
+	 * the current state is auto-snapshotted first, so a restore is always undoable.
+	 */
+	restoreVersion(id: string): void {
+		const target = this.versions.find((v) => v.id === id);
+		if (!target || !this.activeEnv) return;
+		// Auto-snapshot the pre-restore state (built from current app BEFORE we mutate).
+		const auto = this.#buildVersion(
+			'Before restore',
+			`Auto-saved before restoring “${target.label}”`
+		);
+		const withAuto = capVersions([...this.versions, auto]);
+		// Apply the restored snapshot, then persist source+settings+versions together.
+		app.source = target.source;
+		applySettings(target.settings);
+		this.#commitVersions(withAuto);
+	}
+
+	pinVersion(id: string, pinned: boolean): void {
+		this.#commitVersions(this.versions.map((v) => (v.id === id ? { ...v, pinned } : v)));
+	}
+
+	renameVersion(id: string, label: string): void {
+		const trimmed = label.trim();
+		this.#commitVersions(
+			this.versions.map((v) =>
+				v.id === id ? { ...v, label: trimmed || defaultVersionLabel(v.createdAt) } : v
+			)
+		);
+	}
+
+	setVersionNote(id: string, note: string): void {
+		const trimmed = note.trim();
+		this.#commitVersions(
+			this.versions.map((v) => (v.id === id ? { ...v, note: trimmed || undefined } : v))
+		);
+	}
+
+	deleteVersion(id: string): void {
+		this.#commitVersions(this.versions.filter((v) => v.id !== id));
+	}
+
+	/**
+	 * Persist a new versions array onto the active doc, alongside the live
+	 * source+settings (so a version op also saves pending edits). Degrades under
+	 * quota by dropping the oldest UNPINNED versions and retrying, so pinned
+	 * checkpoints and the user's source are never lost to storage pressure.
+	 */
+	#commitVersions(versions: SchemeVersion[]): void {
+		if (!this.activeEnv) return;
+		const settings = snapshotSettings();
+		let next = versions;
+		let res: WriteResult;
+		// Try, then shed oldest unpinned on quota until it fits or nothing's left to drop.
+		for (;;) {
+			const env: DocEnvelope = {
+				...this.activeEnv,
+				source: app.source,
+				settings,
+				versions: next.length ? next : undefined,
+				updatedAt: Date.now(),
+				schemaVersion: DOC_SCHEMA_VERSION
+			};
+			res = store.writeDoc(env);
+			if (res.ok) {
+				this.activeEnv = env;
+				this.versions = next;
+				this.index = store.listDocs();
+				this.baseline = JSON.stringify({ source: env.source, settings });
+				this.#reportWrite(res);
+				return;
+			}
+			const droppable = next.filter((v) => !v.pinned).sort((a, b) => a.createdAt - b.createdAt)[0];
+			if (res.reason !== 'quota' || !droppable) break;
+			next = next.filter((v) => v.id !== droppable.id);
+		}
+		this.#reportWrite(res);
+	}
+
 	// ── library backup ─────────────────────────────────────────────────────────
 
 	exportLibrary(): string {
@@ -237,6 +355,7 @@ export class DocStore {
 	#applyDoc(env: DocEnvelope): void {
 		this.activeEnv = env;
 		this.activeId = env.id;
+		this.versions = env.versions ?? [];
 		app.source = env.source;
 		applySettings(env.settings);
 		this.baseline = snapshotKey();

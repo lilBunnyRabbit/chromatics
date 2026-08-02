@@ -38,6 +38,7 @@ updated: 2026-06-24
 - [[Accessibility]] — WCAG, APCA, CVD simulation, and how they power product features.
 - [[Library Landscape]] — culori / colorjs.io / chroma.js / d3-color, with verdicts.
 - [[Color Theory]] — foundational theory (harmony, perception, mixing).
+- [[Brand Dark Theme Spec]] — the finished lilBunnyRabbit theme, both modes: one seed, 17 tokens with `light_` twins, every derivation and the source.
 - [[Brand Color Design]] — brand palette principles.
 - [[Resources]] — the "where to learn more" hub: references, tools, libraries, papers.
 

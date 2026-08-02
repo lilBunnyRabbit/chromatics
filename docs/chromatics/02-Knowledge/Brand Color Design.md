@@ -6,6 +6,9 @@ tags: [knowledge, brand]
 
 A worked methodology for deriving a complete, accessible brand palette from a single base color using perceptual color relationships. The approach starts from a dark background, builds a primary by combining hue rotation with a perceptual lightness bump, then derives secondary, accent, and foreground roles through complementary and split-complementary relationships in [[Oklch]] and [[HSL]]. This note captures the reusable rules; the underlying theory lives in [[Color Theory]], and these rules feed directly into [[Dynamic Theme]] generation and the [[Unified Product Plan]].
 
+> [!note] Superseded in practice
+> The applied, finished version of this methodology is [[Brand Dark Theme Spec]] — same seed, every constant now derived rather than hand-tuned, with a verified 63-pair contrast contract.
+
 ## Core Idea
 
 Pick **one base color** (here a dark background) and derive every other role from it by fixed, repeatable transforms. Working in [[Oklch]] keeps lightness and chroma perceptually even across hues, so a single "+L, rotate hue" rule produces consistent results no matter where on the wheel you land — unlike HSL, where equal lightness values look uneven between hues. Every derived color is validated against the background for [[Accessibility]] contrast.

@@ -19,7 +19,7 @@
 		// pollutes an existing slot; drop the hash so a refresh won't re-import.
 		decodeHash(location.hash).then((shared) => {
 			if (shared?.source) {
-				docs.openShared(shared.source);
+				docs.openShared(shared.source, shared.settings);
 				history.replaceState(null, '', location.pathname + location.search);
 			}
 		});

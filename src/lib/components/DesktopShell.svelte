@@ -6,10 +6,12 @@
 	import Styleguide from '$lib/components/Styleguide.svelte';
 	import Studio from '$lib/components/Studio.svelte';
 	import Validate from '$lib/components/Validate.svelte';
+	import History from '$lib/components/History.svelte';
 	import Docs from '$lib/components/Docs.svelte';
 	import ExportPanel from '$lib/components/ExportPanel.svelte';
 	import DocControls from '$lib/components/DocControls.svelte';
 	import { app } from '$lib/state/app.svelte';
+	import { docs } from '$lib/state/docs.svelte';
 	import { ui, type Tab, PRIMARY_TABS, ADVANCED_TABS, isAdvancedTab } from '$lib/state/ui.svelte';
 	import { welcome } from '$lib/state/welcome.svelte';
 	import { completion, hover, makeSwatches } from '$lib/dsl/editor-bindings';
@@ -41,6 +43,7 @@
 		styleguide: 'Design System',
 		matrix: 'Matrix',
 		validate: 'Validate',
+		history: 'History',
 		export: 'Export'
 	};
 	const primaryTabs = PRIMARY_TABS.map((id) => ({ id, label: LABELS[id] }));
@@ -63,7 +66,7 @@
 	let shareLabel = $state('Share');
 
 	async function share() {
-		location.hash = await encodeHash({ source: app.source });
+		location.hash = await encodeHash({ source: app.source, settings: docs.currentSettings() });
 		navigator.clipboard?.writeText(location.href);
 		shareLabel = 'Copied!';
 		setTimeout(() => (shareLabel = 'Share'), 1200);
@@ -317,6 +320,8 @@
 					<Preview />
 				{:else if ui.tab === 'styleguide'}
 					<Styleguide />
+				{:else if ui.tab === 'history'}
+					<History />
 				{:else}
 					<ExportPanel />
 				{/if}

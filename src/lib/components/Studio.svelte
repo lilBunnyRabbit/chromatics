@@ -3,29 +3,49 @@
 	import Ramp from './tools/Ramp.svelte';
 	import Gradient from './tools/Gradient.svelte';
 	import AutoFix from './tools/AutoFix.svelte';
+	import Compare from './tools/Compare.svelte';
 	import ImageExtract from './tools/ImageExtract.svelte';
 	import Pick from './tools/Pick.svelte';
 
-	type ToolId = 'harmony' | 'ramp' | 'gradient' | 'fix' | 'extract' | 'pick';
-	const TOOLS: { id: ToolId; label: string; blurb: string }[] = [
+	type ToolId = 'harmony' | 'ramp' | 'gradient' | 'fix' | 'compare' | 'extract' | 'pick';
+	/** `emits: false` = the tool decides through the role overrides, not the source. */
+	const TOOLS: { id: ToolId; label: string; blurb: string; emits?: boolean }[] = [
 		{
 			id: 'harmony',
 			label: 'Harmony',
-			blurb: 'Complementary, triadic & analogous colors off a base hue.'
+			blurb: 'Complementary, triadic & analogous colors off a base hue.',
+			emits: true
 		},
 		{
 			id: 'ramp',
 			label: 'Tonal ramp',
-			blurb: 'A 50–950 lightness or HCT-tone scale from one color.'
+			blurb: 'A 50–950 lightness or HCT-tone scale from one color.',
+			emits: true
 		},
 		{
 			id: 'gradient',
 			label: 'Gradient',
-			blurb: 'Interpolate two colors in OKLab, OKLCH or linear light.'
+			blurb: 'Interpolate two colors in OKLab, OKLCH or linear light.',
+			emits: true
 		},
-		{ id: 'fix', label: 'Auto-fix', blurb: 'Nudge a foreground until it meets a contrast target.' },
-		{ id: 'extract', label: 'From image', blurb: 'Pull a starter palette from a logo or photo.' },
-		{ id: 'pick', label: 'Pick', blurb: 'Eyedropper / hex → a named color.' }
+		{
+			id: 'fix',
+			label: 'Auto-fix',
+			blurb: 'Nudge a foreground until it meets a contrast target.',
+			emits: true
+		},
+		{
+			id: 'compare',
+			label: 'Compare',
+			blurb: 'Rank every bg / fg / primary combination your palette can form, side by side.'
+		},
+		{
+			id: 'extract',
+			label: 'From image',
+			blurb: 'Pull a starter palette from a logo or photo.',
+			emits: true
+		},
+		{ id: 'pick', label: 'Pick', blurb: 'Eyedropper / hex → a named color.', emits: true }
 	];
 	let tool = $state<ToolId>('harmony');
 	const active = $derived(TOOLS.find((t) => t.id === tool)!);
@@ -42,8 +62,13 @@
 		</div>
 	</div>
 	<div class="studio-body scroll">
-		<p class="blurb">{active.blurb} <span class="emit-note">Inserts DSL into the editor.</span></p>
-		<div class="tool-host">
+		<p class="blurb">
+			{active.blurb}
+			<span class="emit-note">
+				{active.emits ? 'Inserts DSL into the editor.' : 'Applies as role overrides.'}
+			</span>
+		</p>
+		<div class="tool-host" class:wide={tool === 'compare'}>
 			{#if tool === 'harmony'}
 				<Harmony />
 			{:else if tool === 'ramp'}
@@ -52,6 +77,8 @@
 				<Gradient />
 			{:else if tool === 'fix'}
 				<AutoFix />
+			{:else if tool === 'compare'}
+				<Compare />
 			{:else if tool === 'extract'}
 				<ImageExtract />
 			{:else}
@@ -94,6 +121,10 @@
 	}
 	.tool-host {
 		max-width: 760px;
+	}
+	/* The candidate grid is a comparison surface — it wants every pixel it can get. */
+	.tool-host.wide {
+		max-width: none;
 	}
 
 	@media (max-width: 640px) {

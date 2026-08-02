@@ -35,9 +35,35 @@ export type DocOrigin = 'blank' | 'example' | 'imported' | 'shared';
 /** Per-document view options (Preview / Studio / Styleguide), saved with the doc. */
 export interface DocSettings {
 	roles: Roles;
+	/**
+	 * Dark-mode role overrides. Optional & additive: docs written before the
+	 * per-mode override seam simply have none, and read back as "all auto".
+	 */
+	darkRoles?: Roles;
 	opacities: Opacities;
 	visionSim: VisionSimulation;
 	fgOpacity: number;
+}
+
+/**
+ * A checkpointed `{ source, settings }` snapshot (CD-14). Nothing derived is ever
+ * stored — a version is exactly the input that determines a scheme, so diffing is
+ * a re-derivation of two of these. Lives inline on the envelope (additive: an old
+ * reader ignores it; library export/import carries it; pinned ones survive
+ * capping and quota pressure).
+ */
+export interface SchemeVersion {
+	id: string;
+	/** User-editable label; defaults to a timestamp string. */
+	label: string;
+	note?: string;
+	source: string;
+	settings?: DocSettings;
+	createdAt: number;
+	/** Pinned versions are exempt from the cap and from quota-pressure dropping. */
+	pinned?: boolean;
+	/** The version this one was restored from (provenance breadcrumb). */
+	parentId?: string;
 }
 
 export interface DocEnvelope {
@@ -49,6 +75,8 @@ export interface DocEnvelope {
 	/** Example name when origin === 'example'. */
 	exampleId?: string;
 	settings?: DocSettings;
+	/** Checkpointed snapshots (CD-14), newest appended last. Optional & additive. */
+	versions?: SchemeVersion[];
 	createdAt: number;
 	updatedAt: number;
 	schemaVersion: number;
@@ -133,6 +161,32 @@ export function newId(): string {
 	return 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+export function newVersionId(): string {
+	return 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// ── versions (CD-14) ──────────────────────────────────────────────────────────
+
+/** Max retained UNPINNED versions per document; pinned ones are always kept. */
+export const VERSION_CAP = 30;
+
+/**
+ * Enforce the per-doc version cap: keep every pinned version plus the most recent
+ * `cap` unpinned ones, dropping the oldest unpinned beyond that. Original array
+ * order is preserved (oldest → newest); only over-cap unpinned entries are removed.
+ */
+export function capVersions(versions: SchemeVersion[], cap = VERSION_CAP): SchemeVersion[] {
+	const unpinned = versions.filter((v) => !v.pinned);
+	if (unpinned.length <= cap) return versions;
+	const keep = new Set(
+		[...unpinned]
+			.sort((a, b) => b.createdAt - a.createdAt)
+			.slice(0, Math.max(0, cap))
+			.map((v) => v.id)
+	);
+	return versions.filter((v) => v.pinned || keep.has(v.id));
+}
+
 // ── envelope <-> index ───────────────────────────────────────────────────────
 
 export function entryFromEnvelope(env: DocEnvelope): DocIndexEntry {
@@ -152,6 +206,7 @@ export function makeEnvelope(init: {
 	origin?: DocOrigin;
 	exampleId?: string;
 	settings?: DocSettings;
+	versions?: SchemeVersion[];
 	at?: number;
 }): DocEnvelope {
 	const at = init.at ?? Date.now();
@@ -162,6 +217,7 @@ export function makeEnvelope(init: {
 		origin: init.origin ?? 'blank',
 		exampleId: init.exampleId,
 		settings: init.settings,
+		versions: init.versions,
 		createdAt: at,
 		updatedAt: at,
 		schemaVersion: DOC_SCHEMA_VERSION
@@ -385,6 +441,7 @@ export function importLibrary(json: string): { added: number; firstId: string | 
 			source: raw.source,
 			origin: 'imported',
 			settings: raw.settings,
+			versions: Array.isArray(raw.versions) ? raw.versions : undefined,
 			at: typeof raw.updatedAt === 'number' ? raw.updatedAt : now
 		});
 		const res = writeDoc(env);
