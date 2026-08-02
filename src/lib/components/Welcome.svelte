@@ -139,7 +139,8 @@ surface = bg.lighten(0.05)`;
 	let lastFocused: HTMLElement | null = null;
 
 	onMount(() => {
-		if (!hasWelcomed()) welcome.open = true;
+		// Never auto-open inside an embedded /showcase frame.
+		if (!ui.embed && !hasWelcomed()) welcome.open = true;
 	});
 
 	$effect(() => {

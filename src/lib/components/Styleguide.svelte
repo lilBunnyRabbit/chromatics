@@ -28,8 +28,12 @@
 	import TokenSpecimens from './styleguide/TokenSpecimens.svelte';
 	import FlowSteps from './system/FlowSteps.svelte';
 
-	/** Which mode the live preview + audit show. View-only (non-dirtying). */
-	let mode = $state<'light' | 'dark'>('light');
+	/**
+	 * Which mode the live preview + audit show. View-only (non-dirtying), and
+	 * shared with the Preview tab through `app.previewMode` so the two toggles
+	 * never disagree.
+	 */
+	const mode = $derived(app.previewMode);
 
 	// ── rendered surface (CVD-aware, like Preview) ──
 	const simEntries = $derived(
@@ -43,7 +47,7 @@
 		byName: new Map(simEntries.map((e) => [e.name, e]))
 	});
 	// Active mode's roles drive the preview; dark falls back to light when unauthored.
-	const activeRoles = $derived(mode === 'dark' ? app.darkEffectiveRoles : app.effectiveRoles);
+	const activeRoles = $derived(app.modeRoles);
 	const themeVars = $derived(cssVars(simScheme, activeRoles, app.opacities));
 	const namedVars = $derived(
 		simEntries.map((e) => `--color-${kebab(e.name)}:${e.color.toCSS()}`).join(';')
@@ -56,7 +60,7 @@
 	});
 
 	// ── audit (current mode; from real components, else the 21 fixed pairs) ──
-	const audit = $derived(mode === 'dark' ? app.darkComponentAudit : app.componentAudit);
+	const audit = $derived(app.modeComponentAudit);
 	const fails = $derived(
 		audit.filter(
 			(a) => (a.large ? wcagLevels(a.ratio).large : wcagLevels(a.ratio).normal) === 'Fail'
@@ -116,8 +120,14 @@
 							: null;
 		if (s) {
 			insert(s.lines, s.comment);
-			if (id === 'modes') mode = 'dark';
+			if (id === 'modes') app.previewMode = 'dark';
 		}
+	}
+
+	/** "name #hex" for a role target, or a placeholder when it resolves to nothing. */
+	function describe(name: string): string {
+		const e = name ? app.scheme.byName.get(name) : undefined;
+		return e ? `${e.name} ${e.color.hex}` : 'none';
 	}
 
 	const roleRows: [keyof Roles, string, boolean][] = [
@@ -139,15 +149,21 @@
 	<div class="sg-toolbar">
 		<span class="sg-tool-title">Design System</span>
 		<div class="mode-toggle" role="group" aria-label="Preview mode">
-			<button class="mode-btn" class:on={mode === 'light'} onclick={() => (mode = 'light')}>
+			<button
+				class="mode-btn"
+				class:on={mode === 'light'}
+				onclick={() => (app.previewMode = 'light')}
+			>
 				Light
 			</button>
 			<button
 				class="mode-btn"
 				class:on={mode === 'dark'}
 				class:muted={!app.hasDarkTheme}
-				title={app.hasDarkTheme ? 'Preview dark mode' : 'No dark theme yet — mirrors light'}
-				onclick={() => (mode = 'dark')}
+				title={app.hasDarkTheme
+					? 'Preview dark mode'
+					: 'No dark theme authored — dark inherits light until you override a role'}
+				onclick={() => (app.previewMode = 'dark')}
 			>
 				Dark
 			</button>
@@ -178,7 +194,7 @@
 					<h2 class="step-h">{activeStepObj.title}</h2>
 					<p class="step-desc">{activeStepObj.blurb}</p>
 				</div>
-				{#if activeStepObj.status === 'todo' && SCAFFOLD_CTA[activeStep]}
+				{#if activeStepObj.status === 'todo' && SCAFFOLD_CTA[activeStep] && !ui.sourceLocked}
 					<button
 						class="btn btn-accent"
 						disabled={!canScaffold}
@@ -196,14 +212,19 @@
 						<div class="sg-empty">Define some colors in the editor to start mapping roles.</div>
 					{:else}
 						<p class="step-hint">
-							Map named colors to roles, or with <code>theme(&#123;…&#125;)</code> in the editor
-							(the editor wins and is shareable). <strong>Auto-map roles</strong> writes a
-							<code>theme()</code> block from a best guess.
+							You are editing the <strong>{mode}</strong> mapping (switch with the toolbar toggle).
+							<code>Auto</code> follows the editor's <code>roles &#123;…&#125;</code> /
+							<code>theme(&#123;…&#125;)</code>
+							block — it names the color it landed on. Picking anything else pins that role for this mode
+							and wins over the editor, without rewriting your source.
+							<strong>Auto-map roles</strong> writes a <code>theme()</code> block from a best guess.
 						</p>
 						<div class="role-grid">
 							{#each roleRows as [key, label, optional] (key)}
-								{@const active = app.effectiveRoles[key]}
-								{@const locked = app.themeRoles[key] !== undefined && app.themeRoles[key] !== ''}
+								{@const active = app.modeRoles[key]}
+								{@const auto = app.modeAutoRoles[key]}
+								{@const fromDsl = (mode === 'dark' ? app.darkThemeRoles : app.themeRoles)[key]}
+								{@const pinned = app.modeOverrides[key] !== ''}
 								<div class="role-row">
 									<div
 										class="role-swatch"
@@ -213,10 +234,11 @@
 									></div>
 									<label class="role-label">
 										<span class="role-name"
-											>{label}{#if locked}<span class="role-tag">theme</span>{/if}</span
+											>{label}{#if pinned}<span class="role-tag">pinned</span
+												>{:else if fromDsl}<span class="role-tag">theme</span>{/if}</span
 										>
-										<select class="role-select" bind:value={app.roles[key]} disabled={locked}>
-											<option value="">{locked ? `theme: ${active}` : 'Auto'}</option>
+										<select class="role-select" bind:value={app.modeOverrides[key]}>
+											<option value="">Auto · {describe(auto)}</option>
 											{#if optional}<option value={NONE_ROLE}>None</option>{/if}
 											{#each app.scheme.entries as e (e.name)}
 												<option value={e.name}>{e.name}</option>
@@ -596,9 +618,6 @@
 		padding: 3px 5px;
 		font-size: 12px;
 		width: 100%;
-	}
-	.role-select:disabled {
-		opacity: 0.6;
 	}
 
 	/* ── light/dark mode toggle (toolbar) ── */

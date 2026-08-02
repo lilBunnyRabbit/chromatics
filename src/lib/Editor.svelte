@@ -22,18 +22,25 @@
 		onchange,
 		completionSource,
 		hover,
-		swatch
+		swatch,
+		readonly = false
 	}: {
 		value: string;
 		onchange?: (value: string) => void;
 		completionSource?: CompletionSource;
 		hover?: Extension;
 		swatch?: Extension;
+		/** Display-only: no typing, no caret, but selection/copy/hover stay live. */
+		readonly?: boolean;
 	} = $props();
 
 	let container: HTMLDivElement;
 	let view: EditorView;
 	const swatchCompartment = new Compartment();
+	// Live-swappable so the /showcase embed can unlock the editor in place.
+	const readonlyCompartment = new Compartment();
+	const readonlyExt = (on: boolean): Extension =>
+		on ? [EditorState.readOnly.of(true), EditorView.editable.of(false)] : [];
 
 	const theme = EditorView.theme({
 		'&': {
@@ -192,6 +199,7 @@
 						: []),
 					...(hover ? [hover] : []),
 					swatchCompartment.of(swatch ?? []),
+					readonlyCompartment.of(readonlyExt(readonly)),
 					theme,
 					highlight,
 					updateListener
@@ -215,6 +223,10 @@
 	// Live-swap the swatch marker style when the caller passes a new extension.
 	$effect(() => {
 		if (view) view.dispatch({ effects: swatchCompartment.reconfigure(swatch ?? []) });
+	});
+
+	$effect(() => {
+		if (view) view.dispatch({ effects: readonlyCompartment.reconfigure(readonlyExt(readonly)) });
 	});
 </script>
 
