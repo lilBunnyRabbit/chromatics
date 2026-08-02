@@ -195,17 +195,46 @@ export function buildManifest(
 	// theme is a callable builtin AND a namespace: theme.light({…}) / theme.dark({…})
 	registerNamespace('theme', THEME_SIGNATURES);
 
-	// flat channel accessors on a bare value (ok_l, hwb_w, lab_a, lr…)
+	// Channel accessors on a bare value, in `ColorValue.member()`'s own dispatch
+	// order: the color's OWN model's un-prefixed channels win, then the flat index.
+	// So `.l` is native lightness on OKLCH/Lab/…, and only falls back to hsl.l on a
+	// model with no local `l`; `.c` / `.a` / `.k` are native-only (no flat key).
+	const localOwners = new Map<string, ModelDef>();
+	for (const m of models) {
+		if (m.id === 'root') continue;
+		for (const ch of m.channels) if (!localOwners.has(ch.localKey)) localOwners.set(ch.localKey, m);
+	}
+	const seenValue = new Set<string>();
+	// 1) flat index (ok_l, hwb_w, lab_a, lr…) + the hsl/srgb flat keys
 	for (const [key, ch] of channels) {
 		propertyNames.add(key);
+		seenValue.add(key);
 		valueMembers.push({
 			name: key,
 			kind: 'channel',
 			detail: 'number',
-			doc: `${ch.label} (${ch.modelId})`,
+			doc: localOwners.has(key)
+				? `${ch.label} — the color's own model (${ch.modelId} when it has no ${key})`
+				: `${ch.label} (${ch.modelId})`,
 			model: ch.modelId,
 			backed: true,
 			status: 'stable'
+		});
+	}
+	// 2) native-only local keys (c, a, k, w, x…) — reachable bare on their model
+	for (const [key, m] of localOwners) {
+		if (seenValue.has(key)) continue;
+		seenValue.add(key);
+		propertyNames.add(key);
+		const ch = m.channels.find((c) => c.localKey === key)!;
+		valueMembers.push({
+			name: key,
+			kind: 'channel',
+			detail: 'number',
+			doc: `${ch.label} — the color's own model (e.g. ${m.id})`,
+			model: m.id,
+			backed: m.backed,
+			status: m.status
 		});
 	}
 

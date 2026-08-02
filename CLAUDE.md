@@ -31,7 +31,7 @@ Run from the **repo root** (the Bash shell cwd can drift into subdirs — `cd` f
 ```sh
 bun install
 bun run dev            # dev server
-bun test               # unit tests (bun:test) — currently 408 across 30 files
+bun test               # unit tests (bun:test) — currently 421 across 31 files
 bun run check          # svelte-kit sync + svelte-check (expect 0 errors / 0 warnings)
 bunx vite build        # static build → build/  (also: bun run build)
 bun run format         # prettier --write
@@ -43,9 +43,9 @@ Before calling any change done: **`bun test` + `bun run check` + `bunx vite buil
 
 ### Color engine — `src/lib/models/`
 
-The hybrid "A+C" design. Immutable, OKLCH-stored color values + a data-driven model registry + one runtime view class.
+The hybrid "A+C" design. Immutable, **model-tagged** color values (a color is stored natively in the model it was built in — there is no single canonical store) + a data-driven model registry + one runtime view class.
 
-- `value.ts` — `ColorValue` (immutable; canonical `_oklch`; lazy `project(mode)` cache; `channel`/`view`/`member` dispatch; `.hex/.inGamut/.gamutMapped/.toCSS`). **Channel accessors and per-model views (`c.oklch`, `c.lab`, `c.ok_h`, …) are resolved dynamically at runtime via `member()` — they are NOT on the static TS type.** In typed `.ts`/`.svelte` code, `c.oklch.lighten(…)` will fail `svelte-check`; only the DSL evaluator reaches them. If you need a value's hex in component code, derive it through the DSL (`evaluate`) or use typed methods.
+- `value.ts` — `ColorValue` (immutable; native `_native` + `_model` tag; lazy `project(mode)` cache; `channel`/`view`/`member` dispatch; `.hex/.inGamut/.gamutMapped/.toCSS`). **Channel accessors and per-model views (`c.oklch`, `c.lab`, `c.ok_h`, …) are resolved dynamically at runtime via `member()` — they are NOT on the static TS type.** In typed `.ts`/`.svelte` code, `c.oklch.lighten(…)` will fail `svelte-check`; only the DSL evaluator reaches them. If you need a value's hex in component code, derive it through the DSL (`evaluate`) or use typed methods. **Bare channels are model-local**: `member()` resolves the color's OWN model's `localKey` **first**, so an OKLCH color's `.l/.c/.h` are its own coordinates and a Lab color's `.b` is Lab _b_ — same rule as methods ("channels and ops live on the model the color is already in"). Only then does it fall back to the flat `CHANNELS` index, which still serves cross-model namespaced reads (`.ok_l`, `.lab_a`) and the un-namespaced `h/s/l` (hsl) + `r/g/b` (srgb) keys for models that have no local channel of that name. `ColorValue.channel(key)` (used by components/analysis) is the **flat-index-only** low-level read and is unaffected.
 - `view.ts` — `ModelView`, the single runtime class (channel → method → cross-model re-entry).
 - `registry.ts` — the **only** culori importer; `toMode/getModel/allModels/CHANNELS/register/defineModel` + gamut helpers.
 - `types.ts`, `families.ts`, `util.ts` — model/method/channel defs, op-tables + factories, coercions. `families.ts` has `mkHarmonyNative(mode)` (the per-model rotateHue/complementary/triadic/analogous set); `util.ts` has `lerpInMode(…, hueStrategy)` + `rotateHueInMode` (the model-generic interpolate/rotate primitives).
@@ -110,6 +110,7 @@ An **Obsidian vault** (markdown, not part of the build — `adapter-static` only
 - **`package.json` `sideEffects` must keep `"**/models/**"`** — otherwise the model registry is tree-shaken out and the static build crashes on boot (`No constructor registered for oklch`).
 - Run gates from the repo **root**.
 - Dynamic color accessors (`.oklch`, `.ok_h`, …) don't exist on the static type — see the engine note above.
+- **A bare channel means "this color's own model"** (`value.ts#member`), so `.l` is _not_ globally HSL: it's OKLCH L on an OKLCH color, Lab L\* on a Lab color, and only falls back to `hsl.l` when the native model has no `l`. Adding a channel whose `localKey` collides with a **method name on the same model** would silently shadow the method — `tests/native-channels.test.ts` guards that. Component/analysis code that wants a specific space must keep using `c.channel('ok_l')`/`c.channel('r')` (flat index), never `member()`.
 - Theme/mobile detection happens **only after mount** on purpose; don't read `matchMedia`/`localStorage` during render.
 - **A UI role override beats the DSL, not the other way round** (`deriveScheme`'s `mergeRoles` / `applyOverrides`). It used to be inverted, which silently made every Preview dropdown a no-op the moment a `roles {}` block existed. Overrides are per mode (`app.roles` / `app.darkRoles`) — a new preview surface must bind `app.modeOverrides`, never `app.roles` directly, or it will edit light while showing dark.
 - **`ui.embed` / `ui.sourceLocked` are the embed's two kill-switches.** `embed` suppresses every write that would leak an iframe's presentation into the visitor's own studio (`chromatics:theme` + `chromatics:ui` in `+layout.svelte`, the auto-opening welcome modal) **and** the reads that would override the embed's URL params; `sourceLocked` makes `tools/shared.ts#insert` a no-op and hides the Design System scaffold CTAs. Any new persistence write in `+layout` or new source-mutating panel must respect them, or an embed will start writing to its host's visitors.
