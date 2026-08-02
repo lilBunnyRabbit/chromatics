@@ -4,6 +4,7 @@
  * into the editor through `insert` — keeping the editor the source of truth.
  */
 import { app } from '$lib/state/app.svelte';
+import { ui } from '$lib/state/ui.svelte';
 import { appendStatements } from '$lib/dsl/emit';
 
 /** All identifiers already defined in the source (colors + plain values). */
@@ -11,8 +12,14 @@ export function takenNames(): string[] {
 	return [...app.scheme.entries.map((e) => e.name), ...app.scheme.nonColorVars.map((v) => v.name)];
 }
 
-/** Append generated DSL statements to the editor source. */
+/**
+ * Append generated DSL statements to the editor source. A no-op while the
+ * source is locked (the /showcase embed in read-only mode) — emitters are
+ * reachable from panels the embed reuses, and a viewer must not rewrite the
+ * author's scheme.
+ */
 export function insert(lines: string[], comment?: string): void {
+	if (ui.sourceLocked) return;
 	app.source = appendStatements(app.source, lines, comment);
 }
 

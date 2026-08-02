@@ -11,6 +11,7 @@
 	import Styleguide from '$lib/components/Styleguide.svelte';
 	import Matrix from '$lib/components/Matrix.svelte';
 	import Validate from '$lib/components/Validate.svelte';
+	import History from '$lib/components/History.svelte';
 	import ExportPanel from '$lib/components/ExportPanel.svelte';
 	import Docs from '$lib/components/Docs.svelte';
 	import BottomTabBar from './BottomTabBar.svelte';
@@ -93,6 +94,8 @@
 			<Validate />
 		{:else if ui.tab === 'matrix'}
 			<Matrix />
+		{:else if ui.tab === 'history'}
+			<History />
 		{:else if ui.tab === 'export'}
 			<ExportPanel />
 		{/if}

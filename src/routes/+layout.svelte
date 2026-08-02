@@ -9,19 +9,23 @@
 	let ready = $state(false);
 
 	onMount(() => {
-		const applied = document.documentElement.getAttribute('data-theme');
-		if (applied === 'dark' || applied === 'light') ui.theme = applied;
-		try {
-			const raw = localStorage.getItem('chromatics:ui');
-			if (raw) {
-				const p = JSON.parse(raw);
-				if (typeof p.editorWidth === 'number') ui.editorWidth = p.editorWidth;
-				if (typeof p.editorCollapsed === 'boolean') ui.editorCollapsed = p.editorCollapsed;
-				if (isTab(p.tab)) ui.tab = p.tab;
-				if (p.swatchMode) ui.swatchMode = p.swatchMode;
+		// Child onMounts (the page) run first, so `ui.embed` is already set when the
+		// /showcase route owns the render — its URL params, not localStorage, win.
+		if (!ui.embed) {
+			const applied = document.documentElement.getAttribute('data-theme');
+			if (applied === 'dark' || applied === 'light') ui.theme = applied;
+			try {
+				const raw = localStorage.getItem('chromatics:ui');
+				if (raw) {
+					const p = JSON.parse(raw);
+					if (typeof p.editorWidth === 'number') ui.editorWidth = p.editorWidth;
+					if (typeof p.editorCollapsed === 'boolean') ui.editorCollapsed = p.editorCollapsed;
+					if (isTab(p.tab)) ui.tab = p.tab;
+					if (p.swatchMode) ui.swatchMode = p.swatchMode;
+				}
+			} catch {
+				/* ignore */
 			}
-		} catch {
-			/* ignore */
 		}
 
 		// Desktop/mobile shell gate. Only read matchMedia after mount so the
@@ -41,6 +45,9 @@
 	$effect(() => {
 		if (!ready) return;
 		document.documentElement.setAttribute('data-theme', ui.theme);
+		// The /showcase embed drives the theme from its own URL param — never let
+		// an embedded frame overwrite the visitor's studio preference.
+		if (ui.embed) return;
 		try {
 			localStorage.setItem('chromatics:theme', ui.theme);
 		} catch {
@@ -49,7 +56,7 @@
 	});
 
 	$effect(() => {
-		if (!ready) return;
+		if (!ready || ui.embed) return;
 		try {
 			localStorage.setItem(
 				'chromatics:ui',

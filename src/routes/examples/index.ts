@@ -10,6 +10,7 @@ import {
 	name as microsaasEnforcedName,
 	source as microsaasEnforcedSource
 } from './microsaas-enforced';
+import { name as brandDarkName, source as brandDarkSource } from './brand-dark';
 
 export interface Example {
 	name: string;
@@ -26,5 +27,6 @@ export const examples: Example[] = [
 	{ name: designSystemName, source: designSystemSource },
 	{ name: microsaasName, source: microsaasSource },
 	{ name: microsaasEnforcedName, source: microsaasEnforcedSource },
+	{ name: brandDarkName, source: brandDarkSource },
 	{ name: dynamicName, source: dynamicSource }
 ];

@@ -114,16 +114,28 @@ export class ColorValue {
 	}
 
 	/**
-	 * Member dispatch for a bare value: channels → conversion → OWN-model methods
-	 * → cross-model views → root queries. The DSL evaluator routes `color.<prop>`
-	 * through here.
+	 * Member dispatch for a bare value: OWN-model channels → flat channel index →
+	 * conversion → OWN-model methods → cross-model views → root queries. The DSL
+	 * evaluator routes `color.<prop>` through here.
 	 *
-	 * Crucially a color exposes ITS OWN model's methods directly: an OKLCH color
-	 * answers `c.lighten()`, an HSL color answers `c.tint()`. You only prefix a
-	 * view (`c.oklch.…`) to reach a DIFFERENT model — "ops live on the model the
-	 * color is already in."
+	 * Crucially a color exposes ITS OWN model's channels AND methods directly: an
+	 * OKLCH color answers `c.l`/`c.c`/`c.h` and `c.lighten()`, an HSL color answers
+	 * `c.s` and `c.tint()`. You only prefix a view (`c.oklch.…`) to reach a
+	 * DIFFERENT model — "channels and ops live on the model the color is already
+	 * in." The flat index still resolves cross-model reads by namespaced key
+	 * (`c.ok_l`, `c.lab_a`) and keeps the hsl/srgb flat keys (`h`/`s`/`l`,
+	 * `r`/`g`/`b`) working on models that have no local channel of that name.
 	 */
 	member(prop: string): DSLValue | undefined {
+		// This color's OWN model's channels, un-prefixed (mirrors ModelView.member).
+		const ownDef = getModel(this._model) ?? getModelByMode(this._model);
+		const localCh = ownDef?.channels.find((c) => c.localKey === prop || c.key === prop);
+		if (localCh) {
+			const v = (this.project(ownDef!.mode) as unknown as Record<string, number | undefined>)[
+				localCh.culoriField
+			];
+			return (v ?? 0) * (localCh.scale ?? 1);
+		}
 		if (CHANNELS.has(prop)) return this.channel(prop);
 		// Explicit conversion: c.to("oklch") or c.to(c.oklch). Returns a tagged color.
 		if (prop === 'to') {
@@ -134,7 +146,6 @@ export class ColorValue {
 			};
 		}
 		// This color's OWN model methods, reachable without a view prefix.
-		const ownDef = getModel(this._model) ?? getModelByMode(this._model);
 		const own = ownDef?.methods.get(prop);
 		if (own) {
 			if (own.kind === 'accessor') return own.impl(this, []);

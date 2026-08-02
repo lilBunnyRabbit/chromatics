@@ -49,8 +49,22 @@ import {
 	importLibrary,
 	readActive,
 	writeActive,
-	DOC_SCHEMA_VERSION
+	capVersions,
+	newVersionId,
+	VERSION_CAP,
+	DOC_SCHEMA_VERSION,
+	type SchemeVersion
 } from '../src/lib/persistence/documents';
+
+function mkVersion(init: Partial<SchemeVersion> & { createdAt: number }): SchemeVersion {
+	return {
+		id: newVersionId(),
+		label: init.label ?? 'v',
+		source: init.source ?? 'bg = hex("#fff")',
+		pinned: init.pinned,
+		...init
+	};
+}
 
 describe('document CRUD', () => {
 	test('writeDoc round-trips and upserts the index', () => {
@@ -191,5 +205,50 @@ describe('library export / import', () => {
 	test('import of garbage is a no-op', () => {
 		expect(importLibrary('not json').added).toBe(0);
 		expect(importLibrary('{}').added).toBe(0);
+	});
+
+	test('versions ride library export/import', () => {
+		const v = mkVersion({ createdAt: 1, label: 'snap', pinned: true });
+		const a = makeEnvelope({ name: 'A', source: 'aaa', versions: [v] });
+		writeDoc(a);
+		const dump = exportLibrary();
+		const { firstId } = importLibrary(dump);
+		const imported = firstId ? readDoc(firstId) : null;
+		expect(imported?.versions?.length).toBe(1);
+		expect(imported?.versions?.[0].label).toBe('snap');
+		expect(imported?.versions?.[0].pinned).toBe(true);
+	});
+});
+
+describe('versions (CD-14)', () => {
+	test('writeDoc round-trips versions on the envelope', () => {
+		const env = makeEnvelope({
+			name: 'V',
+			source: 'bg = hex("#fff")',
+			versions: [mkVersion({ createdAt: 10, label: 'first' })]
+		});
+		expect(writeDoc(env).ok).toBe(true);
+		const back = readDoc(env.id);
+		expect(back?.versions?.length).toBe(1);
+		expect(back?.versions?.[0].label).toBe('first');
+	});
+
+	test('capVersions keeps pinned + the most recent N unpinned', () => {
+		const versions: SchemeVersion[] = [];
+		for (let i = 0; i < VERSION_CAP + 5; i++) versions.push(mkVersion({ createdAt: i }));
+		// Pin the very oldest so it must survive despite being far past the cap.
+		versions[0].pinned = true;
+
+		const capped = capVersions(versions);
+		expect(capped.length).toBe(VERSION_CAP + 1); // cap unpinned + 1 pinned
+		expect(capped.some((v) => v.id === versions[0].id)).toBe(true); // pinned kept
+		// The oldest UNPINNED (index 1) is dropped; the newest is kept.
+		expect(capped.some((v) => v.id === versions[1].id)).toBe(false);
+		expect(capped.some((v) => v.id === versions[VERSION_CAP + 4].id)).toBe(true);
+	});
+
+	test('capVersions is a no-op under the cap', () => {
+		const versions = [mkVersion({ createdAt: 1 }), mkVersion({ createdAt: 2 })];
+		expect(capVersions(versions)).toEqual(versions);
 	});
 });

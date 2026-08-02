@@ -1,6 +1,6 @@
 import { test, expect, describe } from 'bun:test';
 import { manifest } from '../src/lib/dsl/manifest';
-import { OKLCH, getModel } from '../src/lib/models';
+import { OKLCH, getModel, CHANNELS } from '../src/lib/models';
 
 const probe = OKLCH(0.6, 0.12, 250);
 
@@ -13,9 +13,18 @@ describe('manifest <-> runtime (anti-drift)', () => {
 		expect(names).toContain('hex');
 	});
 
-	test('every flat channel accessor resolves to a number on a value', () => {
+	test('every channel accessor on a bare value resolves to a number', () => {
 		for (const m of manifest.valueMembers.filter((x) => x.kind === 'channel')) {
-			expect(typeof probe.channel(m.name)).toBe('number');
+			// Flat-index keys read off ANY color; native-only local keys (c, a, k…)
+			// read off a color that is actually in the owning model.
+			if (CHANNELS.has(m.name)) {
+				expect(typeof probe.channel(m.name)).toBe('number');
+				expect(typeof probe.member(m.name)).toBe('number');
+				continue;
+			}
+			const def = getModel(m.model);
+			if (!def?.backed) continue;
+			expect(typeof probe.to(m.model).member(m.name)).toBe('number');
 		}
 	});
 

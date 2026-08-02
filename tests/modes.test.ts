@@ -87,6 +87,47 @@ describe('dark re-binding + warnings', () => {
 	});
 });
 
+describe('per-mode role overrides (the preview override seam)', () => {
+	const derive = (roles = emptyRoles(), darkRoles = emptyRoles(), src = SRC) =>
+		deriveScheme(src, { roles, darkRoles, opacities: DEFAULT_OPACITIES });
+
+	test('a dark override wins over the theme.dark() re-point', () => {
+		const r = derive(emptyRoles(), { ...emptyRoles(), bg: 'bg' });
+		expect(r.darkAutoRoles.bg).toBe('bg_dark'); // what auto would have picked
+		expect(r.darkEffectiveRoles.bg).toBe('bg'); // the explicit pick wins
+	});
+
+	test('light and dark overrides are independent', () => {
+		const r = derive({ ...emptyRoles(), bg: 'primary' }, { ...emptyRoles(), fg: 'primary' });
+		expect(r.effectiveRoles.bg).toBe('primary');
+		expect(r.effectiveRoles.fg).toBe('fg'); // untouched by the dark override
+		expect(r.darkEffectiveRoles.bg).toBe('bg_dark'); // dark re-point still applies
+		expect(r.darkEffectiveRoles.fg).toBe('primary');
+	});
+
+	test('dark is previewable with NO dark theme authored', () => {
+		const noDark = `
+bg = OKLCH(0.96, 0.01, 250)
+fg = OKLCH(0.20, 0.02, 250)
+primary = OKLCH(0.60, 0.15, 250)
+bg_dark = OKLCH(0.18, 0.02, 250)
+roles {
+  bg = bg
+  fg = fg
+  primary = primary
+}`;
+		const r = derive(emptyRoles(), { ...emptyRoles(), bg: 'bg_dark' }, noDark);
+		expect(r.hasDarkTheme).toBe(false);
+		expect(r.darkAutoRoles.bg).toBe('bg'); // inherits light...
+		expect(r.darkEffectiveRoles.bg).toBe('bg_dark'); // ...until you override it
+	});
+
+	test('a dark role left on auto inherits the light override', () => {
+		const r = derive({ ...emptyRoles(), primary: 'fg' });
+		expect(r.darkEffectiveRoles.primary).toBe('fg');
+	});
+});
+
 describe('modeFragilePairs (worst-of-both)', () => {
 	const mk = (label: string, ratio: number): AuditPair => ({ label, fg: 'a', bg: 'b', ratio });
 

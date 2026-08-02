@@ -72,6 +72,11 @@
 		node.select();
 	}
 
+	function snapshot() {
+		const v = docs.snapshot();
+		flash(v ? 'Snapshot saved — see History' : 'Nothing to snapshot');
+	}
+
 	function switchDoc(e: Event) {
 		docs.open((e.currentTarget as HTMLSelectElement).value);
 	}
@@ -177,6 +182,26 @@
 		<button class="btn" onclick={() => docs.saveNow()} disabled={docs.saveState !== 'saving'}
 			>Save</button
 		>
+		<button
+			class="btn dc-snap"
+			onclick={snapshot}
+			title="Checkpoint the current source + settings (compare it later in History)"
+			aria-label="Take a snapshot"
+		>
+			<svg
+				viewBox="0 0 24 24"
+				width="14"
+				height="14"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+				><path d="M3 3v5h5" /><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" /><path d="M12 7v5l4 2" /></svg
+			>
+			Snapshot
+		</button>
 		<button class="btn" onclick={() => docs.newDoc()}>New</button>
 
 		<div class="dc-menu-host">
@@ -329,6 +354,7 @@
 			<button class="btn" onclick={() => docs.saveNow()} disabled={docs.saveState !== 'saving'}
 				>Save</button
 			>
+			<button class="btn" onclick={snapshot}>Snapshot</button>
 			<button class="btn" onclick={() => docs.newDoc()}>New</button>
 			<button class="btn" onclick={() => docs.duplicate(docs.activeId)}>Duplicate</button>
 			<button class="btn dc-del" onclick={requestDelete}>Delete…</button>
@@ -464,6 +490,11 @@
 		text-transform: uppercase;
 		color: var(--text-faint);
 		padding: 4px 6px 2px;
+	}
+	.dc-snap {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
 	}
 	.dc-templates {
 		display: inline-flex;
