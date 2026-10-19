@@ -55,7 +55,7 @@ Decisions:
 - **Everything is bound to the color's own class** (owner): _"all methods and everything should be bound to color class. I hate the pattern we had with dsl like someColor.hsl.l"_. No cross-model views (`c.hsl.l`, `c.oklch.lighten()`); reading another model's channel means converting: `c.to(Hsl).l`. This also settles most of "where operations live" (methods, not free functions), accepting that unused methods ship with their class.
 - **Custom models: not in v1.** The model contract stays internal; opening it later is additive.
 
-Still open from this round: how `is()` narrows (`instanceof` vs model id) given the dual-package hazard.
+How `is()` narrows was settled in grill 14 (model tag compare).
 
 ### Grill 2: storage, mutability, construction (decided)
 
@@ -204,6 +204,21 @@ Decisions:
   5. Video, print, catalogs.
 - **Studio migration: big bang at parity.** Culori stays in the app until the package covers everything the app uses; then one PR switches. Claude recommended incremental swaps behind `registry.ts`; the owner chose one clean cut over a half-culori period.
 
+### Grill 15: package file layout (decided 2026-10-19)
+
+- **A folder per model, flat** (no family level; family lives in the base class): `src/models/oklch/{oklch.ts, oklch.test.ts, oklch.domain.ts, oklch.fixtures.json, README.md}`. `src/core/` holds `color.ts`, `edge.ts`, `router.ts`, `families/`; `src/index.ts` is the root barrel; `src/all.ts` holds `models`, `parse`, `reachable`, `path`; `scripts/fixtures/` holds the oracle generators. Tests sit beside their source.
+- Rejected: folder per model under family (the 2025 `dev-dev` layout; re-grouping moves files), flat files with a separate `tests/` (the studio today).
+
+### Grill 16: sourced numbers (decided 2026-10-19)
+
+An Opus research agent checked CSS Color 4 (ED and TR, 2026-10-09), colorjs.io 0.7.1, culori 4.0.2, ColorAide 8.13.1, Chromium, WebKit, Stylo and colour-science, and measured float noise on V8 and JSC (`scratchpad/research/`, `scratchpad/scripts/noise.mjs`). The owner picked the matrix source and delegated the rest (_"dont know whats best decide"_). Values and citations are in the revisions of ADR-003, ADR-006 and ADR-008:
+
+- Matrices: CSS Color 4 64-bit where published, others derived and verified (owner). Found trap: Ottosson's 10-decimal matrices round-trip at 1.2e-4 relative near black.
+- Achromatic threshold: CSS values, `≤` (Claude).
+- `inGamut`: 7.5e-5 per channel (Claude).
+- `looksSame`: deltaEOk < 0.02 (Claude).
+- Round-trip: `|a − b| ≤ 1e-13 + 1e-12·|b|`, per-model looser bound with reason (Claude).
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.
@@ -213,7 +228,6 @@ Decisions:
 
 ## Still open
 
-- Numbers the ADRs need, each from a cited source: achromatic chroma epsilon per model, round-trip epsilon, the `looksSame` JND, `inGamut` epsilon (today 1e-5).
 - Where a catalog entry's name and code live when `get()` returns a plain color.
 - The DSL adapter's shape (clone at the boundary, `member()` onto class methods, the snake_case `ok_l` keys). Decided at migration time.
 - A packed batch type (one shared `Float64Array` for many colors): deferred until a consumer needs it.
@@ -226,7 +240,7 @@ Decisions:
 - [x] ADRs for the decided rounds: [ADR-001…010](../adrs/README.md)
 - [ ] Owner review of PRINCIPLES / CONVENTIONS / CLAUDE.md rule sections
 - [ ] `@lilbunnyrabbit/optional` 1.1.0 (ESM build) is versioned on master but unpublished: the publish got 404, so no trusted publisher is configured. Set one up on npmjs.com (tick "also allow npm publish"), then bump and release. The package depends on it.
-- [ ] Source the open numbers
+- [x] Source the open numbers (grill 16)
 
 ## Next session topics
 

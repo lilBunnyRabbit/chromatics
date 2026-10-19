@@ -23,7 +23,19 @@ src/routes/      # routes + examples only
 tests/           # bun:test, *.test.ts; acceptance/ + fixtures/
 ```
 
-The package's layout (folder per model? per family? monorepo tooling?) is **not decided**. It comes out of the API grill and gets an ADR. Don't scaffold it ahead of that.
+The package lives in `packages/chromatics/` (ADR-007):
+
+```
+packages/chromatics/
+├── src/
+│   ├── index.ts        # root barrel
+│   ├── all.ts          # models[], parse, reachable, path
+│   ├── core/           # color.ts, edge.ts, router.ts, families/
+│   └── models/{id}/    # {id}.ts, {id}.test.ts, {id}.domain.ts, {id}.fixtures.json, README.md
+└── scripts/fixtures/   # oracle generators (uv + Python where needed)
+```
+
+A folder per model, flat: a model's family lives in its base class, not its path. Package tests sit beside their source; the studio's tests stay in `tests/`.
 
 ### Three layers of logic
 

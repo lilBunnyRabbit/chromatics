@@ -1,7 +1,9 @@
 # ADR-006: Parsing, formatting, equality
 
 **Date:** 2026-10-18
-**Status:** Accepted (`looksSame` threshold pending a source)
+**Status:** Accepted
+
+> **Revision 2026-10-19:** `looksSame` threshold is **deltaEOk < 0.02**, per CSS Color 4 §13.2 ("For the OkLCh color space, one JND is an OkLCh difference of 0.02"). It's conventional rather than measured: ΔE2000 ≈ 2 rescaled by Oklab's 0–1 lightness range. Every implementation uses the same value (colorjs.io `toGamut.js`, culori `toGamut`, ColorAide `fit_minde_chroma.py`, Stylo `gamut.rs`). Owner delegated the value.
 
 ## Context
 

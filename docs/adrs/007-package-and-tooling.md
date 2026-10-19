@@ -17,6 +17,7 @@ The owner's order: build the package on a branch, then turn this repo into a mon
 - **Release:** changesets + npm trusted publishing (OIDC), configured before the first publish. No long-lived `NPM_TOKEN`.
 - **Versioning:** `0.x` until the API is frozen, then `1.0.0`.
 - **Runtime dependencies:** only `@lilbunnyrabbit/optional`. Dev: TypeScript, Vitest, fast-check.
+- **File layout (2026-10-19):** a folder per model, flat (`src/models/oklch/{oklch.ts, oklch.test.ts, oklch.domain.ts, oklch.fixtures.json, README.md}`); `src/core/` for the base class, edges, router, family bases; `src/index.ts` root barrel; `src/all.ts`; `scripts/fixtures/` for oracle generators. Tests beside their source.
 
 ## Alternatives Considered
 

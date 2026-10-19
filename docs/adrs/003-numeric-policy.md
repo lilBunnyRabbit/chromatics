@@ -1,7 +1,13 @@
 # ADR-003: Numeric policy
 
 **Date:** 2026-10-18
-**Status:** Accepted (epsilon values pending sources)
+**Status:** Accepted
+
+> **Revision 2026-10-19: sourced numbers** (owner delegated the values; [brainstorm](../brainstorm/2026-10-18-own-color-library.md) grill 16)
+>
+> - **Matrices:** CSS Color 4's 64-bit matrices where published; other RGB spaces derived from primaries + white point by one generator script (`scripts/matrices/`), verified against the CSS-published ones. Reason, measured: Ottosson's 10-decimal blog matrices round-trip sRGB ↔ Oklab at 1.2e-4 relative near black (white = 0.99999999347); the 64-bit ones at 3.7e-12.
+> - **Achromatic threshold, `≤`:** the chroma reference range / 100 000, per CSS Color 4 (csswg-drafts #11706, resolved 2025; Editor's Draft 2026-10-09 §7–9): Oklch `c ≤ 0.000004`, Lch `c ≤ 0.0015`, Hsl `s ≤ 0.00001`, Hwb `w + b ≥ 0.99999`. Other hue models use the same rule on their chroma range. Measured grey noise is ~1e-15 (Oklch) and ~1e-13 (Lch). Browsers disagree (Chromium 0.02 for both; Stylo lightness range / 1e5), so they're not oracles for this.
+> - **`inGamut` tolerance:** 7.5e-5 per channel, in the space's own 0–1 coordinates. Same as colorjs.io (`src/inGamut.js`, 0.7.1) and ColorAide (`DEF_FIT_TOLERANCE`, 8.13.1); neither documents a rationale. It absorbs rounded CSS input (3-decimal strings), and measured 64-bit noise is 3.8e-14.
 
 ## Context
 
@@ -15,10 +21,6 @@ The 2024–25 setters clamped hue instead of wrapping it and divided RGB by its 
 - **Byte models round and clamp on set** (`new Srgb8(127.6, 300, -4)` → 128, 255, 0).
 - **Bad input throws.** `parse` throws `SyntaxError`; constructors and setters throw `TypeError` on `NaN` / `Infinity`.
 - **`tryParse` returns `Optional<T>`** from `@lilbunnyrabbit/optional`.
-
-## Pending numbers
-
-Each needs a cited source before implementation: the achromatic chroma epsilon per hue model, the `inGamut` epsilon.
 
 ## Alternatives Considered
 
