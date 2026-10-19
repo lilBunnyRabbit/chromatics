@@ -51,7 +51,7 @@ The harness (`src/testing/harness.ts`, ADR-008) does two things before comparing
 | `#ex-xyz` hex / `rgb()` ↔ XYZ pairs                              |        8 | The example's XYZ values come from its rounded `lab()` member, not from `#7654CD`. The hex → `xyz-d50` z is 0.44708, but the spec prints 0.4472 |
 | `oklab(54.0% -0.10 -0.02)`, `oklab(54.0 -25% -5%)`               |        2 | Spec typos: inconsistent with the stated result and with WPT, which clamps a bare 54 to 1                                                       |
 | Wikipedia rows for models other than HSV                         |       19 | Secondary source; primary sources exist for those models                                                                                        |
-| Other spaces (rec2020, a98-rgb, prophoto-rgb, display-p3-linear) | 36 + 395 | Not yet implemented; they come back with their models                                                                                           |
+| Other spaces (rec2020, a98-rgb, prophoto-rgb, display-p3-linear) | 36 + 395 | Excluded at first collection; restored 2026-10-19 with their models (`732cd87`), so they now live in those fixture files                        |
 | `calc()`, relative color, `color-mix()`, `currentcolor`          |      344 | Syntax this package doesn't parse                                                                                                               |
 
 These numbers come from the 2026-10-19 collection run. The scripts that collected and reshaped the vectors were one-off transcription tools, not committed. The JSON here is the committed source of truth, and every case can be audited against its pinned source line.
