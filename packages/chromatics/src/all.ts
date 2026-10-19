@@ -11,6 +11,10 @@ import { Hsv } from "./models/hsv/hsv.js";
 import { Hwb } from "./models/hwb/hwb.js";
 import { Lab } from "./models/lab/lab.js";
 import { Lch } from "./models/lch/lch.js";
+import { Lchuv50 } from "./models/lchuv50/lchuv50.js";
+import { Lchuv65 } from "./models/lchuv65/lchuv65.js";
+import { Luv50 } from "./models/luv50/luv50.js";
+import { Luv65 } from "./models/luv65/luv65.js";
 import { LinearSrgb } from "./models/linear-srgb/linear-srgb.js";
 import { Oklab } from "./models/oklab/oklab.js";
 import { Oklch } from "./models/oklch/oklch.js";
@@ -37,6 +41,10 @@ export const models: readonly ColorModel[] = [
   Oklch,
   Lab,
   Lch,
+  Luv65,
+  Luv50,
+  Lchuv65,
+  Lchuv50,
   Hsl,
   Hsv,
   Hwb,
@@ -53,6 +61,10 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   lch: Lch.parse,
   oklab: Oklab.parse,
   oklch: Oklch.parse,
+  "luv-d65": Luv65.parse,
+  "luv-d50": Luv50.parse,
+  "lchuv-d65": Lchuv65.parse,
+  "lchuv-d50": Lchuv50.parse,
 };
 
 const SPACES: Readonly<Record<string, (input: string) => Color>> = {
@@ -85,7 +97,7 @@ const SPACES: Readonly<Record<string, (input: string) => Color>> = {
  */
 export function parse(input: string): Color {
   const text = input.trim().toLowerCase();
-  const name = /^([a-z-]+)\(/.exec(text)?.[1];
+  const name = /^([a-z][a-z0-9-]*)\(/.exec(text)?.[1];
   if (name === undefined) return Srgb8.parse(input);
   if (name === "color") {
     const space = /^color\(\s*([a-z0-9-]+)/.exec(text)?.[1] ?? "";

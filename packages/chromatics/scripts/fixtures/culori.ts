@@ -22,6 +22,9 @@ const MODES: Readonly<Record<string, string>> = {
   hsl: "hsl",
   hsv: "hsv",
   hwb: "hwb",
+  // culori's luv / lchuv are D50 (it converts from xyz50); the D65 pair has no culori counterpart.
+  "luv-d50": "luv",
+  "lchuv-d50": "lchuv",
 };
 
 const FOLDERS: Readonly<Record<string, string>> = {
@@ -29,6 +32,8 @@ const FOLDERS: Readonly<Record<string, string>> = {
   "xyz-d50": "xyz50",
   "srgb-linear": "linear-srgb",
   "display-p3-linear": "linear-display-p3",
+  "luv-d50": "luv50",
+  "lchuv-d50": "lchuv50",
 };
 
 export interface CrossCase {

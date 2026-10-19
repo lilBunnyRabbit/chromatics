@@ -53,6 +53,14 @@
       "types": "./dist/models/lch/lch.d.ts",
       "default": "./dist/models/lch/lch.js"
     },
+    "./lchuv50": {
+      "types": "./dist/models/lchuv50/lchuv50.d.ts",
+      "default": "./dist/models/lchuv50/lchuv50.js"
+    },
+    "./lchuv65": {
+      "types": "./dist/models/lchuv65/lchuv65.d.ts",
+      "default": "./dist/models/lchuv65/lchuv65.js"
+    },
     "./linear-display-p3": {
       "types": "./dist/models/linear-display-p3/linear-display-p3.d.ts",
       "default": "./dist/models/linear-display-p3/linear-display-p3.js"
@@ -60,6 +68,14 @@
     "./linear-srgb": {
       "types": "./dist/models/linear-srgb/linear-srgb.d.ts",
       "default": "./dist/models/linear-srgb/linear-srgb.js"
+    },
+    "./luv50": {
+      "types": "./dist/models/luv50/luv50.d.ts",
+      "default": "./dist/models/luv50/luv50.js"
+    },
+    "./luv65": {
+      "types": "./dist/models/luv65/luv65.d.ts",
+      "default": "./dist/models/luv65/luv65.js"
     },
     "./oklab": {
       "types": "./dist/models/oklab/oklab.d.ts",

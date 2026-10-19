@@ -3,6 +3,10 @@ import { Hsl } from "../models/hsl/hsl.js";
 import { Hsv } from "../models/hsv/hsv.js";
 import { Hwb } from "../models/hwb/hwb.js";
 import { Lch } from "../models/lch/lch.js";
+import { Lchuv50 } from "../models/lchuv50/lchuv50.js";
+import { Lchuv65 } from "../models/lchuv65/lchuv65.js";
+import { Luv50 } from "../models/luv50/luv50.js";
+import { Luv65 } from "../models/luv65/luv65.js";
 import { Oklch } from "../models/oklch/oklch.js";
 
 /**
@@ -18,8 +22,23 @@ export interface Comparison {
 
 const at = (coords: readonly number[], i: number) => coords[i]!;
 
+// u* = 13·L*·(u′ − u′n): below L* 1e-12 (the grill 45 floor) u* v* carry no color, and the inverse is
+// ill-conditioned there. Lchuv likewise, plus its borrowed 0.0015 grey threshold.
+const luv: Comparison = { canonical: (c) => (Math.abs(at(c, 0)) < 1e-12 ? [at(c, 0), NaN, NaN] : c) };
+const lchuv: Comparison = {
+  hueWeight: (c) => Math.abs(at(c, 1)),
+  canonical: (c) => {
+    if (Math.abs(at(c, 0)) < 1e-12) return [at(c, 0), NaN, NaN];
+    return at(c, 1) <= 0.0015 ? [at(c, 0), at(c, 1), NaN] : c;
+  },
+};
+
 // NaN marks a channel that doesn't affect the color here; comparisons skip it when either side is NaN.
 export const comparisons = new Map<ColorModel, Comparison>([
+  [Luv65, luv],
+  [Luv50, luv],
+  [Lchuv65, lchuv],
+  [Lchuv50, lchuv],
   [
     Oklch,
     {
@@ -92,6 +111,7 @@ const RECTANGULAR = [
  * rectangular models among themselves, and out-of-gamut sRGB through HSL (CSS Color 4 `rgbToHsl`
  * rotates negative saturation for exactly this, csswg-drafts #9222). HWB is left out (the spec notes
  * "No round-tripping of oog colors, unlike HSL"), and so is HSV, which no source defines out of gamut.
+ * Luv too: it stores chromaticity times L*, so XYZ with Y near 0 and X ≠ 0 loses v′ below vn's precision.
  */
 export function extended(from: string, via: string): boolean {
   if (RECTANGULAR.includes(from) && RECTANGULAR.includes(via)) return true;

@@ -3,6 +3,12 @@
 **Date:** 2026-10-19
 **Status:** Accepted
 
+> **Revision 2026-10-20, Luv group implemented:**
+> - Ids are `luv-d65`, `luv-d50`, `lchuv-d65`, `lchuv-d50`. They aren't CSS, so `toString()` writes `luv-d65(l u v)`, as Hsv does, and there is no `toCss()`.
+> - Reference ranges cover sRGB as the HSLuv snapshot measures it (u −83…175, v −134…107.4, C 0…179): u [−100, 200], v [−150, 150], C [0, 200].
+> - The inverse has no CIE source; it is written so that small L* never overflows or underflows. When the input's v′ was lost below vn's precision (XYZ with Y far below X or Z), it uses the smallest v′ that maps back to the same u*, v*.
+> - Luv is left out of the harness's 3× "extended" round trip, since it stores chromaticity times L*. Below L* 1e-12, u* and v* don't count in comparisons (the grill 45 floor).
+
 ## Context
 
 ADR-010 family 2. Sources, ambiguities and implementation disagreements are logged in the [brainstorm](../brainstorm/2026-10-18-own-color-library.md), grills 47–58 plus the model-specific choices after them. The owner decided names, units and infrastructure. Model internals follow the primary source and common practice (owner, 2026-10-19).
@@ -11,8 +17,8 @@ ADR-010 family 2. Sources, ambiguities and implementation disagreements are logg
 
 | Class | Channels | Units | Edge | Source |
 | --- | --- | --- | --- | --- |
-| `Luv65`, `Luv50` | `l u v` | L* 0–100 | `Xyz65` / `Xyz50` | CIE 015:2018 §8.2.2, eqs. 8.26–8.35; κ = 24389/27, ε = 216/24389 (CSS Color 4 sample code) |
-| `Lchuv65`, `Lchuv50` | `l c h` | as Luv, h in degrees | `Luv65` / `Luv50` | polar form, CIE 015:2018 eqs. 8.36–8.37 |
+| `Luv65`, `Luv50` | `l u v` | L* 0–100 | `Xyz65` / `Xyz50` | CIE 015:2018 §8.2.2.1, eqs. 8.26–8.30; κ = 24389/27, ε = 216/24389 (CSS Color 4 sample code) |
+| `Lchuv65`, `Lchuv50` | `l c h` | as Luv, h in degrees | `Luv65` / `Luv50` | polar form, CIE 015:2018 eqs. 8.32–8.33 |
 | `Hsluv`, `Hpluv` | `h s l`, `h p l` | s, p, l as fractions (l = L*/100); p can exceed 1 | `Lchuv65` | hsluv/hsluv (MIT), built on our exact Luv65 |
 | `Okhsl`, `Okhsv` | `h s l`, `h s v` | fractions | `Oklab` | Ottosson 2021 "colorpicker", `ok_color.h` (MIT) |
 | `Jzazbz`, `Jzczhz` | `j a b`, `j c h` | CSS Color HDR 1 | `Xyz65` / `Jzazbz` | Safdar et al. 2017, eqs. 8–15 and Appendix A |

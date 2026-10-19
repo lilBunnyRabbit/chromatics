@@ -10,3 +10,7 @@ bun.lockb
 
 # Research vault — preserve the Obsidian markdown verbatim (don't reflow)
 /docs/
+
+# Package fixtures: generated / transcribed JSON, kept as written
+packages/chromatics/**/*.fixtures.json
+packages/chromatics/dist/
