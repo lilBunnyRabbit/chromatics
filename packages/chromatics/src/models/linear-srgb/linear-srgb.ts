@@ -1,5 +1,5 @@
 import { finite } from "../../core/channel.js";
-import { Color } from "../../core/color.js";
+import { RgbColor } from "../../core/families/rgb.js";
 import { readColorFunction, serialize, type CssOptions } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
 import { multiply } from "../../core/linear.js";
@@ -18,7 +18,7 @@ import { Xyz65 } from "../xyz65/xyz65.js";
  * new LinearSrgb(0.5, 0.5, 0.5).to(Srgb).r; // above 0.5: half the light encodes lighter than mid-scale
  * ```
  */
-export class LinearSrgb extends Color {
+export class LinearSrgb extends RgbColor {
   static readonly id = "srgb-linear";
   static readonly channels = {
     r: { range: [0, 1], percent: 1 },

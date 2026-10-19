@@ -1,5 +1,6 @@
+import { shift, ramp, type RampOptions } from "../../core/adjust.js";
 import { finite, wrapHue } from "../../core/channel.js";
-import { Color } from "../../core/color.js";
+import { HueColor } from "../../core/families/hue.js";
 import { readFunction, serialize, type CssOptions } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
 import type { Edge } from "../../core/model.js";
@@ -23,7 +24,7 @@ const ACHROMATIC = 0.000004;
  * Oklch.parse('oklch(70% 0.15 30deg / 50%)');
  * ```
  */
-export class Oklch extends Color {
+export class Oklch extends HueColor {
   static readonly id = "oklch";
   static readonly channels = {
     l: { range: [0, 1], percent: 1 },
@@ -84,8 +85,38 @@ export class Oklch extends Color {
   }
 
   /** `true` when chroma is at most 0.000004, the CSS Color 4 threshold below which hue is meaningless. */
-  isAchromatic(): boolean {
+  override isAchromatic(): boolean {
     return this._c <= ACHROMATIC;
+  }
+
+  /** Adds `amount` × the `l` range (0–1) to `l` and returns this color (mutates). Not clamped. */
+  lighten(amount: number): this {
+    return shift(this, "l", amount);
+  }
+
+  /** Subtracts `amount` × the `l` range (0–1) from `l` (mutates). Not clamped. */
+  darken(amount: number): this {
+    return shift(this, "l", -amount);
+  }
+
+  /** Adds `amount` × the `c` reference range (0–0.4) to `c` (mutates). Not clamped. */
+  saturate(amount: number): this {
+    return shift(this, "c", amount);
+  }
+
+  /** Subtracts `amount` × the `c` reference range (0–0.4) from `c` (mutates). Not clamped: below 0 is stored as is. */
+  desaturate(amount: number): this {
+    return shift(this, "c", -amount);
+  }
+
+  /**
+   * `n` new colors with this one's other channels and `l` evenly spaced from `from` to `to` (fractions
+   * of the range, default 0.05–0.95). Steps are raw: map each for display, `c.to(Srgb).gamutMap()`.
+   *
+   * @throws {RangeError} when `n` isn't an integer ≥ 2.
+   */
+  ramp(n: number, options: RampOptions = {}): this[] {
+    return ramp(this, "l", n, options);
   }
 
   /**

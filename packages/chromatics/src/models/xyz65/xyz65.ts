@@ -1,5 +1,5 @@
 import { finite } from "../../core/channel.js";
-import { Color } from "../../core/color.js";
+import { RectangularColor } from "../../core/families/rectangular.js";
 import { readColorFunction, serialize, type CssOptions } from "../../core/css.js";
 import type { Edge } from "../../core/model.js";
 
@@ -17,7 +17,7 @@ import type { Edge } from "../../core/model.js";
  * Xyz65.parse('color(xyz 0.2 0.3 0.4)');   // `xyz` is D65 in CSS
  * ```
  */
-export class Xyz65 extends Color {
+export class Xyz65 extends RectangularColor {
   static readonly id = "xyz-d65";
   static readonly channels = {
     x: { range: [0, 1], percent: 1 },

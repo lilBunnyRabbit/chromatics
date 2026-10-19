@@ -1,5 +1,6 @@
+import { shift, ramp, type RampOptions } from "../../core/adjust.js";
 import { finite, wrapHue } from "../../core/channel.js";
-import { Color } from "../../core/color.js";
+import { HueColor } from "../../core/families/hue.js";
 import { readHueFunction, serialize, type CssOptions } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
 import { hslToRgb, rgbToHue } from "../../core/hue.js";
@@ -40,7 +41,7 @@ function srgbToHsl(c: Srgb): Hsl {
  * Hsl.parse('hsl(30deg, 100%, 50%)');       // legacy comma syntax works too
  * ```
  */
-export class Hsl extends Color {
+export class Hsl extends HueColor {
   static readonly id = "hsl";
   static readonly channels = {
     h: { range: [0, 360], hue: true },
@@ -97,8 +98,38 @@ export class Hsl extends Color {
   }
 
   /** `true` when saturation is at most 0.00001, the CSS Color 4 threshold below which hue is meaningless. */
-  isAchromatic(): boolean {
+  override isAchromatic(): boolean {
     return this._s <= ACHROMATIC;
+  }
+
+  /** Adds `amount` × the `l` range (0–1) to `l` and returns this color (mutates). Not clamped. */
+  lighten(amount: number): this {
+    return shift(this, "l", amount);
+  }
+
+  /** Subtracts `amount` × the `l` range (0–1) from `l` (mutates). Not clamped. */
+  darken(amount: number): this {
+    return shift(this, "l", -amount);
+  }
+
+  /** Adds `amount` × the `s` reference range (0–1) to `s` (mutates). Not clamped. */
+  saturate(amount: number): this {
+    return shift(this, "s", amount);
+  }
+
+  /** Subtracts `amount` × the `s` reference range (0–1) from `s` (mutates). Not clamped: below 0 is stored as is. */
+  desaturate(amount: number): this {
+    return shift(this, "s", -amount);
+  }
+
+  /**
+   * `n` new colors with this one's other channels and `l` evenly spaced from `from` to `to` (fractions
+   * of the range, default 0.05–0.95). Steps are raw: map each for display, `c.to(Srgb).gamutMap()`.
+   *
+   * @throws {RangeError} when `n` isn't an integer ≥ 2.
+   */
+  ramp(n: number, options: RampOptions = {}): this[] {
+    return ramp(this, "l", n, options);
   }
 
   /**

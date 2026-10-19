@@ -52,6 +52,15 @@ export abstract class Color {
    */
   abstract toString(): string;
 
+  /** Writes channels in order through their setters (so every write is still checked); returns `this`. */
+  protected assign(coords: readonly number[], alpha: number): this {
+    const names = Object.keys((this.constructor as ColorModel).channels);
+    const target = this as unknown as Record<string, number>;
+    names.forEach((name, i) => (target[name] = coords[i]!));
+    this.alpha = alpha;
+    return this;
+  }
+
   /** A new, independent instance with the same channels and alpha. */
   clone(): this {
     const model = this.constructor as ColorModel<this>;

@@ -1,5 +1,5 @@
 import { finite, wrapHue } from "../../core/channel.js";
-import { Color } from "../../core/color.js";
+import { HueColor } from "../../core/families/hue.js";
 import { readHueFunction, serialize, type CssOptions } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
 import { hslToRgb, rgbToHue } from "../../core/hue.js";
@@ -41,7 +41,7 @@ function srgbToHwb(c: Srgb): Hwb {
  * Hwb.parse('hwb(150 20% 10%)');
  * ```
  */
-export class Hwb extends Color {
+export class Hwb extends HueColor {
   static readonly id = "hwb";
   static readonly channels = {
     h: { range: [0, 360], hue: true },
@@ -96,7 +96,7 @@ export class Hwb extends Color {
   }
 
   /** `true` when `w + b` is at least 0.99999, the CSS Color 4 threshold: the color is a grey. */
-  isAchromatic(): boolean {
+  override isAchromatic(): boolean {
     return this._w + this._b >= 1 - ACHROMATIC;
   }
 

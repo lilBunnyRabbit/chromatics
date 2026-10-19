@@ -1,5 +1,6 @@
+import { shift } from "../../core/adjust.js";
 import { finite, wrapHue } from "../../core/channel.js";
-import { Color } from "../../core/color.js";
+import { HueColor } from "../../core/families/hue.js";
 import { readHueFunction, serialize } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
 import { rgbToHue } from "../../core/hue.js";
@@ -54,7 +55,7 @@ function hslToHsv(c: Hsl): Hsv {
  * Hsv.parse('hsv(30 100% 100%)');
  * ```
  */
-export class Hsv extends Color {
+export class Hsv extends HueColor {
   static readonly id = "hsv";
   static readonly channels = {
     h: { range: [0, 360], hue: true },
@@ -109,8 +110,28 @@ export class Hsv extends Color {
   }
 
   /** `true` when saturation is at most 0.00001: the hue is meaningless. */
-  isAchromatic(): boolean {
+  override isAchromatic(): boolean {
     return this._s <= ACHROMATIC;
+  }
+
+  /** Adds `amount` × the `v` range (0–1) to `v` and returns this color (mutates). Not clamped. */
+  lighten(amount: number): this {
+    return shift(this, "v", amount);
+  }
+
+  /** Subtracts `amount` × the `v` range (0–1) from `v` (mutates). Not clamped. */
+  darken(amount: number): this {
+    return shift(this, "v", -amount);
+  }
+
+  /** Adds `amount` × the `s` reference range (0–1) to `s` (mutates). Not clamped. */
+  saturate(amount: number): this {
+    return shift(this, "s", amount);
+  }
+
+  /** Subtracts `amount` × the `s` reference range (0–1) from `s` (mutates). Not clamped: below 0 is stored as is. */
+  desaturate(amount: number): this {
+    return shift(this, "s", -amount);
   }
 
   /**

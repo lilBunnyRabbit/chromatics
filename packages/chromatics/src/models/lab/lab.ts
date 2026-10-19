@@ -1,5 +1,6 @@
+import { shift, ramp, type RampOptions } from "../../core/adjust.js";
 import { finite } from "../../core/channel.js";
-import { Color } from "../../core/color.js";
+import { RectangularColor } from "../../core/families/rectangular.js";
 import { readFunction, serialize, type CssOptions } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
 import { D50_WHITE } from "../../core/matrices.js";
@@ -11,6 +12,64 @@ import { Xyz50 } from "../xyz50/xyz50.js";
 const EPSILON = 216 / 24389;
 const KAPPA = 24389 / 27;
 const [WX, WY, WZ] = D50_WHITE;
+
+const POW25_7 = 25 ** 7;
+const RAD = Math.PI / 180;
+
+function hueDeg(b: number, a: number): number {
+  if (a === 0 && b === 0) return 0;
+  const h = Math.atan2(b, a) / RAD;
+  return h < 0 ? h + 360 : h;
+}
+
+// CIEDE2000 (CIE 142-2001) in the form of Sharma, Wu & Dalal (2005), including their notes on the
+// hue mean and difference when a chroma is 0.
+function deltaE2000(x: Lab, y: Lab): number {
+  const c1 = Math.hypot(x.a, x.b);
+  const c2 = Math.hypot(y.a, y.b);
+  const cBar7 = ((c1 + c2) / 2) ** 7;
+  const g = 0.5 * (1 - Math.sqrt(cBar7 / (cBar7 + POW25_7)));
+  const a1 = (1 + g) * x.a;
+  const a2 = (1 + g) * y.a;
+  const c1p = Math.hypot(a1, x.b);
+  const c2p = Math.hypot(a2, y.b);
+  const h1p = hueDeg(x.b, a1);
+  const h2p = hueDeg(y.b, a2);
+  const dL = y.l - x.l;
+  const dC = c2p - c1p;
+  let dh = 0;
+  if (c1p * c2p !== 0) {
+    dh = h2p - h1p;
+    if (dh > 180) dh -= 360;
+    else if (dh < -180) dh += 360;
+  }
+  const dH = 2 * Math.sqrt(c1p * c2p) * Math.sin((dh / 2) * RAD);
+  const lBar = (x.l + y.l) / 2;
+  const cBarP = (c1p + c2p) / 2;
+  let hBar = h1p + h2p;
+  if (c1p * c2p !== 0) {
+    if (Math.abs(h1p - h2p) <= 180) hBar /= 2;
+    else hBar = hBar < 360 ? (hBar + 360) / 2 : (hBar - 360) / 2;
+  }
+  const t =
+    1 -
+    0.17 * Math.cos((hBar - 30) * RAD) +
+    0.24 * Math.cos(2 * hBar * RAD) +
+    0.32 * Math.cos((3 * hBar + 6) * RAD) -
+    0.2 * Math.cos((4 * hBar - 63) * RAD);
+  const dTheta = 30 * Math.exp(-(((hBar - 275) / 25) ** 2));
+  const cBarP7 = cBarP ** 7;
+  const rC = 2 * Math.sqrt(cBarP7 / (cBarP7 + POW25_7));
+  const l50 = (lBar - 50) ** 2;
+  const sL = 1 + (0.015 * l50) / Math.sqrt(20 + l50);
+  const sC = 1 + 0.045 * cBarP;
+  const sH = 1 + 0.015 * cBarP * t;
+  const rT = -Math.sin(2 * dTheta * RAD) * rC;
+  const l = dL / sL;
+  const c = dC / sC;
+  const h = dH / sH;
+  return Math.sqrt(l * l + c * c + h * h + rT * c * h);
+}
 
 function f(v: number): number {
   return v > EPSILON ? Math.cbrt(v) : (KAPPA * v + 16) / 116;
@@ -47,7 +106,7 @@ function labToXyz(c: Lab): Xyz50 {
  * Lab.parse('lab(52% 32% 47%)');          // percentages: l of 100, a / b of 125
  * ```
  */
-export class Lab extends Color {
+export class Lab extends RectangularColor {
   static readonly id = "lab";
   static readonly channels = {
     l: { range: [0, 100], percent: 100 },
@@ -99,6 +158,44 @@ export class Lab extends Color {
 
   get coords(): readonly [l: number, a: number, b: number] {
     return [this._l, this._a, this._b];
+  }
+
+  /** Adds `amount` × the `l` range (0–100) to `l` and returns this color (mutates). Not clamped. */
+  lighten(amount: number): this {
+    return shift(this, "l", amount);
+  }
+
+  /** Subtracts `amount` × the `l` range (0–100) from `l` (mutates). Not clamped. */
+  darken(amount: number): this {
+    return shift(this, "l", -amount);
+  }
+
+  /**
+   * `n` new colors with this one's other channels and `l` evenly spaced from `from` to `to` (fractions
+   * of the range, default 0.05–0.95). Steps are raw: map each for display, `c.to(Srgb).gamutMap()`.
+   *
+   * @throws {RangeError} when `n` isn't an integer ≥ 2.
+   */
+  ramp(n: number, options: RampOptions = {}): this[] {
+    return ramp(this, "l", n, options);
+  }
+
+  /** CIE ΔE*ab (1976): the Euclidean distance to `other` in Lab. Prefer {@link deltaE2000}, which corrects Lab's non-uniformity. */
+  deltaE76(other: Lab): number {
+    return Math.hypot(this._l - other._l, this._a - other._a, this._b - other._b);
+  }
+
+  /**
+   * CIEDE2000 color difference to `other`, with kL = kC = kH = 1 (CIE 142-2001; implemented after Sharma,
+   * Wu & Dalal 2005 and checked against their 34 published test pairs). Symmetric.
+   *
+   * @example
+   * ```ts
+   * a.to(Lab).deltaE2000(b.to(Lab)); // CSS Color 4 takes 2 as one just-noticeable difference
+   * ```
+   */
+  deltaE2000(other: Lab): number {
+    return deltaE2000(this, other);
   }
 
   /**

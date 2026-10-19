@@ -1,5 +1,5 @@
 import { finite } from "../../core/channel.js";
-import { Color } from "../../core/color.js";
+import { RgbColor } from "../../core/families/rgb.js";
 import { readColorFunction, serialize, type CssOptions } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
 import { multiply } from "../../core/linear.js";
@@ -19,7 +19,7 @@ import { Xyz65 } from "../xyz65/xyz65.js";
  * DisplayP3.parse('color(display-p3 1 0 0)').to(Srgb).r; // > 1: P3 red is outside sRGB
  * ```
  */
-export class DisplayP3 extends Color {
+export class DisplayP3 extends RgbColor {
   static readonly id = "display-p3";
   static readonly channels = {
     r: { range: [0, 1], percent: 1 },

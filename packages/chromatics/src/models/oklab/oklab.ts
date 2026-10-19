@@ -1,5 +1,6 @@
+import { shift, ramp, type RampOptions } from "../../core/adjust.js";
 import { finite } from "../../core/channel.js";
-import { Color } from "../../core/color.js";
+import { RectangularColor } from "../../core/families/rectangular.js";
 import { readFunction, serialize, type CssOptions } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
 import { multiply } from "../../core/linear.js";
@@ -56,7 +57,7 @@ function oklabToXyz(c: Oklab): Xyz65 {
  * Oklab.parse('oklab(70% 25% -12.5%)');    // percentages: l of 1, a / b of 0.4
  * ```
  */
-export class Oklab extends Color {
+export class Oklab extends RectangularColor {
   static readonly id = "oklab";
   static readonly channels = {
     l: { range: [0, 1], percent: 1 },
@@ -108,6 +109,47 @@ export class Oklab extends Color {
 
   get coords(): readonly [l: number, a: number, b: number] {
     return [this._l, this._a, this._b];
+  }
+
+  /** Adds `amount` × the `l` range (0–1) to `l` and returns this color (mutates). Not clamped. */
+  lighten(amount: number): this {
+    return shift(this, "l", amount);
+  }
+
+  /** Subtracts `amount` × the `l` range (0–1) from `l` (mutates). Not clamped. */
+  darken(amount: number): this {
+    return shift(this, "l", -amount);
+  }
+
+  /**
+   * `n` new colors with this one's other channels and `l` evenly spaced from `from` to `to` (fractions
+   * of the range, default 0.05–0.95). Steps are raw: map each for display, `c.to(Srgb).gamutMap()`.
+   *
+   * @throws {RangeError} when `n` isn't an integer ≥ 2.
+   */
+  ramp(n: number, options: RampOptions = {}): this[] {
+    return ramp(this, "l", n, options);
+  }
+
+  /**
+   * ΔEOK: the Euclidean distance to `other` in Oklab (CSS Color 4 `#color-difference-OK`). 0.02 is one
+   * just-noticeable difference.
+   *
+   * @example
+   * ```ts
+   * a.to(Oklab).deltaEOk(b.to(Oklab));
+   * ```
+   */
+  deltaEOk(other: Oklab): number {
+    return Math.hypot(this._l - other._l, this._a - other._a, this._b - other._b);
+  }
+
+  /**
+   * `true` when `other` is closer than one just-noticeable difference: ΔEOK < 0.02 (CSS Color 4
+   * `#GMA-Binary-local-MINDE`: "one JND is an OkLCh difference of 0.02"; ADR-006).
+   */
+  looksSame(other: Oklab): boolean {
+    return this.deltaEOk(other) < 0.02;
   }
 
   /**

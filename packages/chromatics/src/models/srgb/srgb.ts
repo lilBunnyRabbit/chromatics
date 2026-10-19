@@ -1,5 +1,7 @@
+import { multiply } from "../../core/linear.js";
+import { LINEAR_SRGB_TO_XYZ_D65 } from "../../core/matrices.js";
 import { finite } from "../../core/channel.js";
-import { Color } from "../../core/color.js";
+import { RgbColor } from "../../core/families/rgb.js";
 import { invalid, parseFunction, readAlpha, readColorFunction, serialize, type CssOptions } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
 import type { Edge } from "../../core/model.js";
@@ -21,7 +23,7 @@ import { LinearSrgb } from "../linear-srgb/linear-srgb.js";
  * c.to(Srgb).toCss();                       // 'color(srgb 1 0.50196 0)'
  * ```
  */
-export class Srgb extends Color {
+export class Srgb extends RgbColor {
   static readonly id = "srgb";
   static readonly channels = {
     r: { range: [0, 1], percent: 1 },
@@ -79,6 +81,29 @@ export class Srgb extends Color {
 
   get coords(): readonly [r: number, g: number, b: number] {
     return [this._r, this._g, this._b];
+  }
+
+  /**
+   * Relative luminance Y, 0 (black) to 1 (white) for in-gamut colors: the linear-light channels weighted
+   * by the sRGB → XYZ matrix's Y row. Equal to `this.to(Xyz65).y`.
+   */
+  luminance(): number {
+    return multiply(LINEAR_SRGB_TO_XYZ_D65, srgbToLinear(this._r), srgbToLinear(this._g), srgbToLinear(this._b))[1];
+  }
+
+  /**
+   * WCAG 2.x contrast ratio with `other`, 1 (none) to 21 (black on white). Symmetric. WCAG 2.2 SC 1.4.3
+   * (AA) asks 4.5 for text and 3 for large text; SC 1.4.6 (AAA) asks 7 and 4.5.
+   *
+   * @example
+   * ```ts
+   * Srgb8.parse("#767676").to(Srgb).contrast(new Srgb(1, 1, 1)); // ≈ 4.54
+   * ```
+   */
+  contrast(other: Srgb): number {
+    const a = this.luminance();
+    const b = other.luminance();
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
   }
 
   /**
