@@ -69,7 +69,12 @@ Package color models (2026-10-18 grill): classes are PascalCase words (`Oklch`, 
 - Discriminated unions over optional-field soup.
 - No `any`. `unknown` + narrowing.
 - TypeScript over its JS-era equivalent: `private` / `protected` / `readonly`, never `#private` fields.
-- Every exported symbol of the package has JSDoc: what it does, units and ranges of every number, the source of the formula.
+- **JSDoc is for IntelliSense** (owner, 2026-10-19): every exported symbol of the package gets a `/** */` block (never `//`) that highlights what a developer needs at the call site, without restating the signature:
+  - units and ranges of every number (`l` 0–1, `h` degrees, wraps into [0, 360))
+  - whether the call **mutates** the receiver or returns new instances
+  - what it throws, and defaults
+  - the formula's source (`@see` spec section or paper)
+  - a short `@example` where usage isn't obvious
 
 ---
 

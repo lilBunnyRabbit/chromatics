@@ -137,7 +137,16 @@ bunx vite build        # static build → build/  (also: bun run build)
 bun run format         # prettier --write
 ```
 
-Before calling any change done: **`bun test` + `bun run check` + `bunx vite build` all green.** Note: Bun resolves `./x.js` imports to `x.ts`.
+Before calling any change done: **`bun test` + `bun run check` + `bunx vite build` all green.** Note: Bun resolves `./x.js` imports to `x.ts`. Root `bun test` is scoped to `tests/` (`bunfig.toml`).
+
+Package (`packages/chromatics`, run from that folder):
+
+```sh
+bun run test:all       # Vitest on node (V8) and bun (JSC) — both must pass (ADR-008)
+bun run check          # tsc --noEmit
+bun run build          # tsc → dist/ (ESM, per file)
+bun run matrices       # regenerate src/core/matrices.ts from exact rational arithmetic
+```
 
 ## Architecture
 

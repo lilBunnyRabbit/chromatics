@@ -219,6 +219,16 @@ An Opus research agent checked CSS Color 4 (ED and TR, 2026-10-09), colorjs.io 0
 - `looksSame`: deltaEOk < 0.02 (Claude).
 - Round-trip: `|a − b| ≤ 1e-13 + 1e-12·|b|`, per-model looser bound with reason (Claude).
 
+### Grill 17: scaffold findings (decided 2026-10-19)
+
+Found while scaffolding `packages/chromatics`:
+
+- **Undeclared studio imports.** Bun's isolated workspace linker only links direct dependencies, and `svelte-check` failed on `@codemirror/view` / `state` / `commands` and `estree`, which the studio imported without declaring. Decided: declare them at the installed versions (vs. switching back to the hoisted linker).
+- **Script types:** Bun-only scripts with `@types/bun` (owner; Claude had proposed `@types/node`).
+- **Bradford:** the owner asked for _"the most precise and correct. No shortcuts"_, so the exact rational derivation ships, not CSS's float-computed decimals (≤ 3.2e-16 apart). sRGB and P3 match the CSS rationals exactly.
+- **Router determinism (a bug Claude found in its own first version):** searching the global graph made a route depend on what else had been converted. Now a route depends only on its two models. `path(from, to)` returns that exact route (owner), dropping the `models` argument.
+- JSDoc (owner): public API documented for IntelliSense in `/** */` blocks: units, ranges, mutation, throws, examples; never restating the signature. Recorded in CONVENTIONS.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

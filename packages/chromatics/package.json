@@ -1,0 +1,47 @@
+{
+	"name": "@lilbunnyrabbit/chromatics",
+	"version": "0.0.0",
+	"description": "Every color model and color system, typed, with cited math and exhaustive tests.",
+	"author": "Andraž Mesarič-Sirec <amesaricsirec@gmail.com>",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lilBunnyRabbit/chromatics.git",
+		"directory": "packages/chromatics"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"files": [
+		"dist",
+		"!dist/**/*.test.*",
+		"!dist/**/*.domain.*"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./all": {
+			"types": "./dist/all.d.ts",
+			"default": "./dist/all.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"build": "rm -rf dist && tsc -p tsconfig.build.json",
+		"check": "tsc -p tsconfig.json --noEmit",
+		"test": "vitest run",
+		"test:bun": "bunx --bun vitest run",
+		"test:all": "vitest run && bunx --bun vitest run",
+		"matrices": "bun scripts/matrices/derive.ts"
+	},
+	"dependencies": {
+		"@lilbunnyrabbit/optional": "^1.0.1"
+	},
+	"devDependencies": {
+		"@types/bun": "1.4.2",
+		"fast-check": "4.10.2",
+		"typescript": "^5.9.3",
+		"vitest": "5.0.3"
+	}
+}
