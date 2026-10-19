@@ -5,9 +5,14 @@ const KAPPA = 24389 / 27;
 
 export type White = readonly [x: number, y: number, z: number];
 
-function chromaticity(x: number, y: number, z: number): [u: number, v: number] | undefined {
+export function chromaticity(x: number, y: number, z: number): [u: number, v: number] | undefined {
   const d = x + 15 * y + 3 * z;
   return d === 0 ? undefined : [(4 * x) / d, (9 * y) / d];
+}
+
+/** Relative luminance Y / Yn for a CIE lightness L*: the inverse of eqs. 8.26–8.28. */
+export function lightnessToY(l: number): number {
+  return l > KAPPA * EPSILON ? ((l + 16) / 116) ** 3 : l / KAPPA;
 }
 
 export function xyzToLuv(x: number, y: number, z: number, white: White): [l: number, u: number, v: number] {

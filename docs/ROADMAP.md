@@ -31,7 +31,7 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
    - [x] Wide-gamut RGB (2026-10-19, ADR-010 family 1): `A98Rgb`, `ProphotoRgb`, `Rec2020`, `LinearDisplayP3`, with the full matrix, exact matrices and WPT references
    - [-] Perceptual family (ADR-011, grills 47–58):
      - [x] `Luv65`, `Luv50`, `Lchuv65`, `Lchuv50` (2026-10-20): HSLuv snapshot (secondary) for D65, culori grid for D50
-     - [ ] `Hsluv`, `Hpluv`
+     - [x] `Hsluv`, `Hpluv` (2026-10-20): closed-form gamut lines on our Luv65, HSLuv snapshot (secondary); `THIRD_PARTY_NOTICES.md` ships
      - [ ] `Okhsl`, `Okhsv`
      - [ ] `Jzazbz`, `Jzczhz`, `Ictcp`, `IctcpHlg`
    - [ ] Remaining wide-gamut RGB (ACES and others: names and sources to grill)

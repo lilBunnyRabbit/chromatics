@@ -13,6 +13,7 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "THIRD_PARTY_NOTICES.md",
     "!dist/**/*.test.*",
     "!dist/**/*.domain.*"
   ],
@@ -33,9 +34,17 @@
       "types": "./dist/models/display-p3/display-p3.d.ts",
       "default": "./dist/models/display-p3/display-p3.js"
     },
+    "./hpluv": {
+      "types": "./dist/models/hpluv/hpluv.d.ts",
+      "default": "./dist/models/hpluv/hpluv.js"
+    },
     "./hsl": {
       "types": "./dist/models/hsl/hsl.d.ts",
       "default": "./dist/models/hsl/hsl.js"
+    },
+    "./hsluv": {
+      "types": "./dist/models/hsluv/hsluv.d.ts",
+      "default": "./dist/models/hsluv/hsluv.js"
     },
     "./hsv": {
       "types": "./dist/models/hsv/hsv.d.ts",

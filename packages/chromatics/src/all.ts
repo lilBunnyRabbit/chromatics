@@ -6,7 +6,9 @@ import { DisplayP3 } from "./models/display-p3/display-p3.js";
 import { LinearDisplayP3 } from "./models/linear-display-p3/linear-display-p3.js";
 import { ProphotoRgb } from "./models/prophoto-rgb/prophoto-rgb.js";
 import { Rec2020 } from "./models/rec2020/rec2020.js";
+import { Hpluv } from "./models/hpluv/hpluv.js";
 import { Hsl } from "./models/hsl/hsl.js";
+import { Hsluv } from "./models/hsluv/hsluv.js";
 import { Hsv } from "./models/hsv/hsv.js";
 import { Hwb } from "./models/hwb/hwb.js";
 import { Lab } from "./models/lab/lab.js";
@@ -45,6 +47,8 @@ export const models: readonly ColorModel[] = [
   Luv50,
   Lchuv65,
   Lchuv50,
+  Hsluv,
+  Hpluv,
   Hsl,
   Hsv,
   Hwb,
@@ -65,6 +69,8 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   "luv-d50": Luv50.parse,
   "lchuv-d65": Lchuv65.parse,
   "lchuv-d50": Lchuv50.parse,
+  hsluv: Hsluv.parse,
+  hpluv: Hpluv.parse,
 };
 
 const SPACES: Readonly<Record<string, (input: string) => Color>> = {

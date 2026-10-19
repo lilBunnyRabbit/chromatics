@@ -8,6 +8,12 @@
 > - Reference ranges cover sRGB as the HSLuv snapshot measures it (u −83…175, v −134…107.4, C 0…179): u [−100, 200], v [−150, 150], C [0, 200].
 > - The inverse has no CIE source; it is written so that small L* never overflows or underflows. When the input's v′ was lost below vn's precision (XYZ with Y far below X or Z), it uses the smallest v′ that maps back to the same u*, v*.
 > - Luv is left out of the harness's 3× "extended" round trip, since it stores chromaticity times L*. Below L* 1e-12, u* and v* don't count in comparisons (the grill 45 floor).
+>
+> **Revision 2026-10-20, HSLuv group implemented:**
+> - The six gamut lines are derived in closed form from our Luv65 and sRGB matrix, as A·u* + B·v* + K = 0 per channel limit. The reference's Maxima constants are not used. They agree with the snapshot to 5.5e-10 (s on the 0–100 scale).
+> - The black and white bands use the reference's cut-offs: |L*| < 1e-8 and |L* − 100| < 1e-7. Outside the bands, out-of-range L* keeps its geometry instead of being forced to black or white as the reference does (ADR-003); inside [0, 100] the results are identical.
+> - `isAchromatic()` is true when the Lchuv65 chroma is at most 0.0015, so it matches the hue the conversion drops.
+> - Strings are `hsluv(h s% l%)` / `hpluv(h p% l%)`; s / p and l also take 0–100 numbers, like `hsv()`.
 
 ## Context
 

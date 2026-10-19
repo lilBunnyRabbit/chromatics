@@ -1,5 +1,8 @@
+import { maxChroma, maxChromaForHue, singular } from "../core/hsluv.js";
 import type { ColorModel } from "../core/model.js";
+import { Hpluv } from "../models/hpluv/hpluv.js";
 import { Hsl } from "../models/hsl/hsl.js";
+import { Hsluv } from "../models/hsluv/hsluv.js";
 import { Hsv } from "../models/hsv/hsv.js";
 import { Hwb } from "../models/hwb/hwb.js";
 import { Lch } from "../models/lch/lch.js";
@@ -34,11 +37,26 @@ const lchuv: Comparison = {
 };
 
 // NaN marks a channel that doesn't affect the color here; comparisons skip it when either side is NaN.
+// HSLuv / HPLuv: s and p scale the Lchuv65 chroma, so the hue weight is that chroma (as a fraction of
+// L*'s 100) and the hue is free where it is ≤ 0.0015; at the black / white points s and p are free too.
+function luvHue(max: (l: number, h: number) => number): Comparison {
+  const chroma = (c: readonly number[]) => Math.abs(at(c, 1)) * max(at(c, 2) * 100, at(c, 0));
+  return {
+    hueWeight: (c) => chroma(c) / 100,
+    canonical: (c) => {
+      if (singular(at(c, 2) * 100) !== undefined) return [NaN, NaN, at(c, 2)];
+      return chroma(c) <= 0.0015 ? [NaN, at(c, 1), at(c, 2)] : c;
+    },
+  };
+}
+
 export const comparisons = new Map<ColorModel, Comparison>([
   [Luv65, luv],
   [Luv50, luv],
   [Lchuv65, lchuv],
   [Lchuv50, lchuv],
+  [Hsluv, luvHue(maxChromaForHue)],
+  [Hpluv, luvHue((l) => maxChroma(l))],
   [
     Oklch,
     {
