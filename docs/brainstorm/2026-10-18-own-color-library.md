@@ -275,6 +275,40 @@ Other findings from the same run:
 - **Mutation testing** (break the code on purpose): 31 mutants. The first run left 9 alive, and each got a targeted, cited test: the Lab κ/ε junction, parse-time clamps, the HSL negative-saturation rotation, the achromatic thresholds, angle units, and alpha omission in output. Now 30 of 31 are killed; the survivor (the `+360` in `toPolar`) is equivalent code, because the constructor wraps hue anyway. The harness self-test also caught a gap in the harness itself: equal shape values per channel hid a swapped channel order.
 - Formatting (owner): the package uses the owner's Prettier config (`packages/chromatics/.prettierrc`, 2 spaces, double quotes, width 120); the studio keeps its own.
 
+### Grill 33–42: operations in detail (decided 2026-10-19)
+
+ADR-005 settled where operations live; these rounds settled what they are.
+
+- **Grill 33: adjustment methods, amount as a fraction of the reference range** (owner).
+  - Methods: `lighten` / `darken` / `saturate` / `desaturate`, mutating and chainable.
+  - Where: Oklch, Lch, Hsl (s, l); Hsv (s, v); Lab and Oklab (lighten / darken only); Hwb gets none.
+  - Units: `lighten(0.1)` is +10% of the channel's reference range in every model, so +0.1 in Oklch and +10 in Lab.
+  - Raw units stay available through the setters (`c.l += 0.1`).
+  - Rejected: model units (the same call differs 100× between models); no methods.
+- **Grill 34: `mix(b, t)` needs t, and t outside [0, 1] extrapolates** (owner). `steps(b, n)` returns n colors including both ends, and throws a RangeError when n < 2. An achromatic end takes the other end's hue (ADR-003). Rejected: a hidden default of 0.5, and clamping like CSS `color-mix()`.
+- **Grill 35: the full harmony set on hue models** (owner).
+  - `complement()` mutates.
+  - `triadic()`, `tetradic()`, `square()` and `splitComplementary(angle = 30)` return new arrays that start with a copy of the receiver.
+  - `analogous(angle = 30, count = 3)` returns an array centred on the receiver (as the chosen preview showed).
+  - Rejected: arrays without the receiver; only the studio's three harmonies.
+- **Grill 36: `gamutMap()` is CSS Color 4's algorithm** (`#binsearch`: OkLCh chroma reduction, deltaEOk JND 0.02, clip).
+  - Lives on the RGB classes, mutating; `{ method: 'clip' }` is offered for symmetry with `clamp()`.
+  - `inGamut(tolerance = 7.5e-5)` (ADR-003).
+  - Accepted cost: Srgb imports the Oklch math (about +3 KB).
+  - Tested against the spec's `#GM-*` examples.
+  - Rejected: a separate `/gamut` import (breaks the class rule); several algorithms.
+- **Grill 37: `contrast()` is WCAG 2.x, on Srgb** (ratio 1–21, symmetric). APCA waits until its license text is checked and brought to the owner (ADR-009).
+- **Grill 38: color-difference metrics.**
+  - On Lab: `deltaE76`, and `deltaE2000` tested against Sharma, Wu & Dalal (2005)'s 34 pairs.
+  - On Oklab: `deltaEOk` and `looksSame` (< 0.02).
+  - ΔE94, CMC and ITP come later with their models.
+- **Grill 39: `Srgb.luminance()`** returns Y, documented as equal to `to(Xyz65).y`.
+- **Grill 40: `Model.gradient(stops, n)` and `ramp(n, { from = 0.05, to = 0.95 })` both ship now** (owner chose both over deferring ramp).
+  - Ramp lives on models with a lightness axis: Oklch, Lch, Lab, Oklab, Hsl.
+  - The endpoint defaults are a design choice of the owner, not a sourced number.
+- **Grill 41: ramp steps are raw** (owner): evenly spaced lightness, the receiver isn't forced in, nothing is gamut-mapped. Map each step for display: `ramp.map(c => c.to(Srgb).gamutMap())`.
+- **Grill 42: the family base classes stay internal** (owner). Generic code uses unions of the model classes. Rejected: exporting `HueColor` / `RgbColor` / `RectangularColor` (more API to keep stable).
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

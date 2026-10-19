@@ -3,6 +3,34 @@
 **Date:** 2026-10-18
 **Status:** Accepted
 
+> **Revision 2026-10-19: the operation set** ([brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 33–42)
+>
+> - **Families (internal, not exported):** rectangular, RGB (extends rectangular) and hue. Generic user code uses unions of the model classes.
+> - **Adjust:**
+>   - Methods: `lighten` / `darken` / `saturate` / `desaturate`.
+>   - The amount is a fraction of the channel's reference range: `lighten(0.1)` is +0.1 in Oklch and +10 in Lab.
+>   - On Oklch, Lch, Hsl (s, l), Hsv (s, v); lighten / darken only on Lab and Oklab; none on Hwb.
+> - **Interpolation:**
+>   - `mix(b, t)` requires t and extrapolates outside [0, 1].
+>   - `steps(b, n)` returns n ≥ 2 colors, both ends included.
+>   - `interpolator(b)` returns a function of t.
+>   - `Model.gradient(stops, n)` is the multi-stop form.
+>   - Hue models take `{ hue: 'shorter' | 'longer' | 'increasing' | 'decreasing' }`, default `shorter`.
+>   - An achromatic end takes the other end's hue.
+> - **Harmonies (hue models):**
+>   - `rotateHue(deg)` and `complement()` mutate.
+>   - `triadic()`, `tetradic()`, `square()`, `splitComplementary(angle = 30)` return arrays that start with a copy of the receiver.
+>   - `analogous(angle = 30, count = 3)` is centred on the receiver.
+> - **Ramp:**
+>   - `ramp(n, { from = 0.05, to = 0.95 })` on Oklch, Lch, Lab, Oklab and Hsl.
+>   - Lightness is evenly spaced as a fraction of the range; the receiver's hue and chroma are kept; steps are raw (no gamut mapping).
+> - **Gamut (RGB classes):** `inGamut(tolerance = 7.5e-5)`, `clamp()`, `gamutMap({ method: 'css4' | 'clip' })`. The default is CSS Color 4 `#binsearch`.
+> - **Metrics:**
+>   - Srgb: `luminance()` and `contrast(other)` (WCAG 2.x).
+>   - Lab: `deltaE76` and `deltaE2000`.
+>   - Oklab: `deltaEOk` and `looksSame`.
+>   - APCA waits on a license check.
+
 ## Context
 
 Operations are methods on the color's class (ADR-001), and single-result operations mutate and return `this`. Open questions were: how shared operations reach ~100 classes, two-color operations across models, operations needing another model's math, multi-color results, interpolation, gamut mapping. The studio uses op-tables in `families.ts`; binary ops throw across models. [Brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 6, 7, 8, 12.
