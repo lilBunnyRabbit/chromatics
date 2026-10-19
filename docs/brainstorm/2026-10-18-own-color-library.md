@@ -245,6 +245,12 @@ Opened before writing the first models.
 - **Grill 24: `toString()` is shortest exact, `toCss()` is rounded** (owner). `toString()` writes each number as JS's shortest round-trip form, so it stays lossless. Percentages shift the decimal point in the string rather than multiplying by 100, because `x * 100 / 100 !== x` for 15% of random doubles (measured). `toCss({ precision })` rounds; the default is 5 significant digits relative to each channel's reference range, so Oklch L gets 5 decimals and hue gets 2 (precedent: colorjs.io's default precision of 5). For CSS-native models the two methods now differ only in digits; this revises ADR-006's "the two agree".
 - **Grill 25: output uses the modern space-separated syntax, with `%` where the spec uses it** (owner): `hsl(30 100% 50%)`, `hwb(30 0% 0%)`, `oklch(0.7 0.15 30)`, `lab(50 20 -30)`; `Srgb` writes `color(srgb 1 0.5 0)`; `Srgb8` writes hex (ADR-006). Rejected: the legacy comma form; numbers-only `hsl(30 100 50)` (older browsers reject it).
 
+### Grill 26–28: ids, named colors, toCss (decided 2026-10-19)
+
+- **Grill 26: model ids are CSS idents** (owner): `'srgb-linear'`, `'display-p3'`, `'xyz-d65'`, `'xyz-d50'`. Where CSS has no name, they're lowercase kebab (`'srgb8'`, `'hsv'`, `'cam16'`). Parse dispatch is then a direct lookup. Rejected: camelCase of the class (two names for one space), lowercase class name.
+- **Grill 27: named colors live on `Srgb8`** (owner). `Srgb8.parse('rebeccapurple')` works, and `parse('red')` from `/all` returns `Srgb8`. `transparent` is `Srgb8(0, 0, 0, 0)`; `currentcolor` throws. Rejected: a separate `/named` export.
+- **Grill 28: only CSS-native models have `toCss()`** (owner: _"actually no toCss if not css color!"_). Claude had proposed a per-model CSS fallback (Hsv to `color(srgb …)`). Instead, `toCss()` leaves the `Color` base, and a non-CSS model converts explicitly: `hsv.to(Srgb).toCss()`. This revises ADR-006 ("`toCss()` is always valid CSS, converting when the model has no CSS form").
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

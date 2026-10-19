@@ -11,6 +11,12 @@
 > - Parsing applies CSS Color 4's parse-time clamps (L range, negative chroma, alpha, legacy `rgb()`). Constructors and setters stay raw.
 > - `toString()` writes shortest-exact numbers, and percentages shift the decimal point in the string, so it's lossless for in-range values. `toCss({ precision })` rounds to 5 significant digits relative to each channel's reference range by default. For CSS-native models the two differ only in digits.
 > - Output uses the modern space-separated syntax with `%` where the spec uses it (`hsl(30 100% 50%)`). `Srgb` writes `color(srgb …)`.
+>
+> **Revision 2026-10-19: ids, named colors, toCss** (grills 26–28)
+>
+> - Model ids are CSS idents (`'display-p3'`, `'xyz-d65'`), or lowercase kebab where CSS has no name.
+> - Named colors parse through `Srgb8.parse`, and `/all`'s `parse`.
+> - **`toCss()` exists only on CSS-native models.** It's not on `Color`; non-CSS models convert first (`hsv.to(Srgb).toCss()`). This replaces "converting when the model has no CSS form" in the decision below.
 
 ## Context
 
