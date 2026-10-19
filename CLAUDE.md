@@ -2,6 +2,106 @@
 
 Guidance for working in this repo. **Keep it current** — see _Maintaining this file_ at the bottom.
 
+## Read first
+
+1. [docs/PRINCIPLES.md](docs/PRINCIPLES.md): why the project exists, how decisions get made, how the owner works. **Mandatory.**
+2. [docs/CONVENTIONS.md](docs/CONVENTIONS.md): where code goes, naming, tests, known drift.
+3. [docs/ROADMAP.md](docs/ROADMAP.md): what's done and what's next.
+4. [docs/adrs/README.md](docs/adrs/README.md): the ADR index, accepted vs implemented.
+5. The latest log in [docs/brainstorm/](docs/brainstorm/) for the area you touch.
+
+**Current focus:** our own npm color package, replacing the culori wrapper (`src/lib/models/`). Built on a branch first, then this repo becomes a monorepo hosting the package and the website. The API is being decided with the owner, question by question. Until an ADR says otherwise, nothing about the package's shape is decided.
+
+## Hard rules
+
+- `camelCase` identifiers, `PascalCase` types / classes / Svelte components, `kebab-case` `.ts` files. **No snake_case.** Settled; don't relitigate.
+- No `any`. `interface` for object shapes. `private` / `readonly`, never `#private`.
+- Runes only in Svelte code.
+- No new dependency (runtime or dev) without asking.
+- Every color model and system is in scope, except proprietary data (Pantone). Unclear licensing is the owner's call per system.
+- Every model ships with its full test matrix (below). A model without it isn't done.
+
+## Numbers need sources
+
+The earlier hand-written libraries died partly on unverified math (`// TODO: AI generated, needs check`). So:
+
+- Every formula cites its source in a comment: spec + section (CSS Color 4 §…, ITU-R BT.2100 Table …), CIE publication, or paper + equation.
+- Every expected value in a test comes from an **independent** source, cited next to it: the spec's own examples, colour-science, colorjs.io, a published table. Never computed by the code under test, never from an agent's recall. If no source exists, say so and ask; don't invent one.
+- Tolerances are decisions (ADR), not per-test guesses.
+
+**Per-model test matrix** (until a testing ADR refines it):
+
+- Channel boundaries: every min / max, every corner of the model's domain, and just outside it.
+- Degenerate input: achromatic (powerless hue), zero, negative, `NaN`, `Infinity`, missing alpha.
+- Conversion to and from every direct neighbour, both directions; round-trip within the ADR tolerance.
+- Reference vectors from a cited independent source.
+- Parse ↔ format round-trip for every string form the model supports.
+- During the migration: parity against a culori baseline dump, so the studio's golden hexes (`tests/acceptance/brand-dark.test.ts`) can't regress.
+
+Break the code once on purpose and check the test fails.
+
+## Architecture is the owner's call, always
+
+**Never make an architectural decision yourself.** The most important rule in this repo. The API is the part the owner cares about most: _"I want to be 200% involved and to my liking."_
+
+### What counts as architectural
+
+Anything that changes the shape of the package or the app and isn't already in an ADR or CONVENTIONS:
+
+- the public API: export names, class vs function, method names and signatures, argument order, option objects, return types
+- how a color is represented and stored; precision
+- a model's channel names, ranges, units, defaults
+- conversion routing (hubs, graph), how models plug in, tree-shaking and export layout
+- numeric policy: out-of-gamut, clamping, powerless hue, `none`, equality, tolerances
+- error behaviour: throw, return `undefined`, or flag
+- a new dependency, or the monorepo / build / publish tooling
+- a new state layer, abstraction, registry, or plugin mechanism in the app
+- deviating from an ADR or from the pattern the repo already uses
+- anything justified by "we'll need it later"
+
+### What doesn't count
+
+Just do these:
+
+- implementing what an ADR already specifies
+- adding a model inside an existing, ADR-backed pattern (still with its full test matrix)
+- bug fixes that don't change shape
+- renames the owner asked for, formatting, docs, tooling
+
+When in doubt, treat it as architectural.
+
+### How to ask: grill the owner
+
+1. **Stop before the first edit.** Investigate, then stop. Never ship a "temporary" version of an API to ask about later.
+2. **Brief first.** What the area is for, what exists today, what needs deciding. The owner must never guess what a question is about.
+3. **State the problem and its root cause** in one or two sentences, with evidence (`file:line`, branch, spec section).
+4. **Lay out the real options**, lightest first, each with a code sketch of how it **reads at the call site** and what breaks with it.
+5. **Recommend one, then attack it yourself.** The strongest argument against your own pick.
+6. **Grill.** The hard questions the owner may not have considered:
+   - How does this read for a library user who never saw the DSL?
+   - What does it do to bundle size and tree-shaking?
+   - What happens with an out-of-gamut, achromatic, or `NaN` input?
+   - Which conversion paths does it touch, and how is precision kept?
+   - Is it a breaking change once published?
+   - Which earlier iteration tried this, and why did it die?
+   - What's the smallest version that still answers the question?
+     Challenge the request itself if it looks wrong.
+7. **Record it.** Log the discussion in `docs/brainstorm/` during the session. If final, write an ADR. Only then implement.
+
+Claude Code: use `AskUserQuestion`, recommended option first, a code preview per option. Never ask in prose and then carry on.
+
+Subagents that implement get this section in their prompt; otherwise scope them to investigation only. Brainstorm subagents may run on Fable (owner, 2026-10-18); their output is input to the grill, never a decision.
+
+If work is blocked on the owner, finish everything that doesn't depend on the answer, then stop and report.
+
+## Documentation duties
+
+- **Brainstorm logs:** `docs/brainstorm/YYYY-MM-DD-topic.md` for every design discussion, updated **during** the session. Sections: date and participants, context, topics with decisions, key takeaways, action items, next session topics.
+- **ADRs:** `docs/adrs/NNN-title.md` once a decision is final, added to the index. Implementation that forces a change adds a dated revision note.
+- **Roadmap:** at the end of every session that completes work, update `docs/ROADMAP.md` and the ADR status.
+- **Package API docs:** every exported symbol has JSDoc with units, ranges and the formula's source.
+- The vault (`docs/chromatics/`) is research and history. Don't rewrite it; new decisions go to ADRs.
+
 ## What this is
 
 **Chromatics** — a scriptable **color language** (a small JS-subset DSL) plus an **interactive studio** for designing, analyzing and exploring color. Write a tiny program that derives a whole palette from one brand color; inspect any color across ~100 color models; check accessibility; preview it on real UI — all in the browser. Stored canonically in **OKLCH**; every other space is a lazy [culori](https://culorijs.org/) projection.
