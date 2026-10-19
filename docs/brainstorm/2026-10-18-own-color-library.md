@@ -352,6 +352,56 @@ ADR-005 settled where operations live; these rounds settled what they are.
 - **Transfer functions** are CSS Color 4's sample code: A98 is the power 563/256; ProPhoto is gamma 1.8 with a linear segment; Rec2020 is the BT.1886 gamma 2.4.
 - **Finding:** culori 4.0.2 still decodes Rec2020 with the inverse BT.2020 OETF (α 1.0993, β 0.0181), CSS's earlier definition. Rec2020 is left out of the culori grid. For the studio migration, any Rec2020 value the app shows will change.
 
+### Grill 47+: perceptual family (open, 2026-10-19)
+
+Context: ADR-010 family 2 is Luv / Lchuv, Jzazbz / Jzczhz, Ictcp, Okhsl / Okhsv, Hsluv / Hpluv. A source sweep (2026-10-19) found:
+
+- **Primary sources**:
+  - Luv: CIE 015:2018 §8.2.2, eqs. 8.26–8.35. Paid; a free copy exists on law.resource.org.
+  - Jzazbz: Safdar et al. 2017, Opt. Express 25(13) 15131, eqs. 8–15 and Appendix A. Open access.
+  - ICtCp: ITU-R BT.2100-3 Tables 4 and 7; ΔE_ITP in BT.2124-0. Both free.
+  - Okhsl / Okhsv: Ottosson's "colorpicker" and "gamutclipping" posts and `ok_color.h`. MIT.
+  - HSLuv: the hsluv/hsluv Maxima files and reference code. MIT.
+- **CSS Color HDR 1** (ED, 8 Oct 2026) defines `ictcp()`, `jzazbz()` and `jzczhz()`. Their channel keywords are `i ct cp`, `j a b` and `j c h`, and SDR white is `Yw = 203` cd/m², as in BT.2100-3 Table 10 note 10a and BT.2408-8 §2.1.
+- **Primary reference vectors** exist only for ICtCp: BT.2124 Annex 4, 4 decimals.
+  - Jzazbz and Okhsl / Okhsv have none; colour-science and colorjs test vectors are secondary.
+  - HSLuv has its MIT `snapshot-rev4.json`: 4096 colours, checked to 1e-10 against its own truncated κ = 903.2962962 and ε = 0.0088564516.
+  - Luv has none of its own; the HSLuv snapshot has luv columns.
+- **Implementations disagree:**
+  - Luv white: culori uses D50; colorjs, colour-science and HSLuv use D65.
+  - Jzazbz negatives: culori clamps them; colorjs keeps the sign.
+  - ICtCp: culori's `itp` stores the unscaled values under the name ITP.
+- **Studio bugs found:**
+  - `deltaEitp` is plain Euclidean, not BT.2124's 720·√(ΔI² + (0.5ΔCt)² + ΔCp²).
+  - The HPLuv `p` range is [0, 100], but the snapshot reaches 308.
+  - The Luv / LChuv ranges don't match culori's.
+
+Decisions:
+
+- **Grill 47, channel letters:** the CSS HDR keywords, lowercase like Lab's `l`. That gives `Jzazbz` `j a b`, `Jzczhz` `j c h` and `Ictcp` `i ct cp`. Risk: HDR 1 is still an Editor's Draft.
+- **Grill 48, absolute luminance:** a fixed 203 cd/m² for relative Y = 1, applied inside the Xyz65 edge, as CSS HDR, culori and colorjs do. No absolute XYZ node and no option.
+- **Grill 49, references:** cited secondary vectors where no primary exists, marked `secondary` in the fixtures, as was done for HSV: colour-science for Jzazbz, colorjs for Okhsl / Okhsv. The culori grid stays a cross-check.
+- **Grill 50, Luv white:** both D65 and D50 (owner).
+- **Grill 51, names:** `Luv65` / `Luv50` and `Lchuv65` / `Lchuv50`, which mirror `Xyz65` / `Xyz50`. `Hsluv` builds on `Lchuv65`.
+- **Grill 52, negatives into PQ:** sign-preserving, `sign(x)·f(|x|)`, as colorjs does and as ADR-003 requires (never lose data silently). Inside the gamut it matches culori.
+- **Grill 53, ICtCp variants:** both PQ and HLG (owner): `Ictcp` and `IctcpHlg`. HLG's scene-light mapping still needs sourcing.
+- **Grill 54, HSLuv constants:** our exact Luv65 (κ = 24389/27) and our matrices. The snapshot is tested at a measured tolerance recorded in an ADR. HSLuv's truncated constants are not used.
+- **Grill 55, HSLuv / HPLuv units:** h in degrees; s and l as 0–1 fractions, like Hsl and per ADR-004, so l = L*/100. HPLuv's p can exceed 1.
+- **Grill 56, Okhsl / Okhsv:** built on our Oklab (the CSS matrices) with Ottosson's fitted coefficients unchanged. The polynomial is only the first guess, refined by his Halley step. Expect about 1e-7 against ok_color.h and culori.
+- **Grill 57, ICtCp LMS matrix:** exact, from the generator: BT.2100's integers/4096 times our exact XYZ → Rec2020 rational, with the inverse also exact.
+- **Grill 58, licences:** a one-line copyright + MIT header in each ported file, plus a `THIRD_PARTY_NOTICES.md` with the full texts, listed in `files`.
+- **Owner, 2026-10-19:** "how to define models is your choice based on what is best and normally the practice". From here, model specifics are decided by the primary source and common practice, then logged; the owner rules on infrastructure. CLAUDE.md was updated to say so. The choices made that way:
+  - **HLG input:** BT.2100-3 Table 7 applies the HLG OETF to the LMS of *scene* light. We map relative Y = 1 to the BT.2408-8 §5.1.4.1 scene-referred gain, E = Y × OETF⁻¹(0.75) = 0.264962560, so diffuse white lands at I = 0.75 as BT.2408-8 Table 1 states. Rejected:
+    - CSS HDR's ÷3.7743 belongs to `rec2100-hlg`, not ICtCp, and puts white at 0.74998.
+    - The inverse OOTF assumes a display.
+    - colour-science's raw E = Y puts white at peak.
+  - **HLG constants:** the published Note 5c literals a = 0.17883277, b = 0.28466892, c = 0.55991073, which are what CSS and colorjs use.
+  - **HLG references:** primary achromatic checks from BT.2408-8 Table 1: white → [0.75, 0, 0]; 18% grey → I ≈ 0.38 and the 90% card → 0.73, each at the published 2 digits. The matrices are checked against BT.2100's integers. No chromatic primary vector exists; colour-science's are on a different input domain, so they're not used.
+  - **Luv black:** X + 15Y + 3Z = 0 gives u = v = 0, as in every implementation. It is also the limit along the grey axis.
+  - **Lchuv achromatic threshold:** none is published. Lch's CSS 0.0015 is borrowed, since both have L* 0–100 and chroma on a similar scale. Recorded as borrowed, not specified.
+  - **Jzczhz threshold:** CSS HDR's 0.0000026.
+  - **Order:** four commits, gates green before each next one: Luv / Lchuv, Hsluv / Hpluv, Okhsl / Okhsv, then the HDR group.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

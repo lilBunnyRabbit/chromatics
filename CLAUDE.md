@@ -50,9 +50,8 @@ Anything that changes the shape of the package or the app and isn't already in a
 
 - the public API: export names, class vs function, method names and signatures, argument order, option objects, return types
 - how a color is represented and stored; precision
-- a model's channel names, ranges, units, defaults
 - conversion routing (hubs, graph), how models plug in, tree-shaking and export layout
-- numeric policy: out-of-gamut, clamping, powerless hue, `none`, equality, tolerances
+- package-wide numeric policy: out-of-gamut, clamping, powerless hue, `none`, equality
 - error behaviour: throw, return `undefined`, or flag
 - a new dependency, or the monorepo / build / publish tooling
 - a new state layer, abstraction, registry, or plugin mechanism in the app
@@ -65,6 +64,7 @@ Just do these:
 
 - implementing what an ADR already specifies
 - adding a model inside an existing, ADR-backed pattern (still with its full test matrix)
+- **model specifics** (owner, 2026-10-19: "how to define models is your choice based on what is best and normally the practice"): which constants, white point, transfer variant, channel letters and ranges, per-model thresholds and tolerances, which reference vectors. Follow the primary source and common practice, record the choice and its reasoning in the brainstorm log and ADR, and report it. A new class name, or a choice that bends a package-wide rule (ADR-003 / ADR-004), is still asked
 - bug fixes that don't change shape
 - renames the owner asked for, formatting, docs, tooling
 
