@@ -5,6 +5,13 @@
 
 > **Revision 2026-10-19:** `looksSame` threshold is **deltaEOk < 0.02**, per CSS Color 4 §13.2 ("For the OkLCh color space, one JND is an OkLCh difference of 0.02"). It's conventional rather than measured: ΔE2000 ≈ 2 rescaled by Oklab's 0–1 lightness range. Every implementation uses the same value (colorjs.io `toGamut.js`, culori `toGamut`, ColorAide `fit_minde_chroma.py`, Stylo `gamut.rs`). Owner delegated the value.
 
+> **Revision 2026-10-19: parse and format details** ([brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 22–25)
+>
+> - `none` parses to 0; output never contains `none`.
+> - Parsing applies CSS Color 4's parse-time clamps (L range, negative chroma, alpha, legacy `rgb()`). Constructors and setters stay raw.
+> - `toString()` writes shortest-exact numbers, and percentages shift the decimal point in the string, so it's lossless for in-range values. `toCss({ precision })` rounds to 5 significant digits relative to each channel's reference range by default. For CSS-native models the two differ only in digits.
+> - Output uses the modern space-separated syntax with `%` where the spec uses it (`hsl(30 100% 50%)`). `Srgb` writes `color(srgb …)`.
+
 ## Context
 
 Culori's `parse` covers CSS Color 4; `formatCss` falls back to `rgb()` for models CSS doesn't know, losing the model. The 2025 attempt had a priority/`canParse` parser registry and a paste-to-detect idea. A global parse must know every syntax, so it can't tree-shake. [Brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 7, 8.
