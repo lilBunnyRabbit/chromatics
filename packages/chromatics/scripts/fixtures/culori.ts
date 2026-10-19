@@ -25,6 +25,8 @@ const MODES: Readonly<Record<string, string>> = {
   // culori's luv / lchuv are D50 (it converts from xyz50); the D65 pair has no culori counterpart.
   "luv-d50": "luv",
   "lchuv-d50": "lchuv",
+  okhsl: "okhsl",
+  okhsv: "okhsv",
 };
 
 const FOLDERS: Readonly<Record<string, string>> = {
@@ -65,6 +67,16 @@ function grid(model: ColorModel): number[][] {
   return out;
 }
 
+// Okhsl / Okhsv are defined inside sRGB only; outside it culori follows ok_color.h's curve past its pole
+// and this package extends linearly (ADR-011), so those edges compare in-gamut colors only.
+const SRGB_ONLY = new Set(["okhsl", "okhsv"]);
+const toRgb = converter("rgb");
+
+function inSrgb(model: ColorModel, input: readonly number[]): boolean {
+  const { r, g, b } = toRgb(toCulori(model, input)) as { r: number; g: number; b: number };
+  return [r, g, b].every((v) => v >= -1e-9 && v <= 1 + 1e-9);
+}
+
 export function crossCheck(model: ColorModel): CrossCase[] {
   const cases: CrossCase[] = [];
   const neighbours = [
@@ -75,6 +87,7 @@ export function crossCheck(model: ColorModel): CrossCase[] {
   for (const target of neighbours) {
     const to = converter(MODES[target.id] as never);
     for (const input of grid(model)) {
+      if ((SRGB_ONLY.has(model.id) || SRGB_ONLY.has(target.id)) && !inSrgb(model, input)) continue;
       cases.push({ to: target.id, input, expected: fromCulori(target, to(toCulori(model, input))) });
     }
   }
@@ -96,8 +109,17 @@ if (import.meta.main) {
       generated: new Date().toISOString().slice(0, 10),
       // Measured 2026-10-19: every edge agrees within 1.2e-13, except Bradford D65 ↔ D50 at 9.7e-8, where
       // culori ships its own matrix; ours equals CSS Color 4's within 4e-16 (scripts/matrices).
+      // Okhsl / Okhsv (2026-10-20): culori takes ok_color.h's single Halley step, this package iterates to
+      // convergence; measured 6.1e-5 (okhsl → oklab), 5.6e-5 (okhsv → oklab), 1.2e-7 / 1.4e-8 back.
       tolerance: 1e-12,
-      toleranceFor: { "xyz-d65>xyz-d50": 1e-6, "xyz-d50>xyz-d65": 1e-6 },
+      toleranceFor: {
+        "xyz-d65>xyz-d50": 1e-6,
+        "xyz-d50>xyz-d65": 1e-6,
+        "okhsl>oklab": 1e-4,
+        "okhsv>oklab": 1e-4,
+        "oklab>okhsl": 1e-6,
+        "oklab>okhsv": 1e-7,
+      },
       cases,
     };
     await Bun.write(file, JSON.stringify(existing, null, 1) + "\n");

@@ -32,7 +32,7 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
    - [-] Perceptual family (ADR-011, grills 47–58):
      - [x] `Luv65`, `Luv50`, `Lchuv65`, `Lchuv50` (2026-10-20): HSLuv snapshot (secondary) for D65, culori grid for D50
      - [x] `Hsluv`, `Hpluv` (2026-10-20): closed-form gamut lines on our Luv65, HSLuv snapshot (secondary); `THIRD_PARTY_NOTICES.md` ships
-     - [ ] `Okhsl`, `Okhsv`
+     - [x] `Okhsl`, `Okhsv` (2026-10-20): ok_color.h ported onto our Oklab with converged Halley steps; colorjs vectors (secondary), culori grid in sRGB; L outside [0, 1] clamps (grill 59)
      - [ ] `Jzazbz`, `Jzczhz`, `Ictcp`, `IctcpHlg`
    - [ ] Remaining wide-gamut RGB (ACES and others: names and sources to grill)
    - [ ] Changesets release setup, README per model

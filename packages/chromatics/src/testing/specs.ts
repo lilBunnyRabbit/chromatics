@@ -1,6 +1,10 @@
 import { maxChroma, maxChromaForHue, singular } from "../core/hsluv.js";
+import { shapeless, toeInv } from "../core/okhsl.js";
 import type { ColorModel } from "../core/model.js";
 import { Hpluv } from "../models/hpluv/hpluv.js";
+import { Okhsl } from "../models/okhsl/okhsl.js";
+import { Okhsv } from "../models/okhsv/okhsv.js";
+import { Oklab } from "../models/oklab/oklab.js";
 import { Hsl } from "../models/hsl/hsl.js";
 import { Hsluv } from "../models/hsluv/hsluv.js";
 import { Hsv } from "../models/hsv/hsv.js";
@@ -50,6 +54,24 @@ function luvHue(max: (l: number, h: number) => number): Comparison {
   };
 }
 
+// Okhsl / Okhsv: the hue weight is the Oklab chroma; the hue is free at Oklch's 0.000004, and s too where
+// the conversion drops chroma (grill 59 and the 1e-12 floor).
+function ok(model: ColorModel): Comparison {
+  const chroma = (c: readonly number[]) => {
+    if (c.some(Number.isNaN)) return 0;
+    const lab = new model(...c).to(Oklab) as Oklab;
+    return Math.hypot(lab.a, lab.b);
+  };
+  return {
+    hueWeight: chroma,
+    canonical: (c) => {
+      const lightness = toeInv(at(c, 2));
+      if (at(c, 2) <= 0 || lightness >= 1 || shapeless(lightness)) return [NaN, NaN, at(c, 2)];
+      return chroma(c) <= 0.000004 ? [NaN, at(c, 1), at(c, 2)] : c;
+    },
+  };
+}
+
 export const comparisons = new Map<ColorModel, Comparison>([
   [Luv65, luv],
   [Luv50, luv],
@@ -57,6 +79,8 @@ export const comparisons = new Map<ColorModel, Comparison>([
   [Lchuv50, lchuv],
   [Hsluv, luvHue(maxChromaForHue)],
   [Hpluv, luvHue((l) => maxChroma(l))],
+  [Okhsl, ok(Okhsl)],
+  [Okhsv, ok(Okhsv)],
   [
     Oklch,
     {

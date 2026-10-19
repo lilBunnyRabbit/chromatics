@@ -16,6 +16,8 @@ export { LinearDisplayP3 } from "./models/linear-display-p3/linear-display-p3.js
 export { LinearSrgb } from "./models/linear-srgb/linear-srgb.js";
 export { Luv50 } from "./models/luv50/luv50.js";
 export { Luv65 } from "./models/luv65/luv65.js";
+export { Okhsl } from "./models/okhsl/okhsl.js";
+export { Okhsv } from "./models/okhsv/okhsv.js";
 export { Oklab } from "./models/oklab/oklab.js";
 export { Oklch } from "./models/oklch/oklch.js";
 export { ProphotoRgb } from "./models/prophoto-rgb/prophoto-rgb.js";

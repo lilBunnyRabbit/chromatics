@@ -14,6 +14,12 @@
 > - The black and white bands use the reference's cut-offs: |L*| < 1e-8 and |L* − 100| < 1e-7. Outside the bands, out-of-range L* keeps its geometry instead of being forced to black or white as the reference does (ADR-003); inside [0, 100] the results are identical.
 > - `isAchromatic()` is true when the Lchuv65 chroma is at most 0.0015, so it matches the hue the conversion drops.
 > - Strings are `hsluv(h s% l%)` / `hpluv(h p% l%)`; s / p and l also take 0–100 numbers, like `hsv()`.
+>
+> **Revision 2026-10-20, Okhsl group implemented:**
+> - Ottosson's single Halley steps, in the cusp search and the gamut intersection, are iterated to convergence. ok_color.h itself suggests more steps for accuracy. With our matrices a single step leaves sRGB red's Okhsv s at 0.99952. Iterated, every primary and secondary lands on s = 1 and every hue's (h, 1, 1) is the sRGB cusp.
+> - Grill 59 (owner): Oklab L ≥ 1 is white and L ≤ 0 is black, in both directions. Within 1e-12 of either end, chroma is dropped and L kept, because the gamut shape underflows there.
+> - Beyond the gamut edge, ok_color.h's s(C) curve has a pole. Okhsl therefore extends linearly past s = 1, at the edge's slope, so every chroma has an s (package-defined). Okhsv's map needs no extension: out-of-gamut colors come out with v > 1 and round-trip.
+> - `toe` is evaluated in a rationalised form below k1/k3, avoiding a cancellation that cost 5e-6 relative at L 1e-12.
 
 ## Context
 

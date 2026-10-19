@@ -19,6 +19,8 @@ import { Luv50 } from "./models/luv50/luv50.js";
 import { Luv65 } from "./models/luv65/luv65.js";
 import { LinearSrgb } from "./models/linear-srgb/linear-srgb.js";
 import { Oklab } from "./models/oklab/oklab.js";
+import { Okhsl } from "./models/okhsl/okhsl.js";
+import { Okhsv } from "./models/okhsv/okhsv.js";
 import { Oklch } from "./models/oklch/oklch.js";
 import { Srgb } from "./models/srgb/srgb.js";
 import { Srgb8 } from "./models/srgb8/srgb8.js";
@@ -41,6 +43,8 @@ export const models: readonly ColorModel[] = [
   Rec2020,
   Oklab,
   Oklch,
+  Okhsl,
+  Okhsv,
   Lab,
   Lch,
   Luv65,
@@ -71,6 +75,8 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   "lchuv-d50": Lchuv50.parse,
   hsluv: Hsluv.parse,
   hpluv: Hpluv.parse,
+  okhsl: Okhsl.parse,
+  okhsv: Okhsv.parse,
 };
 
 const SPACES: Readonly<Record<string, (input: string) => Color>> = {

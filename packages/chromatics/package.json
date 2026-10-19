@@ -86,6 +86,14 @@
       "types": "./dist/models/luv65/luv65.d.ts",
       "default": "./dist/models/luv65/luv65.js"
     },
+    "./okhsl": {
+      "types": "./dist/models/okhsl/okhsl.d.ts",
+      "default": "./dist/models/okhsl/okhsl.js"
+    },
+    "./okhsv": {
+      "types": "./dist/models/okhsv/okhsv.d.ts",
+      "default": "./dist/models/okhsv/okhsv.js"
+    },
     "./oklab": {
       "types": "./dist/models/oklab/oklab.d.ts",
       "default": "./dist/models/oklab/oklab.js"

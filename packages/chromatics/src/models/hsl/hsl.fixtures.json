@@ -50910,7 +50910,11 @@
   "tolerance": 1e-12,
   "toleranceFor": {
    "xyz-d65>xyz-d50": 0.000001,
-   "xyz-d50>xyz-d65": 0.000001
+   "xyz-d50>xyz-d65": 0.000001,
+   "okhsl>oklab": 0.0001,
+   "okhsv>oklab": 0.0001,
+   "oklab>okhsl": 0.000001,
+   "oklab>okhsv": 1e-7
   },
   "cases": [
    {

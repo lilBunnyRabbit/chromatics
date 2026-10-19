@@ -401,6 +401,9 @@ Decisions:
   - **Lchuv achromatic threshold:** none is published. Lch's CSS 0.0015 is borrowed, since both have L* 0–100 and chroma on a similar scale. Recorded as borrowed, not specified.
   - **Jzczhz threshold:** CSS HDR's 0.0000026.
   - **Order:** four commits, gates green before each next one: Luv / Lchuv, Hsluv / Hpluv, Okhsl / Okhsv, then the HDR group.
+- **Grill 59, the Okhsl / Okhsv range (owner, 2026-10-20):** both are defined only for Oklab L in [0, 1]. Outside it, ok_color.h's gamut-shape formulas fail (colorjs and culori return garbage or NaN), and the toe has a pole at −0.03. Conversions clamp: L ≥ 1 is white, L ≤ 0 is black, in both directions, the way a byte model clamps. This deliberately bends ADR-003's no-loss rule for these two models, and the class docs say so. Rejected:
+  - a RangeError, which breaks grill 32's totality;
+  - passing L through with an s that no source defines.
 
 ## Key takeaways
 
