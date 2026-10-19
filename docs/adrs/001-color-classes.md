@@ -3,6 +3,11 @@
 **Date:** 2026-10-18
 **Status:** Accepted
 
+> **Revision 2026-10-19** ([brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 18, 19)
+>
+> - **Channels are accessors over private backing fields**, not plain fields, so a write can validate (ADR-003: throw on `NaN` / `Infinity`, wrap hue). Measured cost over 10M read+write ops: plain fields 25 ms on V8 and 60 ms on JSC, accessors 100 ms and 250 ms. Accepted by the owner; a batch type can win it back. `toJSON()` returns `{ model, ...channels, alpha }`.
+> - **Static channel metadata, keyed by name:** `static readonly channels = { l: { range: [0, 1] }, c: { range: [0, 0.4] }, h: { range: [0, 360], hue: true } } as const`. Key order is the constructor and `coords` order. `range` is the CSS reference range, never enforced.
+
 ## Context
 
 The studio's `ColorValue` (`src/lib/models/value.ts`) is one tagged class whose channels resolve at runtime through `member()`, so they aren't on the TS type (46 `.channel()` call sites, ~164 casts). The vault's Implementation Plan §0 rejected class-per-model because typing "is irrelevant in a dynamically-typed DSL"; for a TS package that premise is false. The owner's 2024–26 libraries extended typed arrays; [brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 1, 2, 14.

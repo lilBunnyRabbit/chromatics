@@ -229,6 +229,15 @@ Found while scaffolding `packages/chromatics`:
 - **Router determinism (a bug Claude found in its own first version):** searching the global graph made a route depend on what else had been converted. Now a route depends only on its two models. `path(from, to)` returns that exact route (owner), dropping the `models` argument.
 - JSDoc (owner): public API documented for IntelliSense in `/** */` blocks: units, ranges, mutation, throws, examples; never restating the signature. Recorded in CONVENTIONS.
 
+### Grill 18–21: model internals and test tooling (decided 2026-10-19)
+
+Opened before writing the first models.
+
+- **Grill 18: channel writes are validated by accessors** (owner). The conflict: ADR-003 says setters throw on `NaN` / `Infinity` and wrap hue, but ADR-001 says storage is plain fields, and a plain field can't validate a write. Measured over 10M read+write ops (`scratchpad/bench/accessor.mjs`): plain fields 25 ms on V8 and 60 ms on JSC, validating accessors 100 ms and 250 ms. Decided: a private backing field with a validating get / set, plus `toJSON()` returning `{ model, ...channels, alpha }`, so JSON doesn't leak `_h` keys. Rejected: plain fields checked only at operations (`c.h = 400` reads 400, and `NaN` surfaces far from its write); accessors on hue only (two rules to remember).
+- **Grill 19: rich static channel metadata, keyed by name** (owner). `static readonly channels = { l: { range: [0, 1] }, c: { range: [0, 0.4] }, h: { range: [0, 360], hue: true } } as const`. Key order is the constructor / `coords` order, and a test pins it. `range` is the CSS reference range, documented as not enforced. One source feeds the studio sliders, the harness's boundaries and grid, and the domain generators. The owner asked for the object over an array of `{ name }`; rejected: names only (range tables drift), English labels (copy in a math library).
+- **Grill 20: a shared `describeModel(Model, spec)` harness** (owner) runs every row of the matrix; model-specific cases are written by hand beside it. The harness has its own test, which feeds it deliberately broken models and expects each row to fail. Rejected: hand-written tests per model (a forgotten row goes unnoticed across 100 files).
+- **Grill 21: no Python for the core models** (owner). Reference vectors are published spec values at their own precision: CSS Color 4 examples and tables, Ottosson's XYZ→Oklab table, the CIE / ASTM worked values. A **culori grid dump**, generated once by a Bun script, is a labelled secondary cross-check (owner) that catches formula bugs that still round-trip. It is never a reference, and it doubles as ADR-008's migration-parity baseline. Python and colour-science may come back for later families with few published vectors; not decided.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

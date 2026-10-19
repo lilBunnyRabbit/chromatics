@@ -5,6 +5,11 @@
 
 > **Revision 2026-10-19:** round-trips pass when **`|a − b| ≤ 1e-13 + 1e-12·|b|`** per channel. A mixed bound, because relative error grows near black with the sRGB gamma slope. Measured on V8 and JSC with 64-bit matrices: 4.4e-14 / 5.0e-14 absolute, 3.7e-12 / 4.2e-12 relative on channels above 0.01. A model with an iterative inverse (HCT, CAM16) declares a looser bound with its reason beside the model. For comparison: ColorAide asserts 10 significant digits, colour-science 1e-7 (loose enough to hide a 10-decimal-matrix bug at 6e-8). Owner delegated the value.
 
+> **Revision 2026-10-19: harness and core oracles** ([brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 20, 21)
+>
+> - **One shared harness:** `describeModel(Model, spec)` runs every matrix row from the model's channel metadata, edges, domain, fixtures and strings. Model-specific cases sit beside it. The harness has its own test with deliberately broken models.
+> - **Core models use no Python.** References are published spec values at their own precision (CSS Color 4 examples and tables, Ottosson's table, CIE / ASTM worked values). A culori grid dump (Bun script, JSON) is a labelled **cross-check, not a reference**, and is also the migration-parity baseline. Whether Python returns for later families is open.
+
 ## Context
 
 Every hand-written generation died with no real tests and unverified, AI-drafted math. The owner: _"This needs to be bulletproof with really in depth tests of every model boundries, conversions, everything."_ `Math.pow` / `cbrt` / `exp` are implementation-approximated in ECMAScript, so V8 and JavaScriptCore can differ in the last bit. [Brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 9, 10. The rules in CLAUDE.md (_Numbers need sources_, per-model matrix) apply.
