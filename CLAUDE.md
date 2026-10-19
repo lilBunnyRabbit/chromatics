@@ -147,6 +147,7 @@ bun run check          # tsc --noEmit
 bun run build          # tsc → dist/ (ESM, per file)
 bun run matrices       # regenerate src/core/matrices.ts from exact rational arithmetic
 bun run fixtures:culori # regenerate the culori cross-check grid in each <model>.fixtures.json
+bun run exports        # regenerate package.json exports: one subpath per model folder (a test checks it)
 ```
 
 Formatting: `bunx prettier --write packages/chromatics` from the root; the package has its own `.prettierrc` (the owner's: 2 spaces, double quotes, 120 cols).

@@ -25,6 +25,58 @@
       "types": "./dist/all.d.ts",
       "default": "./dist/all.js"
     },
+    "./display-p3": {
+      "types": "./dist/models/display-p3/display-p3.d.ts",
+      "default": "./dist/models/display-p3/display-p3.js"
+    },
+    "./hsl": {
+      "types": "./dist/models/hsl/hsl.d.ts",
+      "default": "./dist/models/hsl/hsl.js"
+    },
+    "./hsv": {
+      "types": "./dist/models/hsv/hsv.d.ts",
+      "default": "./dist/models/hsv/hsv.js"
+    },
+    "./hwb": {
+      "types": "./dist/models/hwb/hwb.d.ts",
+      "default": "./dist/models/hwb/hwb.js"
+    },
+    "./lab": {
+      "types": "./dist/models/lab/lab.d.ts",
+      "default": "./dist/models/lab/lab.js"
+    },
+    "./lch": {
+      "types": "./dist/models/lch/lch.d.ts",
+      "default": "./dist/models/lch/lch.js"
+    },
+    "./linear-srgb": {
+      "types": "./dist/models/linear-srgb/linear-srgb.d.ts",
+      "default": "./dist/models/linear-srgb/linear-srgb.js"
+    },
+    "./oklab": {
+      "types": "./dist/models/oklab/oklab.d.ts",
+      "default": "./dist/models/oklab/oklab.js"
+    },
+    "./oklch": {
+      "types": "./dist/models/oklch/oklch.d.ts",
+      "default": "./dist/models/oklch/oklch.js"
+    },
+    "./srgb": {
+      "types": "./dist/models/srgb/srgb.d.ts",
+      "default": "./dist/models/srgb/srgb.js"
+    },
+    "./srgb8": {
+      "types": "./dist/models/srgb8/srgb8.d.ts",
+      "default": "./dist/models/srgb8/srgb8.js"
+    },
+    "./xyz50": {
+      "types": "./dist/models/xyz50/xyz50.d.ts",
+      "default": "./dist/models/xyz50/xyz50.js"
+    },
+    "./xyz65": {
+      "types": "./dist/models/xyz65/xyz65.d.ts",
+      "default": "./dist/models/xyz65/xyz65.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -34,7 +86,8 @@
     "test:bun": "bunx --bun vitest run",
     "test:all": "vitest run && bunx --bun vitest run",
     "matrices": "bun scripts/matrices/derive.ts",
-    "fixtures:culori": "bun scripts/fixtures/culori.ts"
+    "fixtures:culori": "bun scripts/fixtures/culori.ts",
+    "exports": "bun scripts/exports.ts"
   },
   "dependencies": {
     "@lilbunnyrabbit/optional": "^1.1.0"
