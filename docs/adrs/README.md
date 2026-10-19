@@ -25,13 +25,13 @@ When implementation forces a change, add a dated revision note at the top. Code 
 
 | ADR | Title | Date | Status |
 |---|---|---|---|
-| [001](./001-color-classes.md) | Color classes, storage, mutability | 2026-10-18 | Accepted |
-| [002](./002-conversion-graph.md) | Conversion graph | 2026-10-18 | Accepted |
+| [001](./001-color-classes.md) | Color classes, storage, mutability | 2026-10-18 | Implemented |
+| [002](./002-conversion-graph.md) | Conversion graph | 2026-10-18 | Implemented |
 | [003](./003-numeric-policy.md) | Numeric policy | 2026-10-18 | Accepted |
-| [004](./004-names-and-units.md) | Names and units | 2026-10-18 | Accepted |
+| [004](./004-names-and-units.md) | Names and units | 2026-10-18 | Implemented |
 | [005](./005-operations.md) | Operations | 2026-10-18 | Accepted |
 | [006](./006-parse-format-equality.md) | Parsing, formatting, equality | 2026-10-18 | Accepted |
 | [007](./007-package-and-tooling.md) | Package, layout, tooling, release | 2026-10-18 | Accepted |
-| [008](./008-testing.md) | Testing | 2026-10-18 | Accepted |
+| [008](./008-testing.md) | Testing | 2026-10-18 | Implemented |
 | [009](./009-color-systems.md) | Color systems and licensing | 2026-10-18 | Accepted |
 | [010](./010-build-order-and-migration.md) | Build order and studio migration | 2026-10-18 | Accepted |

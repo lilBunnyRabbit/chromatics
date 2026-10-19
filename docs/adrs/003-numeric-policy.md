@@ -9,6 +9,11 @@
 > - **Bradford D65 ↔ D50 (2026-10-19, owner: "the most precise and correct, no shortcuts"):** ship the exact rational derivation, correctly rounded, instead of CSS Color 4's published decimals. Both start from the same inputs (CSS's 4-figure whites, the linear Bradford cone matrix), but the CSS decimals were computed in float arithmetic and differ by up to 3.2e-16. `derive.test.ts` keeps the CSS decimals as a check (≤ 4e-16, which still proves the inputs: a wrong cone matrix would differ by ~1e-5). The sRGB and Display P3 matrices equal the CSS Color 4 rationals exactly, both directions.
 > - **Achromatic threshold, `≤`:** the chroma reference range / 100 000, per CSS Color 4 (csswg-drafts #11706, resolved 2025; Editor's Draft 2026-10-09 §7–9): Oklch `c ≤ 0.000004`, Lch `c ≤ 0.0015`, Hsl `s ≤ 0.00001`, Hwb `w + b ≥ 0.99999`. Other hue models use the same rule on their chroma range. Measured grey noise is ~1e-15 (Oklch) and ~1e-13 (Lch). Browsers disagree (Chromium 0.02 for both; Stylo lightness range / 1e5), so they're not oracles for this.
 > - **`inGamut` tolerance:** 7.5e-5 per channel, in the space's own 0–1 coordinates. Same as colorjs.io (`src/inGamut.js`, 0.7.1) and ColorAide (`DEF_FIT_TOLERANCE`, 8.13.1); neither documents a rationale. It absorbs rounded CSS input (3-decimal strings), and measured 64-bit noise is 3.8e-14.
+>
+> **Revision 2026-10-19: conversions** (grills 29, 32)
+>
+> - Conversions into a hue model zero the hue when the result is at or below the achromatic threshold (CSS Color 4 sample code). Near-greys therefore round-trip within the threshold, not bit-exactly.
+> - A conversion whose true result lies beyond the number range throws `RangeError: <from> → <to>: result exceeds the number range for <color>`. Spurious intermediate overflows are removed (`Math.hypot` for chroma). Inputs within 1e6× the reference ranges never throw.
 
 ## Context
 

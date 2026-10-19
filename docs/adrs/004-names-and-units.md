@@ -1,7 +1,7 @@
 # ADR-004: Names and units
 
 **Date:** 2026-10-18
-**Status:** Accepted
+**Status:** Implemented
 
 ## Context
 

@@ -1,7 +1,7 @@
 # ADR-001: Color classes, storage, mutability
 
 **Date:** 2026-10-18
-**Status:** Accepted
+**Status:** Implemented
 
 > **Revision 2026-10-19** ([brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 18, 19)
 >

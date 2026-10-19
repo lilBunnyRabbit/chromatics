@@ -1,7 +1,7 @@
 # ADR-008: Testing
 
 **Date:** 2026-10-18
-**Status:** Accepted
+**Status:** Implemented
 
 > **Revision 2026-10-19:** round-trips pass when **`|a − b| ≤ 1e-13 + 1e-12·|b|`** per channel. A mixed bound, because relative error grows near black with the sRGB gamma slope. Measured on V8 and JSC with 64-bit matrices: 4.4e-14 / 5.0e-14 absolute, 3.7e-12 / 4.2e-12 relative on channels above 0.01. A model with an iterative inverse (HCT, CAM16) declares a looser bound with its reason beside the model. For comparison: ColorAide asserts 10 significant digits, colour-science 1e-7 (loose enough to hide a 10-decimal-matrix bug at 6e-8). Owner delegated the value.
 
@@ -9,6 +9,14 @@
 >
 > - **One shared harness:** `describeModel(Model, spec)` runs every matrix row from the model's channel metadata, edges, domain, fixtures and strings. Model-specific cases sit beside it. The harness has its own test with deliberately broken models.
 > - **Core models use no Python.** References are published spec values at their own precision (CSS Color 4 examples and tables, Ottosson's table, CIE / ASTM worked values). A culori grid dump (Bun script, JSON) is a labelled **cross-check, not a reference**, and is also the migration-parity baseline. Whether Python returns for later families is open.
+>
+> **Revision 2026-10-19: tolerance shape, conditioning, totality** (grills 29–32)
+>
+> - Round trips: `|aᵢ − bᵢ| ≤ 1e-13 + 1e-12·maxⱼ|bⱼ|` (relative to the largest non-hue channel). Hue differences are weighted by the model's colorfulness (chroma; `s·min(l, 1 − l)` for HSL; `s·v` for HSV; `1 − w − b` for HWB), so they're compared on the rectangular projection. A channel that doesn't affect the color (hue of a grey, HSL saturation at black or white) is skipped.
+> - Where the source-space check fails, the round trip passes if its residual in the neighbour space passes (`back.to(N)` vs `c.to(N)`). This covers ill-conditioned regions and the achromatic band of ADR-003.
+> - 3× the reference ranges are tested again for the rectangular models among themselves and for out-of-gamut sRGB through HSL.
+> - References: tolerance = max(published half-digit, WPT epsilon) + the spread from the published input's own rounding; WPT inputs carry none.
+> - Totality: every conversion of a finite color returns a finite color or throws a `RangeError`, and never throws within 1e6× the reference ranges (no subnormal magnitudes).
 
 ## Context
 

@@ -1,7 +1,7 @@
 # ADR-002: Conversion graph
 
 **Date:** 2026-10-18
-**Status:** Accepted
+**Status:** Implemented
 
 > **Revision 2026-10-19** (implementation, owner decisions in [brainstorm](../brainstorm/2026-10-18-own-color-library.md) grill 17)
 >

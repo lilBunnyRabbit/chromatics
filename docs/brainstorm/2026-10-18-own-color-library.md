@@ -251,6 +251,30 @@ Opened before writing the first models.
 - **Grill 27: named colors live on `Srgb8`** (owner). `Srgb8.parse('rebeccapurple')` works, and `parse('red')` from `/all` returns `Srgb8`. `transparent` is `Srgb8(0, 0, 0, 0)`; `currentcolor` throws. Rejected: a separate `/named` export.
 - **Grill 28: only CSS-native models have `toCss()`** (owner: _"actually no toCss if not css color!"_). Claude had proposed a per-model CSS fallback (Hsv to `color(srgb …)`). Instead, `toCss()` leaves the `Color` base, and a non-CSS model converts explicitly: `hsv.to(Srgb).toCss()`. This revises ADR-006 ("`toCss()` is always valid CSS, converting when the model has no CSS form").
 
+### Grill 29–32: numeric edge cases found by the harness (decided 2026-10-19)
+
+The first full run of the test matrix (13 models, about 6,800 tests) turned up four questions:
+
+- **Grill 29: conversions zero the hue below the achromatic threshold** (owner, as recommended). This matches CSS Color 4's sample code and browsers, so `#808080` gives `oklch(… 0 0)` instead of `h 89.87` from 1e-15 noise. Cost, measured: near-greys don't round-trip bit-exactly through a hue model (`srgb(0 0 1e-13)` → hwb → sRGB gives `srgb(1e-13 0 0)`). The error is bounded by the threshold: sRGB ≤ 1e-5, Oklab ≤ 8e-6, Lab ≤ 0.003, all far below a JND of 0.02.
+- **Grill 30: round-trip tolerance is relative to the largest channel** (owner: "what you think its best"). The bound becomes `|aᵢ − bᵢ| ≤ 1e-13 + 1e-12·maxⱼ|bⱼ|`, with hue excluded and chroma-weighted. Reason: coupled channels carry their biggest neighbour's error. `Lab(200, 0, 0)` through XYZ returns `a = 1.1e-13`, because `a = 500·(fx − fy)` with fx ≈ 2; even plain white sits at the per-channel edge. Revises ADR-008.
+- **Grill 31: in ill-conditioned regions, check the residual** (owner: "you decide whats best"). Where the source-space error fails, the harness checks `back.to(N)` against `c.to(N)` in the neighbour space (backward error). Cases:
+  - Oklab near the LMS zero plane: imaginary colors inside the ±0.4 box, where the cube root amplifies float noise.
+  - Hsl/Hsv at subnormal lightness, where saturation isn't representable.
+  - Near-greys whose hue was zeroed (grill 29).
+
+  Published-matrix inconsistency was ruled out by measurement: |M·M⁻¹ − I| ≤ 5e-16.
+- **Grill 32: conversions are total** (owner: _"i dont want conversions and things to produce errors in such way"_). Fuzzing found two kinds of overflow:
+  - **Spurious:** the result fits but an intermediate step doesn't, such as `sqrt(a² + b²)` above 1.3e154. These are removed: `Math.hypot` for chroma, and `min / 2 + max / 2` for HSL lightness.
+  - **Genuine:** the true result is beyond the number range (sRGB 1e200 is 1e480 in linear light, and Hsv saturation from a subnormal maximum). These throw `RangeError: <from> → <to>: result exceeds the number range for <color>`. Previously they threw a misleading TypeError naming a channel the user never wrote.
+
+  A harness row proves it per model: over every finite double, each conversion returns a finite color or throws exactly that RangeError. Within 1e6× the reference ranges, with no subnormal magnitudes, nothing throws.
+
+Other findings from the same run:
+- **Spec example `#ex-xyz` (CSS Color 4) is inconsistent beyond its own rounding.** Its XYZ values were derived from the rounded `lab()` member, not from `#7654CD`. The hex → `xyz-d50` z value is 0.44708, but the spec prints 0.4472. Those pairs are excluded from the fixtures with that reason; lab ↔ XYZ and hex ↔ lab are kept.
+- **Reference tolerance** = the published half-digit (or WPT's asserted epsilon, whichever is larger), plus the spread of the published *input's* own rounding. Every corner of the input's half-digit box is converted. WPT inputs are test definitions and carry no spread.
+- **Mutation testing** (break the code on purpose): 31 mutants. The first run left 9 alive, and each got a targeted, cited test: the Lab κ/ε junction, parse-time clamps, the HSL negative-saturation rotation, the achromatic thresholds, angle units, and alpha omission in output. Now 30 of 31 are killed; the survivor (the `+360` in `toPolar`) is equivalent code, because the constructor wraps hue anyway. The harness self-test also caught a gap in the harness itself: equal shape values per channel hid a swapped channel order.
+- Formatting (owner): the package uses the owner's Prettier config (`packages/chromatics/.prettierrc`, 2 spaces, double quotes, width 120); the studio keeps its own.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.
@@ -271,7 +295,7 @@ Opened before writing the first models.
 - [x] API grill rounds 1–14
 - [x] ADRs for the decided rounds: [ADR-001…010](../adrs/README.md)
 - [ ] Owner review of PRINCIPLES / CONVENTIONS / CLAUDE.md rule sections
-- [ ] `@lilbunnyrabbit/optional` 1.1.0 (ESM build) is versioned on master but unpublished: the publish got 404, so no trusted publisher is configured. Set one up on npmjs.com (tick "also allow npm publish"), then bump and release. The package depends on it.
+- [x] `@lilbunnyrabbit/optional` 1.1.0 published 2026-10-19 via npm trusted publishing (OIDC); the package depends on `^1.1.0`
 - [x] Source the open numbers (grill 16)
 
 ## Next session topics

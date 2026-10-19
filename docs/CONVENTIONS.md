@@ -89,7 +89,8 @@ Package color models (2026-10-18 grill): classes are PascalCase words (`Oklch`, 
 
 ## Formatting
 
-Prettier: tabs, single quotes, no trailing commas, 100 cols (`.prettierrc`). `bun run format`.
+- Studio: tabs, single quotes, no trailing commas, 100 cols (root `.prettierrc`). `bun run format`.
+- Package: the owner's config: 2 spaces, double quotes, es5 trailing commas, 120 cols (`packages/chromatics/.prettierrc`). Run `bunx prettier --write packages/chromatics` from the root. Fixture JSON is machine-written and ignored.
 
 ## Tests
 
@@ -98,7 +99,19 @@ Prettier: tabs, single quotes, no trailing commas, 100 cols (`.prettierrc`). `bu
 - Test behaviour through the public API.
 - A test must fail when the behaviour breaks: break the code once on purpose and check.
 - Expected values carry their source. See CLAUDE.md, _Numbers need sources_.
-- The package's test layout, tolerances, and oracle strategy are decided in an ADR before the first model lands.
+- Package (ADR-008): every model's `<model>.test.ts` calls `describeModel(Model, models, spec)` from `src/testing/harness.ts`. That runs the whole matrix:
+  - shape and boundaries
+  - degenerate input
+  - totality
+  - every edge both ways (grid plus fast-check)
+  - parse / format
+  - references from `<model>.fixtures.json`
+  - the culori cross-check
+
+  Model-specific cases go in a `describe` beside it. Each one cites its source.
+- The harness has its own test (`harness.test.ts`) with deliberately broken models. A new harness row needs a broken model that fails it.
+- How the harness compares a model's colors (hue weight, channels that don't matter, wide round trips) lives in `src/testing/specs.ts`.
+- Fixture provenance and exclusions: `packages/chromatics/scripts/fixtures/README.md`. Regenerate the culori grid with `bun run fixtures:culori`.
 
 ## Comments
 

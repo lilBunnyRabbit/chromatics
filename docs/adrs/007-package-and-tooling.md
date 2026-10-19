@@ -18,6 +18,10 @@ The owner's order: build the package on a branch, then turn this repo into a mon
 - **Versioning:** `0.x` until the API is frozen, then `1.0.0`.
 - **Runtime dependencies:** only `@lilbunnyrabbit/optional`. Dev: TypeScript, Vitest, fast-check.
 - **Scaffold notes (2026-10-19):** TypeScript 5.9.3 to match the studio (one TS in the workspace; `svelte-check` needs the TS 5 API). Scripts are Bun-only and typed with `@types/bun` (owner chose it over `@types/node`); the build config sets `types: []` so `src/` can't touch runtime APIs. Bun's workspace install uses the isolated linker, which exposed the studio's undeclared `@codemirror/view` / `state` / `commands` and `@types/estree` imports; they're now declared (owner). The root `bunfig.toml` scopes `bun test` to `tests/`, so the package's Vitest suites only run through Vitest.
+- **Core models (2026-10-19):**
+  - Dev dependencies `culori` 4.0.2 and `@types/culori` (owner, grill 21) feed the cross-check grid only.
+  - The package has its own `.prettierrc`: the owner's config.
+  - `src/testing/` holds the shared harness and is excluded from the build, like `*.test.ts` and `*.fixtures.json`.
 - **File layout (2026-10-19):** a folder per model, flat (`src/models/oklch/{oklch.ts, oklch.test.ts, oklch.domain.ts, oklch.fixtures.json, README.md}`); `src/core/` for the base class, edges, router, family bases; `src/index.ts` root barrel; `src/all.ts`; `scripts/fixtures/` for oracle generators. Tests beside their source.
 
 ## Alternatives Considered
