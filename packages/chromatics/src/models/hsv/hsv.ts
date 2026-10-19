@@ -3,7 +3,7 @@ import { finite, wrapHue } from "../../core/channel.js";
 import { HueColor } from "../../core/families/hue.js";
 import { readHueFunction, serialize } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
-import { rgbToHue } from "../../core/hue.js";
+import { GREY_NOISE, rgbToHue } from "../../core/hue.js";
 import type { Edge } from "../../core/model.js";
 import { Hsl } from "../hsl/hsl.js";
 import { Srgb } from "../srgb/srgb.js";
@@ -25,6 +25,7 @@ function hsvToSrgb(c: Hsv): Srgb {
 function srgbToHsv(c: Srgb): Hsv {
   const max = Math.max(c.r, c.g, c.b);
   const min = Math.min(c.r, c.g, c.b);
+  if (max - min < GREY_NOISE) return new Hsv(0, 0, max, c.alpha);
   const s = max === 0 ? 0 : (max - min) / max;
   return new Hsv(s <= ACHROMATIC ? 0 : rgbToHue(c.r, c.g, c.b), s, max, c.alpha);
 }

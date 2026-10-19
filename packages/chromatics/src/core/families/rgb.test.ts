@@ -4,6 +4,8 @@ import { DisplayP3 } from "../../models/display-p3/display-p3.js";
 import { LinearSrgb } from "../../models/linear-srgb/linear-srgb.js";
 import { Oklch } from "../../models/oklch/oklch.js";
 import { Srgb } from "../../models/srgb/srgb.js";
+import { parse } from "../../all.js";
+import fixtures from "./gamut.fixtures.json" with { type: "json" };
 
 describe("gamutMap, CSS Color 4 examples", () => {
   // #ex-p3-oog-display: color(display-p3 1.1 0.4 0.2) maps to "such as" color(display-p3 1 0.473 0.314).
@@ -63,5 +65,20 @@ describe("gamutMap invariants", () => {
     expect(new Srgb(1.00005, 0, 0.5).inGamut(0)).toBe(false);
     expect([...c.clone().gamutMap({ method: "clip" }).coords]).toEqual([1, 0, 0.5]);
     expect([...c.clone().clamp().coords]).toEqual([1, 0, 0.5]);
+  });
+});
+
+// web-platform-tests canvas gamut-mapping cases list each CSS algorithm's 8-bit result to 2 decimals,
+// generated with colorjs.io: an implementation, so a cross-check of the Binary Search with Local MINDE
+// path, not a reference. Half a unit of the second decimal is 0.005.
+describe("gamutMap cross-check: colorjs.io MINDE values from WPT canvas tests", () => {
+  it.each(
+    fixtures.canvas.map((c) => [`${c.input} → ${c.file.includes("display-p3") ? "display-p3" : "srgb"}`, c] as const)
+  )("%s", (_, c) => {
+    const model = c.file.includes("display-p3") ? DisplayP3 : Srgb;
+    const mapped = (parse(c.input).to(model) as Srgb).gamutMap();
+    mapped.coords.forEach((v, i) =>
+      expect(Math.abs(v * 255 - c.per_algorithm_8bit_2dp.MINDE[i]!)).toBeLessThanOrEqual(0.005 + 1e-9)
+    );
   });
 });

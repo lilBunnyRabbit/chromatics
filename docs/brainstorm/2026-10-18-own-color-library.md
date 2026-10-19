@@ -309,6 +309,39 @@ ADR-005 settled where operations live; these rounds settled what they are.
 - **Grill 41: ramp steps are raw** (owner): evenly spaced lightness, the receiver isn't forced in, nothing is gamut-mapped. Map each step for display: `ramp.map(c => c.to(Srgb).gamutMap())`.
 - **Grill 42: the family base classes stay internal** (owner). Generic code uses unions of the model classes. Rejected: exporting `HueColor` / `RgbColor` / `RectangularColor` (more API to keep stable).
 
+### Grill 43–45: contrast formula, APCA, HSL noise (decided 2026-10-19)
+
+- **Grill 43: `contrast()` follows WCAG 2.2's literal formula** (owner).
+  - It uses `0.2126 R + 0.7152 G + 0.0722 B` with the 0.04045 threshold (WCAG 2.2 `#dfn-relative-luminance`).
+  - `luminance()` stays the exact Y (grill 39).
+  - Measured: the exact matrix row and WCAG's 4-digit coefficients disagree on 1,951 of 33.5M pass/fail checks (every 8-bit color on white and black, at 3 / 4.5 / 7). `#006ffb` on white is 4.5001 by the exact row and 4.4999 by WCAG. Audit tools use WCAG's numbers.
+- **Grill 44: APCA stays out of the MIT package** (owner).
+  - Its license (apca-w3 repo HEAD) limits use to WCAG web content and prohibits commercial use without a signed agreement. It also forbids changing the constants, controls the names, and claims patents pending over "the math".
+  - The npm 0.1.9 tarball's LICENSE is looser, and the "W3 cooperative agreement" it refers to is unpublished.
+  - The studio's `analysis/apca.ts` is logged in the inbox for the owner.
+- **Grill 45: a 1e-12 noise floor on sRGB chroma for HSL / HSV** (owner).
+  - White from Lab, LCH, XYZ-D50 or Display P3 reaches sRGB with ~2e-16 of noise. HSL saturation divides by min(l, 1 − l) ≈ 1e-16, so `lab(100 0 0)` became `hsl(60 50% 100%)`.
+  - Now a chroma (max − min) below 1e-12 converts as grey (s = 0, h = 0); above it, CSS's rules are unchanged.
+  - Measured grey noise is ≤ 1e-15.
+- Other operation findings:
+  - **References:**
+    - All 34 CIEDE2000 pairs (Sharma 2005) pass. Pairs 21–24 need the author's full-precision inputs from the XLS; the published inputs are 4-decimal roundings.
+    - 465 WPT `color-mix()` cases and the CSS Color 4 interpolation examples pass.
+    - All 29 WPT canvas gamut-mapping cases agree with colorjs.io's MINDE values to the printed 2 decimals.
+  - **Deliberate differences from CSS, excluded with reasons:**
+    - WPT color-mix lines 613 and 618, plus 4 more: CSS keeps an explicit hue on a grey that is already in the mixing space, while ADR-003 treats every grey's hue as missing.
+    - The WAI page's `#E5E5E5` on `#6221EA` = 5.6:1, which rounds to 5.7 by WCAG's own formula.
+  - **Spec:**
+    - CSS Color 4 now lists three gamut-mapping algorithms that give different results; Binary Search with Local MINDE is the one ADR-005 chose.
+    - The pseudo-code for `longer` yields a full 360° turn for equal hues, which its stated range [180, 360) excludes; we follow the pseudo-code.
+  - **Precision:**
+    - Mixing uses the weight form `v₁·a₁(1 − t)/α + v₂·a₂t/α`, algebraically CSS's premultiply-interpolate-divide, but nothing underflows and t = 0 / 1 return the ends exactly.
+    - The 3×3 matrix product uses compensated summation, so sRGB white's Y is exactly 1 and black on white is exactly 21.
+  - **Mutation testing:** 33 of 36 operation mutants killed. All three survivors are effectively equivalent:
+    - the constructor already wraps hue
+    - `minInGamut` only skips a redundant check
+    - a 1.6e-10 change to CIEDE2000's G term is below the published 4 decimals
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

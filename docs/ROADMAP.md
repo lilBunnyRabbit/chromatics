@@ -21,7 +21,12 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
      - the shared test matrix (`describeModel`), about 6,900 tests on V8 and JSC
      - references: CSS Color 4 + WPT + Ottosson (+ Wikipedia for HSV only), and the culori cross-check grid
      - mutation-tested: 30 of 31 mutants killed; the survivor is equivalent code
-   - [ ] Operations (ADR-005): `mix` / `steps` / `interpolator`, `inGamut` / `clamp` / `gamutMap`, `contrast`, `deltaE2000`, `deltaEOk`, `looksSame`, harmonies, `isAchromatic` on the remaining hue models
+   - [x] Operations (2026-10-19, ADR-005):
+     - interpolation (mix / steps / interpolator / gradient), harmonies, adjusting, ramp
+     - gamut (CSS Color 4 MINDE)
+     - metrics: WCAG contrast, ΔE76 / 2000 / OK, luminance
+     - checked against CIEDE2000 (Sharma), WCAG examples, 465 WPT color-mix cases and 29 canvas gamut cases; mutation-tested
+   - [ ] APCA: not in the package (license, grill 44); the studio's copy is in the inbox
    - [ ] Per-model subpath exports (ADR-007), changesets, README per model
    - [x] `@lilbunnyrabbit/optional` 1.1.0 published (2026-10-19, npm trusted publishing)
 5. [ ] **Monorepo**: this repo hosts the package and the website

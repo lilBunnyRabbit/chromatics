@@ -1,3 +1,8 @@
+// Grill 45: below this sRGB chroma (max − min) a color is grey. Grey from other spaces reaches sRGB with
+// ~1e-16 of noise, and HSL's saturation divides by min(l, 1 − l) ≈ 1e-16 at white, turning that noise
+// into 50% saturation. 1e-12 sits far above measured noise (≤ 1e-15) and far below visibility.
+export const GREY_NOISE = 1e-12;
+
 // CSS Color 4 sample code `rgbToHue` (rgbToHwb.js), returning 0 instead of NaN when max === min.
 export function rgbToHue(r: number, g: number, b: number): number {
   const max = Math.max(r, g, b);

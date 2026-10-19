@@ -3,7 +3,7 @@ import { finite, wrapHue } from "../../core/channel.js";
 import { HueColor } from "../../core/families/hue.js";
 import { readHueFunction, serialize, type CssOptions } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
-import { hslToRgb, rgbToHue } from "../../core/hue.js";
+import { GREY_NOISE, hslToRgb, rgbToHue } from "../../core/hue.js";
 import type { Edge } from "../../core/model.js";
 import { Srgb } from "../srgb/srgb.js";
 
@@ -18,8 +18,9 @@ function srgbToHsl(c: Srgb): Hsl {
   // Halving each term is exact, so this equals (min + max) / 2 without its overflow (grill 32).
   const l = min / 2 + max / 2;
   const d = max - min;
+  if (d < GREY_NOISE) return new Hsl(0, 0, l, c.alpha);
   let h = rgbToHue(r, g, b);
-  let s = d === 0 || l === 0 || l === 1 ? 0 : (max - l) / Math.min(l, 1 - l);
+  let s = l === 0 || l === 1 ? 0 : (max - l) / Math.min(l, 1 - l);
   // Very out-of-gamut colors give a negative saturation: rotate the hue instead (csswg-drafts #9222).
   if (s < 0) {
     h += 180;

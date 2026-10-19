@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { fixHues, segment } from "./interpolate.js";
 
 const hue = fc.double({ min: 0, max: 360, maxExcluded: true, noNaN: true });
+// Adding 360 to one angle can round away an ulp, so the boundaries hold to 1e-9, not exactly.
 
 // CSS Color 4 #hue-interpolation states each strategy's invariant on θ₂ − θ₁ after the fixup.
 describe("fixHues invariants (CSS Color 4 #hue-interpolation)", () => {
@@ -10,7 +11,7 @@ describe("fixHues invariants (CSS Color 4 #hue-interpolation)", () => {
     fc.assert(
       fc.property(hue, hue, (a, b) => {
         const [h1, h2] = fixHues(a, b, "shorter");
-        expect(Math.abs(h2 - h1)).toBeLessThanOrEqual(180);
+        expect(Math.abs(h2 - h1)).toBeLessThanOrEqual(180 + 1e-9);
       })
     );
   });
@@ -22,7 +23,7 @@ describe("fixHues invariants (CSS Color 4 #hue-interpolation)", () => {
       fc.property(hue, hue, (a, b) => {
         const [h1, h2] = fixHues(a, b, "longer");
         const d = h2 - h1;
-        expect((d >= -360 && d <= -180) || (d >= 180 && d <= 360)).toBe(true);
+        expect((d >= -360 - 1e-9 && d <= -180 + 1e-9) || (d >= 180 - 1e-9 && d <= 360 + 1e-9)).toBe(true);
       })
     );
   });

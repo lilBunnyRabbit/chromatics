@@ -14,6 +14,8 @@
 >
 > - Conversions into a hue model zero the hue when the result is at or below the achromatic threshold (CSS Color 4 sample code). Near-greys therefore round-trip within the threshold, not bit-exactly.
 > - A conversion whose true result lies beyond the number range throws `RangeError: <from> → <to>: result exceeds the number range for <color>`. Spurious intermediate overflows are removed (`Math.hypot` for chroma). Inputs within 1e6× the reference ranges never throw.
+>
+> **Revision 2026-10-19: grey noise floor** (grill 45): in sRGB → HSL / HSV, a chroma (max − min) below 1e-12 converts as grey (s = 0, h = 0), so float noise from other spaces can't become saturation near white or black.
 
 ## Context
 

@@ -1,0 +1,72 @@
+{
+ "spec": {
+  "url": "https://www.w3.org/TR/WCAG22/",
+  "dated_version": "https://www.w3.org/TR/2024/REC-WCAG22-20241212/"
+ },
+ "examples": [
+  {
+   "fg": "#949494",
+   "bg": "white",
+   "published_ratio": "3:1",
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
+   "quote": "a sufficiently contrasting focus indicator (grey #949494 against white, with a contrast ratio of 3:1)."
+  },
+  {
+   "fg": "#E5E5E5",
+   "bg": "#6221EA",
+   "published_ratio": "5.6:1",
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
+   "quote": "Pass: A customized checkbox with light grey check (#E5E5E5), which has a contrast ratio of 5.6:1 with the purple box (#6221EA).",
+   "knownDiscrepancy": "WCAG 2.2 formula gives 5.6994 (rounds to 5.7). The page's other examples round half-up correctly (e.g. 1.1854 published as 1.2), so 5.6 is an inconsistency in the page. Tested only for the claim it supports: at least 3:1 (SC 1.4.11)."
+  },
+  {
+   "fg": "#FFF000",
+   "bg": "white",
+   "published_ratio": "1.2:1",
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
+   "quote": "fails the Non-text contrast criterion due to the yellow (#FFF000) to white contrast ratio of 1.2:1."
+  },
+  {
+   "fg": "#CCC",
+   "bg": "#FFF",
+   "published_ratio": "1.6:1",
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
+   "quote": "the additional gray (#CCC) outline has an insufficient contrast of 1.6:1 against the white (#FFF) background"
+  },
+  {
+   "fg": "white",
+   "bg": "#6E747B",
+   "published_ratio": "4.7:1",
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
+   "quote": "it has a contrast of 4.7:1 for the white icon on dark gray (#6E747B)."
+  },
+  {
+   "fg": "#9D9D9D",
+   "bg": "white",
+   "published_ratio": "2.7:1",
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
+   "quote": "The grey border color of the checkbox (#9D9D9D) has a contrast ratio of 2.7:1 with the white background"
+  },
+  {
+   "fg": "#AAA",
+   "bg": "#FFF",
+   "published_ratio": "2.3:1",
+   "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
+   "quote": "the gray (#AAA) indicator has an insufficient ratio of 2.3:1 with the white (#FFF) adjacent background."
+  },
+  {
+   "fg": "#3366CC",
+   "bg": "#000000",
+   "published_ratio": "3.9:1",
+   "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G183",
+   "quote": "The hypertext links in a document are medium-light blue (#3366CC) and the regular text is black (#000000). ... it has a contrast of 3.9:1 with the surrounding text"
+  },
+  {
+   "fg": "#E3660E",
+   "bg": "#FFFFFF",
+   "published_ratio": "3.4:1",
+   "url": "https://www.w3.org/WAI/WCAG22/Techniques/general/G207",
+   "quote": "The color orange (#E3660E) is tested against the white background (#FFFFFF) and it has a contrast ratio of 3.4:1."
+  }
+ ]
+}

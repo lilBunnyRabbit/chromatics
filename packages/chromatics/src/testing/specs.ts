@@ -40,7 +40,8 @@ export const comparisons = new Map<ColorModel, Comparison>([
       hueWeight: (c) => Math.abs(at(c, 1)) * Math.max(0, Math.min(at(c, 2), 1 - at(c, 2))),
       canonical: (c) => {
         const [h, s, l] = [at(c, 0), at(c, 1), at(c, 2)];
-        if (l <= 0 || l >= 1) return [NaN, NaN, l];
+        // Grill 45: an sRGB chroma below 1e-12 converts as grey.
+        if (l <= 0 || l >= 1 || 2 * Math.abs(s) * Math.min(l, 1 - l) < 1e-12) return [NaN, NaN, l];
         return s <= 0.00001 ? [NaN, s, l] : [h, s, l];
       },
     },
@@ -51,7 +52,7 @@ export const comparisons = new Map<ColorModel, Comparison>([
       hueWeight: (c) => Math.abs(at(c, 1)) * Math.max(0, at(c, 2)),
       canonical: (c) => {
         const [h, s, v] = [at(c, 0), at(c, 1), at(c, 2)];
-        if (v <= 0) return [NaN, NaN, v];
+        if (v <= 0 || Math.abs(s) * v < 1e-12) return [NaN, NaN, v];
         return s <= 0.00001 ? [NaN, s, v] : [h, s, v];
       },
     },

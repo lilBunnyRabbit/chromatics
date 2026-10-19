@@ -8,6 +8,12 @@ import type { Edge } from "../../core/model.js";
 import { linearToSrgb, srgbToLinear } from "../../core/transfer.js";
 import { LinearSrgb } from "../linear-srgb/linear-srgb.js";
 
+// WCAG 2.2 #dfn-relative-luminance, Note 1: "L = 0.2126 * R + 0.7152 * G + 0.0722 * B", with the sRGB
+// transfer at threshold 0.04045 (the same curve as `srgbToLinear`).
+function wcagLuminance(c: Srgb): number {
+  return 0.2126 * srgbToLinear(c.r) + 0.7152 * srgbToLinear(c.g) + 0.0722 * srgbToLinear(c.b);
+}
+
 /**
  * sRGB with its transfer curve, channels 0–1 (CSS Color 4 `srgb`, IEC 61966-2-1). What `rgb()` and
  * most screens mean by a color.
@@ -95,14 +101,19 @@ export class Srgb extends RgbColor {
    * WCAG 2.x contrast ratio with `other`, 1 (none) to 21 (black on white). Symmetric. WCAG 2.2 SC 1.4.3
    * (AA) asks 4.5 for text and 3 for large text; SC 1.4.6 (AAA) asks 7 and 4.5.
    *
+   * Follows WCAG 2.2's definition literally (#dfn-relative-luminance: `0.2126 R + 0.7152 G + 0.0722 B`,
+   * threshold 0.04045), not {@link luminance}: they differ in the 4th decimal, which flipped 1,951 of
+   * 33.5M pass/fail checks (every 8-bit color on white and black, at 3 / 4.5 / 7), and audit tools use
+   * WCAG's numbers (grill 43).
+   *
    * @example
    * ```ts
-   * Srgb8.parse("#767676").to(Srgb).contrast(new Srgb(1, 1, 1)); // ≈ 4.54
+   * Srgb8.parse("#3366cc").to(Srgb).contrast(new Srgb(0, 0, 0)); // 3.9 (WCAG technique G183)
    * ```
    */
   contrast(other: Srgb): number {
-    const a = this.luminance();
-    const b = other.luminance();
+    const a = wcagLuminance(this);
+    const b = wcagLuminance(other);
     return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
   }
 

@@ -30,6 +30,13 @@
 >   - Lab: `deltaE76` and `deltaE2000`.
 >   - Oklab: `deltaEOk` and `looksSame`.
 >   - APCA waits on a license check.
+>
+> **Revision 2026-10-19: implemented** (grills 43–45)
+>
+> - `contrast()` uses WCAG 2.2's literal relative luminance (`0.2126 / 0.7152 / 0.0722`, threshold 0.04045); `luminance()` is the exact Y. They differ in the 4th decimal.
+> - APCA is not shipped: its license conflicts with MIT (grill 44).
+> - `gamutMap()` is CSS Color 4 Binary Search with Local MINDE. At lightness ≥ 1 or ≤ 0 it returns the destination's exact white or black, every result lies within [0, 1], and in-gamut colors are unchanged.
+> - `tetradic(angle = 60)` is the rectangle `[h, h + angle, h + 180, h + 180 + angle]`; `tetradic(90)` equals `square()`.
 
 ## Context
 
