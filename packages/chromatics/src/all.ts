@@ -1,7 +1,11 @@
 import type { Color } from "./core/color.js";
 import { invalid } from "./core/css.js";
 import type { ColorModel } from "./core/model.js";
+import { A98Rgb } from "./models/a98-rgb/a98-rgb.js";
 import { DisplayP3 } from "./models/display-p3/display-p3.js";
+import { LinearDisplayP3 } from "./models/linear-display-p3/linear-display-p3.js";
+import { ProphotoRgb } from "./models/prophoto-rgb/prophoto-rgb.js";
+import { Rec2020 } from "./models/rec2020/rec2020.js";
 import { Hsl } from "./models/hsl/hsl.js";
 import { Hsv } from "./models/hsv/hsv.js";
 import { Hwb } from "./models/hwb/hwb.js";
@@ -25,6 +29,10 @@ export const models: readonly ColorModel[] = [
   Srgb,
   Srgb8,
   DisplayP3,
+  LinearDisplayP3,
+  A98Rgb,
+  ProphotoRgb,
+  Rec2020,
   Oklab,
   Oklch,
   Lab,
@@ -51,6 +59,10 @@ const SPACES: Readonly<Record<string, (input: string) => Color>> = {
   srgb: Srgb.parse,
   "srgb-linear": LinearSrgb.parse,
   "display-p3": DisplayP3.parse,
+  "display-p3-linear": LinearDisplayP3.parse,
+  "a98-rgb": A98Rgb.parse,
+  "prophoto-rgb": ProphotoRgb.parse,
+  rec2020: Rec2020.parse,
   xyz: Xyz65.parse,
   "xyz-d65": Xyz65.parse,
   "xyz-d50": Xyz50.parse,

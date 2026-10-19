@@ -138,6 +138,36 @@
    "at": "css/css-color/parsing/color-computed-relative-color.html:852"
   },
   {
+   "id": "wpt-5751",
+   "kind": "wpt-relative-color-identity",
+   "input": "color(srgb 0.25 0.5 0.75)",
+   "expected": "color(a98-rgb 0.346741 0.496104 0.736143)",
+   "precision": 5e-7,
+   "epsilon": 0.001,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-relative-color.html:837"
+  },
+  {
+   "id": "wpt-5753",
+   "kind": "wpt-relative-color-identity",
+   "input": "color(srgb 0.25 0.5 0.75)",
+   "expected": "color(prophoto-rgb 0.374929 0.416494 0.663803)",
+   "precision": 5e-7,
+   "epsilon": 0.001,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-relative-color.html:839"
+  },
+  {
+   "id": "wpt-5755",
+   "kind": "wpt-relative-color-identity",
+   "input": "color(srgb 0.25 0.5 0.75)",
+   "expected": "color(rec2020 0.420493 0.518024 0.741381)",
+   "precision": 5e-7,
+   "epsilon": 0.001,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-relative-color.html:841"
+  },
+  {
    "id": "css4-0041",
    "kind": "explicit-statement",
    "input": "rgb(46.27% 32.94% 80.39%)",

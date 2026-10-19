@@ -38,6 +38,30 @@ export const RGB_SPACES = [
     blue: { x: "0.150", y: "0.060" },
     white: "D65",
   },
+  {
+    // CSS Color 4 #predefined-a98-rgb characteristics table
+    name: "A98_RGB",
+    red: { x: "0.6400", y: "0.3300" },
+    green: { x: "0.2100", y: "0.7100" },
+    blue: { x: "0.1500", y: "0.0600" },
+    white: "D65",
+  },
+  {
+    // CSS Color 4 #predefined-prophoto-rgb characteristics table
+    name: "PROPHOTO_RGB",
+    red: { x: "0.734699", y: "0.265301" },
+    green: { x: "0.159597", y: "0.840403" },
+    blue: { x: "0.036598", y: "0.000105" },
+    white: "D50",
+  },
+  {
+    // CSS Color 4 #predefined-rec2020 characteristics table
+    name: "REC2020",
+    red: { x: "0.708", y: "0.292" },
+    green: { x: "0.170", y: "0.797" },
+    blue: { x: "0.131", y: "0.046" },
+    white: "D65",
+  },
 ] as const satisfies readonly RgbSpace[];
 
 export function whiteXyz(white: Chromaticity): Vector3 {

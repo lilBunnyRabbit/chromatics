@@ -60,8 +60,8 @@ export abstract class RgbColor extends RectangularColor {
     const alpha = this.alpha;
     const origin = this.to(Oklch);
     const fromOklch = (c: Oklch) => c.to(model).clamp();
-    // CSS converts oklab(1 0 0) / oklab(0 0 0); every RGB space here shares Oklab's D65 white, so that is
-    // exactly 1 / 0 per channel, without the 16-digit Oklab matrices' 6e-16 of noise.
+    // CSS converts oklab(1 0 0) / oklab(0 0 0). Every RGB space here maps Oklab's white to 1 per channel
+    // (ProPhoto's D50 through Bradford), so return that exactly, without ~1e-15 of matrix noise.
     if (origin.l >= 1) return this.assign([1, 1, 1], alpha);
     if (origin.l <= 0) return this.assign([0, 0, 0], alpha);
     const inGamut = (c: Oklch) => (c.to(model) as RgbColor).inGamut(0);

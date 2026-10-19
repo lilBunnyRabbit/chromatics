@@ -1,0 +1,783 @@
+{
+ "retrieved": "2026-10-19",
+ "sources": {
+  "css4": "CSS Color 4 ED, csswg-drafts 3cfa13e88561688b47392ab3ee171fbb8d76d949 css-color-4/Overview.bs",
+  "wpt": "web-platform-tests 38690cce87929f184a529234eff84eaa426609c3 css/css-color/parsing/",
+  "ottosson": "Björn Ottosson, A perceptual color space for image processing, table \"example XYZ and Oklab pairs\"",
+  "wikipedia": "Wikipedia \"HSL and HSV\" oldid 1378989624, Examples table (secondary source)"
+ },
+ "conversions": [
+  {
+   "id": "css4-0038",
+   "kind": "explicit-statement",
+   "input": "color(display-p3-linear 0.3081 0.014 0.0567)",
+   "expected": "color(display-p3 0.591 0.123 0.264)",
+   "precision": 0.0005,
+   "src": "css4",
+   "at": "Overview.bs:4303-4309 #predefined-display-p3-linear",
+   "quote": "<div class=\"example\" id=\"display-p3-linear-swatches\">\nFor example, these are the same color\n<pre class=\"lang-css\">\n<span class=\"swatch\" style=\"--color: rgb(64.55% 2.065% 26.03%)\"></span> color(display-p3 0.591 0.123 0.264)\n<span class=\"swatch\" style=\"--color: rgb(64.55% 2.065% 26.03%)\"></span> color(display-p3-linear 0.3081 0.014 0.0567)\n</pre>\n</div>"
+  }
+ ],
+ "parse": [
+  {
+   "id": "wpt-0187",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 0% 0% 0%)",
+   "expected": "color(display-p3-linear 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:22"
+  },
+  {
+   "id": "wpt-0188",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 10% 10% 10%)",
+   "expected": "color(display-p3-linear 0.1 0.1 0.1)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:23"
+  },
+  {
+   "id": "wpt-0189",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear .2 .2 25%)",
+   "expected": "color(display-p3-linear 0.2 0.2 0.25)",
+   "precision": [
+    0.05,
+    0.05,
+    0.005
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:24"
+  },
+  {
+   "id": "wpt-0190",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 0 0 0 / 1)",
+   "expected": "color(display-p3-linear 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:25"
+  },
+  {
+   "id": "wpt-0191",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 0% 0 0 / 0.5)",
+   "expected": "color(display-p3-linear 0 0 0 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:26"
+  },
+  {
+   "id": "wpt-0192",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 20% 0 10/0.5)",
+   "expected": "color(display-p3-linear 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:27"
+  },
+  {
+   "id": "wpt-0193",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 20% 0 10/50%)",
+   "expected": "color(display-p3-linear 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:28"
+  },
+  {
+   "id": "wpt-0194",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 400% 0 10/50%)",
+   "expected": "color(display-p3-linear 4 0 10 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:29"
+  },
+  {
+   "id": "wpt-0195",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 50% -160 160)",
+   "expected": "color(display-p3-linear 0.5 -160 160)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:30"
+  },
+  {
+   "id": "wpt-0196",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 50% -200 200)",
+   "expected": "color(display-p3-linear 0.5 -200 200)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:31"
+  },
+  {
+   "id": "wpt-0197",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 0 0 0 / -10%)",
+   "expected": "color(display-p3-linear 0 0 0 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:32"
+  },
+  {
+   "id": "wpt-0198",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 0 0 0 / 110%)",
+   "expected": "color(display-p3-linear 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:33"
+  },
+  {
+   "id": "wpt-0199",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 0 0 0 / 300%)",
+   "expected": "color(display-p3-linear 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:34"
+  },
+  {
+   "id": "wpt-0200",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 200 200 200)",
+   "expected": "color(display-p3-linear 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:35"
+  },
+  {
+   "id": "wpt-0201",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 200 200 200 / 200)",
+   "expected": "color(display-p3-linear 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:36"
+  },
+  {
+   "id": "wpt-0202",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear -200 -200 -200)",
+   "expected": "color(display-p3-linear -200 -200 -200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:37"
+  },
+  {
+   "id": "wpt-0203",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear -200 -200 -200 / -200)",
+   "expected": "color(display-p3-linear -200 -200 -200 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:38"
+  },
+  {
+   "id": "wpt-0204",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 200% 200% 200%)",
+   "expected": "color(display-p3-linear 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:39"
+  },
+  {
+   "id": "wpt-0205",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 200% 200% 200% / 200%)",
+   "expected": "color(display-p3-linear 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:40"
+  },
+  {
+   "id": "wpt-0206",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear -200% -200% -200% / -200%)",
+   "expected": "color(display-p3-linear -2 -2 -2 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:41"
+  },
+  {
+   "id": "wpt-0209",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear none none none / none)",
+   "expected": "color(display-p3-linear none none none / none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:167"
+  },
+  {
+   "id": "wpt-0210",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear none none none)",
+   "expected": "color(display-p3-linear none none none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:157"
+  },
+  {
+   "id": "wpt-0211",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 10% none none / none)",
+   "expected": "color(display-p3-linear 0.1 none none / none)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:47"
+  },
+  {
+   "id": "wpt-0212",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear none none none / 0.5)",
+   "expected": "color(display-p3-linear none none none / 0.5)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:48"
+  },
+  {
+   "id": "wpt-0213",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 0 0 0 / none)",
+   "expected": "color(display-p3-linear 0 0 0 / none)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:49"
+  },
+  {
+   "id": "wpt-0332",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 1.00 0.50 0.200)",
+   "expected": "color(display-p3-linear 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:153"
+  },
+  {
+   "id": "wpt-0333",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 100% 50% 20%)",
+   "expected": "color(display-p3-linear 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:154"
+  },
+  {
+   "id": "wpt-0334",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 100% 0.5 20%)",
+   "expected": "color(display-p3-linear 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:155"
+  },
+  {
+   "id": "wpt-0335",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 1.00 50% 0.2)",
+   "expected": "color(display-p3-linear 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:156"
+  },
+  {
+   "id": "wpt-0336",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 1.00 none 0.2)",
+   "expected": "color(display-p3-linear 1 none 0.2)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:158"
+  },
+  {
+   "id": "wpt-0337",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 100% none 20%)",
+   "expected": "color(display-p3-linear 1 none 0.2)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:159"
+  },
+  {
+   "id": "wpt-0338",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 100% none 0.2)",
+   "expected": "color(display-p3-linear 1 none 0.2)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:160"
+  },
+  {
+   "id": "wpt-0339",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 1.00 0.50 0.200 / 0.6)",
+   "expected": "color(display-p3-linear 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:163"
+  },
+  {
+   "id": "wpt-0340",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 100% 50% 20% / 60%)",
+   "expected": "color(display-p3-linear 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:164"
+  },
+  {
+   "id": "wpt-0341",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 100% 0.5 20% / 0.6)",
+   "expected": "color(display-p3-linear 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:165"
+  },
+  {
+   "id": "wpt-0342",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 1.00 50% 0.2 / 60%)",
+   "expected": "color(display-p3-linear 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:166"
+  },
+  {
+   "id": "wpt-0343",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 1.00 none 0.2 / none)",
+   "expected": "color(display-p3-linear 1 none 0.2 / none)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:168"
+  },
+  {
+   "id": "wpt-0344",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 100% none 20% / 30%)",
+   "expected": "color(display-p3-linear 1 none 0.2 / 0.3)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:169"
+  },
+  {
+   "id": "wpt-0345",
+   "kind": "wpt-computed-value",
+   "input": "color(display-p3-linear 100% none 0.2 / 23.7%)",
+   "expected": "color(display-p3-linear 1 none 0.2 / 0.237)",
+   "precision": [
+    0.5,
+    0.05,
+    0.0005
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:170"
+  },
+  {
+   "id": "wpt-5244",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 0% 0% 0%)",
+   "expected": "color(display-p3-linear 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:18"
+  },
+  {
+   "id": "wpt-5245",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 10% 10% 10%)",
+   "expected": "color(display-p3-linear 0.1 0.1 0.1)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:19"
+  },
+  {
+   "id": "wpt-5246",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear .2 .2 25%)",
+   "expected": "color(display-p3-linear 0.2 0.2 0.25)",
+   "precision": [
+    0.05,
+    0.05,
+    0.005
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:20"
+  },
+  {
+   "id": "wpt-5247",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 0 0 0 / 1)",
+   "expected": "color(display-p3-linear 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:21"
+  },
+  {
+   "id": "wpt-5248",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 0% 0 0 / 0.5)",
+   "expected": "color(display-p3-linear 0 0 0 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:22"
+  },
+  {
+   "id": "wpt-5249",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 20% 0 10/0.5)",
+   "expected": "color(display-p3-linear 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:23"
+  },
+  {
+   "id": "wpt-5250",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 20% 0 10/50%)",
+   "expected": "color(display-p3-linear 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:24"
+  },
+  {
+   "id": "wpt-5251",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 400% 0 10/50%)",
+   "expected": "color(display-p3-linear 4 0 10 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:25"
+  },
+  {
+   "id": "wpt-5252",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 50% -160 160)",
+   "expected": "color(display-p3-linear 0.5 -160 160)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:26"
+  },
+  {
+   "id": "wpt-5253",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 50% -200 200)",
+   "expected": "color(display-p3-linear 0.5 -200 200)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:27"
+  },
+  {
+   "id": "wpt-5254",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 0 0 0 / -10%)",
+   "expected": "color(display-p3-linear 0 0 0 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:28"
+  },
+  {
+   "id": "wpt-5255",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 0 0 0 / 110%)",
+   "expected": "color(display-p3-linear 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:29"
+  },
+  {
+   "id": "wpt-5256",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 0 0 0 / 300%)",
+   "expected": "color(display-p3-linear 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:30"
+  },
+  {
+   "id": "wpt-5257",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 200 200 200)",
+   "expected": "color(display-p3-linear 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:31"
+  },
+  {
+   "id": "wpt-5258",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 200 200 200 / 200)",
+   "expected": "color(display-p3-linear 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:32"
+  },
+  {
+   "id": "wpt-5259",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear -200 -200 -200)",
+   "expected": "color(display-p3-linear -200 -200 -200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:33"
+  },
+  {
+   "id": "wpt-5260",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear -200 -200 -200 / -200)",
+   "expected": "color(display-p3-linear -200 -200 -200 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:34"
+  },
+  {
+   "id": "wpt-5261",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 200% 200% 200%)",
+   "expected": "color(display-p3-linear 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:35"
+  },
+  {
+   "id": "wpt-5262",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 200% 200% 200% / 200%)",
+   "expected": "color(display-p3-linear 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:36"
+  },
+  {
+   "id": "wpt-5263",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear -200% -200% -200% / -200%)",
+   "expected": "color(display-p3-linear -2 -2 -2 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:37"
+  },
+  {
+   "id": "wpt-5267",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear none none none / none)",
+   "expected": "color(display-p3-linear none none none / none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:42"
+  },
+  {
+   "id": "wpt-5268",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear none none none)",
+   "expected": "color(display-p3-linear none none none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:43"
+  },
+  {
+   "id": "wpt-5269",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 10% none none / none)",
+   "expected": "color(display-p3-linear 0.1 none none / none)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:44"
+  },
+  {
+   "id": "wpt-5270",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear none none none / 0.5)",
+   "expected": "color(display-p3-linear none none none / 0.5)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:45"
+  },
+  {
+   "id": "wpt-5271",
+   "kind": "wpt-specified-value",
+   "input": "color(display-p3-linear 0 0 0 / none)",
+   "expected": "color(display-p3-linear 0 0 0 / none)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:46"
+  }
+ ]
+}

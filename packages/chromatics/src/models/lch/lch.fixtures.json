@@ -67,6 +67,20 @@
    "at": "css/css-color/parsing/color-computed-powerless.html:458"
   },
   {
+   "id": "css4-0030",
+   "kind": "explicit-statement",
+   "input": "lch(85.9017% 166.116 138.207)",
+   "expected": "color(rec2020 0.42053 0.979780 0.00579)",
+   "precision": [
+    0.000005,
+    5e-7,
+    0.000005
+   ],
+   "src": "css4",
+   "at": "Overview.bs:3955-3962 #color-function",
+   "quote": "<div class=\"example\" id=\"ex-2020-oog-p3\">\nThis very intense lime color is in-gamut for rec.2020:\n<pre class=\"lang-css\">color(rec2020 0.42053 0.979780 0.00579);</pre>\nin LCH, that color is\n<pre class=\"lang-css\">lch(85.9017% 166.116 138.207);</pre>\nin display-p3, that color is\n<pre class=\"lang-css\">color(display-p3 -0.350289 1.00707 -0.144209);</pre>\nand is out of gamut for display-p3"
+  },
+  {
    "id": "css4-0203",
    "kind": "explicit-statement",
    "input": "lch(66.93% 68.79 85.94 / 0.4)",

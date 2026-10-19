@@ -1,6 +1,10 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { A98Rgb } from "../../models/a98-rgb/a98-rgb.js";
 import { DisplayP3 } from "../../models/display-p3/display-p3.js";
+import { LinearDisplayP3 } from "../../models/linear-display-p3/linear-display-p3.js";
+import { ProphotoRgb } from "../../models/prophoto-rgb/prophoto-rgb.js";
+import { Rec2020 } from "../../models/rec2020/rec2020.js";
 import { LinearSrgb } from "../../models/linear-srgb/linear-srgb.js";
 import { Oklch } from "../../models/oklch/oklch.js";
 import { Srgb } from "../../models/srgb/srgb.js";
@@ -21,7 +25,15 @@ describe("gamutMap, CSS Color 4 examples", () => {
 
 describe("gamutMap invariants", () => {
   const wide = fc.double({ min: -2, max: 3, noNaN: true });
-  const models = [Srgb, LinearSrgb, DisplayP3] as unknown as (typeof Srgb)[];
+  const models = [
+    Srgb,
+    LinearSrgb,
+    DisplayP3,
+    LinearDisplayP3,
+    A98Rgb,
+    ProphotoRgb,
+    Rec2020,
+  ] as unknown as (typeof Srgb)[];
 
   it.each(models)("%o: every result is within [0, 1], and mapping again changes nothing", (Model) => {
     fc.assert(
@@ -43,6 +55,14 @@ describe("gamutMap invariants", () => {
         expect(c.clone().gamutMap().equals(c)).toBe(true);
       })
     );
+  });
+
+  it.each(models)("%o: Oklab white lands on 1 per channel, within float noise", (Model) => {
+    new Oklch(1, 0, 0).to(Model).coords.forEach((v) => expect(Math.abs(v - 1)).toBeLessThan(2e-15));
+  });
+
+  it("Rec. 2020 green is outside Display P3 (the Rec2020 JSDoc example)", () => {
+    expect(new Rec2020(0, 1, 0).to(DisplayP3).inGamut()).toBe(false);
   });
 
   it("lightness at or beyond the ends gives white or black (CSS Color 4 #pseudo-binsearch)", () => {

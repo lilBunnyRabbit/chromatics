@@ -25,6 +25,10 @@
       "types": "./dist/all.d.ts",
       "default": "./dist/all.js"
     },
+    "./a98-rgb": {
+      "types": "./dist/models/a98-rgb/a98-rgb.d.ts",
+      "default": "./dist/models/a98-rgb/a98-rgb.js"
+    },
     "./display-p3": {
       "types": "./dist/models/display-p3/display-p3.d.ts",
       "default": "./dist/models/display-p3/display-p3.js"
@@ -49,6 +53,10 @@
       "types": "./dist/models/lch/lch.d.ts",
       "default": "./dist/models/lch/lch.js"
     },
+    "./linear-display-p3": {
+      "types": "./dist/models/linear-display-p3/linear-display-p3.d.ts",
+      "default": "./dist/models/linear-display-p3/linear-display-p3.js"
+    },
     "./linear-srgb": {
       "types": "./dist/models/linear-srgb/linear-srgb.d.ts",
       "default": "./dist/models/linear-srgb/linear-srgb.js"
@@ -60,6 +68,14 @@
     "./oklch": {
       "types": "./dist/models/oklch/oklch.d.ts",
       "default": "./dist/models/oklch/oklch.js"
+    },
+    "./prophoto-rgb": {
+      "types": "./dist/models/prophoto-rgb/prophoto-rgb.d.ts",
+      "default": "./dist/models/prophoto-rgb/prophoto-rgb.js"
+    },
+    "./rec2020": {
+      "types": "./dist/models/rec2020/rec2020.d.ts",
+      "default": "./dist/models/rec2020/rec2020.js"
     },
     "./srgb": {
       "types": "./dist/models/srgb/srgb.d.ts",

@@ -111,6 +111,16 @@
    "quote": "<div class=\"example\" id=\"ex-same-color\">\nFor example, these different syntactic forms are all the same color:\n<ul>\n<li><span class=\"swatch\" style=\"--color: oklch(65% 0.15 270)\"></span> oklch(65% 0.15 270)</li>\n<li><span class=\"swatch\" style=\"--color: lab(57.9% 11.4 -53.7)\"></span> lab(57.9% 11.4 -53.7)</li>\n<li><span class=\"swatch\" style=\"--color: color(display-p3 0.445 0.529 0.891)\"></span> color(display-p3 0.445 0.529 0.891)</li>\n<li><span class=\"swatch\" style=\"--color: color(rec2020 0.522 0.557 0.892)\"></span> color(rec2020 0.522 0.557 0.892)</li>\n<li><span class=\"swatch\" style=\"--color: #6c88ea\"></span> #6c88ea</li>\n</ul>\n</div>"
   },
   {
+   "id": "css4-0076",
+   "kind": "explicit-statement",
+   "input": "lab(57.9% 11.4 -53.7)",
+   "expected": "color(rec2020 0.522 0.557 0.892)",
+   "precision": 0.0005,
+   "src": "css4",
+   "at": "Overview.bs:4834-4843 #color-convert-intro",
+   "quote": "<div class=\"example\" id=\"ex-same-color\">\nFor example, these different syntactic forms are all the same color:\n<ul>\n<li><span class=\"swatch\" style=\"--color: oklch(65% 0.15 270)\"></span> oklch(65% 0.15 270)</li>\n<li><span class=\"swatch\" style=\"--color: lab(57.9% 11.4 -53.7)\"></span> lab(57.9% 11.4 -53.7)</li>\n<li><span class=\"swatch\" style=\"--color: color(display-p3 0.445 0.529 0.891)\"></span> color(display-p3 0.445 0.529 0.891)</li>\n<li><span class=\"swatch\" style=\"--color: color(rec2020 0.522 0.557 0.892)\"></span> color(rec2020 0.522 0.557 0.892)</li>\n<li><span class=\"swatch\" style=\"--color: #6c88ea\"></span> #6c88ea</li>\n</ul>\n</div>"
+  },
+  {
    "id": "css4-0078",
    "kind": "explicit-statement",
    "input": "lab(57.9% 11.4 -53.7)",

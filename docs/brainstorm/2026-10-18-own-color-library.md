@@ -342,6 +342,16 @@ ADR-005 settled where operations live; these rounds settled what they are.
     - `minInGamut` only skips a redundant check
     - a 1.6e-10 change to CIEDE2000's G term is below the published 4 decimals
 
+### Grill 46: wide-gamut RGB names (decided 2026-10-19)
+
+- **Names (owner):** PascalCase of the CSS ident, so `A98Rgb` ('a98-rgb'), `ProphotoRgb` ('prophoto-rgb') and `Rec2020` ('rec2020').
+- **Linear forms:** `LinearDisplayP3` ('display-p3-linear') ships because CSS has it, and `DisplayP3` now converts through it, as `Srgb` does through `LinearSrgb`. Rec2020, A98 and ProPhoto have no CSS linear form, so their linear stage stays internal.
+- **Matrices** come from the generator, using the primaries in the CSS characteristics tables (csswg-drafts `40527902`):
+  - A98 and Rec2020 equal CSS's rationals exactly. Rec2020's 0 entry, which CSS notes "is actually calculated as 4.99e-17" in floats, is exactly 0.
+  - ProPhoto is within 4e-16 of CSS's 64-bit decimals; CSS says that matrix "cannot be expressed in rational form".
+- **Transfer functions** are CSS Color 4's sample code: A98 is the power 563/256; ProPhoto is gamma 1.8 with a linear segment; Rec2020 is the BT.1886 gamma 2.4.
+- **Finding:** culori 4.0.2 still decodes Rec2020 with the inverse BT.2020 OETF (α 1.0993, β 0.0181), CSS's earlier definition. Rec2020 is left out of the culori grid. For the studio migration, any Rec2020 value the app shows will change.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

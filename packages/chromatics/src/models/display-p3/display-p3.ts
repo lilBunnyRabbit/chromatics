@@ -2,11 +2,9 @@ import { finite } from "../../core/channel.js";
 import { RgbColor } from "../../core/families/rgb.js";
 import { readColorFunction, serialize, type CssOptions } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
-import { multiply } from "../../core/linear.js";
-import { LINEAR_DISPLAY_P3_TO_XYZ_D65, XYZ_D65_TO_LINEAR_DISPLAY_P3 } from "../../core/matrices.js";
 import type { Edge } from "../../core/model.js";
 import { linearToSrgb, srgbToLinear } from "../../core/transfer.js";
-import { Xyz65 } from "../xyz65/xyz65.js";
+import { LinearDisplayP3 } from "../linear-display-p3/linear-display-p3.js";
 
 /**
  * Display P3: DCI-P3 primaries with the D65 white and the sRGB transfer curve (CSS Color 4
@@ -28,16 +26,9 @@ export class DisplayP3 extends RgbColor {
   } as const;
   static readonly edges: readonly Edge[] = [
     edge(
-      Xyz65,
-      (c: DisplayP3) =>
-        new Xyz65(
-          ...multiply(LINEAR_DISPLAY_P3_TO_XYZ_D65, srgbToLinear(c.r), srgbToLinear(c.g), srgbToLinear(c.b)),
-          c.alpha
-        ),
-      (c) => {
-        const [r, g, b] = multiply(XYZ_D65_TO_LINEAR_DISPLAY_P3, c.x, c.y, c.z);
-        return new DisplayP3(linearToSrgb(r), linearToSrgb(g), linearToSrgb(b), c.alpha);
-      }
+      LinearDisplayP3,
+      (c: DisplayP3) => new LinearDisplayP3(srgbToLinear(c.r), srgbToLinear(c.g), srgbToLinear(c.b), c.alpha),
+      (c) => new DisplayP3(linearToSrgb(c.r), linearToSrgb(c.g), linearToSrgb(c.b), c.alpha)
     ),
   ];
   static readonly terminal = false;

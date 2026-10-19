@@ -73,7 +73,19 @@ export const comparisons = new Map<ColorModel, Comparison>([
   ],
 ]);
 
-const RECTANGULAR = ["xyz-d65", "xyz-d50", "srgb-linear", "srgb", "display-p3", "oklab", "lab"];
+const RECTANGULAR = [
+  "xyz-d65",
+  "xyz-d50",
+  "srgb-linear",
+  "srgb",
+  "display-p3",
+  "display-p3-linear",
+  "a98-rgb",
+  "prophoto-rgb",
+  "rec2020",
+  "oklab",
+  "lab",
+];
 
 /**
  * Round trips that hold for every real triple, tested again over 3× the reference ranges: the

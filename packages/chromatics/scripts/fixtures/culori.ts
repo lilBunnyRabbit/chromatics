@@ -11,6 +11,10 @@ const MODES: Readonly<Record<string, string>> = {
   "srgb-linear": "lrgb",
   srgb: "rgb",
   "display-p3": "p3",
+  "a98-rgb": "a98",
+  "prophoto-rgb": "prophoto",
+  // No rec2020: culori 4.0.2 decodes it with the inverse BT.2020 OETF (α 1.0993, β 0.0181), the CSS
+  // draft's earlier definition. CSS Color 4 now uses the BT.1886 gamma 2.4, which WPT tests.
   oklab: "oklab",
   oklch: "oklch",
   lab: "lab",
@@ -24,6 +28,7 @@ const FOLDERS: Readonly<Record<string, string>> = {
   "xyz-d65": "xyz65",
   "xyz-d50": "xyz50",
   "srgb-linear": "linear-srgb",
+  "display-p3-linear": "linear-display-p3",
 };
 
 export interface CrossCase {

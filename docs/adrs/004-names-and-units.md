@@ -3,6 +3,8 @@
 **Date:** 2026-10-18
 **Status:** Implemented
 
+> **Revision 2026-10-19** (grill 46): the wide-gamut RGB classes are `A98Rgb`, `ProphotoRgb`, `Rec2020` and `LinearDisplayP3`, PascalCase of the CSS ident. Linear forms ship only where CSS defines the space.
+
 ## Context
 
 Class names, channel names and channel units are the first words a user types; changing any of them after publishing is breaking. The repo bans snake_case identifiers. CIE xyY (`x y Y`) and CAM16 (`J C h Q M s`) use case-sensitive letters. [Brainstorm](../brainstorm/2026-10-18-own-color-library.md) grill 5.
