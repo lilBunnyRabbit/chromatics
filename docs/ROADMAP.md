@@ -42,6 +42,23 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
 5. [ ] **Monorepo**: this repo hosts the package and the website
 6. [ ] **Studio on the package**: culori removed from the app
 
+### Parity gap (2026-10-20)
+
+ADR-010 switches the studio only at parity. The studio registers 101 entries (`allModels()`): 31 stable, 35 experimental, 35 coming-soon stubs. The package covers 24 of the 66 that ship.
+
+| Studio family    | Covered by the package                                                                                       | Missing                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| RGB              | srgb, lin, p3, a98, prophoto, rec2020                                                                         | aces, acescg, acescc, acescct, scrgb, smptec                                                              |
+| Tristimulus      | xyz, xyz50                                                                                                   | xyy, ucs, ucs60, uvw, lms, xyb                                                                            |
+| Lab-like         | lab, lch, oklab, oklch, luv, lchuv, jab, jch, itp                                                             | lab65, lch65, dlab, dlch, hlab, ipt, cam16ucs                                                             |
+| Hue              | hsl, hsv, hwb, hsluv, hpluv, okhsl, okhsv                                                                     | hsi, hsp, tsl, cubehelix                                                                                  |
+| Appearance       | none                                                                                                         | cam16, ciecam02, hct                                                                                      |
+| Video            | none                                                                                                         | yiq, ypbpr, ycbcr, rec601, yuv, ydbdr, secam, ycgco, ycocgr, sycc, xvycc, rec2100                         |
+| Subtractive      | none                                                                                                         | cmyk, cmy, ryb                                                                                            |
+| Systems          | none                                                                                                         | ral                                                                                                       |
+
+The studio's `luv` / `lchuv` are D50 (culori), so they map to `Luv50` / `Lchuv50`. The 35 coming-soon stubs (most catalogs, Pantone excluded per CLAUDE.md) aren't part of the parity gate.
+
 ## Studio
 
 Existing app work is tracked in the vault's [Roadmap](chromatics/04-Product/Roadmap.md) until it moves here.
