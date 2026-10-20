@@ -109,9 +109,10 @@ const hct: Comparison = {
 const chromaticityY: Comparison = {
   canonical: (c) => (at(c, 1) === 0 ? [NaN, NaN, NaN] : at(c, 2) === 0 ? [NaN, NaN, 0] : c),
 };
-// CIE 1964: below Y 1e-12 (W* ≈ −17) U* V* are free; at W* = 0 they are 0.
+// CIE 1964: below Y 1e-12 (W* ≈ −17) U* V* are free; within 1e-12 of W* = 0 they are 0.
 const uvw: Comparison = {
-  canonical: (c) => (Math.abs(((at(c, 2) + 17) / 25) ** 3 / 100) < 1e-12 || at(c, 2) === 0 ? [NaN, NaN, at(c, 2)] : c),
+  canonical: (c) =>
+    Math.abs(((at(c, 2) + 17) / 25) ** 3 / 100) < 1e-12 || Math.abs(at(c, 2)) < 1e-12 ? [NaN, NaN, at(c, 2)] : c,
 };
 
 export const comparisons = new Map<ColorModel, Comparison>([

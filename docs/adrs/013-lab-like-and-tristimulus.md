@@ -9,6 +9,8 @@
 > - **Hunter Lab** drops a and b below |Y| 1e-12, where they divide by an underflowing √Y.
 > - **Okhsl / Okhsv:** once the hue is zeroed, the gamut shape is read along hue 0, so s and h describe one color at tiny L.
 > - **DIN99 and the chromaticity models** use a 1× totality sweep. Their inverses are exponential or blow up near y = 0.
+>
+> **Revision 2026-10-20 (fix):** `Uvw64` treats |W\*| < 1e-12 like W\* = 0. U\*/W\* past that outruns the precision of X + 15Y + 3Z, so the chromaticity couldn't round-trip. Found by fast-check on JSC.
 
 ## Context
 

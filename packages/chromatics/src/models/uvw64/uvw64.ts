@@ -18,12 +18,14 @@ function toUvw(c: Xyz65): Uvw64 {
   return new Uvw64(13 * w * (uv[0] - U0), 13 * w * (uv[1] / 1.5 - V0), w, c.alpha);
 }
 
-// At W* = 0 (Y ≈ 0.0031, not black) U* and V* must be 0, so u v are the white's.
+// At W* = 0 (Y ≈ 0.0031, not black) U* and V* must be 0, so u v are the white's. Within the grill 45 floor
+// of it, U*/W* outruns the precision of X + 15Y + 3Z and the chromaticity can't come back, so it's the same.
 function toXyz(c: Uvw64): Xyz65 {
   const y = ((c.W + 17) / 25) ** 3 / 100;
   if (Math.abs(y) < 1e-12) return new Xyz65(D65_WHITE[0] * y, y, D65_WHITE[2] * y, c.alpha);
-  const u = c.W === 0 ? U0 : c.U / (13 * c.W) + U0;
-  const v = c.W === 0 ? V0 : c.V / (13 * c.W) + V0;
+  const flat = Math.abs(c.W) < 1e-12;
+  const u = flat ? U0 : c.U / (13 * c.W) + U0;
+  const v = flat ? V0 : c.V / (13 * c.W) + V0;
   if (v === 0) return new Xyz65(0, 0, 0, c.alpha);
   const k = y / (6 * v);
   return new Xyz65(9 * u * k, y, (12 - 3 * u - 30 * v) * k, c.alpha);

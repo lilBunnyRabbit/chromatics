@@ -36,3 +36,13 @@ describe("Uvw64 references", () => {
     expect(w0.z / w0.y).toBeCloseTo(D65_WHITE[2], 12);
   });
 });
+
+describe("Uvw64 near W* = 0", () => {
+  // fast-check counterexample: chroma over a vanishing W* outruns float precision; within the grill 45
+  // floor it converts like W* = 0 (u v the white's).
+  it("treats |W*| < 1e-12 as W* = 0", () => {
+    const xyz = new Uvw64(0, -26.41195107205049, 1.790309662346208e-15).to(Xyz65);
+    expect(xyz.x / xyz.y).toBeCloseTo(D65_WHITE[0], 12);
+    expect(xyz.z / xyz.y).toBeCloseTo(D65_WHITE[2], 12);
+  });
+});
