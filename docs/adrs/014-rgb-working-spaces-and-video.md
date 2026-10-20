@@ -53,3 +53,5 @@ The parity table's RGB and video rows: ACES, scRGB, SMPTE-C, Rec. 2100, and the 
   - YCbCr loses its 0.5 offset.
   The migration maps them; none touches the brand golden hexes (sRGB).
 - The log, PQ and HLG decodes are exponential, so their totality sweep stays in the reference ranges (`realistic: 1`).
+
+**Revision 2026-10-20, grill 75 (owner):** the studio's `ycocgr` ("YCoCg-R") uses the plain YCoCg matrix, the same as `Ycgco` with Co before Cg. The migration maps it onto `Ycgco` and drops the -R label. True YCoCg-R is a lossless integer lifting transform, not a color space; no class and no integer-coded family for now.

@@ -53,7 +53,7 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
 
 ### Parity gap (2026-10-20)
 
-ADR-010 switches the studio only at parity. The studio registers 101 entries (`allModels()`): 31 stable, 35 experimental, 35 coming-soon stubs. The package covers 64 of the 66 that ship (2026-10-20): ycocgr waits on integer-coded models, and RAL is excluded for licensing (grill 74), like Pantone.
+ADR-010 switches the studio only at parity. The studio registers 101 entries (`allModels()`): 31 stable, 35 experimental, 35 coming-soon stubs. The package covers 65 of the 66 that ship (2026-10-20); RAL is excluded for licensing (grill 74), like Pantone. The studio's ycocgr is plain YCoCg and maps to `Ycgco` (grill 75).
 
 | Studio family    | Covered by the package                                                                                       | Missing                                                                                                   |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
@@ -62,7 +62,7 @@ ADR-010 switches the studio only at parity. The studio registers 101 entries (`a
 | Lab-like         | lab, lch, oklab, oklch, luv, lchuv, jab, jch, itp, cam16ucs, lab65, lch65, dlab, dlch, hlab, ipt              | none                                                                                                      |
 | Hue              | hsl, hsv, hwb, hsluv, hpluv, okhsl, okhsv, hsi (hexagonal hue), hsp, cubehelix (s up to 4.6144), tsl (t°)    | none                                                                                                      |
 | Appearance       | cam16, ciecam02, hct (the studio's are JCh; ours are JMh with C read-only)                                    | none                                                                                                      |
-| Video            | rec2100 (`Rec2100Pq` + `Rec2100Hlg`, white 203 cd/m²), ycbcr / xvycc (`Ycbcr709`), rec601 / ypbpr / sycc (`Ycbcr601`), yiq (170M digits), yuv, ydbdr / secam (`Ydbdr`), ycgco; the studio's 0.5 chroma offset is dropped | ycocgr (needs integer-coded models) |
+| Video            | rec2100 (`Rec2100Pq` + `Rec2100Hlg`, white 203 cd/m²), ycbcr / xvycc (`Ycbcr709`), rec601 / ypbpr / sycc (`Ycbcr601`), yiq (170M digits), yuv, ydbdr / secam (`Ydbdr`), ycgco + ycocgr (`Ycgco`, grill 75); the studio's 0.5 chroma offset is dropped | none |
 | Subtractive      | cmyk (`Cmyk`, CSS `device-cmyk()`), cmy, ryb (throws where the cube can't reach)                            | none                                                                                                      |
 | Systems          | none                                                                                                         | ral (excluded, licensing)                                                                                 |
 
