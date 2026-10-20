@@ -45,3 +45,54 @@ export function rec2020ToLinear(v: number): number {
 export function linearToRec2020(v: number): number {
   return Math.sign(v) * Math.pow(Math.abs(v), 1 / 2.4);
 }
+
+// ITU-R BT.2100-3 Table 4, PQ: m1 = 2610/16384, m2 = 2523/4096 × 128, c1 = 3424/4096, c2 = 2413/4096 × 32,
+// c3 = 2392/4096 × 32. Jzazbz swaps m2 for p = 1.7 × 2523/32 (Safdar 2017), hence the exponent parameter.
+const PQ_M1 = 2610 / 16384;
+export const PQ_M2 = 2523 / 32;
+const PQ_C1 = 3424 / 4096;
+const PQ_C2 = 2413 / 128;
+const PQ_C3 = 2392 / 128;
+
+function pq(y: number, m2: number): number {
+  const p = y ** PQ_M1;
+  return ((PQ_C1 + PQ_C2 * p) / (1 + PQ_C3 * p)) ** m2;
+}
+
+function pqInv(e: number, m2: number): number {
+  const r = e ** (1 / m2);
+  const d = PQ_C2 - PQ_C3 * r;
+  // The encoding approaches (c2 / c3)^m2 as light goes to infinity; past it there is no light to decode.
+  if (d <= 0) return Infinity;
+  return (Math.max(r - PQ_C1, 0) / d) ** (1 / PQ_M1);
+}
+
+/**
+ * PQ inverse EOTF of `y` = luminance / 10 000 cd/m². PQ(0) = c1^m2 isn't 0, so negative light mirrors the
+ * curve around (0, PQ(0)) instead of around the origin: continuous, increasing, invertible (grill 60).
+ */
+export function pqEncode(y: number, m2 = PQ_M2): number {
+  return y >= 0 ? pq(y, m2) : 2 * pq(0, m2) - pq(-y, m2);
+}
+
+/** The inverse of {@link pqEncode}: luminance / 10 000 cd/m². */
+export function pqDecode(e: number, m2 = PQ_M2): number {
+  const zero = pq(0, m2);
+  return e >= zero ? pqInv(e, m2) : -pqInv(2 * zero - e, m2);
+}
+
+// ITU-R BT.2100-3 Table 5, HLG OETF, with Note 5c's published b and c. E is scene light in [0, 1]; the
+// √ branch is odd, so negatives keep their sign (Note 5h: don't clip).
+const HLG_A = 0.17883277;
+const HLG_B = 0.28466892;
+const HLG_C = 0.55991073;
+
+export function hlgEncode(e: number): number {
+  if (e <= 1 / 12) return Math.sign(e) * Math.sqrt(3 * Math.abs(e));
+  return HLG_A * Math.log(12 * e - HLG_B) + HLG_C;
+}
+
+export function hlgDecode(v: number): number {
+  if (v <= 0.5) return (Math.sign(v) * v * v) / 3;
+  return (Math.exp((v - HLG_C) / HLG_A) + HLG_B) / 12;
+}

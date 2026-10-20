@@ -404,6 +404,7 @@ Decisions:
 - **Grill 59, the Okhsl / Okhsv range (owner, 2026-10-20):** both are defined only for Oklab L in [0, 1]. Outside it, ok_color.h's gamut-shape formulas fail (colorjs and culori return garbage or NaN), and the toe has a pole at −0.03. Conversions clamp: L ≥ 1 is white, L ≤ 0 is black, in both directions, the way a byte model clamps. This deliberately bends ADR-003's no-loss rule for these two models, and the class docs say so. Rejected:
   - a RangeError, which breaks grill 32's totality;
   - passing L through with an s that no source defines.
+- **Grill 60, PQ at zero (owner, 2026-10-20):** grill 52's `sign(x)·f(|x|)` is discontinuous at 0, because PQ(0) = c1^m2 ≈ 7.3e-7, and outputs inside (−7.3e-7, 7.3e-7) have no inverse. Replaced with a mirror around PQ(0): E(x) = 2·PQ(0) − PQ(−x) for x < 0. It is continuous, strictly increasing and a bijection over all reals. It is identical to BT.2100 for x ≥ 0 and never clips. The HLG √ branch is odd already (√(3E) is 0 at 0), so sign(x)·√(3|x|) stays.
 
 ## Key takeaways
 

@@ -9,6 +9,7 @@ import { Hsl } from "../models/hsl/hsl.js";
 import { Hsluv } from "../models/hsluv/hsluv.js";
 import { Hsv } from "../models/hsv/hsv.js";
 import { Hwb } from "../models/hwb/hwb.js";
+import { Jzczhz } from "../models/jzczhz/jzczhz.js";
 import { Lch } from "../models/lch/lch.js";
 import { Lchuv50 } from "../models/lchuv50/lchuv50.js";
 import { Lchuv65 } from "../models/lchuv65/lchuv65.js";
@@ -79,6 +80,13 @@ export const comparisons = new Map<ColorModel, Comparison>([
   [Lchuv50, lchuv],
   [Hsluv, luvHue(maxChromaForHue)],
   [Hpluv, luvHue((l) => maxChroma(l))],
+  [
+    Jzczhz,
+    {
+      hueWeight: (c) => Math.abs(at(c, 1)),
+      canonical: (c) => (at(c, 1) <= 0.0000026 ? [at(c, 0), at(c, 1), NaN] : c),
+    },
+  ],
   [Okhsl, ok(Okhsl)],
   [Okhsv, ok(Okhsv)],
   [

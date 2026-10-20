@@ -20,6 +20,13 @@
 > - Grill 59 (owner): Oklab L ≥ 1 is white and L ≤ 0 is black, in both directions. Within 1e-12 of either end, chroma is dropped and L kept, because the gamut shape underflows there.
 > - Beyond the gamut edge, ok_color.h's s(C) curve has a pole. Okhsl therefore extends linearly past s = 1, at the edge's slope, so every chroma has an s (package-defined). Okhsv's map needs no extension: out-of-gamut colors come out with v > 1 and round-trip.
 > - `toe` is evaluated in a rationalised form below k1/k3, avoiding a cancellation that cost 5e-6 relative at L 1e-12.
+>
+> **Revision 2026-10-20, HDR group implemented:**
+> - `Jzazbz`, `Jzczhz` and `Ictcp` have `toCss()`, because CSS Color HDR 1 defines `jzazbz()`, `jzczhz()` and `ictcp()`. `IctcpHlg` (id `ictcp-hlg`) isn't CSS and has no `toCss()`.
+> - Grill 60 (owner): negative light into PQ is mirrored around PQ(0), not `sign(x)·f(|x|)`.
+> - PQ decoding saturates: values whose LMS′ lies past (c2 / c3)^m2 carry infinite light, so decoding them throws a RangeError. The harness's totality sweep for these models therefore covers their reference ranges (0.4× for Jzazbz and Jzczhz, whose Jz below about −0.5 decodes past the mirrored asymptote), not 1e6×.
+> - HLG uses BT.2100-3 Note 5c's 8-digit b and c. Its √ branch is odd, so negatives keep their sign.
+> - Added `Ictcp.deltaEItp()` (BT.2124-0). Safdar's ΔEz is deferred: its equation isn't verified against the paper yet.
 
 ## Context
 

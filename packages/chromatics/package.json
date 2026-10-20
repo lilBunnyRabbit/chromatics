@@ -54,6 +54,22 @@
       "types": "./dist/models/hwb/hwb.d.ts",
       "default": "./dist/models/hwb/hwb.js"
     },
+    "./ictcp": {
+      "types": "./dist/models/ictcp/ictcp.d.ts",
+      "default": "./dist/models/ictcp/ictcp.js"
+    },
+    "./ictcp-hlg": {
+      "types": "./dist/models/ictcp-hlg/ictcp-hlg.d.ts",
+      "default": "./dist/models/ictcp-hlg/ictcp-hlg.js"
+    },
+    "./jzazbz": {
+      "types": "./dist/models/jzazbz/jzazbz.d.ts",
+      "default": "./dist/models/jzazbz/jzazbz.js"
+    },
+    "./jzczhz": {
+      "types": "./dist/models/jzczhz/jzczhz.d.ts",
+      "default": "./dist/models/jzczhz/jzczhz.js"
+    },
     "./lab": {
       "types": "./dist/models/lab/lab.d.ts",
       "default": "./dist/models/lab/lab.js"

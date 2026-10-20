@@ -11,6 +11,10 @@ import { Hsl } from "./models/hsl/hsl.js";
 import { Hsluv } from "./models/hsluv/hsluv.js";
 import { Hsv } from "./models/hsv/hsv.js";
 import { Hwb } from "./models/hwb/hwb.js";
+import { IctcpHlg } from "./models/ictcp-hlg/ictcp-hlg.js";
+import { Ictcp } from "./models/ictcp/ictcp.js";
+import { Jzazbz } from "./models/jzazbz/jzazbz.js";
+import { Jzczhz } from "./models/jzczhz/jzczhz.js";
 import { Lab } from "./models/lab/lab.js";
 import { Lch } from "./models/lch/lch.js";
 import { Lchuv50 } from "./models/lchuv50/lchuv50.js";
@@ -56,6 +60,10 @@ export const models: readonly ColorModel[] = [
   Hsl,
   Hsv,
   Hwb,
+  Jzazbz,
+  Jzczhz,
+  Ictcp,
+  IctcpHlg,
 ];
 
 const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
@@ -77,6 +85,10 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   hpluv: Hpluv.parse,
   okhsl: Okhsl.parse,
   okhsv: Okhsv.parse,
+  jzazbz: Jzazbz.parse,
+  jzczhz: Jzczhz.parse,
+  ictcp: Ictcp.parse,
+  "ictcp-hlg": IctcpHlg.parse,
 };
 
 const SPACES: Readonly<Record<string, (input: string) => Color>> = {

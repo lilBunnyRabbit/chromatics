@@ -96,6 +96,43 @@ export function bradford(from: keyof typeof WHITES, to: keyof typeof WHITES): Ma
   return multiply(invert(BRADFORD), multiply(diagonal(gain), BRADFORD));
 }
 
+function over4096(rows: readonly (readonly [number, number, number])[]): Matrix3 {
+  return rows.map((row) => row.map((v) => Rational.of(v, 4096))) as unknown as Matrix3;
+}
+
+function decimals(rows: readonly (readonly [string, string, string])[]): Matrix3 {
+  return rows.map((row) => row.map(r)) as unknown as Matrix3;
+}
+
+// ITU-R BT.2100-3 Table 7: linear BT.2020 RGB → LMS, and L′M′S′ → ICtCp for PQ and for HLG.
+export const BT2100_RGB_TO_LMS = over4096([
+  [1688, 2146, 262],
+  [683, 2951, 462],
+  [99, 309, 3688],
+]);
+export const BT2100_PQ_LMS_TO_ICTCP = over4096([
+  [2048, 2048, 0],
+  [6610, -13613, 7003],
+  [17933, -17390, -543],
+]);
+export const BT2100_HLG_LMS_TO_ICTCP = over4096([
+  [2048, 2048, 0],
+  [3625, -7465, 3840],
+  [9500, -9212, -288],
+]);
+
+// Safdar et al. 2017, Opt. Express 25(13), eqs. 9 and 11 (as in CSS Color HDR 1 §11.4 and colour-science).
+export const JZAZBZ_XYZ_TO_LMS = decimals([
+  ["0.41478972", "0.579999", "0.0146480"],
+  ["-0.2015100", "1.120649", "0.0531008"],
+  ["-0.0166008", "0.264800", "0.6684799"],
+]);
+export const JZAZBZ_LMS_TO_IZAZBZ = decimals([
+  ["0.5", "0.5", "0"],
+  ["3.524000", "-4.066708", "0.542708"],
+  ["0.199076", "1.096799", "-1.295875"],
+]);
+
 export function exactMatrices(): Record<string, Matrix3> {
   const out: Record<string, Matrix3> = {};
   for (const space of RGB_SPACES) {
@@ -105,6 +142,17 @@ export function exactMatrices(): Record<string, Matrix3> {
   }
   out["XYZ_D65_TO_XYZ_D50"] = bradford("D65", "D50");
   out["XYZ_D50_TO_XYZ_D65"] = bradford("D50", "D65");
+  const lms = multiply(BT2100_RGB_TO_LMS, invert(rgbToXyz(RGB_SPACES[4])));
+  out["XYZ_D65_TO_LMS_ICTCP"] = lms;
+  out["LMS_ICTCP_TO_XYZ_D65"] = invert(lms);
+  out["PQ_LMS_TO_ICTCP"] = BT2100_PQ_LMS_TO_ICTCP;
+  out["ICTCP_TO_PQ_LMS"] = invert(BT2100_PQ_LMS_TO_ICTCP);
+  out["HLG_LMS_TO_ICTCP"] = BT2100_HLG_LMS_TO_ICTCP;
+  out["ICTCP_TO_HLG_LMS"] = invert(BT2100_HLG_LMS_TO_ICTCP);
+  out["JZAZBZ_XYZ_TO_LMS"] = JZAZBZ_XYZ_TO_LMS;
+  out["JZAZBZ_LMS_TO_XYZ"] = invert(JZAZBZ_XYZ_TO_LMS);
+  out["JZAZBZ_LMS_TO_IZAZBZ"] = JZAZBZ_LMS_TO_IZAZBZ;
+  out["JZAZBZ_IZAZBZ_TO_LMS"] = invert(JZAZBZ_LMS_TO_IZAZBZ);
   return out;
 }
 

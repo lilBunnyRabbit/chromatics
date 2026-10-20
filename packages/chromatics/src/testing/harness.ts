@@ -26,6 +26,12 @@ export interface ModelSpec {
   readonly invalid?: readonly string[];
   /** `[input, toCss()]` pairs, each from a cited serialization example. */
   readonly formats?: readonly (readonly [input: string, css: string])[];
+  /**
+   * How far past the reference ranges totality's "never throws" sweep goes (default 1e6×). PQ and HLG
+   * models decode only what light can encode: PQ approaches (c2 / c3)^m2 ≈ 1.99 as light goes to
+   * infinity, so their values a little past the range have no light, and a RangeError is the answer.
+   */
+  readonly realistic?: number;
 }
 
 export interface FixtureCase {
@@ -273,10 +279,10 @@ export function checkEdges(model: ColorModel, all: readonly ColorModel[]): void 
  * finite color or throws a RangeError (the true result is beyond the number range). Within a million
  * times the reference ranges, with no subnormal magnitudes, nothing throws at all.
  */
-export function checkTotality(model: ColorModel, all: readonly ColorModel[]): void {
+export function checkTotality(model: ColorModel, all: readonly ColorModel[], scale = 1e6): void {
   const channels = channelList(model);
   const realistic = channels.map(([, ch]) => {
-    const limit = 1e6 * Math.max(Math.abs(ch.range[0]), Math.abs(ch.range[1]));
+    const limit = scale * Math.max(Math.abs(ch.range[0]), Math.abs(ch.range[1]));
     return fc
       .double({ min: -limit, max: limit, noNaN: true, noDefaultInfinity: true })
       .map((v) => (Math.abs(v) < 1e-300 ? 0 : v));
@@ -524,7 +530,7 @@ export function describeModel(model: ColorModel, all: readonly ColorModel[], spe
     it("degenerate: NaN / ±Infinity throw and leave the color unchanged", () => checkDegenerate(model));
     it("edges: round trips with every direct neighbour, both ways (grid + fast-check)", () => checkEdges(model, all));
     it("totality: finite result or RangeError for any finite input; never throws on realistic input", () =>
-      checkTotality(model, all));
+      checkTotality(model, all, spec.realistic));
     it("strings: parse ↔ toString exact, toCss within rounding, fixed cases", () => checkStrings(model, spec));
     const fixtures = spec.fixtures;
     const cross = fixtures?.crossCheck;

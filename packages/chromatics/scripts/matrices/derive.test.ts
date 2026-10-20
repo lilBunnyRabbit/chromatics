@@ -97,6 +97,43 @@ describe("derived matrices", () => {
       for (let j = 0; j < 3; j++) expect(Math.abs(derived[i]![j]! - expected[i]![j]!)).toBeLessThanOrEqual(4e-16);
   });
 
+  // CSS Color HDR 1 ED (2026-10-08) §11.4 / §11.5 sample code, computed in floats (Dolby's ICtCp procedure,
+  // numpy-style inverses of Safdar's matrices). A wrong integer or primary would differ by ~1e-4.
+  const CSS_HDR: Record<string, number[][]> = {
+    XYZ_D65_TO_LMS_ICTCP: [
+      [0.3592832590121217, 0.6976051147779502, -0.035891593232029],
+      [-0.1920808463704993, 1.1004767970374321, 0.0753748658519118],
+      [0.0070797844607479, 0.0748396662186362, 0.8433265453898765],
+    ],
+    LMS_ICTCP_TO_XYZ_D65: [
+      [2.0701522183894223, -1.3263473389671563, 0.2066510476294053],
+      [0.3647385209748072, 0.6805660249472273, -0.0453045459220347],
+      [-0.0497472075358123, -0.0492609666966131, 1.1880659249923042],
+    ],
+    ICTCP_TO_PQ_LMS: [
+      [0.9999999999999998, 0.0086090370379328, 0.111029625003026],
+      [0.9999999999999998, -0.0086090370379328, -0.1110296250030259],
+      [0.9999999999999998, 0.5600313357106791, -0.3206271749873188],
+    ],
+    JZAZBZ_LMS_TO_XYZ: [
+      [1.9242264357876067, -1.0047923125953657, 0.037651404030618],
+      [0.35031676209499907, 0.7264811939316552, -0.06538442294808501],
+      [-0.09098281098284752, -0.3127282905230739, 1.5227665613052603],
+    ],
+    JZAZBZ_IZAZBZ_TO_LMS: [
+      [1, 0.13860504327153927, 0.05804731615611883],
+      [1, -0.1386050432715393, -0.058047316156118904],
+      [1, -0.09601924202631895, -0.811891896056039],
+    ],
+  };
+
+  it.each(Object.keys(CSS_HDR))("%s is within 1e-15 of CSS Color HDR 1's sample code", (name) => {
+    const derived = toNumbers(exact[name]!);
+    const expected = CSS_HDR[name]!;
+    for (let i = 0; i < 3; i++)
+      for (let j = 0; j < 3; j++) expect(Math.abs(derived[i]![j]! - expected[i]![j]!)).toBeLessThanOrEqual(1e-15);
+  });
+
   it("src/core/matrices.ts is up to date", () => {
     for (const [name, m] of Object.entries(exact)) {
       expect((generated as Record<string, unknown>)[name]).toEqual(toNumbers(m));

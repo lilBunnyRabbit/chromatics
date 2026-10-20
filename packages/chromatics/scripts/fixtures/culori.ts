@@ -27,7 +27,17 @@ const MODES: Readonly<Record<string, string>> = {
   "lchuv-d50": "lchuv",
   okhsl: "okhsl",
   okhsv: "okhsv",
+  jzazbz: "jab",
+  jzczhz: "jch",
+  ictcp: "itp",
 };
+
+// culori's channel keys where they differ from ours: its `itp` stores unscaled ICtCp as i, t, p.
+const KEYS: Readonly<Record<string, Readonly<Record<string, string>>>> = { ictcp: { ct: "t", cp: "p" } };
+
+function key(model: ColorModel, name: string): string {
+  return KEYS[model.id]?.[name] ?? name;
+}
 
 const FOLDERS: Readonly<Record<string, string>> = {
   "xyz-d65": "xyz65",
@@ -36,6 +46,7 @@ const FOLDERS: Readonly<Record<string, string>> = {
   "display-p3-linear": "linear-display-p3",
   "luv-d50": "luv50",
   "lchuv-d50": "lchuv50",
+  "ictcp-hlg": "ictcp-hlg",
 };
 
 export interface CrossCase {
@@ -48,14 +59,14 @@ function toCulori(model: ColorModel, coords: readonly number[]): CuloriColor {
   const mode = MODES[model.id]!;
   const names = Object.keys(model.channels);
   const out: Record<string, unknown> = { mode };
-  names.forEach((n, i) => (out[n] = coords[i]));
+  names.forEach((n, i) => (out[key(model, n)] = coords[i]));
   return out as unknown as CuloriColor;
 }
 
 function fromCulori(model: ColorModel, color: CuloriColor): number[] {
   const record = color as unknown as Record<string, number | undefined>;
   // Culori leaves a grey's hue undefined; this package stores 0 (ADR-003).
-  return Object.keys(model.channels).map((n) => record[n] ?? 0);
+  return Object.keys(model.channels).map((n) => record[key(model, n)] ?? 0);
 }
 
 function grid(model: ColorModel): number[][] {
@@ -68,8 +79,9 @@ function grid(model: ColorModel): number[][] {
 }
 
 // Okhsl / Okhsv are defined inside sRGB only; outside it culori follows ok_color.h's curve past its pole
-// and this package extends linearly (ADR-011), so those edges compare in-gamut colors only.
-const SRGB_ONLY = new Set(["okhsl", "okhsv"]);
+// and this package extends linearly (ADR-011). culori also clamps negative light before PQ, which this
+// package mirrors (grill 60). Those edges compare in-gamut colors only.
+const SRGB_ONLY = new Set(["okhsl", "okhsv", "jzazbz", "jzczhz", "ictcp"]);
 const toRgb = converter("rgb");
 
 function inSrgb(model: ColorModel, input: readonly number[]): boolean {
@@ -111,6 +123,7 @@ if (import.meta.main) {
       // culori ships its own matrix; ours equals CSS Color 4's within 4e-16 (scripts/matrices).
       // Okhsl / Okhsv (2026-10-20): culori takes ok_color.h's single Halley step, this package iterates to
       // convergence; measured 6.1e-5 (okhsl → oklab), 5.6e-5 (okhsv → oklab), 1.2e-7 / 1.4e-8 back.
+      // Jzazbz → XYZ: culori's float inverse of Safdar's matrices, measured 1.7e-8 (ours is exact).
       tolerance: 1e-12,
       toleranceFor: {
         "xyz-d65>xyz-d50": 1e-6,
@@ -119,6 +132,7 @@ if (import.meta.main) {
         "okhsv>oklab": 1e-4,
         "oklab>okhsl": 1e-6,
         "oklab>okhsv": 1e-7,
+        "jzazbz>xyz-d65": 1e-7,
       },
       cases,
     };
