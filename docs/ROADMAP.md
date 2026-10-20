@@ -48,7 +48,7 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
    - [x] Package README (2026-10-20): one file with a table per family (owner style: grouped tables, not a file per item); a test checks every class is listed
    - [ ] Changesets release setup
    - [x] `@lilbunnyrabbit/optional` 1.1.0 published (2026-10-19, npm trusted publishing)
-5. [ ] **Monorepo**: this repo hosts the package and the website
+5. [x] **Monorepo**: this repo hosts the package and the website (2026-10-20, grill 76: `apps/studio` + `packages/chromatics`, Turborepo, CI on `--affected`)
 6. [ ] **Studio on the package**: culori removed from the app
 
 ### Parity gap (2026-10-20)

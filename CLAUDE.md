@@ -106,7 +106,7 @@ If work is blocked on the owner, finish everything that doesn't depend on the an
 
 **Chromatics** — a scriptable **color language** (a small JS-subset DSL) plus an **interactive studio** for designing, analyzing and exploring color. Write a tiny program that derives a whole palette from one brand color; inspect any color across ~100 color models; check accessibility; preview it on real UI — all in the browser. Stored canonically in **OKLCH**; every other space is a lazy [culori](https://culorijs.org/) projection.
 
-Also shipped **as a library**: the color engine under `src/lib/models` is exported as a Svelte package (culori sits behind one seam, the registry).
+Repo layout: the studio app lives in `apps/studio/`; app paths in this file (`src/…`, `static/…`, `tests/…`, `package.json`) are relative to it. The color package lives in `packages/chromatics/` and replaces culori (behind one seam, the registry) at roadmap step 6.
 
 ## Repo, branch & deployment
 
@@ -122,7 +122,117 @@ Also shipped **as a library**: the color engine under `src/lib/models` is export
 
 ## Stack
 
-SvelteKit 2 + **Svelte 5 runes** + TypeScript + **Bun** + CodeMirror 6 + culori + Tailwind v4 + `adapter-static` (static SPA, deployed to GitHub Pages on push to `master`).
+SvelteKit 2 + **Svelte 5 runes** + TypeScript + **Bun** workspaces + **Turborepo** + CodeMirror 6 + culori + Tailwind v4 + `adapter-static` (static SPA, deployed to GitHub Pages on push to `master`).
+
+## Commands / gates
+
+A Bun + Turborepo monorepo (ADR-007, grill 76): the studio in `apps/studio` (private), the package in `packages/chromatics`, `docs/` at the root. Root scripts run through `turbo` from the **repo root** (the Bash shell cwd can drift into subdirs; `cd` first):
+
+```sh
+bun install
+bun run dev            # studio dev server
+bun run test           # studio bun:test (421 across 31 files) + package Vitest on node and bun (8,536)
+bun run check          # studio svelte-check (expect 0 errors / 0 warnings) + package tsc
+bun run build          # studio static build → apps/studio/build/, package → packages/chromatics/dist/
+bun run lint           # prettier --check: root config for the package and repo files, the studio its own
+bun run format         # prettier --write, same split
+```
+
+One workspace: `bunx turbo run test --filter=studio` (or `--filter=@lilbunnyrabbit/chromatics`). Before calling any change done: **`bun run check` + `bun run test` + `bun run build` + `bun run lint` all green.** CI (`.github/workflows/ci.yml`) runs `lint` and `turbo run check test build --affected` on every push and pull request; `deploy.yml` builds only the studio. Note: Bun resolves `./x.js` imports to `x.ts`. The studio's `bun test` is scoped to its `tests/` (`apps/studio/bunfig.toml`).
+
+Package generators (run from `packages/chromatics`):
+
+```sh
+bun run matrices       # regenerate src/core/matrices.ts from exact rational arithmetic
+bun run fixtures:culori # regenerate the culori cross-check grid in each <model>.fixtures.json
+bun run exports        # regenerate package.json exports: one subpath per model folder (a test checks it)
+```
+
+Formatting: the root `.prettierrc` is the owner's (2 spaces, double quotes, 120 cols) and covers the package; `apps/studio/.prettierrc` (tabs, Svelte + Tailwind plugins) covers the studio, which formats itself because its plugins live in its own `node_modules`.
+
+## Architecture is the owner's call, always
+
+**Never make an architectural decision yourself.** The most important rule in this repo. The API is the part the owner cares about most: _"I want to be 200% involved and to my liking."_
+
+### What counts as architectural
+
+Anything that changes the shape of the package or the app and isn't already in an ADR or CONVENTIONS:
+
+- the public API: export names, class vs function, method names and signatures, argument order, option objects, return types
+- how a color is represented and stored; precision
+- conversion routing (hubs, graph), how models plug in, tree-shaking and export layout
+- package-wide numeric policy: out-of-gamut, clamping, powerless hue, `none`, equality
+- error behaviour: throw, return `undefined`, or flag
+- a new dependency, or the monorepo / build / publish tooling
+- a new state layer, abstraction, registry, or plugin mechanism in the app
+- deviating from an ADR or from the pattern the repo already uses
+- anything justified by "we'll need it later"
+
+### What doesn't count
+
+Just do these:
+
+- implementing what an ADR already specifies
+- adding a model inside an existing, ADR-backed pattern (still with its full test matrix)
+- **model specifics** (owner, 2026-10-19: "how to define models is your choice based on what is best and normally the practice"): which constants, white point, transfer variant, channel letters and ranges, per-model thresholds and tolerances, which reference vectors. Follow the primary source and common practice, record the choice and its reasoning in the brainstorm log and ADR, and report it. A new class name, or a choice that bends a package-wide rule (ADR-003 / ADR-004), is still asked
+- bug fixes that don't change shape
+- renames the owner asked for, formatting, docs, tooling
+
+When in doubt, treat it as architectural.
+
+### How to ask: grill the owner
+
+1. **Stop before the first edit.** Investigate, then stop. Never ship a "temporary" version of an API to ask about later.
+2. **Brief first.** What the area is for, what exists today, what needs deciding. The owner must never guess what a question is about.
+3. **State the problem and its root cause** in one or two sentences, with evidence (`file:line`, branch, spec section).
+4. **Lay out the real options**, lightest first, each with a code sketch of how it **reads at the call site** and what breaks with it.
+5. **Recommend one, then attack it yourself.** The strongest argument against your own pick.
+6. **Grill.** The hard questions the owner may not have considered:
+   - How does this read for a library user who never saw the DSL?
+   - What does it do to bundle size and tree-shaking?
+   - What happens with an out-of-gamut, achromatic, or `NaN` input?
+   - Which conversion paths does it touch, and how is precision kept?
+   - Is it a breaking change once published?
+   - Which earlier iteration tried this, and why did it die?
+   - What's the smallest version that still answers the question?
+     Challenge the request itself if it looks wrong.
+7. **Record it.** Log the discussion in `docs/brainstorm/` during the session. If final, write an ADR. Only then implement.
+
+Claude Code: use `AskUserQuestion`, recommended option first, a code preview per option. Never ask in prose and then carry on.
+
+Subagents that implement get this section in their prompt; otherwise scope them to investigation only. Brainstorm subagents may run on Fable (owner, 2026-10-18); their output is input to the grill, never a decision.
+
+If work is blocked on the owner, finish everything that doesn't depend on the answer, then stop and report.
+
+## Documentation duties
+
+- **Brainstorm logs:** `docs/brainstorm/YYYY-MM-DD-topic.md` for every design discussion, updated **during** the session. Sections: date and participants, context, topics with decisions, key takeaways, action items, next session topics.
+- **ADRs:** `docs/adrs/NNN-title.md` once a decision is final, added to the index. Implementation that forces a change adds a dated revision note.
+- **Roadmap:** at the end of every session that completes work, update `docs/ROADMAP.md` and the ADR status.
+- **Package API docs:** every exported symbol has JSDoc with units, ranges and the formula's source.
+- The vault (`docs/chromatics/`) is research and history. Don't rewrite it; new decisions go to ADRs.
+
+## What this is
+
+**Chromatics** — a scriptable **color language** (a small JS-subset DSL) plus an **interactive studio** for designing, analyzing and exploring color. Write a tiny program that derives a whole palette from one brand color; inspect any color across ~100 color models; check accessibility; preview it on real UI — all in the browser. Stored canonically in **OKLCH**; every other space is a lazy [culori](https://culorijs.org/) projection.
+
+Repo layout: the studio app lives in `apps/studio/`; app paths in this file (`src/…`, `static/…`, `tests/…`, `package.json`) are relative to it. The color package lives in `packages/chromatics/` and replaces culori (behind one seam, the registry) at roadmap step 6.
+
+## Repo, branch & deployment
+
+- **This is the canonical repo: `lilBunnyRabbit/chromatics`.** The app was first committed on the **`the-final-decision`** branch (the same branch that holds the research vault `docs/chromatics/`), and is **merged into `master`** from there. `master` is the deploy branch; `the-final-decision` is where the port + vault live together.
+- **Provenance.** The app was developed in the separate `lilBunnyRabbit/color-testing` repo (the DSL half on `test-dsl`, the display half on `master`, then merged) and **ported here**. `color-testing` is the old/abandoned location — do not push there; work happens here.
+- **Deployment.** `.github/workflows/deploy.yml` builds on push to **`master`** and publishes to **GitHub Pages** at `https://lilbunnyrabbit.github.io/chromatics/`. `BASE_PATH` is derived from the repo name (`/${{ github.event.repository.name }}` → `/chromatics`), so the base path follows the repo automatically — don't hardcode it. (The `github-pages` environment only allows `master`/`dev` to deploy.)
+- **Prerender / SEO.** All routes are prerendered (`export const prerender = true` in `src/routes/+layout.ts`) so each ships as a real **200** HTML file with the shared `<head>` — without this, `adapter-static`'s `fallback: '404.html'` makes GitHub Pages serve **HTTP 404** for _every_ URL (crawlers read that as "don't index"). The home `/` keeps **SSR on** (no `ssr=false`): its mount-gated shell renders `DesktopShell` at build time, so the prerendered `index.html` carries a real `<title>`, an indexable `.sr-only` `<h1>`+blurb (`+page.svelte`), `<main>`/`<nav>` landmarks (`DesktopShell.svelte`), and a self-referential canonical. `/mixer` + `/models` keep `ssr=false` (browser-only canvas/matchMedia/live-color code) so they prerender to a shell with only the shared static `<head>` — a generic `<title>` fallback from `app.html`; their per-route `<svelte:head>` titles upgrade client-side. Rounded out by `static/sitemap.xml` + `WebApplication`/`WebSite` JSON-LD. **Subpath caveat:** a `robots.txt`/`sitemap.xml` under `/chromatics/` is _not_ auto-discovered (robots is only honored at the host root, which this repo doesn't own) — submit the sitemap via Search Console. Don't flip `/mixer`·`/models` to `ssr=true` without re-verifying the build (their browser-only code would server-render). `/showcase` prerenders too but is **`noindex, follow`** and is deliberately **absent from the sitemap** — it renders other sites' embedded content, and the canonical page is the studio; its shell is mount-gated because the scheme lives in the (browser-only) hash.
+- **Branding / meta / assets** (keep in sync if branding changes):
+  - `static/favicon.svg` — the brand mark: a rounded-square **conic color wheel** matching the in-app `.brand-dot` (`conic-gradient(from 0deg, #ff5d5d, #ffd24d, #4dff88, #4db8ff, #a64dff, #ff5d5d)` in `DesktopShell.svelte` / mobile `MobileShell.svelte`).
+  - `static/og.png` (1200×630, dark `#0f1115` theme) + its source `static/og.svg` — the social card referenced by the Open Graph / Twitter tags.
+  - `src/app.html` — global `<head>`: a default `<title>` (`Chromatics — color as code`), description, OG/Twitter tags, `theme-color`, icons, a GA preconnect, and `WebApplication`/`WebSite` JSON-LD. `/mixer` + `/models` override the title client-side via `<svelte:head>`; the home `<h1>` + canonical live in `src/routes/+page.svelte`.
+  - Absolute URLs hardcode `https://lilbunnyrabbit.github.io/chromatics/` in **four** places (static files / `app.html` can't read `BASE_PATH`) — the OG/Twitter tags **and** the JSON-LD in `src/app.html`, the `<loc>`s in `static/sitemap.xml`, and the canonical in `src/routes/+page.svelte`. Update **all** of them together if the deploy URL changes.
+
+## Stack
+
+SvelteKit 2 + **Svelte 5 runes** + TypeScript + **Bun** workspaces + **Turborepo** + CodeMirror 6 + culori + Tailwind v4 + `adapter-static` (static SPA, deployed to GitHub Pages on push to `master`).
 
 ## Commands / gates
 
@@ -220,8 +330,8 @@ An **Obsidian vault** (markdown, not part of the build — `adapter-static` only
 
 ## Gotchas
 
-- **`package.json` `sideEffects` must keep `"**/models/**"`** — otherwise the model registry is tree-shaken out and the static build crashes on boot (`No constructor registered for oklch`).
-- Run gates from the repo **root**.
+- **`apps/studio/package.json` `sideEffects` must keep `"**/models/**"`** — otherwise the model registry is tree-shaken out and the static build crashes on boot (`No constructor registered for oklch`).
+- Run gates from the repo **root** (`turbo` fans out). `turbo.json` sets `agentGuidance: false` so `turbo` stops writing an `AGENTS.md`; build tasks see only env vars listed in `turbo.json` (`BASE_PATH`), so a new build-time var must be added there.
 - Dynamic color accessors (`.oklch`, `.ok_h`, …) don't exist on the static type — see the engine note above.
 - **A bare channel means "this color's own model"** (`value.ts#member`), so `.l` is _not_ globally HSL: it's OKLCH L on an OKLCH color, Lab L\* on a Lab color, and only falls back to `hsl.l` when the native model has no `l`. Adding a channel whose `localKey` collides with a **method name on the same model** would silently shadow the method — `tests/native-channels.test.ts` guards that. Component/analysis code that wants a specific space must keep using `c.channel('ok_l')`/`c.channel('r')` (flat index), never `member()`.
 - Theme/mobile detection happens **only after mount** on purpose; don't read `matchMedia`/`localStorage` during render.

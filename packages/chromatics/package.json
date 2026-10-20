@@ -311,7 +311,8 @@
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
+    "test": "vitest run && bunx --bun vitest run",
+    "test:node": "vitest run",
     "test:bun": "bunx --bun vitest run",
     "test:all": "vitest run && bunx --bun vitest run",
     "matrices": "bun scripts/matrices/derive.ts",

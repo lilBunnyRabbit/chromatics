@@ -539,6 +539,15 @@ Owner grills:
 
 ΔEz (mine, pattern of `deltaEItp`): Safdar 2017 eq. 15 read from the Optics Express full text. It reduces to Euclidean Jzazbz distance for Cz ≥ 0, so `Jzczhz.deltaEz` computes that. The paper has no worked example; coloraide and color.js vectors are the references.
 
+### Grill 76: monorepo layout (decided 2026-10-20)
+
+Roadmap step 5. ADR-007 had fixed `packages/chromatics` + changesets; open was the app's place, its library build, the task runner and CI. The root `package.json` was three things at once: the app, the workspace root, and a Svelte library build (`svelte-package`, `publint`, `exports`) under the npm name `chromatics`, which belongs to someone else, so it never shipped. CI was `deploy.yml` only; nothing ran the package's tests.
+
+- **76a, layout:** the app moves to `apps/studio` (owner, over the recommended `apps/web`: named after the product). The root is private and only orchestrates. `docs/` stays at the root.
+- **76b, app library build:** dropped; the app is private (recommended). The package is the library.
+- **76c, runner:** owner asked whether Turborepo is needed and said to add it if so. It is, for 76d: `turbo run --affected` diffs against the base branch and walks the workspace graph, so a package change reruns the studio once the studio depends on it (step 6), and an app-only change skips the package suite. Path filters in the workflow can't see that graph. `turbo` 2.11.7 (2026-10-02, the newest release at least two weeks old) is a root dev dependency.
+- **76d, CI:** one `ci.yml` on push and pull request running check, test and build for the affected workspaces (recommended, plus the owner's change detection). `deploy.yml` builds only the studio.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

@@ -17,12 +17,14 @@ The owner's order: build the package on a branch, then turn this repo into a mon
 - **Release:** changesets + npm trusted publishing (OIDC), configured before the first publish. No long-lived `NPM_TOKEN`.
 - **Versioning:** `0.x` until the API is frozen, then `1.0.0`.
 - **Runtime dependencies:** only `@lilbunnyrabbit/optional`. Dev: TypeScript, Vitest, fast-check.
-- **Scaffold notes (2026-10-19):** TypeScript 5.9.3 to match the studio (one TS in the workspace; `svelte-check` needs the TS 5 API). Scripts are Bun-only and typed with `@types/bun` (owner chose it over `@types/node`); the build config sets `types: []` so `src/` can't touch runtime APIs. Bun's workspace install uses the isolated linker, which exposed the studio's undeclared `@codemirror/view` / `state` / `commands` and `@types/estree` imports; they're now declared (owner). The root `bunfig.toml` scopes `bun test` to `tests/`, so the package's Vitest suites only run through Vitest.
+- **Scaffold notes (2026-10-19):** TypeScript 5.9.3 to match the studio (one TS in the workspace; `svelte-check` needs the TS 5 API). Scripts are Bun-only and typed with `@types/bun` (owner chose it over `@types/node`); the build config sets `types: []` so `src/` can't touch runtime APIs. Bun's workspace install uses the isolated linker, which exposed the studio's undeclared `@codemirror/view` / `state` / `commands` and `@types/estree` imports; they're now declared (owner). The studio's `bunfig.toml` scopes `bun test` to `tests/`, so the package's Vitest suites only run through Vitest.
 - **Core models (2026-10-19):**
   - Dev dependencies `culori` 4.0.2 and `@types/culori` (owner, grill 21) feed the cross-check grid only.
   - The package has its own `.prettierrc`: the owner's config.
   - `src/testing/` holds the shared harness and is excluded from the build, like `*.test.ts` and `*.fixtures.json`.
 - **File layout (2026-10-19):** a folder per model, flat (`src/models/oklch/{oklch.ts, oklch.test.ts, oklch.domain.ts, oklch.fixtures.json, README.md}`); `src/core/` for the base class, edges, router, family bases; `src/index.ts` root barrel; `src/all.ts`; `scripts/fixtures/` for oracle generators. Tests beside their source.
+
+- **Monorepo (2026-10-20, grill 76):** the app lives in `apps/studio` (not `apps/web`), private, with its Svelte library build removed. The root `package.json` is private and orchestrates through Turborepo (`turbo` dev dependency, owner); `docs/` stays at the root. CI is `ci.yml` running `turbo run check test build --affected` on push and pull request; `deploy.yml` builds only the studio. The owner's `.prettierrc` moved from the package to the root and covers the package and repo files; the studio keeps its own config and formats itself (its plugins resolve only from its `node_modules` under Bun's isolated linker). The package's `test` script now runs both engines. `turbo` 2.11.7 sets `agentGuidance: false`.
 
 ## Alternatives Considered
 

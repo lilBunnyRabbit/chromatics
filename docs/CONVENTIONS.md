@@ -8,7 +8,7 @@ For _why_, read [PRINCIPLES.md](PRINCIPLES.md). The app's architecture map lives
 
 ## Where code goes
 
-Today, single package:
+A Bun + Turborepo monorepo (ADR-007, grill 76): `apps/studio/` (the app, private), `packages/chromatics/` (the package), `docs/` at the root. The studio, under `apps/studio/`:
 
 ```
 src/lib/
@@ -89,12 +89,13 @@ Package color models (2026-10-18 grill): classes are PascalCase words (`Oklch`, 
 
 ## Formatting
 
-- Studio: tabs, single quotes, no trailing commas, 100 cols (root `.prettierrc`). `bun run format`.
-- Package: the owner's config: 2 spaces, double quotes, es5 trailing commas, 120 cols (`packages/chromatics/.prettierrc`). Run `bunx prettier --write packages/chromatics` from the root. Fixture JSON is machine-written and ignored.
+- Studio: tabs, single quotes, no trailing commas, 100 cols (`apps/studio/.prettierrc`).
+- Package and repo files: the owner's config: 2 spaces, double quotes, es5 trailing commas, 120 cols (root `.prettierrc`). Fixture JSON is machine-written and ignored.
+- `bun run format` / `bun run lint` from the root cover both; the studio formats itself because its Prettier plugins live in its own `node_modules`.
 
 ## Tests
 
-`bun test` (bun:test). Today in `tests/`, named after the module (`conversions.test.ts`). Acceptance tests in `tests/acceptance/`, shared oracles in `tests/fixtures/`.
+Studio: `bun test` (bun:test) in `apps/studio/tests/`, named after the module (`conversions.test.ts`). Acceptance tests in `tests/acceptance/`, shared oracles in `tests/fixtures/`.
 
 - Test behaviour through the public API.
 - A test must fail when the behaviour breaks: break the code once on purpose and check.

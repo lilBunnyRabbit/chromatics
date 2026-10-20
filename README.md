@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="static/og.png" alt="Chromatics — a scriptable color language and interactive studio" width="680" />
+<img src="apps/studio/static/og.png" alt="Chromatics — a scriptable color language and interactive studio" width="680" />
 
 # Chromatics
 
@@ -87,9 +87,9 @@ Hex / CSS, swatch SVG, Markdown tables, and round-trippable DSL source.
 The color engine is framework-light and exported as a Svelte package — `culori` lives behind a single seam (the model registry), so it stays swappable.
 
 ```js
-import { ColorValue, OKLCH, hex, allModels, getModel } from 'chromatics';
+import { ColorValue, OKLCH, hex, allModels, getModel } from "chromatics";
 
-const c = hex('#6c5ce7');
+const c = hex("#6c5ce7");
 c.oklch.l; // lightness
 c.lighten(0.1).hex; // → "#…"
 allModels().length; // every registered model/system
@@ -105,6 +105,8 @@ allModels().length; // every registered model/system
 
 ## Development
 
+A Bun + Turborepo monorepo: the studio in `apps/studio`, the color package [`@lilbunnyrabbit/chromatics`](packages/chromatics) in `packages/chromatics`.
+
 ```sh
 bun install
 bun run dev        # start the studio
@@ -113,12 +115,14 @@ bun run dev        # start the studio
 ## Building & testing
 
 ```sh
-bun run build      # static build → build/
-bun run preview    # preview the production build
-bun test           # unit tests (bun:test)
-bun run check      # svelte-check + types
-bun run format     # prettier
+bun run build      # every workspace (studio → apps/studio/build/)
+bun run test       # studio (bun:test) + package (Vitest on node and bun)
+bun run check      # svelte-check + tsc
+bun run lint       # prettier --check
+bun run format     # prettier --write
 ```
+
+`turbo` caches each task; add `--filter=studio` or `--filter=@lilbunnyrabbit/chromatics` to run one workspace.
 
 Deployed to **GitHub Pages** via GitHub Actions on every push to `master`.
 
