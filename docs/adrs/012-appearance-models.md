@@ -9,6 +9,7 @@
 > - **Infinite light:** the inverse compression has a pole at a response of 400, so low J with high M is infinite light even inside the reference ranges. The inverse throws a RangeError there, and these models skip the harness's "never throws" sweep (`realistic: 0`).
 > - **Black floor:** J and HCT's Y below 1e-12 (the grill 45 floor) are black. Their hue and chroma are invisible there and can't be solved.
 > - **HCT inverse:** Newton from colorjs's seed. If that fails, roots are bracketed on a log grid of J (skipping poles) and bisected. A root is kept only if it converts back to the same hue and chroma: at high chroma, and for imaginary colors, other J reach the tone too. If none fits, a RangeError.
+> - **HCT root tolerance (2026-10-20, found by the first CI run):** "converts back" means Y, chroma and hue all within 1e-9 relative. Y was 1e-12, which float64 can't always resolve near Y ≈ 0: on node 22 the imaginary color in `hct.test.ts` misses by 1.6e-12 at the nearest double and threw; node 24 misses by 1.1e-13.
 
 ## Context
 

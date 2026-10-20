@@ -31,9 +31,11 @@ function solve(c: number, h: number, y: number, seed: number): [number, number, 
   const m = c * Cam16.env.flRoot;
   const at = (j: number) => toXyz(Cam16.env, j, m, h);
   // A root only counts if it converts back to this hue and chroma: imaginary colors (negative J or M) have
-  // roots on other branches that reach the tone with a different chroma.
+  // roots on other branches that reach the tone with a different chroma. Y uses the same 1e-9 as chroma:
+  // near Y ≈ 0 the nearest double to a bisected J can miss Y by ~1e-12 relative, and by how much differs
+  // between V8 releases' Math (node 22 vs 24); poles the bracket check misses sit orders of magnitude off.
   const fits = (xyz: [number, number, number]) => {
-    if (!(Math.abs(xyz[1] - y) <= 1e-12 * Math.abs(y))) return false;
+    if (!(Math.abs(xyz[1] - y) <= 1e-9 * Math.abs(y))) return false;
     const back = fromXyz(Cam16.env, ...xyz, ACHROMATIC);
     const d = Math.abs(back.h - h) % 360;
     const arc = (Math.min(d, 360 - d) * Math.PI) / 180;

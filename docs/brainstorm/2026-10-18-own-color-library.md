@@ -548,6 +548,8 @@ Roadmap step 5. ADR-007 had fixed `packages/chromatics` + changesets; open was t
 - **76c, runner:** owner asked whether Turborepo is needed and said to add it if so. It is, for 76d: `turbo run --affected` diffs against the base branch and walks the workspace graph, so a package change reruns the studio once the studio depends on it (step 6), and an app-only change skips the package suite. Path filters in the workflow can't see that graph. `turbo` 2.11.7 (2026-10-02, the newest release at least two weeks old) is a root dev dependency.
 - **76d, CI:** one `ci.yml` on push and pull request running check, test and build for the affected workspaces (recommended, plus the owner's change detection). `deploy.yml` builds only the studio.
 
+The first CI run (node 22.23, the runner's) failed two Hct tests that pass on node 24 locally. The imaginary-color round trip threw: HCT's root check wanted Y within 1e-12, tighter than float64 resolves near Y ≈ 0, and V8's Math differs in the last bits between releases. It now uses 1e-9, like chroma and hue (mine: model tolerance, ADR-012 note). The Hct totality sweep also exceeded Vitest's 5 s default on the 2-core runner; `testTimeout` is 30 s.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.
