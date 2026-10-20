@@ -250,6 +250,34 @@
       "types": "./dist/models/xyz65/xyz65.d.ts",
       "default": "./dist/models/xyz65/xyz65.js"
     },
+    "./ycbcr-2020": {
+      "types": "./dist/models/ycbcr-2020/ycbcr-2020.d.ts",
+      "default": "./dist/models/ycbcr-2020/ycbcr-2020.js"
+    },
+    "./ycbcr-601": {
+      "types": "./dist/models/ycbcr-601/ycbcr-601.d.ts",
+      "default": "./dist/models/ycbcr-601/ycbcr-601.js"
+    },
+    "./ycbcr-709": {
+      "types": "./dist/models/ycbcr-709/ycbcr-709.d.ts",
+      "default": "./dist/models/ycbcr-709/ycbcr-709.js"
+    },
+    "./ycgco": {
+      "types": "./dist/models/ycgco/ycgco.d.ts",
+      "default": "./dist/models/ycgco/ycgco.js"
+    },
+    "./ydbdr": {
+      "types": "./dist/models/ydbdr/ydbdr.d.ts",
+      "default": "./dist/models/ydbdr/ydbdr.js"
+    },
+    "./yiq": {
+      "types": "./dist/models/yiq/yiq.d.ts",
+      "default": "./dist/models/yiq/yiq.js"
+    },
+    "./yuv": {
+      "types": "./dist/models/yuv/yuv.d.ts",
+      "default": "./dist/models/yuv/yuv.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

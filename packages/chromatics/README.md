@@ -69,6 +69,21 @@ Channels are the spec's letters. Percentages are 0–1 fractions (`new Hsl(30, 1
 - ACEScc / ACEScct aren't clamped: negatives mirror and nothing caps at 65504, so every value round-trips.
 - **scRGB** is linear sRGB with an extended range: use `LinearSrgb`.
 
+### Video
+
+Y′ plus two color differences, as matrices over encoded RGB (`Srgb`, or `Rec2020` for 2020). Float forms: Y′ 0–1, no digital offsets or code values.
+
+| Class                               | String (not CSS)     | Channels              | Source                                 |
+| ----------------------------------- | -------------------- | --------------------- | -------------------------------------- |
+| `Ycbcr601`, `Ycbcr709`, `Ycbcr2020` | `ycbcr-601(y cb cr)` | y, cb cr ±0.5         | BT.601-7 / BT.709-6 / BT.2020-2, H.273 |
+| `Yiq`                               | `yiq(y i q)`         | y, i ±0.596, q ±0.523 | SMPTE 170M-2004 Annex A                |
+| `Yuv`                               | `yuv(y u v)`         | y, u ±0.436, v ±0.615 | SMPTE 170M-2004 Annex A                |
+| `Ydbdr`                             | `ydbdr(y db dr)`     | y, db dr ±1.333       | ITU-R BT.470-6 (SECAM)                 |
+| `Ycgco`                             | `ycgco(y cg co)`     | y, cg co ±0.5         | ITU-T H.273                            |
+
+- Same math, other names: sYCC, JPEG Y′CbCr, YPbPr and Rec. 601 are `Ycbcr601` over `Srgb`; xvYCC is `Ycbcr709`; SECAM is `Ydbdr`.
+- Integer code values (16–235 legal range, YCgCo-R's lifting) aren't modelled yet.
+
 ### Perceptual
 
 | Class                | String                     | Channels                  | Source                          |

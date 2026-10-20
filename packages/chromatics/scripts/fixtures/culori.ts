@@ -35,6 +35,7 @@ const MODES: Readonly<Record<string, string>> = {
   jzazbz: "jab",
   jzczhz: "jch",
   ictcp: "itp",
+  // No yiq: culori 4.0.2 uses Kotsarenko & Ramos 2010's coefficients, about 4e-4 from SMPTE 170M Annex A.
 };
 
 // culori's channel keys where they differ from ours: its `itp` stores unscaled ICtCp as i, t, p.

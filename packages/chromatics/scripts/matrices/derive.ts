@@ -199,6 +199,66 @@ export const XYB_OPSIN: Matrix3 = [
   [r("0.24342268924547819"), r("0.20476744424496821"), one.sub(r("0.24342268924547819")).sub(r("0.20476744424496821"))],
 ];
 
+interface Luma {
+  readonly kr: string;
+  readonly kb: string;
+}
+
+// Luma weights: BT.601-7 §2.5.1, BT.709-6 item 3.2, BT.2020-2 Table 4.
+const LUMA_601: Luma = { kr: "0.299", kb: "0.114" };
+const LUMA_709: Luma = { kr: "0.2126", kb: "0.0722" };
+const LUMA_2020: Luma = { kr: "0.2627", kb: "0.0593" };
+
+// Rows Y, s1·(B − Y) + s2·(R − Y), s3·(B − Y) + s4·(R − Y) over encoded R′G′B′.
+function lumaDifference(luma: Luma, second: [Rational, Rational], third: [Rational, Rational]): Matrix3 {
+  const kr = r(luma.kr);
+  const kb = r(luma.kb);
+  const one = Rational.of(1);
+  const kg = one.sub(kr).sub(kb);
+  const zero = Rational.of(0);
+  const by = [zero.sub(kr), zero.sub(kg), one.sub(kb)];
+  const ry = [one.sub(kr), zero.sub(kg), zero.sub(kb)];
+  const mix = ([b, rr]: [Rational, Rational]) => [0, 1, 2].map((i) => b.mul(by[i]!).add(rr.mul(ry[i]!)));
+  return [[kr, kg, kb], mix(second), mix(third)] as unknown as Matrix3;
+}
+
+// H.273 eq. 45–47 (BT.601 §2.5.2): Cb = 0.5·(B − Y)/(1 − Kb), Cr = 0.5·(R − Y)/(1 − Kr).
+function ycbcr(luma: Luma): Matrix3 {
+  const zero = Rational.of(0);
+  const half = Rational.of(1, 2);
+  const cb = half.div(Rational.of(1).sub(r(luma.kb)));
+  const cr = half.div(Rational.of(1).sub(r(luma.kr)));
+  return lumaDifference(luma, [cb, zero], [zero, cr]);
+}
+
+export function videoMatrices(): Record<string, Matrix3> {
+  const zero = Rational.of(0);
+  const q = (n: number) => Rational.of(n, 4);
+  const forward: Record<string, Matrix3> = {
+    YCBCR_601: ycbcr(LUMA_601),
+    YCBCR_709: ycbcr(LUMA_709),
+    YCBCR_2020: ycbcr(LUMA_2020),
+    // SMPTE 170M-2004 Annex A eq. 4–5: the reduced b − y, r − y.
+    YUV: lumaDifference(LUMA_601, [r("0.492111"), zero], [zero, r("0.877283")]),
+    // SMPTE 170M-2004 Annex A eq. 6–7: I and Q, 33° from b − y, r − y.
+    YIQ: lumaDifference(LUMA_601, [r("-0.26802288"), r("0.73575162")], [r("0.41271905"), r("0.47780269")]),
+    // ITU-R BT.470-6 Table 2 item 2.5 (SECAM): D′B = 1.505·(B − Y), D′R = −1.902·(R − Y).
+    YDBDR: lumaDifference(LUMA_601, [r("1.505"), zero], [zero, r("-1.902")]),
+    // ITU-T H.273 (V4) eq. 51–53, channel order Y, Cg, Co.
+    YCGCO: [
+      [q(1), q(2), q(1)],
+      [q(-1), q(2), q(-1)],
+      [q(2), zero, q(-2)],
+    ],
+  };
+  const out: Record<string, Matrix3> = {};
+  for (const [name, m] of Object.entries(forward)) {
+    out[`RGB_TO_${name}`] = m;
+    out[`${name}_TO_RGB`] = invert(m);
+  }
+  return out;
+}
+
 export function exactMatrices(): Record<string, Matrix3> {
   const out: Record<string, Matrix3> = {};
   for (const space of RGB_SPACES) {
@@ -244,6 +304,7 @@ export function exactMatrices(): Record<string, Matrix3> {
   out["HPE_TO_XYZ"] = invert(HPE);
   out["CAT02_TO_HPE"] = multiply(HPE, invert(CAT02));
   out["HPE_TO_CAT02"] = invert(multiply(HPE, invert(CAT02)));
+  Object.assign(out, videoMatrices());
   return out;
 }
 

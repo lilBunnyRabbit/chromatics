@@ -19,6 +19,13 @@ import { Hct } from "./models/hct/hct.js";
 import { LinearDisplayP3 } from "./models/linear-display-p3/linear-display-p3.js";
 import { ProphotoRgb } from "./models/prophoto-rgb/prophoto-rgb.js";
 import { Rec2020 } from "./models/rec2020/rec2020.js";
+import { Ycbcr601 } from "./models/ycbcr-601/ycbcr-601.js";
+import { Ycbcr709 } from "./models/ycbcr-709/ycbcr-709.js";
+import { Ycbcr2020 } from "./models/ycbcr-2020/ycbcr-2020.js";
+import { Yiq } from "./models/yiq/yiq.js";
+import { Yuv } from "./models/yuv/yuv.js";
+import { Ydbdr } from "./models/ydbdr/ydbdr.js";
+import { Ycgco } from "./models/ycgco/ycgco.js";
 import { Aces2065 } from "./models/aces2065-1/aces2065-1.js";
 import { Acescg } from "./models/acescg/acescg.js";
 import { Acescc } from "./models/acescc/acescc.js";
@@ -79,6 +86,13 @@ export const models: readonly ColorModel[] = [
   Acescg,
   Acescc,
   Acescct,
+  Ycbcr601,
+  Ycbcr709,
+  Ycbcr2020,
+  Yiq,
+  Yuv,
+  Ydbdr,
+  Ycgco,
   Oklab,
   Oklch,
   Okhsl,
@@ -168,6 +182,13 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   acescc: Acescc.parse,
   acescct: Acescct.parse,
   "smpte-c": SmpteC.parse,
+  "ycbcr-601": Ycbcr601.parse,
+  "ycbcr-709": Ycbcr709.parse,
+  "ycbcr-2020": Ycbcr2020.parse,
+  yiq: Yiq.parse,
+  yuv: Yuv.parse,
+  ydbdr: Ydbdr.parse,
+  ycgco: Ycgco.parse,
 };
 
 const SPACES: Readonly<Record<string, (input: string) => Color>> = {

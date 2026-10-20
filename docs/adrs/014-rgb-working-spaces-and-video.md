@@ -1,7 +1,14 @@
 # ADR-014: RGB working spaces and video
 
 **Date:** 2026-10-20
-**Status:** Accepted
+**Status:** Implemented
+
+> **Revision 2026-10-20, implemented:**
+> - Every matrix is exact from the generator. The YCbCr, YUV, YIQ and YDbDr rows are built from the luma weights and the printed factors.
+> - YIQ reproduces 170M eq. 8–9 to its 6 decimals.
+> - SMPTE 170M Table A.1 prints green's luminance as 61.7972 IRE. Its own weight 0.587 gives 61.7975, and only that value makes the bars sum consistently, so the test tolerates 3.5e-4 IRE.
+> - Ydbdr has no independent vectors. It is checked against BT.601 Table 1's colour differences times BT.470's factors.
+> - The log, PQ and HLG models sweep totality at 1× (`realistic: 1`).
 
 ## Context
 
