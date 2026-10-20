@@ -461,6 +461,53 @@ Decisions:
   - Hunter Lab uses colour-science's form with the 1966 Ka / Kb formula on our D65. Its table-D65 vectors are tested through the core function with that white.
   - IPT uses the paper's matrices, inverses exact from the generator. White's I ≈ 0.99999 is accepted as published.
 
+### Grill 68+: RGB working spaces and video (2026-10-20)
+
+Source sweep, pinned to aces-dev v1.0.3 ed0c686a / v1.3.1 fc189808, aces-docs 7c34c210, OpenColorIO 22dd9c4f, colour-science 248121e3, colorjs 4d3ab457. Free primaries found:
+
+- **ACES:** S-2008-001 (the free predecessor of ST 2065-1) and the S-2014-003 / S-2014-004 / S-2016-001 LaTeX sources in aces-dev.
+- **SMPTE 170M-2004:** free inside the ITU-R BT.1700 zip.
+- **FCC 47 CFR 73.682 (2003):** free from govinfo.
+- **ITU-R** BT.470-6, BT.601-7, BT.709-6, BT.2020-2 and BT.2100-3, plus **ITU-T** H.273 and T.871.
+- **Paywalled:** IEC 61966-2-2 (scRGB), 61966-2-1 Amd1 (sYCC) and 61966-2-4 (xvYCC).
+
+What the studio does today:
+
+- ACES feeds D60 XYZ into the D65 hub with no adaptation.
+- SMPTE-C is linear.
+- `rec2100` maps relative Y = 1 to 10 000 cd/m².
+- YIQ is culori's Kotsarenko digits.
+- YDbDr and YUV use Wikipedia's rounded matrices.
+- `ycocgr` is the YCgCo matrix with its channels reordered, not the lifting.
+- Six ids repeat another model's math.
+
+Decisions (owner, 2026-10-20):
+
+- **Grill 68, YCbCr:** three classes, `Ycbcr601`, `Ycbcr709` and `Ycbcr2020`.
+  - Float form: Y 0–1, Cb/Cr ±0.5 with no offset (H.273 eq. 45–47, BT.601 §2.5.2).
+- **Grill 69, duplicates:** dropped and documented as a map.
+  - scRGB → `LinearSrgb`, sYCC / rec601 / YPbPr → `Ycbcr601`, xvYCC → `Ycbcr709`, SECAM → `Ydbdr`.
+  - YCgCo-R waits for integer-coded models.
+- **Grill 70, ACES log curves:** the spec curve inside its domain, mirrored for negatives around lin 0 (as grill 60 did for PQ), with no 65504 cap. Lossless.
+- **Grill 71, Rec. 2100:** `Rec2100Pq` and `Rec2100Hlg` (`rec2100-pq` / `rec2100-hlg`).
+  - Both are RGB on BT.2020 primaries, with relative Y = 1 at 203 cd/m², like `Ictcp`.
+
+Model specifics (by practice, logged):
+
+- **ACES:**
+  - White is x 0.32168, y 0.33767 (S-2008-001 §4.1.3), adapted to D65 with Bradford: ACES CTL `D60_2_D65_CAT`, OCIO `ACES.cpp:584`, color.js. colour-science defaults to CAT02.
+  - The NPMs are derived exactly. The derivation reproduces S-2008-001's AP0 NPM and the published TRA1 / TRA2 to 5e-11.
+- **ACEScc / ACEScct:** constants as the specs print them; ACEScct's A, B, X_BRK, Y_BRK are decimals only.
+- **SMPTE-C:**
+  - Primaries from SMPTE 170M §4.1.
+  - Transfer from §5.1 / §5.2: OETF 1.099·L^0.45 − 0.099, linear 4.5·L below 0.018, mirrored for negatives.
+  - colour-science's gamma 2.2 cites the paywalled RP 145.
+- **YIQ:** SMPTE 170M Annex A eq. 6–9 (precise values, 33° rotation). Differs from culori by about 4e-4.
+- **YUV:** SMPTE 170M Annex A eq. 4–5, 0.492111 / 0.877283. BT.470 prints 0.493, an arithmetic slip that 170M explains.
+- **YDbDr:** derived from BT.470-6 Table 2's 1.505 / −1.902.
+- **YCgCo:** H.273 eq. 51–53, channels Y Cg Co.
+- **Base RGB:** the YCC models are matrices over the encoded RGB they're defined on. For 601, 709, YIQ, YUV, YDbDr and YCgCo that is `Srgb`, because sYCC defines exactly that. For 2020 it is `Rec2020`.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

@@ -39,7 +39,9 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
    - [x] Lab-like and tristimulus (ADR-013, grills 65–67), 2026-10-20:
      - [x] `Lab65`, `Lch65`, `Xyy`, `Uvy76`, `Uvy60`, `Uvw64`, `Lms` (2026-10-20): CIE 015:2018 formulas, colour-science vectors
      - [x] `Ipt`, `HunterLab`, `Din99` / `Din99Lch`, `Din99o` / `Din99oLch`, `Xyb`: IPT paper, colour-science, libjxl invariants, culori grids
-   - [ ] Remaining wide-gamut RGB (ACES and others: names and sources to grill)
+   - [-] RGB working spaces and video (ADR-014, grills 68–71):
+     - [x] `Aces2065`, `Acescg`, `Acescc`, `Acescct`, `SmpteC`, `Rec2100Pq`, `Rec2100Hlg` (2026-10-20): Academy specs, SMPTE 170M, BT.2100; OCIO, colour-science and color.js vectors. scRGB is `LinearSrgb`
+     - [ ] `Ycbcr601`, `Ycbcr709`, `Ycbcr2020`, `Yiq`, `Yuv`, `Ydbdr`, `Ycgco`
    - [x] Package README (2026-10-20): one file with a table per family (owner style: grouped tables, not a file per item); a test checks every class is listed
    - [ ] Changesets release setup
    - [x] `@lilbunnyrabbit/optional` 1.1.0 published (2026-10-19, npm trusted publishing)
@@ -48,16 +50,16 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
 
 ### Parity gap (2026-10-20)
 
-ADR-010 switches the studio only at parity. The studio registers 101 entries (`allModels()`): 31 stable, 35 experimental, 35 coming-soon stubs. The package covers 39 of the 66 that ship (2026-10-20).
+ADR-010 switches the studio only at parity. The studio registers 101 entries (`allModels()`): 31 stable, 35 experimental, 35 coming-soon stubs. The package covers 46 of the 66 that ship (2026-10-20).
 
 | Studio family    | Covered by the package                                                                                       | Missing                                                                                                   |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| RGB              | srgb, lin, p3, a98, prophoto, rec2020                                                                         | aces, acescg, acescc, acescct, scrgb, smptec                                                              |
+| RGB              | srgb, lin, p3, a98, prophoto, rec2020, aces (`Aces2065`), acescg, acescc, acescct, scrgb (`LinearSrgb`), smptec (`SmpteC`, 170M curve; studio's is linear) | none |
 | Tristimulus      | xyz, xyz50, xyy, ucs (`Uvy76`), ucs60 (`Uvy60`), uvw (`Uvw64`), lms, xyb (B = S′, studio's is S′ − Y′)      | none                                                                                                      |
 | Lab-like         | lab, lch, oklab, oklch, luv, lchuv, jab, jch, itp, cam16ucs, lab65, lch65, dlab, dlch, hlab, ipt              | none                                                                                                      |
 | Hue              | hsl, hsv, hwb, hsluv, hpluv, okhsl, okhsv                                                                     | hsi, hsp, tsl, cubehelix                                                                                  |
 | Appearance       | cam16, ciecam02, hct (the studio's are JCh; ours are JMh with C read-only)                                    | none                                                                                                      |
-| Video            | none                                                                                                         | yiq, ypbpr, ycbcr, rec601, yuv, ydbdr, secam, ycgco, ycocgr, sycc, xvycc, rec2100                         |
+| Video            | rec2100 (`Rec2100Pq`, white 203 cd/m²; studio's is 10 000) + `Rec2100Hlg`                                    | yiq, ypbpr, ycbcr, rec601, yuv, ydbdr, secam, ycgco, ycocgr, sycc, xvycc                                  |
 | Subtractive      | none                                                                                                         | cmyk, cmy, ryb                                                                                            |
 | Systems          | none                                                                                                         | ral                                                                                                       |
 

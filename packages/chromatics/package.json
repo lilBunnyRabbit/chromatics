@@ -30,6 +30,22 @@
       "types": "./dist/models/a98-rgb/a98-rgb.d.ts",
       "default": "./dist/models/a98-rgb/a98-rgb.js"
     },
+    "./aces2065-1": {
+      "types": "./dist/models/aces2065-1/aces2065-1.d.ts",
+      "default": "./dist/models/aces2065-1/aces2065-1.js"
+    },
+    "./acescc": {
+      "types": "./dist/models/acescc/acescc.d.ts",
+      "default": "./dist/models/acescc/acescc.js"
+    },
+    "./acescct": {
+      "types": "./dist/models/acescct/acescct.d.ts",
+      "default": "./dist/models/acescct/acescct.js"
+    },
+    "./acescg": {
+      "types": "./dist/models/acescg/acescg.d.ts",
+      "default": "./dist/models/acescg/acescg.js"
+    },
     "./cam16": {
       "types": "./dist/models/cam16/cam16.d.ts",
       "default": "./dist/models/cam16/cam16.js"
@@ -185,6 +201,18 @@
     "./rec2020": {
       "types": "./dist/models/rec2020/rec2020.d.ts",
       "default": "./dist/models/rec2020/rec2020.js"
+    },
+    "./rec2100-hlg": {
+      "types": "./dist/models/rec2100-hlg/rec2100-hlg.d.ts",
+      "default": "./dist/models/rec2100-hlg/rec2100-hlg.js"
+    },
+    "./rec2100-pq": {
+      "types": "./dist/models/rec2100-pq/rec2100-pq.d.ts",
+      "default": "./dist/models/rec2100-pq/rec2100-pq.js"
+    },
+    "./smpte-c": {
+      "types": "./dist/models/smpte-c/smpte-c.d.ts",
+      "default": "./dist/models/smpte-c/smpte-c.js"
     },
     "./srgb": {
       "types": "./dist/models/srgb/srgb.d.ts",

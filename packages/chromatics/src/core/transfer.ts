@@ -96,3 +96,56 @@ export function hlgDecode(v: number): number {
   if (v <= 0.5) return (Math.sign(v) * v * v) / 3;
   return (Math.exp((v - HLG_C) / HLG_A) + HLG_B) / 12;
 }
+
+// Academy S-2014-003 §4.4.1 Eq. 1 / §4.4.2 Eq. 3 (ACEScc). The spec sends every lin ≤ 0 to the encoding of
+// 0 and caps decoding at 65504 (half-float max); here the curve mirrors around (0, ACEScc(0)) like PQ
+// (grill 60) and is uncapped, so negative and very bright values round-trip (grill 70).
+const ACESCC_ZERO = (-16 + 9.72) / 17.52;
+
+function acesccPositive(lin: number): number {
+  if (lin < 2 ** -15) return (Math.log2(2 ** -16 + lin * 0.5) + 9.72) / 17.52;
+  return (Math.log2(lin) + 9.72) / 17.52;
+}
+
+function acesccPositiveInverse(v: number): number {
+  if (v <= (9.72 - 15) / 17.52) return (2 ** (v * 17.52 - 9.72) - 2 ** -16) * 2;
+  return 2 ** (v * 17.52 - 9.72);
+}
+
+export function linearToAcescc(lin: number): number {
+  return lin >= 0 ? acesccPositive(lin) : 2 * ACESCC_ZERO - acesccPositive(-lin);
+}
+
+export function acesccToLinear(v: number): number {
+  return v >= ACESCC_ZERO ? acesccPositiveInverse(v) : -acesccPositiveInverse(2 * ACESCC_ZERO - v);
+}
+
+// Academy S-2016-001 §4.4.1 Eq. 1 / §4.4.2 Eq. 3 (ACEScct), constants as printed (§4.4, decimals only).
+// The linear toe already covers lin ≤ 0; the 65504 decode cap is dropped (grill 70).
+const ACESCCT_X_BRK = 0.0078125;
+const ACESCCT_Y_BRK = 0.155251141552511;
+const ACESCCT_A = 10.5402377416545;
+const ACESCCT_B = 0.0729055341958355;
+
+export function linearToAcescct(lin: number): number {
+  if (lin <= ACESCCT_X_BRK) return ACESCCT_A * lin + ACESCCT_B;
+  return (Math.log2(lin) + 9.72) / 17.52;
+}
+
+export function acescctToLinear(v: number): number {
+  if (v <= ACESCCT_Y_BRK) return (v - ACESCCT_B) / ACESCCT_A;
+  return 2 ** (v * 17.52 - 9.72);
+}
+
+// SMPTE 170M-2004 §5.1 (OETF) and §5.2 (its inverse, break at V = 0.0812), mirrored for negatives.
+export function linearToSmpte170m(lin: number): number {
+  const abs = Math.abs(lin);
+  if (abs < 0.018) return 4.5 * lin;
+  return Math.sign(lin) * (1.099 * abs ** 0.45 - 0.099);
+}
+
+export function smpte170mToLinear(v: number): number {
+  const abs = Math.abs(v);
+  if (abs < 0.0812) return v / 4.5;
+  return Math.sign(v) * ((abs + 0.099) / 1.099) ** (1 / 0.45);
+}

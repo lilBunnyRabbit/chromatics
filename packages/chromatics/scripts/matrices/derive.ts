@@ -11,6 +11,8 @@ const r = Rational.decimal;
 export const WHITES = {
   D50: { x: "0.3457", y: "0.3585" },
   D65: { x: "0.3127", y: "0.3290" },
+  // Academy S-2008-001 §4.1.3 (ACES white; TB-2018-001: not CIE D60)
+  ACES: { x: "0.32168", y: "0.33767" },
 } as const satisfies Record<string, Chromaticity>;
 
 export interface RgbSpace {
@@ -60,6 +62,30 @@ export const RGB_SPACES = [
     red: { x: "0.708", y: "0.292" },
     green: { x: "0.170", y: "0.797" },
     blue: { x: "0.131", y: "0.046" },
+    white: "D65",
+  },
+  {
+    // Academy S-2008-001 §4.1.2, AP0 (SMPTE ST 2065-1)
+    name: "AP0",
+    red: { x: "0.73470", y: "0.26530" },
+    green: { x: "0.00000", y: "1.00000" },
+    blue: { x: "0.00010", y: "-0.07700" },
+    white: "ACES",
+  },
+  {
+    // Academy S-2014-004 §4.3.1, AP1
+    name: "AP1",
+    red: { x: "0.713", y: "0.293" },
+    green: { x: "0.165", y: "0.830" },
+    blue: { x: "0.128", y: "0.044" },
+    white: "ACES",
+  },
+  {
+    // SMPTE 170M-2004 §4.1 (Note 1: "the SMPTE C set") and §4.2 (D65)
+    name: "SMPTE_C",
+    red: { x: "0.630", y: "0.340" },
+    green: { x: "0.310", y: "0.595" },
+    blue: { x: "0.155", y: "0.070" },
     white: "D65",
   },
 ] as const satisfies readonly RgbSpace[];
@@ -181,6 +207,17 @@ export function exactMatrices(): Record<string, Matrix3> {
     out[`XYZ_${space.white}_TO_LINEAR_${space.name}`] = invert(forward);
   }
   out["XYZ_D65_TO_XYZ_D50"] = bradford("D65", "D50");
+  // ACES CTL `ACESlib.ODT_Common.ctl` D60_2_D65_CAT and OCIO `ACES.cpp` adapt the ACES white with Bradford.
+  for (const name of ["AP0", "AP1"] as const) {
+    const space = RGB_SPACES.find((s) => s.name === name)!;
+    const forward = multiply(bradford("ACES", "D65"), rgbToXyz(space));
+    out[`LINEAR_${name}_TO_XYZ_D65`] = forward;
+    out[`XYZ_D65_TO_LINEAR_${name}`] = invert(forward);
+  }
+  const ap0 = RGB_SPACES.find((s) => s.name === "AP0")!;
+  const ap1 = RGB_SPACES.find((s) => s.name === "AP1")!;
+  out["AP0_TO_AP1"] = multiply(invert(rgbToXyz(ap1)), rgbToXyz(ap0));
+  out["AP1_TO_AP0"] = multiply(invert(rgbToXyz(ap0)), rgbToXyz(ap1));
   out["XYZ_D50_TO_XYZ_D65"] = bradford("D50", "D65");
   const lms = multiply(BT2100_RGB_TO_LMS, invert(rgbToXyz(RGB_SPACES[4])));
   out["XYZ_D65_TO_LMS_ICTCP"] = lms;

@@ -19,6 +19,13 @@ import { Hct } from "./models/hct/hct.js";
 import { LinearDisplayP3 } from "./models/linear-display-p3/linear-display-p3.js";
 import { ProphotoRgb } from "./models/prophoto-rgb/prophoto-rgb.js";
 import { Rec2020 } from "./models/rec2020/rec2020.js";
+import { Aces2065 } from "./models/aces2065-1/aces2065-1.js";
+import { Acescg } from "./models/acescg/acescg.js";
+import { Acescc } from "./models/acescc/acescc.js";
+import { Acescct } from "./models/acescct/acescct.js";
+import { SmpteC } from "./models/smpte-c/smpte-c.js";
+import { Rec2100Pq } from "./models/rec2100-pq/rec2100-pq.js";
+import { Rec2100Hlg } from "./models/rec2100-hlg/rec2100-hlg.js";
 import { Hpluv } from "./models/hpluv/hpluv.js";
 import { Hsl } from "./models/hsl/hsl.js";
 import { Hsluv } from "./models/hsluv/hsluv.js";
@@ -65,6 +72,13 @@ export const models: readonly ColorModel[] = [
   A98Rgb,
   ProphotoRgb,
   Rec2020,
+  Rec2100Pq,
+  Rec2100Hlg,
+  SmpteC,
+  Aces2065,
+  Acescg,
+  Acescc,
+  Acescct,
   Oklab,
   Oklch,
   Okhsl,
@@ -149,6 +163,11 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   "hunter-lab": HunterLab.parse,
   ipt: Ipt.parse,
   xyb: Xyb.parse,
+  "aces2065-1": Aces2065.parse,
+  acescg: Acescg.parse,
+  acescc: Acescc.parse,
+  acescct: Acescct.parse,
+  "smpte-c": SmpteC.parse,
 };
 
 const SPACES: Readonly<Record<string, (input: string) => Color>> = {
@@ -159,6 +178,8 @@ const SPACES: Readonly<Record<string, (input: string) => Color>> = {
   "a98-rgb": A98Rgb.parse,
   "prophoto-rgb": ProphotoRgb.parse,
   rec2020: Rec2020.parse,
+  "rec2100-pq": Rec2100Pq.parse,
+  "rec2100-hlg": Rec2100Hlg.parse,
   xyz: Xyz65.parse,
   "xyz-d65": Xyz65.parse,
   "xyz-d50": Xyz50.parse,

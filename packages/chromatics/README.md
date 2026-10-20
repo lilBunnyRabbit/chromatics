@@ -46,12 +46,28 @@ Channels are the spec's letters. Percentages are 0–1 fractions (`new Hsl(30, 1
 
 ### Wide-gamut RGB
 
-| Class             | CSS                          | Transfer                    | Source      |
-| ----------------- | ---------------------------- | --------------------------- | ----------- |
-| `LinearDisplayP3` | `color(display-p3-linear …)` | linear                      | CSS Color 4 |
-| `A98Rgb`          | `color(a98-rgb …)`           | power 563/256               | CSS Color 4 |
-| `ProphotoRgb`     | `color(prophoto-rgb …)`      | gamma 1.8 + linear toe, D50 | CSS Color 4 |
-| `Rec2020`         | `color(rec2020 …)`           | BT.1886 gamma 2.4           | CSS Color 4 |
+| Class             | CSS                          | Transfer                          | Source                               |
+| ----------------- | ---------------------------- | --------------------------------- | ------------------------------------ |
+| `LinearDisplayP3` | `color(display-p3-linear …)` | linear                            | CSS Color 4                          |
+| `A98Rgb`          | `color(a98-rgb …)`           | power 563/256                     | CSS Color 4                          |
+| `ProphotoRgb`     | `color(prophoto-rgb …)`      | gamma 1.8 + linear toe, D50       | CSS Color 4                          |
+| `Rec2020`         | `color(rec2020 …)`           | BT.1886 gamma 2.4                 | CSS Color 4                          |
+| `Rec2100Pq`       | `color(rec2100-pq …)`        | PQ, white 203 cd/m²               | ITU-R BT.2100-3, CSS Color HDR draft |
+| `Rec2100Hlg`      | `color(rec2100-hlg …)`       | HLG, white 0.75                   | ITU-R BT.2100-3, CSS Color HDR draft |
+| `SmpteC`          | `smpte-c(r g b)` (not CSS)   | SMPTE 170M (1.099·L^0.45 − 0.099) | SMPTE 170M-2004                      |
+
+### ACES
+
+| Class      | String (not CSS)    | Encoding                    | Source             |
+| ---------- | ------------------- | --------------------------- | ------------------ |
+| `Aces2065` | `aces2065-1(r g b)` | AP0, scene-linear           | Academy S-2008-001 |
+| `Acescg`   | `acescg(r g b)`     | AP1, scene-linear           | Academy S-2014-004 |
+| `Acescc`   | `acescc(r g b)`     | AP1, log2                   | Academy S-2014-003 |
+| `Acescct`  | `acescct(r g b)`    | AP1, log2 with a linear toe | Academy S-2016-001 |
+
+- The ACES white (x 0.32168, y 0.33767) is adapted to D65 with Bradford, as the ACES CTL and OCIO do.
+- ACEScc / ACEScct aren't clamped: negatives mirror and nothing caps at 65504, so every value round-trips.
+- **scRGB** is linear sRGB with an extended range: use `LinearSrgb`.
 
 ### Perceptual
 
