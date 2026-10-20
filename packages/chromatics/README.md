@@ -70,6 +70,17 @@ Channels are the spec's letters. Percentages are 0–1 fractions (`new Hsl(30, 1
 - **Okhsl / Okhsv** exist only for Oklab L in [0, 1]: brighter than white converts to white, darker than black to black. This is the one deliberate data loss outside byte models.
 - **Hsluv / Hpluv / Okhsl / Okhsv** describe sRGB only: `s` = 1 is the sRGB edge.
 
+### Tristimulus and Lab-like
+
+| Class            | String (not CSS)  | Channels                                | Source                        |
+| ---------------- | ----------------- | --------------------------------------- | ----------------------------- |
+| `Lab65`, `Lch65` | `lab-d65(l a b)`  | as Lab / Lch, D65 white                 | CIE 015:2018 §8.2.1           |
+| `Xyy`            | `xyy(x y Y)`      | chromaticity x y, luminance Y           | CIE 015:2018 §7.3             |
+| `Uvy76`          | `uvy-1976(u v Y)` | CIE 1976 u′ v′, Y                       | CIE 015:2018 §8.1             |
+| `Uvy60`          | `uvy-1960(u v Y)` | CIE 1960 u v, Y                         | CIE 015:2018 Annex A.4        |
+| `Uvw64`          | `uvw-1964(U V W)` | CIE 1964 U\* V\* W\* (W\* −17 is black) | CIE 015:2018 Annex A.4        |
+| `Lms`            | `lms(l m s)`      | Hunt-Pointer-Estevez cone responses     | Hunt, equal-energy normalised |
+
 ### Appearance
 
 | Class                              | String (not CSS)   | Channels                               | Source                                |

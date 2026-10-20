@@ -9,6 +9,10 @@ import { Cam16Ucs } from "../models/cam16-ucs/cam16-ucs.js";
 import { Ciecam02 } from "../models/ciecam02/ciecam02.js";
 import { Hct } from "../models/hct/hct.js";
 import { Hpluv } from "../models/hpluv/hpluv.js";
+import { Uvw64 } from "../models/uvw64/uvw64.js";
+import { Uvy60 } from "../models/uvy60/uvy60.js";
+import { Uvy76 } from "../models/uvy76/uvy76.js";
+import { Xyy } from "../models/xyy/xyy.js";
 import { Okhsl } from "../models/okhsl/okhsl.js";
 import { Okhsv } from "../models/okhsv/okhsv.js";
 import { Oklab } from "../models/oklab/oklab.js";
@@ -18,6 +22,7 @@ import { Hsv } from "../models/hsv/hsv.js";
 import { Hwb } from "../models/hwb/hwb.js";
 import { Jzczhz } from "../models/jzczhz/jzczhz.js";
 import { Lch } from "../models/lch/lch.js";
+import { Lch65 } from "../models/lch65/lch65.js";
 import { Lchuv50 } from "../models/lchuv50/lchuv50.js";
 import { Lchuv65 } from "../models/lchuv65/lchuv65.js";
 import { Luv50 } from "../models/luv50/luv50.js";
@@ -97,6 +102,15 @@ const hct: Comparison = {
   },
 };
 
+// Chromaticity + Y: at Y = 0 the chromaticity is free; a zero denominator coordinate (y, v) means black.
+const chromaticityY: Comparison = {
+  canonical: (c) => (at(c, 1) === 0 ? [NaN, NaN, NaN] : at(c, 2) === 0 ? [NaN, NaN, 0] : c),
+};
+// CIE 1964: below Y 1e-12 (W* ≈ −17) U* V* are free; at W* = 0 they are 0.
+const uvw: Comparison = {
+  canonical: (c) => (Math.abs(((at(c, 2) + 17) / 25) ** 3 / 100) < 1e-12 || at(c, 2) === 0 ? [NaN, NaN, at(c, 2)] : c),
+};
+
 export const comparisons = new Map<ColorModel, Comparison>([
   [Luv65, luv],
   [Luv50, luv],
@@ -111,6 +125,10 @@ export const comparisons = new Map<ColorModel, Comparison>([
       canonical: (c) => (at(c, 1) <= 0.0000026 ? [at(c, 0), at(c, 1), NaN] : c),
     },
   ],
+  [Xyy, chromaticityY],
+  [Uvy76, chromaticityY],
+  [Uvy60, chromaticityY],
+  [Uvw64, uvw],
   [Cam16, jmh],
   [Ciecam02, jmh],
   [Cam16Ucs, ucs],
@@ -128,6 +146,13 @@ export const comparisons = new Map<ColorModel, Comparison>([
   ],
   [
     Lch,
+    {
+      hueWeight: (c) => Math.abs(at(c, 1)),
+      canonical: (c) => (at(c, 1) <= 0.0015 ? [at(c, 0), at(c, 1), NaN] : c),
+    },
+  ],
+  [
+    Lch65,
     {
       hueWeight: (c) => Math.abs(at(c, 1)),
       canonical: (c) => (at(c, 1) <= 0.0015 ? [at(c, 0), at(c, 1), NaN] : c),
@@ -184,6 +209,7 @@ const RECTANGULAR = [
   "rec2020",
   "oklab",
   "lab",
+  "lab-d65",
 ];
 
 /**

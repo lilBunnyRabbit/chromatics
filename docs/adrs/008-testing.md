@@ -3,6 +3,8 @@
 **Date:** 2026-10-18
 **Status:** Implemented
 
+> **Revision 2026-10-20:** the edge round trip skips a pair when a conversion throws a `RangeError`. Grill 32 makes that the defined answer for a true value past the number range: xyY with a subnormal y, CAM16 past its compression pole. There is nothing to round-trip. A wrong RangeError on realistic input is still caught by the totality sweep, which models whose ranges themselves reach infinity limit (`realistic`) or skip (`realistic: 0`; ADR-012).
+
 > **Revision 2026-10-19:** round-trips pass when **`|a − b| ≤ 1e-13 + 1e-12·|b|`** per channel. A mixed bound, because relative error grows near black with the sRGB gamma slope. Measured on V8 and JSC with 64-bit matrices: 4.4e-14 / 5.0e-14 absolute, 3.7e-12 / 4.2e-12 relative on channels above 0.01. A model with an iterative inverse (HCT, CAM16) declares a looser bound with its reason beside the model. For comparison: ColorAide asserts 10 significant digits, colour-science 1e-7 (loose enough to hide a 10-decimal-matrix bug at 6e-8). Owner delegated the value.
 
 > **Revision 2026-10-19: harness and core oracles** ([brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 20, 21)

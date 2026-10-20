@@ -240,7 +240,16 @@ function edgesOf(model: ColorModel, all: readonly ColorModel[]): [ColorModel, "d
 }
 
 export function checkRoundTrip(from: ColorModel, via: ColorModel, color: Color): void {
-  const back = color.to(via).to(from);
+  let back: Color;
+  try {
+    back = color.to(via).to(from);
+  } catch (error) {
+    // Grill 32: a RangeError is the defined result when the true value is past the number range (xyY with a
+    // subnormal y, CAM16 past its compression pole); there is nothing to round-trip. The totality sweep is
+    // what catches a RangeError on realistic input.
+    if (error instanceof RangeError) return;
+    throw error;
+  }
   if (from.terminal) {
     expect(back.equals(color)).toBe(true);
   } else if (via.terminal && via === Srgb8 && from === Srgb) {

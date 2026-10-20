@@ -33,6 +33,7 @@ function solve(c: number, h: number, y: number, seed: number): [number, number, 
   // A root only counts if it converts back to this hue and chroma: imaginary colors (negative J or M) have
   // roots on other branches that reach the tone with a different chroma.
   const fits = (xyz: [number, number, number]) => {
+    if (!(Math.abs(xyz[1] - y) <= 1e-12 * Math.abs(y))) return false;
     const back = fromXyz(Cam16.env, ...xyz, ACHROMATIC);
     const d = Math.abs(back.h - h) % 360;
     const arc = (Math.min(d, 360 - d) * Math.PI) / 180;

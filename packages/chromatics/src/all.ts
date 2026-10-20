@@ -22,7 +22,9 @@ import { Ictcp } from "./models/ictcp/ictcp.js";
 import { Jzazbz } from "./models/jzazbz/jzazbz.js";
 import { Jzczhz } from "./models/jzczhz/jzczhz.js";
 import { Lab } from "./models/lab/lab.js";
+import { Lab65 } from "./models/lab65/lab65.js";
 import { Lch } from "./models/lch/lch.js";
+import { Lch65 } from "./models/lch65/lch65.js";
 import { Lchuv50 } from "./models/lchuv50/lchuv50.js";
 import { Lchuv65 } from "./models/lchuv65/lchuv65.js";
 import { Luv50 } from "./models/luv50/luv50.js";
@@ -34,6 +36,11 @@ import { Okhsv } from "./models/okhsv/okhsv.js";
 import { Oklch } from "./models/oklch/oklch.js";
 import { Srgb } from "./models/srgb/srgb.js";
 import { Srgb8 } from "./models/srgb8/srgb8.js";
+import { Lms } from "./models/lms/lms.js";
+import { Uvw64 } from "./models/uvw64/uvw64.js";
+import { Uvy60 } from "./models/uvy60/uvy60.js";
+import { Uvy76 } from "./models/uvy76/uvy76.js";
+import { Xyy } from "./models/xyy/xyy.js";
 import { Xyz50 } from "./models/xyz50/xyz50.js";
 import { Xyz65 } from "./models/xyz65/xyz65.js";
 
@@ -57,6 +64,8 @@ export const models: readonly ColorModel[] = [
   Okhsv,
   Lab,
   Lch,
+  Lab65,
+  Lch65,
   Luv65,
   Luv50,
   Lchuv65,
@@ -76,6 +85,11 @@ export const models: readonly ColorModel[] = [
   Cam16Scd,
   Ciecam02,
   Hct,
+  Xyy,
+  Uvy76,
+  Uvy60,
+  Uvw64,
+  Lms,
 ];
 
 const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
@@ -89,6 +103,8 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   lch: Lch.parse,
   oklab: Oklab.parse,
   oklch: Oklch.parse,
+  "lab-d65": Lab65.parse,
+  "lch-d65": Lch65.parse,
   "luv-d65": Luv65.parse,
   "luv-d50": Luv50.parse,
   "lchuv-d65": Lchuv65.parse,
@@ -107,6 +123,11 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   "cam16-scd": Cam16Scd.parse,
   ciecam02: Ciecam02.parse,
   hct: Hct.parse,
+  xyy: Xyy.parse,
+  "uvy-1976": Uvy76.parse,
+  "uvy-1960": Uvy60.parse,
+  "uvw-1964": Uvw64.parse,
+  lms: Lms.parse,
 };
 
 const SPACES: Readonly<Record<string, (input: string) => Color>> = {

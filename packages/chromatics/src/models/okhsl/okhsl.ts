@@ -54,7 +54,8 @@ function fromOklab(c: Oklab): Okhsl {
   if (c.l >= 1) return new Okhsl(0, 0, 1, c.alpha);
   if (c.l <= 0) return new Okhsl(0, 0, 0, c.alpha);
   if (chroma === 0 || shapeless(c.l)) return new Okhsl(0, 0, toe(c.l), c.alpha);
-  const [c0, mid, max] = chromas(c.l, c.a / chroma, c.b / chroma);
+  // With the hue zeroed (grill 29), the shape is read along hue 0 too, so s and h describe one color.
+  const [c0, mid, max] = h === 0 ? chromas(c.l, 1, 0) : chromas(c.l, c.a / chroma, c.b / chroma);
   let s: number;
   if (chroma < mid) {
     const k1 = 0.8 * c0;

@@ -441,6 +441,26 @@ Decisions (owner, 2026-10-20):
 - **Grill 63, scope:** `Cam16` (channels J M h; C, Q, s, H are read-only accessors), `Cam16Ucs` plus `Cam16Lcd` / `Cam16Scd`, `Ciecam02`, `Hct`.
 - **Grill 64, names:** PascalCase of the common name for the coming families, applied without asking again: `Xyy`, `Lms`, `Xyb`, `Ipt`, `HunterLab`, `Din99`, `Din99Lch`, `Lab65`, `Lch65`, `Hsi`, `Hsp`, `Tsl`, `Cubehelix`, `Aces2065`, `Acescg`, `Acescc`, `Acescct`, `Scrgb`, `SmpteC`, `Ycbcr`, `Yiq`, `Yuv`, `Ypbpr`, `Ydbdr`, `Ycgco`, `Rec601`, `Cmyk`, `Cmy`, `Ryb`.
 
+### Grill 65+: Lab-like and tristimulus spaces (2026-10-20)
+
+Source sweep, pinned to colour-science 248121e3, colorjs 4d3ab457 and libjxl f23e813b:
+
+- **IPT:** the primary is free: Ebner & Fairchild 1998, CIC6 Eq. 1.
+- **Paywalled or unreachable primaries:** DIN 6176, ISO/IEC 18181 (XYB), and the HunterLab notes.
+- **Secondary vectors:** colour-science covers Lab D65, xyY, 1960 UCS, UVW, IPT, Hunter Lab and DIN99 / 99b / c / d, all at 8 decimals. Nobody publishes DIN99o or XYB vectors.
+- **The studio's ids mislead:** `ucs` is CIE 1976 u′v′Y, `ucs60` is 1960 uvY, `uvw` is 1964 U*V*W*. The studio's `uvw` inverse treats W = 0 as black, but black is W = −17. Its `lms` comment says D65, but the matrix is HPE normalised to equal-energy white.
+
+Decisions:
+
+- **Grill 65 (owner):** `Uvy76` (`uvy-1976`), `Uvy60` (`uvy-1960`), `Uvw64` (`uvw-1964`).
+- **Grill 66 (owner):** `Lms` is Hunt-Pointer-Estevez, equal-energy normalised (colour-science `MATRIX_XYZ_TO_HPE`), as the studio has it.
+- **Grill 67 (owner):** `Din99` / `Din99Lch` (DIN 6176, checked against colour-science) and `Din99o` / `Din99oLch` (the studio's, from de.wikipedia's and culori's constants, culori grid only, flagged as having no independent reference).
+- **Model specifics (by practice):**
+  - xyY / u′v′ / uv at black (X + Y + Z = 0) are 0, following colour-science today and ADR-003's grey-hue-0 analogue.
+  - XYB follows libjxl (B = S, opsin bias, cube root) but doesn't clamp negatives (ADR-003); the cube root keeps their sign. libjxl's invariants are its tests.
+  - Hunter Lab uses colour-science's form with the 1966 Ka / Kb formula on our D65. Its table-D65 vectors are tested through the core function with that white.
+  - IPT uses the paper's matrices, inverses exact from the generator. White's I ≈ 0.99999 is accepted as published.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

@@ -49,8 +49,9 @@ function fromOklab(c: Oklab): Okhsv {
   if (c.l >= 1) return new Okhsv(0, 0, 1, c.alpha);
   if (c.l <= 0) return new Okhsv(0, 0, 0, c.alpha);
   if (chroma === 0 || shapeless(c.l)) return new Okhsv(0, 0, toe(c.l), c.alpha);
-  const a = c.a / chroma;
-  const b = c.b / chroma;
+  // With the hue zeroed (grill 29), the shape is read along hue 0 too, so s and h describe one color.
+  const a = h === 0 ? 1 : c.a / chroma;
+  const b = h === 0 ? 0 : c.b / chroma;
   const top = cusp(a, b);
   const sMax = top.c / top.l;
   const tMax = top.c / (1 - top.l);

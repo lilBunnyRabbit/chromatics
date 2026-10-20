@@ -175,6 +175,8 @@ export function exactMatrices(): Record<string, Matrix3> {
   out["CAT16_INVERSE"] = invert(CAT16);
   out["CAT02"] = CAT02;
   out["CAT02_INVERSE"] = invert(CAT02);
+  out["XYZ_TO_HPE"] = HPE;
+  out["HPE_TO_XYZ"] = invert(HPE);
   out["CAT02_TO_HPE"] = multiply(HPE, invert(CAT02));
   out["HPE_TO_CAT02"] = invert(multiply(HPE, invert(CAT02)));
   return out;

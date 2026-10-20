@@ -98,9 +98,17 @@
       "types": "./dist/models/lab/lab.d.ts",
       "default": "./dist/models/lab/lab.js"
     },
+    "./lab65": {
+      "types": "./dist/models/lab65/lab65.d.ts",
+      "default": "./dist/models/lab65/lab65.js"
+    },
     "./lch": {
       "types": "./dist/models/lch/lch.d.ts",
       "default": "./dist/models/lch/lch.js"
+    },
+    "./lch65": {
+      "types": "./dist/models/lch65/lch65.d.ts",
+      "default": "./dist/models/lch65/lch65.js"
     },
     "./lchuv50": {
       "types": "./dist/models/lchuv50/lchuv50.d.ts",
@@ -117,6 +125,10 @@
     "./linear-srgb": {
       "types": "./dist/models/linear-srgb/linear-srgb.d.ts",
       "default": "./dist/models/linear-srgb/linear-srgb.js"
+    },
+    "./lms": {
+      "types": "./dist/models/lms/lms.d.ts",
+      "default": "./dist/models/lms/lms.js"
     },
     "./luv50": {
       "types": "./dist/models/luv50/luv50.d.ts",
@@ -157,6 +169,22 @@
     "./srgb8": {
       "types": "./dist/models/srgb8/srgb8.d.ts",
       "default": "./dist/models/srgb8/srgb8.js"
+    },
+    "./uvw64": {
+      "types": "./dist/models/uvw64/uvw64.d.ts",
+      "default": "./dist/models/uvw64/uvw64.js"
+    },
+    "./uvy60": {
+      "types": "./dist/models/uvy60/uvy60.d.ts",
+      "default": "./dist/models/uvy60/uvy60.js"
+    },
+    "./uvy76": {
+      "types": "./dist/models/uvy76/uvy76.d.ts",
+      "default": "./dist/models/uvy76/uvy76.js"
+    },
+    "./xyy": {
+      "types": "./dist/models/xyy/xyy.d.ts",
+      "default": "./dist/models/xyy/xyy.js"
     },
     "./xyz50": {
       "types": "./dist/models/xyz50/xyz50.d.ts",

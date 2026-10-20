@@ -23,6 +23,8 @@ const MODES: Readonly<Record<string, string>> = {
   hsv: "hsv",
   hwb: "hwb",
   // culori's luv / lchuv are D50 (it converts from xyz50); the D65 pair has no culori counterpart.
+  "lab-d65": "lab65",
+  "lch-d65": "lch65",
   "luv-d50": "luv",
   "lchuv-d50": "lchuv",
   okhsl: "okhsl",
@@ -44,6 +46,8 @@ const FOLDERS: Readonly<Record<string, string>> = {
   "xyz-d50": "xyz50",
   "srgb-linear": "linear-srgb",
   "display-p3-linear": "linear-display-p3",
+  "lab-d65": "lab65",
+  "lch-d65": "lch65",
   "luv-d50": "luv50",
   "lchuv-d50": "lchuv50",
   "ictcp-hlg": "ictcp-hlg",

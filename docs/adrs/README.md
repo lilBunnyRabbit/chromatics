@@ -37,3 +37,4 @@ When implementation forces a change, add a dated revision note at the top. Code 
 | [010](./010-build-order-and-migration.md) | Build order and studio migration | 2026-10-18 | Accepted |
 | [011](./011-perceptual-models.md) | Perceptual models | 2026-10-19 | Accepted |
 | [012](./012-appearance-models.md) | Appearance models | 2026-10-20 | Implemented |
+| [013](./013-lab-like-and-tristimulus.md) | Lab-like and tristimulus spaces | 2026-10-20 | Accepted |
