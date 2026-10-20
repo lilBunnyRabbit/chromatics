@@ -27,6 +27,8 @@
 > - PQ decoding saturates: values whose LMS′ lies past (c2 / c3)^m2 carry infinite light, so decoding them throws a RangeError. The harness's totality sweep for these models therefore covers their reference ranges (0.4× for Jzazbz and Jzczhz, whose Jz below about −0.5 decodes past the mirrored asymptote), not 1e6×.
 > - HLG uses BT.2100-3 Note 5c's 8-digit b and c. Its √ branch is odd, so negatives keep their sign.
 > - Added `Ictcp.deltaEItp()` (BT.2124-0). Safdar's ΔEz is deferred: its equation isn't verified against the paper yet.
+>
+> **Revision 2026-10-20, ΔEz:** `Jzczhz.deltaEz()` added, checked against Safdar et al. 2017 eq. 15 (ΔHz = 2√(Cz1·Cz2)·sin(Δhz / 2)). For Cz ≥ 0 that equals the Euclidean distance in Jzazbz, which is what the code computes, so a stored negative chroma still gives a distance. References: coloraide `test_delta_e_jz` and color.js `test/delta.js` (both secondary; the paper prints no example).
 
 ## Context
 

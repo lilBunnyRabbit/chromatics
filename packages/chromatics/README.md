@@ -167,7 +167,7 @@ Y′ plus two color differences, as matrices over encoded RGB (`Srgb`, or `Rec20
 | `lighten`, `darken`, `saturate`, `desaturate`, `ramp(n)`                                      | perceptual and HSL-family models (see each class)                                                                           |
 | `inGamut()`, `clamp()`, `gamutMap()` (CSS Color 4 MINDE)                                      | RGB models                                                                                                                  |
 | `contrast(other)` (WCAG 2), `luminance()`                                                     | `Srgb`                                                                                                                      |
-| `deltaE76`, `deltaE2000` · `deltaEOk`, `looksSame` · `deltaEuv` · `deltaEItp`                 | `Lab` · `Oklab` · `Luv65` / `Luv50` · `Ictcp`                                                                               |
+| `deltaE76`, `deltaE2000` · `deltaEOk`, `looksSame` · `deltaEuv` · `deltaEItp` · `deltaEz`     | `Lab` · `Oklab` · `Luv65` / `Luv50` · `Ictcp` · `Jzczhz`                                                                    |
 
 Interpolation is in premultiplied alpha, like CSS `color-mix()`. A grey's hue is 0 and `isAchromatic()` says when it's meaningless; mixing treats it as missing, so white → blue doesn't pass through red.
 

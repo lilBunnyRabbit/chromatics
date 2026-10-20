@@ -535,6 +535,8 @@ Owner grills:
 - **Grill 73b, RYB failure:** the prototype showed my "every value round-trips" was wrong: Newton from the centre solves 99.6% of an sRGB grid, the rest need a slow, non-unique search. Owner: throw a RangeError where Newton can't reach (recommended). Later found: pure blue is reachable at RYB (1, 0, 2); the failures are dark blues around rgb(0 0 0.75).
 - **Grill 74, RAL:** defer, ship no RAL (recommended).
 
+ΔEz (mine, pattern of `deltaEItp`): Safdar 2017 eq. 15 read from the Optics Express full text. It reduces to Euclidean Jzazbz distance for Cz ≥ 0, so `Jzczhz.deltaEz` computes that. The paper has no worked example; coloraide and color.js vectors are the references.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

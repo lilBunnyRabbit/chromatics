@@ -34,7 +34,7 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
      - [x] `Hsluv`, `Hpluv` (2026-10-20): closed-form gamut lines on our Luv65, HSLuv snapshot (secondary); `THIRD_PARTY_NOTICES.md` ships
      - [x] `Okhsl`, `Okhsv` (2026-10-20): ok_color.h ported onto our Oklab with converged Halley steps; colorjs vectors (secondary), culori grid in sRGB; L outside [0, 1] clamps (grill 59)
      - [x] `Jzazbz`, `Jzczhz`, `Ictcp`, `IctcpHlg` (2026-10-20): exact BT.2100 / Safdar matrices, PQ mirrored at 0 (grill 60), CSS HDR + BT.2124 + BT.2408 references, colour-science (secondary); `deltaEItp`
-     - [ ] Safdar ΔEz once its equation is checked against the paper
+     - [x] Safdar ΔEz (2026-10-20): `Jzczhz.deltaEz`, eq. 15 checked against the paper; coloraide + color.js vectors
    - [x] Appearance family (ADR-012, grills 61–64), 2026-10-20: `Cam16` (+ `viewedIn`), `Cam16Ucs` / `Cam16Lcd` / `Cam16Scd`, `Ciecam02`, `Hct`; MCU, colour-science and Fairchild references
    - [x] Lab-like and tristimulus (ADR-013, grills 65–67), 2026-10-20:
      - [x] `Lab65`, `Lch65`, `Xyy`, `Uvy76`, `Uvy60`, `Uvw64`, `Lms` (2026-10-20): CIE 015:2018 formulas, colour-science vectors

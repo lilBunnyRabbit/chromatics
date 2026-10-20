@@ -10,6 +10,15 @@ import { Jzazbz } from "../jzazbz/jzazbz.js";
 // CSS Color HDR 1 §6.5, JzCzhz characteristics: "Powerless hue ε: Cz <= 0.0000026".
 const ACHROMATIC = 0.0000026;
 
+// Safdar et al. 2017, Opt. Express 25(13) 15131, eq. 15: ΔEz = √(ΔJz² + ΔCz² + ΔHz²) with
+// ΔHz = 2·√(Cz1·Cz2)·sin(Δhz / 2). For Cz ≥ 0 that is exactly the Euclidean distance in Jzazbz, which is
+// what this computes, so a negative stored chroma gives a distance instead of √ of a negative.
+function deltaEz(x: Jzczhz, y: Jzczhz): number {
+  const [xa, xb] = fromPolar(x.c, x.h);
+  const [ya, yb] = fromPolar(y.c, y.h);
+  return Math.hypot(x.j - y.j, xa - ya, xb - yb);
+}
+
 /**
  * JzCzhz: {@link Jzazbz} in cylindrical form, as CSS Color HDR 1 defines `jzczhz()`. Lightness `j` (Jz),
  * chroma `c` (Cz, CSS reference range 0–0.26), hue `h` in degrees from the positive `a` axis.
@@ -21,6 +30,7 @@ const ACHROMATIC = 0.0000026;
  * ```ts
  * new Srgb(0, 1, 0).to(Jzczhz);   // jzczhz(0.17542 0.1614 132.50)
  * Jzczhz.parse("jzczhz(0.2 0.1 30deg)");
+ * a.to(Jzczhz).deltaEz(b.to(Jzczhz));    // Safdar 2017 eq. 15
  * ```
  */
 export class Jzczhz extends HueColor {
@@ -86,6 +96,14 @@ export class Jzczhz extends HueColor {
   /** `true` when chroma is at most 0.0000026, CSS Color HDR 1's powerless-hue threshold. */
   override isAchromatic(): boolean {
     return this._c <= ACHROMATIC;
+  }
+
+  /**
+   * ΔEz (Safdar et al. 2017, eq. 15) to `other`: √(ΔJz² + ΔCz² + ΔHz²), ΔHz = 2·√(Cz1·Cz2)·sin(Δhz / 2).
+   * In Jz units: white to black is about 0.222. Symmetric.
+   */
+  deltaEz(other: Jzczhz): number {
+    return deltaEz(this, other);
   }
 
   /** Adds `amount` × the `j` range (0–1) to `j` and returns this color (mutates). Not clamped. */
