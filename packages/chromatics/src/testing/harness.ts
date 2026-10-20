@@ -30,6 +30,8 @@ export interface ModelSpec {
    * How far past the reference ranges totality's "never throws" sweep goes (default 1e6×). PQ and HLG
    * models decode only what light can encode: PQ approaches (c2 / c3)^m2 ≈ 1.99 as light goes to
    * infinity, so their values a little past the range have no light, and a RangeError is the answer.
+   * 0 skips the sweep: appearance models reach infinite light inside their ranges (low J, high M drive a
+   * compressed cone response past 400), so only "finite or RangeError" holds for them.
    */
   readonly realistic?: number;
 }
@@ -290,13 +292,15 @@ export function checkTotality(model: ColorModel, all: readonly ColorModel[], sca
   const anyFinite = channels.map(() => fc.double({ noNaN: true, noDefaultInfinity: true }));
   const targets = all.filter((m) => m !== model);
   const settings = { numRuns: 300 };
-  fc.assert(
-    fc.property(fc.tuple(...realistic), (coords) => {
-      const c = construct(model, coords);
-      for (const t of targets) c.to(t);
-    }),
-    settings
-  );
+  if (scale > 0) {
+    fc.assert(
+      fc.property(fc.tuple(...realistic), (coords) => {
+        const c = construct(model, coords);
+        for (const t of targets) c.to(t);
+      }),
+      settings
+    );
+  }
   fc.assert(
     fc.property(fc.tuple(...anyFinite), (coords) => {
       const c = construct(model, coords);

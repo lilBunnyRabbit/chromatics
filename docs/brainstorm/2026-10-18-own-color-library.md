@@ -406,6 +406,41 @@ Decisions:
   - passing L through with an s that no source defines.
 - **Grill 60, PQ at zero (owner, 2026-10-20):** grill 52's `sign(x)·f(|x|)` is discontinuous at 0, because PQ(0) = c1^m2 ≈ 7.3e-7, and outputs inside (−7.3e-7, 7.3e-7) have no inverse. Replaced with a mirror around PQ(0): E(x) = 2·PQ(0) − PQ(−x) for x < 0. It is continuous, strictly increasing and a bijection over all reals. It is identical to BT.2100 for x ≥ 0 and never clips. The HLG √ branch is odd already (√(3E) is 0 at 0), so sign(x)·√(3|x|) stays.
 
+### Grill 61+: appearance family (open, 2026-10-20)
+
+Context: ADR-010 family 3 covers CIECAM02, CAM16 (and its UCS variants), HCT, and maybe CIECAM16 and ZCAM. Source sweep, 2026-10-20 (pinned: MCU bd811e4c, colour-science 248121e3, colorjs 4d3ab457, ColorAide 4eaa3e26):
+
+- **Primary sources are paywalled:**
+  - CIECAM02 is in CIE 159:2004; CIECAM16 is in CIE 248:2022.
+  - CAM16 is Li et al. 2017, Color Res. Appl. 42(6).
+  - Fairchild's CIECAM02 worked-example sheet now returns 404.
+  - The equations are readable only as reproduced in MCU (Apache-2.0), colour-science (BSD-3) and colorjs (MIT). All three agree on M16, the 0.42 / 27.13 / 400 constants and the C formula.
+- **HCT** has no paper; material-color-utilities is the definition. MCU's `Hct` stores an ARGB int and gamut-maps through `solveToInt`. ColorAide and colorjs implement an unbounded HCT with a Newton inverse.
+- **Viewing conditions** are white, L_A, Y_b, surround (F, c, Nc) and a discount flag. Defaults differ:
+  - MCU: L_A ≈ 11.72, Y_b ≈ 18.42, average. The studio uses these too.
+  - colorjs `cam16-jmh`: 64/π·0.2 ≈ 4.07, Y_b 20.
+  - colour-science: no default.
+  - None of these libraries put conditions on a per-call `to()` option. ColorAide fixes them per class, the way ADR-011 put Jzazbz's 203 cd/m² inside the edge.
+- **References:**
+  - MCU `hct_test.ts`, 3 decimals, MCU conditions.
+  - colour-science's CAM16 / CIECAM02 tests, secondary: 8 decimals for CAM16, Fairchild's 2-decimal values for CIECAM02.
+  - Any examples in the papers themselves couldn't be read.
+- **Pitfalls:**
+  - With D < 1, D65 white isn't achromatic (MCU white: C 2.869).
+  - J = 0 divides by zero in the inverse.
+  - Negative cone responses and the inverse compression's pole at 400.
+  - The hue-quadrature wrap below 20.14.
+
+Decisions (owner, 2026-10-20):
+
+- **Grill 61, viewing conditions:** fixed defaults plus a factory.
+  - The owner first picked an option on `to()` and asked whether other models do this. None does: ADR-002's options hook is unused, and grill 48 fixed Jzazbz's 203 inside the edge.
+  - Shown that `cam.to(Srgb)` can't carry the conditions back, the owner chose fixed conditions in the edge: Material's (L_A = 200/π · Y(L* 50)/100, Y_b = Y(L* 50), average surround, no discounting).
+  - `Cam16.viewedIn({...})` returns a distinct class that knows its conditions in both directions.
+- **Grill 62, HCT:** an unbounded coordinate space with a Newton inverse, as in ColorAide / colorjs. Material's sRGB-bounded behaviour is `hct.to(Srgb).gamutMap()`.
+- **Grill 63, scope:** `Cam16` (channels J M h; C, Q, s, H are read-only accessors), `Cam16Ucs` plus `Cam16Lcd` / `Cam16Scd`, `Ciecam02`, `Hct`.
+- **Grill 64, names:** PascalCase of the common name for the coming families, applied without asking again: `Xyy`, `Lms`, `Xyb`, `Ipt`, `HunterLab`, `Din99`, `Din99Lch`, `Lab65`, `Lch65`, `Hsi`, `Hsp`, `Tsl`, `Cubehelix`, `Aces2065`, `Acescg`, `Acescc`, `Acescct`, `Scrgb`, `SmpteC`, `Ycbcr`, `Yiq`, `Yuv`, `Ypbpr`, `Ydbdr`, `Ycgco`, `Rec601`, `Cmyk`, `Cmy`, `Ryb`.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

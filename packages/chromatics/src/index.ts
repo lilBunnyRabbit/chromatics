@@ -1,8 +1,15 @@
 export { Color } from "./core/color.js";
 export type { CssOptions } from "./core/css.js";
 export type { Channel, ChannelName, ChannelValues, ColorModel, OptionsOf } from "./core/model.js";
+export type { Surround, ViewingConditions } from "./core/cam.js";
 export { A98Rgb } from "./models/a98-rgb/a98-rgb.js";
+export { Cam16 } from "./models/cam16/cam16.js";
+export { Cam16Lcd } from "./models/cam16-lcd/cam16-lcd.js";
+export { Cam16Scd } from "./models/cam16-scd/cam16-scd.js";
+export { Cam16Ucs } from "./models/cam16-ucs/cam16-ucs.js";
+export { Ciecam02 } from "./models/ciecam02/ciecam02.js";
 export { DisplayP3 } from "./models/display-p3/display-p3.js";
+export { Hct } from "./models/hct/hct.js";
 export { Hpluv } from "./models/hpluv/hpluv.js";
 export { Hsl } from "./models/hsl/hsl.js";
 export { Hsluv } from "./models/hsluv/hsluv.js";

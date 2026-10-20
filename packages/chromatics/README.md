@@ -70,6 +70,18 @@ Channels are the spec's letters. Percentages are 0–1 fractions (`new Hsl(30, 1
 - **Okhsl / Okhsv** exist only for Oklab L in [0, 1]: brighter than white converts to white, darker than black to black. This is the one deliberate data loss outside byte models.
 - **Hsluv / Hpluv / Okhsl / Okhsv** describe sRGB only: `s` = 1 is the sRGB edge.
 
+### Appearance
+
+| Class                              | String (not CSS)   | Channels                               | Source                                |
+| ---------------------------------- | ------------------ | -------------------------------------- | ------------------------------------- |
+| `Cam16`                            | `cam16(J M h)`     | J 0–100, M 0–105, h; read-only C Q s H | Li et al. 2017                        |
+| `Ciecam02`                         | `ciecam02(J M h)`  | as Cam16                               | CIE 159:2004                          |
+| `Cam16Ucs`, `Cam16Lcd`, `Cam16Scd` | `cam16-ucs(J a b)` | J′ a′ b′; `deltaE`                     | Luo et al. 2006 / Li et al. 2017      |
+| `Hct`                              | `hct(h c t)`       | h, c 0–145, t = L\* 0–100              | material-color-utilities (Apache-2.0) |
+
+- Viewing conditions are fixed per class (Material's: D65, L_A ≈ 11.72 cd/m², Y_b ≈ 18.42, average surround). `Cam16.viewedIn({ adaptingLuminance, backgroundLuminance, surround, white, discounting }, id)` makes a class for other conditions that round-trips under them.
+- `Hct` is unbounded: out-of-sRGB values are kept; `hct.to(Srgb).gamutMap()` gives Material's in-gamut color.
+
 ## Operations
 
 | What                                                                                          | Where                                                                                                                       |
@@ -91,4 +103,4 @@ Interpolation is in premultiplied alpha, like CSS `color-mix()`. A grey's hue is
 
 ## License
 
-MIT. Ported code from HSLuv and ok_color.h keeps its notices in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+MIT. Ported code from HSLuv, ok_color.h, material-color-utilities and color.js keeps its notices in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

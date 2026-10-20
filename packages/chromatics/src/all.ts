@@ -2,7 +2,13 @@ import type { Color } from "./core/color.js";
 import { invalid } from "./core/css.js";
 import type { ColorModel } from "./core/model.js";
 import { A98Rgb } from "./models/a98-rgb/a98-rgb.js";
+import { Cam16Lcd } from "./models/cam16-lcd/cam16-lcd.js";
+import { Cam16Scd } from "./models/cam16-scd/cam16-scd.js";
+import { Cam16Ucs } from "./models/cam16-ucs/cam16-ucs.js";
+import { Cam16 } from "./models/cam16/cam16.js";
+import { Ciecam02 } from "./models/ciecam02/ciecam02.js";
 import { DisplayP3 } from "./models/display-p3/display-p3.js";
+import { Hct } from "./models/hct/hct.js";
 import { LinearDisplayP3 } from "./models/linear-display-p3/linear-display-p3.js";
 import { ProphotoRgb } from "./models/prophoto-rgb/prophoto-rgb.js";
 import { Rec2020 } from "./models/rec2020/rec2020.js";
@@ -64,6 +70,12 @@ export const models: readonly ColorModel[] = [
   Jzczhz,
   Ictcp,
   IctcpHlg,
+  Cam16,
+  Cam16Ucs,
+  Cam16Lcd,
+  Cam16Scd,
+  Ciecam02,
+  Hct,
 ];
 
 const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
@@ -89,6 +101,12 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   jzczhz: Jzczhz.parse,
   ictcp: Ictcp.parse,
   "ictcp-hlg": IctcpHlg.parse,
+  cam16: Cam16.parse,
+  "cam16-ucs": Cam16Ucs.parse,
+  "cam16-lcd": Cam16Lcd.parse,
+  "cam16-scd": Cam16Scd.parse,
+  ciecam02: Ciecam02.parse,
+  hct: Hct.parse,
 };
 
 const SPACES: Readonly<Record<string, (input: string) => Color>> = {

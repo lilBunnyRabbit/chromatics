@@ -30,9 +30,33 @@
       "types": "./dist/models/a98-rgb/a98-rgb.d.ts",
       "default": "./dist/models/a98-rgb/a98-rgb.js"
     },
+    "./cam16": {
+      "types": "./dist/models/cam16/cam16.d.ts",
+      "default": "./dist/models/cam16/cam16.js"
+    },
+    "./cam16-lcd": {
+      "types": "./dist/models/cam16-lcd/cam16-lcd.d.ts",
+      "default": "./dist/models/cam16-lcd/cam16-lcd.js"
+    },
+    "./cam16-scd": {
+      "types": "./dist/models/cam16-scd/cam16-scd.d.ts",
+      "default": "./dist/models/cam16-scd/cam16-scd.js"
+    },
+    "./cam16-ucs": {
+      "types": "./dist/models/cam16-ucs/cam16-ucs.d.ts",
+      "default": "./dist/models/cam16-ucs/cam16-ucs.js"
+    },
+    "./ciecam02": {
+      "types": "./dist/models/ciecam02/ciecam02.d.ts",
+      "default": "./dist/models/ciecam02/ciecam02.js"
+    },
     "./display-p3": {
       "types": "./dist/models/display-p3/display-p3.d.ts",
       "default": "./dist/models/display-p3/display-p3.js"
+    },
+    "./hct": {
+      "types": "./dist/models/hct/hct.d.ts",
+      "default": "./dist/models/hct/hct.js"
     },
     "./hpluv": {
       "types": "./dist/models/hpluv/hpluv.d.ts",

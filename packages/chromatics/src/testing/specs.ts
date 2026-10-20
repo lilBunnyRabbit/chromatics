@@ -1,6 +1,13 @@
 import { maxChroma, maxChromaForHue, singular } from "../core/hsluv.js";
+import { lightnessToY } from "../core/luv.js";
 import { shapeless, toeInv } from "../core/okhsl.js";
 import type { ColorModel } from "../core/model.js";
+import { Cam16 } from "../models/cam16/cam16.js";
+import { Cam16Lcd } from "../models/cam16-lcd/cam16-lcd.js";
+import { Cam16Scd } from "../models/cam16-scd/cam16-scd.js";
+import { Cam16Ucs } from "../models/cam16-ucs/cam16-ucs.js";
+import { Ciecam02 } from "../models/ciecam02/ciecam02.js";
+import { Hct } from "../models/hct/hct.js";
 import { Hpluv } from "../models/hpluv/hpluv.js";
 import { Okhsl } from "../models/okhsl/okhsl.js";
 import { Okhsv } from "../models/okhsv/okhsv.js";
@@ -73,6 +80,23 @@ function ok(model: ColorModel): Comparison {
   };
 }
 
+// Appearance models (ADR-012): J = 0 is black whatever M and h say; the hue is free at M ≤ 0.00105.
+const jmh: Comparison = {
+  hueWeight: (c) => Math.abs(at(c, 1)),
+  canonical: (c) => {
+    if (Math.abs(at(c, 0)) < 1e-12) return [at(c, 0), NaN, NaN];
+    return Math.abs(at(c, 1)) <= 105 / 100000 ? [at(c, 0), at(c, 1), NaN] : c;
+  },
+};
+const ucs: Comparison = { canonical: (c) => (at(c, 0) === 0 ? [0, NaN, NaN] : c) };
+const hct: Comparison = {
+  hueWeight: (c) => Math.abs(at(c, 1)),
+  canonical: (c) => {
+    if (Math.abs(lightnessToY(at(c, 2))) < 1e-12) return [NaN, NaN, at(c, 2)];
+    return Math.abs(at(c, 1)) * Cam16.env.flRoot <= 105 / 100000 ? [NaN, at(c, 1), at(c, 2)] : c;
+  },
+};
+
 export const comparisons = new Map<ColorModel, Comparison>([
   [Luv65, luv],
   [Luv50, luv],
@@ -87,6 +111,12 @@ export const comparisons = new Map<ColorModel, Comparison>([
       canonical: (c) => (at(c, 1) <= 0.0000026 ? [at(c, 0), at(c, 1), NaN] : c),
     },
   ],
+  [Cam16, jmh],
+  [Ciecam02, jmh],
+  [Cam16Ucs, ucs],
+  [Cam16Lcd, ucs],
+  [Cam16Scd, ucs],
+  [Hct, hct],
   [Okhsl, ok(Okhsl)],
   [Okhsv, ok(Okhsv)],
   [

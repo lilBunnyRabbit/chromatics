@@ -10,6 +10,11 @@ export function chromaticity(x: number, y: number, z: number): [u: number, v: nu
   return d === 0 ? undefined : [(4 * x) / d, (9 * y) / d];
 }
 
+/** CIE lightness L* for a relative luminance Y / Yn (eqs. 8.26–8.28; the same L* as CIELAB). */
+export function yToLightness(t: number): number {
+  return t > EPSILON ? 116 * Math.cbrt(t) - 16 : KAPPA * t;
+}
+
 /** Relative luminance Y / Yn for a CIE lightness L*: the inverse of eqs. 8.26–8.28. */
 export function lightnessToY(l: number): number {
   return l > KAPPA * EPSILON ? ((l + 16) / 116) ** 3 : l / KAPPA;
@@ -17,8 +22,7 @@ export function lightnessToY(l: number): number {
 
 export function xyzToLuv(x: number, y: number, z: number, white: White): [l: number, u: number, v: number] {
   const [un, vn] = chromaticity(...white)!;
-  const t = y / white[1];
-  const l = t > EPSILON ? 116 * Math.cbrt(t) - 16 : KAPPA * t;
+  const l = yToLightness(y / white[1]);
   // No chromaticity at X + 15Y + 3Z = 0: u* = v* = 0 is the limit along the grey axis.
   const uv = chromaticity(x, y, z);
   if (uv === undefined) return [l, 0, 0];

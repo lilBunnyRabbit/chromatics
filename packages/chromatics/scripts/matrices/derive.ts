@@ -133,6 +133,24 @@ export const JZAZBZ_LMS_TO_IZAZBZ = decimals([
   ["0.199076", "1.096799", "-1.295875"],
 ]);
 
+// CAT16 (Li et al. 2017), CAT02 (CIE 159:2004) and Hunt-Pointer-Estevez, as reproduced in colour-science
+// `colour/adaptation/datasets/cat.py` and `colour/appearance/hunt.py` @ 248121e3 (and MCU's cam16.ts).
+export const CAT16 = decimals([
+  ["0.401288", "0.650173", "-0.051461"],
+  ["-0.250268", "1.204414", "0.045854"],
+  ["-0.002079", "0.048952", "0.953127"],
+]);
+export const CAT02 = decimals([
+  ["0.7328", "0.4296", "-0.1624"],
+  ["-0.7036", "1.6975", "0.0061"],
+  ["0.0030", "0.0136", "0.9834"],
+]);
+export const HPE = decimals([
+  ["0.38971", "0.68898", "-0.07868"],
+  ["-0.22981", "1.18340", "0.04641"],
+  ["0", "0", "1"],
+]);
+
 export function exactMatrices(): Record<string, Matrix3> {
   const out: Record<string, Matrix3> = {};
   for (const space of RGB_SPACES) {
@@ -153,6 +171,12 @@ export function exactMatrices(): Record<string, Matrix3> {
   out["JZAZBZ_LMS_TO_XYZ"] = invert(JZAZBZ_XYZ_TO_LMS);
   out["JZAZBZ_LMS_TO_IZAZBZ"] = JZAZBZ_LMS_TO_IZAZBZ;
   out["JZAZBZ_IZAZBZ_TO_LMS"] = invert(JZAZBZ_LMS_TO_IZAZBZ);
+  out["CAT16"] = CAT16;
+  out["CAT16_INVERSE"] = invert(CAT16);
+  out["CAT02"] = CAT02;
+  out["CAT02_INVERSE"] = invert(CAT02);
+  out["CAT02_TO_HPE"] = multiply(HPE, invert(CAT02));
+  out["HPE_TO_CAT02"] = invert(multiply(HPE, invert(CAT02)));
   return out;
 }
 

@@ -36,3 +36,4 @@ When implementation forces a change, add a dated revision note at the top. Code 
 | [009](./009-color-systems.md) | Color systems and licensing | 2026-10-18 | Accepted |
 | [010](./010-build-order-and-migration.md) | Build order and studio migration | 2026-10-18 | Accepted |
 | [011](./011-perceptual-models.md) | Perceptual models | 2026-10-19 | Accepted |
+| [012](./012-appearance-models.md) | Appearance models | 2026-10-20 | Implemented |
