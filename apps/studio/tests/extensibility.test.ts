@@ -12,6 +12,9 @@ describe('zero-edit extensibility (P6 guarantee)', () => {
 				id: '__demo__',
 				label: 'Demo',
 				family: 'hue',
+				// bun test shares one registry across files; unbacked keeps the demo (no culori mode) out of
+				// every-backed-model sweeps such as mixer.test.ts.
+				backed: false,
 				ctor: {
 					name: 'DEMO',
 					params: [p('a')],
