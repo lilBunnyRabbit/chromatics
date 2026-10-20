@@ -50,6 +50,22 @@
       "types": "./dist/models/ciecam02/ciecam02.d.ts",
       "default": "./dist/models/ciecam02/ciecam02.js"
     },
+    "./din99": {
+      "types": "./dist/models/din99/din99.d.ts",
+      "default": "./dist/models/din99/din99.js"
+    },
+    "./din99-lch": {
+      "types": "./dist/models/din99-lch/din99-lch.d.ts",
+      "default": "./dist/models/din99-lch/din99-lch.js"
+    },
+    "./din99o": {
+      "types": "./dist/models/din99o/din99o.d.ts",
+      "default": "./dist/models/din99o/din99o.js"
+    },
+    "./din99o-lch": {
+      "types": "./dist/models/din99o-lch/din99o-lch.d.ts",
+      "default": "./dist/models/din99o-lch/din99o-lch.js"
+    },
     "./display-p3": {
       "types": "./dist/models/display-p3/display-p3.d.ts",
       "default": "./dist/models/display-p3/display-p3.js"
@@ -74,6 +90,10 @@
       "types": "./dist/models/hsv/hsv.d.ts",
       "default": "./dist/models/hsv/hsv.js"
     },
+    "./hunter-lab": {
+      "types": "./dist/models/hunter-lab/hunter-lab.d.ts",
+      "default": "./dist/models/hunter-lab/hunter-lab.js"
+    },
     "./hwb": {
       "types": "./dist/models/hwb/hwb.d.ts",
       "default": "./dist/models/hwb/hwb.js"
@@ -85,6 +105,10 @@
     "./ictcp-hlg": {
       "types": "./dist/models/ictcp-hlg/ictcp-hlg.d.ts",
       "default": "./dist/models/ictcp-hlg/ictcp-hlg.js"
+    },
+    "./ipt": {
+      "types": "./dist/models/ipt/ipt.d.ts",
+      "default": "./dist/models/ipt/ipt.js"
     },
     "./jzazbz": {
       "types": "./dist/models/jzazbz/jzazbz.d.ts",
@@ -181,6 +205,10 @@
     "./uvy76": {
       "types": "./dist/models/uvy76/uvy76.d.ts",
       "default": "./dist/models/uvy76/uvy76.js"
+    },
+    "./xyb": {
+      "types": "./dist/models/xyb/xyb.d.ts",
+      "default": "./dist/models/xyb/xyb.js"
     },
     "./xyy": {
       "types": "./dist/models/xyy/xyy.d.ts",

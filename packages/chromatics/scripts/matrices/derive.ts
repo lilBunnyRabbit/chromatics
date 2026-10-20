@@ -151,6 +151,28 @@ export const HPE = decimals([
   ["0", "0", "1"],
 ]);
 
+// Ebner & Fairchild 1998, "Development and Testing of a Color Space (IPT) with Improved Hue Uniformity",
+// IS&T CIC6, Eq. 1: XYZ (D65) → LMS, and L′M′S′ → IPT.
+export const IPT_XYZ_TO_LMS = decimals([
+  ["0.4002", "0.7075", "-0.0807"],
+  ["-0.2280", "1.1500", "0.0612"],
+  ["0", "0", "0.9184"],
+]);
+export const IPT_LMS_TO_IPT = decimals([
+  ["0.4000", "0.4000", "0.2000"],
+  ["4.4550", "-4.8510", "0.3960"],
+  ["0.8056", "0.3572", "-1.1628"],
+]);
+
+// libjxl `lib/jxl/cms/opsin_params.h` @ f23e813b (BSD-3): the XYB opsin absorbance matrix on linear sRGB, each
+// row's middle (or last) entry written as 1 minus the others.
+const one = Rational.of(1);
+export const XYB_OPSIN: Matrix3 = [
+  [r("0.30"), one.sub(r("0.078")).sub(r("0.30")), r("0.078")],
+  [r("0.23"), one.sub(r("0.078")).sub(r("0.23")), r("0.078")],
+  [r("0.24342268924547819"), r("0.20476744424496821"), one.sub(r("0.24342268924547819")).sub(r("0.20476744424496821"))],
+];
+
 export function exactMatrices(): Record<string, Matrix3> {
   const out: Record<string, Matrix3> = {};
   for (const space of RGB_SPACES) {
@@ -175,6 +197,12 @@ export function exactMatrices(): Record<string, Matrix3> {
   out["CAT16_INVERSE"] = invert(CAT16);
   out["CAT02"] = CAT02;
   out["CAT02_INVERSE"] = invert(CAT02);
+  out["IPT_XYZ_TO_LMS"] = IPT_XYZ_TO_LMS;
+  out["IPT_LMS_TO_XYZ"] = invert(IPT_XYZ_TO_LMS);
+  out["IPT_LMS_TO_IPT"] = IPT_LMS_TO_IPT;
+  out["IPT_IPT_TO_LMS"] = invert(IPT_LMS_TO_IPT);
+  out["XYB_OPSIN"] = XYB_OPSIN;
+  out["XYB_OPSIN_INVERSE"] = invert(XYB_OPSIN);
   out["XYZ_TO_HPE"] = HPE;
   out["HPE_TO_XYZ"] = invert(HPE);
   out["CAT02_TO_HPE"] = multiply(HPE, invert(CAT02));

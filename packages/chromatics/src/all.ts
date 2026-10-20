@@ -7,6 +7,13 @@ import { Cam16Scd } from "./models/cam16-scd/cam16-scd.js";
 import { Cam16Ucs } from "./models/cam16-ucs/cam16-ucs.js";
 import { Cam16 } from "./models/cam16/cam16.js";
 import { Ciecam02 } from "./models/ciecam02/ciecam02.js";
+import { Din99 } from "./models/din99/din99.js";
+import { Din99Lch } from "./models/din99-lch/din99-lch.js";
+import { Din99o } from "./models/din99o/din99o.js";
+import { Din99oLch } from "./models/din99o-lch/din99o-lch.js";
+import { HunterLab } from "./models/hunter-lab/hunter-lab.js";
+import { Ipt } from "./models/ipt/ipt.js";
+import { Xyb } from "./models/xyb/xyb.js";
 import { DisplayP3 } from "./models/display-p3/display-p3.js";
 import { Hct } from "./models/hct/hct.js";
 import { LinearDisplayP3 } from "./models/linear-display-p3/linear-display-p3.js";
@@ -90,6 +97,13 @@ export const models: readonly ColorModel[] = [
   Uvy60,
   Uvw64,
   Lms,
+  Ipt,
+  HunterLab,
+  Din99,
+  Din99Lch,
+  Din99o,
+  Din99oLch,
+  Xyb,
 ];
 
 const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
@@ -128,6 +142,13 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   "uvy-1960": Uvy60.parse,
   "uvw-1964": Uvw64.parse,
   lms: Lms.parse,
+  din99: Din99.parse,
+  "din99-lch": Din99Lch.parse,
+  din99o: Din99o.parse,
+  "din99o-lch": Din99oLch.parse,
+  "hunter-lab": HunterLab.parse,
+  ipt: Ipt.parse,
+  xyb: Xyb.parse,
 };
 
 const SPACES: Readonly<Record<string, (input: string) => Color>> = {

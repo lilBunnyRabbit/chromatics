@@ -29,6 +29,9 @@ const MODES: Readonly<Record<string, string>> = {
   "lchuv-d50": "lchuv",
   okhsl: "okhsl",
   okhsv: "okhsv",
+  din99o: "dlab",
+  "din99o-lch": "dlch",
+  xyb: "xyb",
   jzazbz: "jab",
   jzczhz: "jch",
   ictcp: "itp",
@@ -41,6 +44,15 @@ function key(model: ColorModel, name: string): string {
   return KEYS[model.id]?.[name] ?? name;
 }
 
+// culori's `xyb` stores b as S′ − Y′ ("chroma from luma"); this package keeps libjxl's B = S′ (ADR-013).
+function toCuloriValues(model: ColorModel, coords: readonly number[]): readonly number[] {
+  return model.id === "xyb" ? [coords[0]!, coords[1]!, coords[2]! - coords[1]!] : coords;
+}
+
+function fromCuloriValues(model: ColorModel, coords: number[]): number[] {
+  return model.id === "xyb" ? [coords[0]!, coords[1]!, coords[2]! + coords[1]!] : coords;
+}
+
 const FOLDERS: Readonly<Record<string, string>> = {
   "xyz-d65": "xyz65",
   "xyz-d50": "xyz50",
@@ -51,6 +63,7 @@ const FOLDERS: Readonly<Record<string, string>> = {
   "luv-d50": "luv50",
   "lchuv-d50": "lchuv50",
   "ictcp-hlg": "ictcp-hlg",
+  "din99o-lch": "din99o-lch",
 };
 
 export interface CrossCase {
@@ -63,14 +76,18 @@ function toCulori(model: ColorModel, coords: readonly number[]): CuloriColor {
   const mode = MODES[model.id]!;
   const names = Object.keys(model.channels);
   const out: Record<string, unknown> = { mode };
-  names.forEach((n, i) => (out[key(model, n)] = coords[i]));
+  const values = toCuloriValues(model, coords);
+  names.forEach((n, i) => (out[key(model, n)] = values[i]));
   return out as unknown as CuloriColor;
 }
 
 function fromCulori(model: ColorModel, color: CuloriColor): number[] {
   const record = color as unknown as Record<string, number | undefined>;
   // Culori leaves a grey's hue undefined; this package stores 0 (ADR-003).
-  return Object.keys(model.channels).map((n) => record[key(model, n)] ?? 0);
+  return fromCuloriValues(
+    model,
+    Object.keys(model.channels).map((n) => record[key(model, n)] ?? 0)
+  );
 }
 
 function grid(model: ColorModel): number[][] {

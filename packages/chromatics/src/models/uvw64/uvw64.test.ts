@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { models } from "../../all.js";
+import { D65_WHITE } from "../../core/matrices.js";
 import { describeModel } from "../../testing/harness.js";
 import { Xyz65 } from "../xyz65/xyz65.js";
 import { Uvw64 } from "./uvw64.js";
@@ -29,6 +30,9 @@ describe("Uvw64 references", () => {
   it("black is W* = −17 and comes back black (the studio's W = 0 bug)", () => {
     expect(new Xyz65(0, 0, 0).to(Uvw64).W).toBe(-17);
     expect([...new Uvw64(0, 0, -17).to(Xyz65).coords]).toEqual([0, 0, 0]);
-    expect(new Uvw64(0, 0, 0).to(Xyz65).y).toBeCloseTo((17 / 25) ** 3 / 100, 15);
+    const w0 = new Uvw64(0, 0, 0).to(Xyz65);
+    expect(w0.y).toBeCloseTo((17 / 25) ** 3 / 100, 15);
+    expect(w0.x / w0.y).toBeCloseTo(D65_WHITE[0], 12);
+    expect(w0.z / w0.y).toBeCloseTo(D65_WHITE[2], 12);
   });
 });

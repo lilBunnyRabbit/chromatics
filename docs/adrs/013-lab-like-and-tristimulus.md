@@ -1,7 +1,14 @@
 # ADR-013: Lab-like and tristimulus spaces
 
 **Date:** 2026-10-20
-**Status:** Accepted
+**Status:** Implemented
+
+> **Revision 2026-10-20, implemented:**
+> - **DIN99o** uses culori's exact constants (100 / ln 1.39, 1 / 0.0435). The shared DIN99 core reproduces colour-science's DIN99 and DIN99b vectors; DIN99b differs from DIN99o only in c1 and c5. DIN99o itself is checked against culori only.
+> - **XYB** matches culori to 1e-12 once culori's b (S′ − Y′) is mapped back to libjxl's B = S′.
+> - **Hunter Lab** drops a and b below |Y| 1e-12, where they divide by an underflowing √Y.
+> - **Okhsl / Okhsv:** once the hue is zeroed, the gamut shape is read along hue 0, so s and h describe one color at tiny L.
+> - **DIN99 and the chromaticity models** use a 1× totality sweep. Their inverses are exponential or blow up near y = 0.
 
 ## Context
 

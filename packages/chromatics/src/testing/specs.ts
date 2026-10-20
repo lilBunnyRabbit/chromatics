@@ -8,6 +8,9 @@ import { Cam16Scd } from "../models/cam16-scd/cam16-scd.js";
 import { Cam16Ucs } from "../models/cam16-ucs/cam16-ucs.js";
 import { Ciecam02 } from "../models/ciecam02/ciecam02.js";
 import { Hct } from "../models/hct/hct.js";
+import { Din99Lch } from "../models/din99-lch/din99-lch.js";
+import { Din99oLch } from "../models/din99o-lch/din99o-lch.js";
+import { HunterLab } from "../models/hunter-lab/hunter-lab.js";
 import { Hpluv } from "../models/hpluv/hpluv.js";
 import { Uvw64 } from "../models/uvw64/uvw64.js";
 import { Uvy60 } from "../models/uvy60/uvy60.js";
@@ -125,6 +128,16 @@ export const comparisons = new Map<ColorModel, Comparison>([
       canonical: (c) => (at(c, 1) <= 0.0000026 ? [at(c, 0), at(c, 1), NaN] : c),
     },
   ],
+  [
+    Din99Lch,
+    { hueWeight: (c) => Math.abs(at(c, 1)), canonical: (c) => (at(c, 1) <= 0.0015 ? [at(c, 0), at(c, 1), NaN] : c) },
+  ],
+  [
+    Din99oLch,
+    { hueWeight: (c) => Math.abs(at(c, 1)), canonical: (c) => (at(c, 1) <= 0.0015 ? [at(c, 0), at(c, 1), NaN] : c) },
+  ],
+  // Hunter: below Y 1e-12 (L 1e-4) a and b are dropped.
+  [HunterLab, { canonical: (c) => (Math.abs(at(c, 0)) < 1e-4 ? [at(c, 0), NaN, NaN] : c) }],
   [Xyy, chromaticityY],
   [Uvy76, chromaticityY],
   [Uvy60, chromaticityY],

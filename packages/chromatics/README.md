@@ -72,14 +72,19 @@ Channels are the spec's letters. Percentages are 0–1 fractions (`new Hsl(30, 1
 
 ### Tristimulus and Lab-like
 
-| Class            | String (not CSS)  | Channels                                | Source                        |
-| ---------------- | ----------------- | --------------------------------------- | ----------------------------- |
-| `Lab65`, `Lch65` | `lab-d65(l a b)`  | as Lab / Lch, D65 white                 | CIE 015:2018 §8.2.1           |
-| `Xyy`            | `xyy(x y Y)`      | chromaticity x y, luminance Y           | CIE 015:2018 §7.3             |
-| `Uvy76`          | `uvy-1976(u v Y)` | CIE 1976 u′ v′, Y                       | CIE 015:2018 §8.1             |
-| `Uvy60`          | `uvy-1960(u v Y)` | CIE 1960 u v, Y                         | CIE 015:2018 Annex A.4        |
-| `Uvw64`          | `uvw-1964(U V W)` | CIE 1964 U\* V\* W\* (W\* −17 is black) | CIE 015:2018 Annex A.4        |
-| `Lms`            | `lms(l m s)`      | Hunt-Pointer-Estevez cone responses     | Hunt, equal-energy normalised |
+| Class                 | String (not CSS)    | Channels                                | Source                                   |
+| --------------------- | ------------------- | --------------------------------------- | ---------------------------------------- |
+| `Lab65`, `Lch65`      | `lab-d65(l a b)`    | as Lab / Lch, D65 white                 | CIE 015:2018 §8.2.1                      |
+| `Xyy`                 | `xyy(x y Y)`        | chromaticity x y, luminance Y           | CIE 015:2018 §7.3                        |
+| `Uvy76`               | `uvy-1976(u v Y)`   | CIE 1976 u′ v′, Y                       | CIE 015:2018 §8.1                        |
+| `Uvy60`               | `uvy-1960(u v Y)`   | CIE 1960 u v, Y                         | CIE 015:2018 Annex A.4                   |
+| `Uvw64`               | `uvw-1964(U V W)`   | CIE 1964 U\* V\* W\* (W\* −17 is black) | CIE 015:2018 Annex A.4                   |
+| `Lms`                 | `lms(l m s)`        | Hunt-Pointer-Estevez cone responses     | Hunt, equal-energy normalised            |
+| `Ipt`                 | `ipt(i p t)`        | i 0–1, p t                              | Ebner & Fairchild 1998                   |
+| `HunterLab`           | `hunter-lab(l a b)` | L 0–100, a b                            | Hunter 1958, 1966 Ka / Kb                |
+| `Din99`, `Din99Lch`   | `din99(l a b)`      | DIN 6176 (D65)                          | DIN 6176:2001                            |
+| `Din99o`, `Din99oLch` | `din99o(l a b)`     | the studio's `dlab` / `dlch`            | Cui et al. 2002 (no independent vectors) |
+| `Xyb`                 | `xyb(x y b)`        | JPEG XL; B = S′ (libjxl)                | libjxl (BSD-3)                           |
 
 ### Appearance
 
