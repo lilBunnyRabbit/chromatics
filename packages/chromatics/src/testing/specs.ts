@@ -22,6 +22,11 @@ import { Oklab } from "../models/oklab/oklab.js";
 import { Hsl } from "../models/hsl/hsl.js";
 import { Hsluv } from "../models/hsluv/hsluv.js";
 import { Hsv } from "../models/hsv/hsv.js";
+import { Cubehelix } from "../models/cubehelix/cubehelix.js";
+import { Hsi } from "../models/hsi/hsi.js";
+import { Hsp } from "../models/hsp/hsp.js";
+import { Cmyk } from "../models/cmyk/cmyk.js";
+import { Srgb } from "../models/srgb/srgb.js";
 import { Hwb } from "../models/hwb/hwb.js";
 import { Jzczhz } from "../models/jzczhz/jzczhz.js";
 import { Lch } from "../models/lch/lch.js";
@@ -115,6 +120,36 @@ const uvw: Comparison = {
     Math.abs(((at(c, 2) + 17) / 25) ** 3 / 100) < 1e-12 || Math.abs(at(c, 2)) < 1e-12 ? [NaN, NaN, at(c, 2)] : c,
 };
 
+// Hsi / Hsp / Cubehelix sit on sRGB: the hue weight is the sRGB chroma, a chroma below 1e-12 is grey
+// (grill 45), and the hue is free at the model's saturation threshold. Cubehelix also drops s where
+// l·(1 − l) is below 1e-12 (black, white).
+function rgbHue(model: ColorModel, threshold: number, spread = false): Comparison {
+  const chroma = (c: readonly number[]) => {
+    if (c.some(Number.isNaN)) return 0;
+    const { r, g, b } = new model(...c).to(Srgb) as Srgb;
+    return Math.max(r, g, b) - Math.min(r, g, b);
+  };
+  return {
+    hueWeight: chroma,
+    canonical: (c) => {
+      const flat = spread && Math.abs(at(c, 2) * (1 - at(c, 2))) < 1e-12;
+      if (flat || chroma(c) < 1e-12) return [NaN, NaN, at(c, 2)];
+      return Math.abs(at(c, 1)) <= threshold ? [NaN, at(c, 1), at(c, 2)] : c;
+    },
+  };
+}
+
+// CMYK names each sRGB color many ways (k takes the inks' shared part): compare the CSS Color 5 §6.1
+// normal form, rgb = (1 − ink)(1 − k) then k = 1 − max(rgb). At k = 1 the inks are free.
+const cmyk: Comparison = {
+  canonical: (c) => {
+    const rgb = [0, 1, 2].map((i) => (1 - at(c, i)) * (1 - at(c, 3)));
+    const w = Math.max(...rgb);
+    if (Math.abs(w) < 1e-12) return [NaN, NaN, NaN, 1 - w];
+    return [...rgb.map((v) => (w - v) / w), 1 - w];
+  },
+};
+
 export const comparisons = new Map<ColorModel, Comparison>([
   [Luv65, luv],
   [Luv50, luv],
@@ -149,6 +184,10 @@ export const comparisons = new Map<ColorModel, Comparison>([
   [Cam16Lcd, ucs],
   [Cam16Scd, ucs],
   [Hct, hct],
+  [Cmyk, cmyk],
+  [Hsi, rgbHue(Hsi, 0.00001)],
+  [Hsp, rgbHue(Hsp, 0.00001)],
+  [Cubehelix, rgbHue(Cubehelix, 4.614386868039719 / 100000, true)],
   [Okhsl, ok(Okhsl)],
   [Okhsv, ok(Okhsv)],
   [

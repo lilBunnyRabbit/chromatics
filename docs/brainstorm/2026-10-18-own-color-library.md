@@ -508,6 +508,28 @@ Model specifics (by practice, logged):
 - **YCgCo:** H.273 eq. 51–53, channels Y Cg Co.
 - **Base RGB:** the YCC models are matrices over the encoded RGB they're defined on. For 601, 709, YIQ, YUV, YDbDr and YCgCo that is `Srgb`, because sYCC defines exactly that. For 2020 it is `Rec2020`.
 
+### Grill 72+: hue and subtractive models (2026-10-20)
+
+Two research passes (Opus, investigation only) covered HSI, HSP, TSL, cubehelix, CMY, CMYK, RYB and RAL. Neither colour-science nor color.js has any of them; culori 4.0.2 has `hsi` and `cubehelix` only. Every source and implementation works on encoded sRGB.
+
+Model specifics (mine, per the owner's 2026-10-19 rule):
+
+- **HSI:** the hexagonal (HSV) hue. Wikipedia "HSL and HSV" oldid 1378989624 defines it with an inverse (§"HSI to RGB") and a table of vectors; culori and coloraide use it, so studio parity holds. Gonzalez & Woods's arccos hue differs by up to about 1°, and the book wasn't available to cite.
+- **HSP:** Finley's published .299 / .587 / .114. His page's "HSP 0,1,1 → RGB 2.037,0,0" example comes from his earlier .241 weights (√(1/.241) = 2.037; .299 gives 1.8288), so it isn't a test vector. Hue in degrees (ADR-004), not Finley's turns.
+  - The inverse is Finley's two branches as one formula that never divides by min/max, so s > 1 extrapolates instead of collapsing onto s = 1 (ADR-003).
+  - **No independent vector exists for P.** Tests: Finley's own statement that H and S are HSV's (Wikipedia table), color-space's transcription as a cross-check, and the definitional identities.
+- **Cubehelix:** d3-color's space reading of Green 2011 eq. 2.
+  - Green's eq. 2 prints the blue coefficient as +1.97249; his Appendix A Fortran and every implementation use +1.97294, the only one that keeps the deviation at constant eq. 1 luma. We use 1.97294.
+  - s reference range 0–4.614386868039719 (coloraide `MAX_SAT`, d3 output at blue and yellow); the studio's 4 was too small.
+  - All vectors (d3 via color-space, coloraide) descend from d3's code.
+- **CMY / CMYK:** CSS Color 5 §6.1 naive conversion and colour-science's `cmyk.py`, the same algebra from two sources.
+  - The forward drops CSS's `min(1, …)`: (1 − c)(1 − k) is equal on [0, 1] and keeps out-of-range inks invertible (ADR-003). colour's K cap at 1 is dropped for the same reason.
+  - "Or 0 if black is 1" uses the grill 45 floor (1e-12).
+  - Id `cmyk`, string `device-cmyk()` with `toCss()` (CSS Color 5; browsers may not support it), parse accepts the legacy comma form of four numbers.
+  - The studio's `limitInk`, rich-black and TAC heuristics are uncited; they aren't model code and stay out.
+
+Open for the owner (grills 72–74): TSL's tint unit, RYB's inverse, RAL licensing.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

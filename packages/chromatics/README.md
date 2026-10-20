@@ -44,6 +44,31 @@ Channels are the spec's letters. Percentages are 0–1 fractions (`new Hsl(30, 1
 | `Hsv`        | `hsv(…)` (not CSS)        | h, s v 0–1               | Smith 1978 via Wikipedia    |
 | `Hwb`        | `hwb()`                   | h, w b 0–1               | CSS Color 4                 |
 
+### More hue models
+
+All over encoded sRGB, like `Hsl`.
+
+| Class       | String (not CSS)   | Channels                    | Source                                     |
+| ----------- | ------------------ | --------------------------- | ------------------------------------------ |
+| `Hsi`       | `hsi(h s% i%)`     | h, s 0–1, i = (R + G + B)/3 | Kender 1976; Wikipedia "HSL and HSV"       |
+| `Hsp`       | `hsp(h s% p%)`     | h, s 0–1, p = √(Σ w·RGB²)   | Finley 2006 (no independent vectors for p) |
+| `Cubehelix` | `cubehelix(h s l)` | h, s 0–4.6144, l 0–1        | Green 2011, d3-color's reading as a space  |
+
+- `Hsi` uses the hexagonal hue (HSV's), as culori and coloraide do; Gonzalez & Woods's arccos hue differs by up to about 1°.
+- `Hsp` and `Hsi` can leave sRGB from in-range channels (`new Hsp(0, 1, 1)` is r 1.83).
+- Green's colormap is a line through `Cubehelix`: h = 120·start − 120 + 360·rotations·λ, s = hue / 2, l = λ^γ.
+
+### Subtractive
+
+Device-free inks over encoded sRGB, not print profiles.
+
+| Class  | String                               | Channels    | Source                            |
+| ------ | ------------------------------------ | ----------- | --------------------------------- |
+| `Cmy`  | `cmy(c m y)` (not CSS)               | c m y 0–1   | colour-science (EasyRGB)          |
+| `Cmyk` | `device-cmyk(c m y k)` (CSS Color 5) | c m y k 0–1 | CSS Color 5 §6.1 naive conversion |
+
+- `Cmyk` names each color many ways; converting from sRGB puts the shared part of the inks in k. Out-of-range inks are stored, not clamped as CSS clamps them.
+
 ### Wide-gamut RGB
 
 | Class             | CSS                          | Transfer                          | Source                               |

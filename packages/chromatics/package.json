@@ -66,6 +66,18 @@
       "types": "./dist/models/ciecam02/ciecam02.d.ts",
       "default": "./dist/models/ciecam02/ciecam02.js"
     },
+    "./cmy": {
+      "types": "./dist/models/cmy/cmy.d.ts",
+      "default": "./dist/models/cmy/cmy.js"
+    },
+    "./cmyk": {
+      "types": "./dist/models/cmyk/cmyk.d.ts",
+      "default": "./dist/models/cmyk/cmyk.js"
+    },
+    "./cubehelix": {
+      "types": "./dist/models/cubehelix/cubehelix.d.ts",
+      "default": "./dist/models/cubehelix/cubehelix.js"
+    },
     "./din99": {
       "types": "./dist/models/din99/din99.d.ts",
       "default": "./dist/models/din99/din99.js"
@@ -94,6 +106,10 @@
       "types": "./dist/models/hpluv/hpluv.d.ts",
       "default": "./dist/models/hpluv/hpluv.js"
     },
+    "./hsi": {
+      "types": "./dist/models/hsi/hsi.d.ts",
+      "default": "./dist/models/hsi/hsi.js"
+    },
     "./hsl": {
       "types": "./dist/models/hsl/hsl.d.ts",
       "default": "./dist/models/hsl/hsl.js"
@@ -101,6 +117,10 @@
     "./hsluv": {
       "types": "./dist/models/hsluv/hsluv.d.ts",
       "default": "./dist/models/hsluv/hsluv.js"
+    },
+    "./hsp": {
+      "types": "./dist/models/hsp/hsp.d.ts",
+      "default": "./dist/models/hsp/hsp.js"
     },
     "./hsv": {
       "types": "./dist/models/hsv/hsv.d.ts",

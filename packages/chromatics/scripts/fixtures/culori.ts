@@ -22,6 +22,8 @@ const MODES: Readonly<Record<string, string>> = {
   hsl: "hsl",
   hsv: "hsv",
   hwb: "hwb",
+  hsi: "hsi",
+  cubehelix: "cubehelix",
   // culori's luv / lchuv are D50 (it converts from xyz50); the D65 pair has no culori counterpart.
   "lab-d65": "lab65",
   "lch-d65": "lch65",
