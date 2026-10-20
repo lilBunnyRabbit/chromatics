@@ -46,7 +46,7 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
      - [x] `Hsi`, `Hsp`, `Cubehelix`, `Cmy`, `Cmyk` (2026-10-20): Wikipedia, Finley, Green / d3, CSS Color 5 §6.1, colour-science; culori grids for hsi / cubehelix
      - [x] `Tsl` (t in degrees, atan2 tint), `Ryb` (Gossett cube, Newton inverse, RangeError out of reach) (2026-10-20); RAL deferred (licensing)
    - [x] Package README (2026-10-20): one file with a table per family (owner style: grouped tables, not a file per item); a test checks every class is listed
-   - [ ] Changesets release setup
+   - [x] Changesets release setup (grill 77; first publish by hand after step 6, runbook in ADR-007)
    - [x] `@lilbunnyrabbit/optional` 1.1.0 published (2026-10-19, npm trusted publishing)
 5. [x] **Monorepo**: this repo hosts the package and the website (2026-10-20, grill 76: `apps/studio` + `packages/chromatics`, Turborepo, CI on `--affected`)
 6. [ ] **Studio on the package**: culori removed from the app

@@ -24,9 +24,12 @@
     "check": "turbo run check",
     "test": "turbo run test",
     "lint": "prettier --check . && bun --filter studio lint",
-    "format": "prettier --write . && bun --filter studio format"
+    "format": "prettier --write . && bun --filter studio format",
+    "changeset": "bun --bun x changeset",
+    "release": "turbo run check test build --filter=@lilbunnyrabbit/chromatics && bun --bun x changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "3.0.3",
     "prettier": "^3.8.1",
     "turbo": "2.11.7"
   }

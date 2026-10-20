@@ -550,6 +550,17 @@ Roadmap step 5. ADR-007 had fixed `packages/chromatics` + changesets; open was t
 
 The first CI run (node 22.23, the runner's) failed two Hct tests that pass on node 24 locally. The imaginary-color round trip threw: HCT's root check wanted Y within 1e-12, tighter than float64 resolves near Y ≈ 0, and V8's Math differs in the last bits between releases. It now uses 1e-9, like chroma and hue (mine: model tolerance, ADR-012 note). The Hct totality sweep also exceeded Vitest's 5 s default on the 2-core runner; `testTimeout` is 30 s.
 
+### Grill 77: release with changesets (decided 2026-10-20)
+
+ADR-007 had fixed changesets + npm trusted publishing + `0.x`. The owner's `@lilbunnyrabbit/optional` repo already releases this way (Version PR via `changesets/action`, OIDC). `@lilbunnyrabbit/chromatics` doesn't exist on npm yet, and every source found says a trusted publisher can only be added to a package that exists.
+
+- **77a, flow:** Version PR on `master` (recommended, the optional repo's pattern).
+- **77b, bootstrap:** the owner publishes 0.1.0 by hand once, then adds the trusted publisher (recommended).
+- **77c, when:** after step 6, the studio on the package, so the migration's API changes land first (recommended). Until then the package is `private`.
+- **77d, enforcement:** no changeset check in CI; default changelog (recommended).
+- **77e, owner: "no node if possible":** the changesets CLI runs on Bun (`bun --bun x changeset`, tested), but `changeset publish` always shells out to `npm publish`, and `bun publish` has no OIDC or provenance (oven-sh/bun#22423 open; #29374 closed unmerged 2026-06-26; #15601). A Bun script could do npm's token exchange (`lib/utils/oidc.js`), but without provenance. Owner: Bun everywhere, npm only for the publish step (recommended), on the runner's npm, no setup-node.
+- **77f:** Node stays in `ci.yml` as the V8 test target (recommended; ADR-008, and it caught the Hct bug).
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

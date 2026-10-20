@@ -136,9 +136,10 @@ bun run check          # studio svelte-check (expect 0 errors / 0 warnings) + pa
 bun run build          # studio static build → apps/studio/build/, package → packages/chromatics/dist/
 bun run lint           # prettier --check: root config for the package and repo files, the studio its own
 bun run format         # prettier --write, same split
+bun run changeset      # add a changeset for the package (changesets on Bun)
 ```
 
-One workspace: `bunx turbo run test --filter=studio` (or `--filter=@lilbunnyrabbit/chromatics`). Before calling any change done: **`bun run check` + `bun run test` + `bun run build` + `bun run lint` all green.** CI (`.github/workflows/ci.yml`) runs `lint` and `turbo run check test build --affected` on every push and pull request; `deploy.yml` builds only the studio. Note: Bun resolves `./x.js` imports to `x.ts`. The studio's `bun test` is scoped to its `tests/` (`apps/studio/bunfig.toml`).
+One workspace: `bunx turbo run test --filter=studio` (or `--filter=@lilbunnyrabbit/chromatics`). Before calling any change done: **`bun run check` + `bun run test` + `bun run build` + `bun run lint` all green.** CI (`.github/workflows/ci.yml`) runs `lint` and `turbo run check test build --affected` on every push and pull request; `deploy.yml` builds only the studio. `release.yml` (changesets, on `master`) opens the Version Packages PR and publishes on its merge; the package stays `"private": true` until the first publish (ADR-007 runbook). Note: Bun resolves `./x.js` imports to `x.ts`. The studio's `bun test` is scoped to its `tests/` (`apps/studio/bunfig.toml`).
 
 Package generators (run from `packages/chromatics`):
 

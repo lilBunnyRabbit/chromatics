@@ -26,6 +26,13 @@ The owner's order: build the package on a branch, then turn this repo into a mon
 
 - **Monorepo (2026-10-20, grill 76):** the app lives in `apps/studio` (not `apps/web`), private, with its Svelte library build removed. The root `package.json` is private and orchestrates through Turborepo (`turbo` dev dependency, owner); `docs/` stays at the root. CI is `ci.yml` running `turbo run check test build --affected` on push and pull request; `deploy.yml` builds only the studio. The owner's `.prettierrc` moved from the package to the root and covers the package and repo files; the studio keeps its own config and formats itself (its plugins resolve only from its `node_modules` under Bun's isolated linker). The package's `test` script now runs both engines. `turbo` 2.11.7 sets `agentGuidance: false`.
 
+- **Release (2026-10-20, grill 77):** `@changesets/cli` 3.0.3 at the root, run on Bun (`bun run changeset`); default changelog generator; `.changeset/config.json` with `access: public`, `baseBranch: master`. `release.yml` on push to `master` runs `changesets/action` 2.1.2: it opens a "Version Packages" PR, and merging it publishes. No CI check requires a changeset. Bun can't publish with OIDC or provenance yet (oven-sh/bun#22423, #15601), so the publish step alone is `npm publish` via `changeset publish`, on the runner's preinstalled npm upgraded to 12.2.0; there is no setup-node in the release. Node stays in `ci.yml` only as the V8 test target (ADR-008).
+- **First publish (grill 77):** npm only lets a trusted publisher be added to a package that exists, so the first version goes out by hand, after step 6 (the studio on the package). Until then the package is `"private": true`, which keeps changesets and `npm publish` off it. Runbook:
+  1. Drop `"private": true` from `packages/chromatics/package.json`, `bun run changeset` → minor (0.0.0 → 0.1.0), merge, merge the Version Packages PR. Its publish step fails (no trusted publisher yet): expected.
+  2. Locally on `master`: `npm login`, `bun run build` in `packages/chromatics`, `npm publish --access public`.
+  3. Within 2 days on npmjs.com → the package → Settings → Trusted publisher: GitHub, `lilBunnyRabbit/chromatics`, workflow `release.yml`. Then set publishing access to disallow tokens.
+  4. From then on every release is the Version PR; `changeset publish` skips versions already on the registry.
+
 ## Alternatives Considered
 
 1. `@chromatics/core` (needs an npm org) or another unscoped name.
