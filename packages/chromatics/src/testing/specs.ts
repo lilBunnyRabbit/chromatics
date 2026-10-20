@@ -25,6 +25,8 @@ import { Hsv } from "../models/hsv/hsv.js";
 import { Cubehelix } from "../models/cubehelix/cubehelix.js";
 import { Hsi } from "../models/hsi/hsi.js";
 import { Hsp } from "../models/hsp/hsp.js";
+import { Tsl } from "../models/tsl/tsl.js";
+import { Ryb } from "../models/ryb/ryb.js";
 import { Cmyk } from "../models/cmyk/cmyk.js";
 import { Srgb } from "../models/srgb/srgb.js";
 import { Hwb } from "../models/hwb/hwb.js";
@@ -120,7 +122,7 @@ const uvw: Comparison = {
     Math.abs(((at(c, 2) + 17) / 25) ** 3 / 100) < 1e-12 || Math.abs(at(c, 2)) < 1e-12 ? [NaN, NaN, at(c, 2)] : c,
 };
 
-// Hsi / Hsp / Cubehelix sit on sRGB: the hue weight is the sRGB chroma, a chroma below 1e-12 is grey
+// Hsi / Hsp / Tsl / Cubehelix sit on sRGB: the hue weight is the sRGB chroma, a chroma below 1e-12 is grey
 // (grill 45), and the hue is free at the model's saturation threshold. Cubehelix also drops s where
 // l·(1 − l) is below 1e-12 (black, white).
 function rgbHue(model: ColorModel, threshold: number, spread = false): Comparison {
@@ -187,6 +189,7 @@ export const comparisons = new Map<ColorModel, Comparison>([
   [Cmyk, cmyk],
   [Hsi, rgbHue(Hsi, 0.00001)],
   [Hsp, rgbHue(Hsp, 0.00001)],
+  [Tsl, rgbHue(Tsl, 0.00001)],
   [Cubehelix, rgbHue(Cubehelix, 4.614386868039719 / 100000, true)],
   [Okhsl, ok(Okhsl)],
   [Okhsv, ok(Okhsv)],
@@ -276,3 +279,9 @@ export function extended(from: string, via: string): boolean {
   if (RECTANGULAR.includes(from) && RECTANGULAR.includes(via)) return true;
   return from === "srgb" && via === "hsl";
 }
+
+/**
+ * Targets whose inverse can fail on realistic input: converting into them throws a RangeError where the
+ * model has no reachable preimage (RYB's cube, ADR-015), so totality's "never throws" sweep allows it.
+ */
+export const partialTargets: ReadonlySet<ColorModel> = new Set([Ryb]);

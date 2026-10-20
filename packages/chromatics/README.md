@@ -48,13 +48,15 @@ Channels are the spec's letters. Percentages are 0–1 fractions (`new Hsl(30, 1
 
 All over encoded sRGB, like `Hsl`.
 
-| Class       | String (not CSS)   | Channels                    | Source                                     |
-| ----------- | ------------------ | --------------------------- | ------------------------------------------ |
-| `Hsi`       | `hsi(h s% i%)`     | h, s 0–1, i = (R + G + B)/3 | Kender 1976; Wikipedia "HSL and HSV"       |
-| `Hsp`       | `hsp(h s% p%)`     | h, s 0–1, p = √(Σ w·RGB²)   | Finley 2006 (no independent vectors for p) |
-| `Cubehelix` | `cubehelix(h s l)` | h, s 0–4.6144, l 0–1        | Green 2011, d3-color's reading as a space  |
+| Class       | String (not CSS)   | Channels                          | Source                                         |
+| ----------- | ------------------ | --------------------------------- | ---------------------------------------------- |
+| `Hsi`       | `hsi(h s% i%)`     | h, s 0–1, i = (R + G + B)/3       | Kender 1976; Wikipedia "HSL and HSV"           |
+| `Hsp`       | `hsp(h s% p%)`     | h, s 0–1, p = √(Σ w·RGB²)         | Finley 2006 (no independent vectors for p)     |
+| `Cubehelix` | `cubehelix(h s l)` | h, s 0–4.6144, l 0–1              | Green 2011, d3-color's reading as a space      |
+| `Tsl`       | `tsl(t s l)`       | t° tint, s 0–1, l = Rec. 601 luma | Terrillon et al. 2000 (no independent vectors) |
 
 - `Hsi` uses the hexagonal hue (HSV's), as culori and coloraide do; Gonzalez & Woods's arccos hue differs by up to about 1°.
+- `Tsl`'s tint is a hue in degrees (Terrillon's turns × 360), so it rotates and mixes like `h`; the atan2 form keeps g′ = 0 invertible.
 - `Hsp` and `Hsi` can leave sRGB from in-range channels (`new Hsp(0, 1, 1)` is r 1.83).
 - Green's colormap is a line through `Cubehelix`: h = 120·start − 120 + 360·rotations·λ, s = hue / 2, l = λ^γ.
 
@@ -62,11 +64,13 @@ All over encoded sRGB, like `Hsl`.
 
 Device-free inks over encoded sRGB, not print profiles.
 
-| Class  | String                               | Channels    | Source                            |
-| ------ | ------------------------------------ | ----------- | --------------------------------- |
-| `Cmy`  | `cmy(c m y)` (not CSS)               | c m y 0–1   | colour-science (EasyRGB)          |
-| `Cmyk` | `device-cmyk(c m y k)` (CSS Color 5) | c m y k 0–1 | CSS Color 5 §6.1 naive conversion |
+| Class  | String                               | Channels        | Source                               |
+| ------ | ------------------------------------ | --------------- | ------------------------------------ |
+| `Cmy`  | `cmy(c m y)` (not CSS)               | c m y 0–1       | colour-science (EasyRGB)             |
+| `Cmyk` | `device-cmyk(c m y k)` (CSS Color 5) | c m y k 0–1     | CSS Color 5 §6.1 naive conversion    |
+| `Ryb`  | `ryb(r y b)` (not CSS)               | r y b paint 0–1 | Gossett & Chen 2004 (trilinear cube) |
 
+- `Ryb` → sRGB is the paper's; the inverse is a Newton solve, exact where it converges. About 0.4% of sRGB (dark blues such as `rgb(0 0 0.75)`) throws a RangeError when converted to `Ryb`.
 - `Cmyk` names each color many ways; converting from sRGB puts the shared part of the inks in k. Out-of-range inks are stored, not clamped as CSS clamps them.
 
 ### Wide-gamut RGB

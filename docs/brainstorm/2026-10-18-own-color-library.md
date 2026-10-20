@@ -528,7 +528,12 @@ Model specifics (mine, per the owner's 2026-10-19 rule):
   - Id `cmyk`, string `device-cmyk()` with `toCss()` (CSS Color 5; browsers may not support it), parse accepts the legacy comma form of four numbers.
   - The studio's `limitInk`, rich-black and TAC heuristics are uncited; they aren't model code and stay out.
 
-Open for the owner (grills 72–74): TSL's tint unit, RYB's inverse, RAL licensing.
+Owner grills:
+
+- **Grill 72, TSL tint:** `t` in degrees with hue operations (recommended). `HueColor` finds the hue channel by its flag instead of a typed `h`.
+- **Grill 73, RYB inverse:** Gossett's cube with an unclamped Newton inverse (recommended).
+- **Grill 73b, RYB failure:** the prototype showed my "every value round-trips" was wrong: Newton from the centre solves 99.6% of an sRGB grid, the rest need a slow, non-unique search. Owner: throw a RangeError where Newton can't reach (recommended). Later found: pure blue is reachable at RYB (1, 0, 2); the failures are dark blues around rgb(0 0 0.75).
+- **Grill 74, RAL:** defer, ship no RAL (recommended).
 
 ## Key takeaways
 

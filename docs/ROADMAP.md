@@ -42,9 +42,9 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
    - [x] RGB working spaces and video (ADR-014, grills 68–71):
      - [x] `Aces2065`, `Acescg`, `Acescc`, `Acescct`, `SmpteC`, `Rec2100Pq`, `Rec2100Hlg` (2026-10-20): Academy specs, SMPTE 170M, BT.2100; OCIO, colour-science and color.js vectors. scRGB is `LinearSrgb`
      - [x] `Ycbcr601`, `Ycbcr709`, `Ycbcr2020`, `Yiq`, `Yuv`, `Ydbdr`, `Ycgco` (2026-10-20): exact matrices from BT.601 / 709 / 2020, SMPTE 170M, BT.470, H.273; BT.601 Table 1, 170M Table A.1 and colour-science vectors
-   - [-] Hue and subtractive (ADR-015, grill 72+):
+   - [x] Hue and subtractive (ADR-015, grills 72–74):
      - [x] `Hsi`, `Hsp`, `Cubehelix`, `Cmy`, `Cmyk` (2026-10-20): Wikipedia, Finley, Green / d3, CSS Color 5 §6.1, colour-science; culori grids for hsi / cubehelix
-     - [ ] `Tsl`, `Ryb`, RAL: waiting on the owner (tint unit, RYB inverse, RAL licensing)
+     - [x] `Tsl` (t in degrees, atan2 tint), `Ryb` (Gossett cube, Newton inverse, RangeError out of reach) (2026-10-20); RAL deferred (licensing)
    - [x] Package README (2026-10-20): one file with a table per family (owner style: grouped tables, not a file per item); a test checks every class is listed
    - [ ] Changesets release setup
    - [x] `@lilbunnyrabbit/optional` 1.1.0 published (2026-10-19, npm trusted publishing)
@@ -53,18 +53,18 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
 
 ### Parity gap (2026-10-20)
 
-ADR-010 switches the studio only at parity. The studio registers 101 entries (`allModels()`): 31 stable, 35 experimental, 35 coming-soon stubs. The package covers 62 of the 66 that ship (2026-10-20).
+ADR-010 switches the studio only at parity. The studio registers 101 entries (`allModels()`): 31 stable, 35 experimental, 35 coming-soon stubs. The package covers 64 of the 66 that ship (2026-10-20): ycocgr waits on integer-coded models, and RAL is excluded for licensing (grill 74), like Pantone.
 
 | Studio family    | Covered by the package                                                                                       | Missing                                                                                                   |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
 | RGB              | srgb, lin, p3, a98, prophoto, rec2020, aces (`Aces2065`), acescg, acescc, acescct, scrgb (`LinearSrgb`), smptec (`SmpteC`, 170M curve; studio's is linear) | none |
 | Tristimulus      | xyz, xyz50, xyy, ucs (`Uvy76`), ucs60 (`Uvy60`), uvw (`Uvw64`), lms, xyb (B = S′, studio's is S′ − Y′)      | none                                                                                                      |
 | Lab-like         | lab, lch, oklab, oklch, luv, lchuv, jab, jch, itp, cam16ucs, lab65, lch65, dlab, dlch, hlab, ipt              | none                                                                                                      |
-| Hue              | hsl, hsv, hwb, hsluv, hpluv, okhsl, okhsv, hsi (hexagonal hue), hsp, cubehelix (s up to 4.6144)              | tsl                                                                                                       |
+| Hue              | hsl, hsv, hwb, hsluv, hpluv, okhsl, okhsv, hsi (hexagonal hue), hsp, cubehelix (s up to 4.6144), tsl (t°)    | none                                                                                                      |
 | Appearance       | cam16, ciecam02, hct (the studio's are JCh; ours are JMh with C read-only)                                    | none                                                                                                      |
 | Video            | rec2100 (`Rec2100Pq` + `Rec2100Hlg`, white 203 cd/m²), ycbcr / xvycc (`Ycbcr709`), rec601 / ypbpr / sycc (`Ycbcr601`), yiq (170M digits), yuv, ydbdr / secam (`Ydbdr`), ycgco; the studio's 0.5 chroma offset is dropped | ycocgr (needs integer-coded models) |
-| Subtractive      | cmyk (`Cmyk`, CSS `device-cmyk()`), cmy                                                                      | ryb                                                                                                       |
-| Systems          | none                                                                                                         | ral                                                                                                       |
+| Subtractive      | cmyk (`Cmyk`, CSS `device-cmyk()`), cmy, ryb (throws where the cube can't reach)                            | none                                                                                                      |
+| Systems          | none                                                                                                         | ral (excluded, licensing)                                                                                 |
 
 The studio's `luv` / `lchuv` are D50 (culori), so they map to `Luv50` / `Lchuv50`. The 35 coming-soon stubs (most catalogs, Pantone excluded per CLAUDE.md) aren't part of the parity gate.
 

@@ -7,7 +7,7 @@ import type { Channel, ColorModel } from "../core/model.js";
 import { Hsv } from "../models/hsv/hsv.js";
 import { Srgb } from "../models/srgb/srgb.js";
 import { Srgb8 } from "../models/srgb8/srgb8.js";
-import { comparisons, extended } from "./specs.js";
+import { comparisons, extended, partialTargets } from "./specs.js";
 import { decimalsFor } from "../core/css.js";
 
 // ADR-008: round trips pass at |a − b| ≤ 1e-13 + 1e-12·|b| per channel.
@@ -305,7 +305,13 @@ export function checkTotality(model: ColorModel, all: readonly ColorModel[], sca
     fc.assert(
       fc.property(fc.tuple(...realistic), (coords) => {
         const c = construct(model, coords);
-        for (const t of targets) c.to(t);
+        for (const t of targets) {
+          try {
+            c.to(t);
+          } catch (error) {
+            if (!(partialTargets.has(t) && error instanceof RangeError)) throw error;
+          }
+        }
       }),
       settings
     );

@@ -3,6 +3,8 @@
 **Date:** 2026-10-18
 **Status:** Accepted
 
+> **Revision 2026-10-20** (grill 74): RAL Classic waits. No clean source exists: RAL gGmbH claims rights to the collection and sells licensed libraries, Wikipedia's list (CC BY-SA) is approximate and internally inconsistent, and the studio's 45 values have no source. Revisit with open RAL data or a licence.
+
 ## Context
 
 The owner: _"I want to support EVERY COLOR MODEL AND SCHEME (not the copywrighted like panetone)."_ A color system is a named sample set, and its data is where licensing applies. The grouping below is an understanding, not legal advice; each source is verified before its system ships. [Brainstorm](../brainstorm/2026-10-18-own-color-library.md) grill 11.

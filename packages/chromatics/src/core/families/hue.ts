@@ -7,13 +7,10 @@ function hueIndexOf(color: Color): number {
 }
 
 /**
- * Models with a hue angle `h` (Oklch, Lch, Hsl, Hsv, Hwb): hue-aware interpolation, rotation and
- * harmonies. Internal (grill 42): users name the concrete classes.
+ * Models with a hue angle in degrees, the channel flagged `hue` (`h` in Oklch, Lch, Hsl; `t` in Tsl):
+ * hue-aware interpolation, rotation and harmonies. Internal (grill 42): users name the concrete classes.
  */
 export abstract class HueColor extends Color {
-  /** Hue angle in degrees, wrapped into [0, 360) on write. */
-  abstract h: number;
-
   /** `true` when the hue is meaningless (chroma or saturation at or below the model's CSS threshold). */
   abstract isAchromatic(): boolean;
 
@@ -84,8 +81,10 @@ export abstract class HueColor extends Color {
 
   /** Adds `degrees` to the hue (wrapping) and returns this color (mutates). */
   rotateHue(degrees: number): this {
-    this.h = this.h + degrees;
-    return this;
+    const coords = [...this.coords];
+    const i = hueIndexOf(this);
+    coords[i] = coords[i]! + degrees;
+    return this.assign(coords, this.alpha);
   }
 
   /** Rotates the hue by 180° (mutates). For the pair, `[c, c.clone().complement()]`. */

@@ -39,8 +39,10 @@ import { Hsluv } from "./models/hsluv/hsluv.js";
 import { Hsv } from "./models/hsv/hsv.js";
 import { Cmy } from "./models/cmy/cmy.js";
 import { Cmyk } from "./models/cmyk/cmyk.js";
+import { Ryb } from "./models/ryb/ryb.js";
 import { Hsi } from "./models/hsi/hsi.js";
 import { Hsp } from "./models/hsp/hsp.js";
+import { Tsl } from "./models/tsl/tsl.js";
 import { Cubehelix } from "./models/cubehelix/cubehelix.js";
 import { Hwb } from "./models/hwb/hwb.js";
 import { IctcpHlg } from "./models/ictcp-hlg/ictcp-hlg.js";
@@ -118,8 +120,10 @@ export const models: readonly ColorModel[] = [
   Hsi,
   Hsp,
   Cubehelix,
+  Tsl,
   Cmy,
   Cmyk,
+  Ryb,
   Jzazbz,
   Jzczhz,
   Ictcp,
@@ -154,6 +158,7 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   hsi: Hsi.parse,
   hsp: Hsp.parse,
   cubehelix: Cubehelix.parse,
+  tsl: Tsl.parse,
   lab: Lab.parse,
   lch: Lch.parse,
   oklab: Oklab.parse,
@@ -204,6 +209,7 @@ const FUNCTIONS: Readonly<Record<string, (input: string) => Color>> = {
   ycgco: Ycgco.parse,
   cmy: Cmy.parse,
   "device-cmyk": Cmyk.parse,
+  ryb: Ryb.parse,
 };
 
 const SPACES: Readonly<Record<string, (input: string) => Color>> = {

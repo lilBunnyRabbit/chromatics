@@ -230,6 +230,10 @@
       "types": "./dist/models/rec2100-pq/rec2100-pq.d.ts",
       "default": "./dist/models/rec2100-pq/rec2100-pq.js"
     },
+    "./ryb": {
+      "types": "./dist/models/ryb/ryb.d.ts",
+      "default": "./dist/models/ryb/ryb.js"
+    },
     "./smpte-c": {
       "types": "./dist/models/smpte-c/smpte-c.d.ts",
       "default": "./dist/models/smpte-c/smpte-c.js"
@@ -241,6 +245,10 @@
     "./srgb8": {
       "types": "./dist/models/srgb8/srgb8.d.ts",
       "default": "./dist/models/srgb8/srgb8.js"
+    },
+    "./tsl": {
+      "types": "./dist/models/tsl/tsl.d.ts",
+      "default": "./dist/models/tsl/tsl.js"
     },
     "./uvw64": {
       "types": "./dist/models/uvw64/uvw64.d.ts",
