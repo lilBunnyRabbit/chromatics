@@ -6,6 +6,7 @@ import { multiply } from "../../core/linear.js";
 import { LINEAR_SRGB_TO_XYZ_D65, XYZ_D65_TO_LINEAR_SRGB } from "../../core/matrices.js";
 import type { Edge } from "../../core/model.js";
 import { Xyz65 } from "../xyz65/xyz65.js";
+import { sourceOver } from "../../core/composite.js";
 
 /**
  * Linear-light sRGB: sRGB primaries and D65 white without the transfer curve (CSS Color 4
@@ -76,6 +77,22 @@ export class LinearSrgb extends RgbColor {
 
   get coords(): readonly [r: number, g: number, b: number] {
     return [this._r, this._g, this._b];
+  }
+
+  /**
+   * Composites this color over `backdrop` (Porter-Duff source-over, CSS Compositing 1) in linear light,
+   * which is physically additive, and returns this color (mutates). Browsers composite in gamma-encoded
+   * sRGB: for that, `Srgb.over()`.
+   *
+   * @example
+   * ```ts
+   * const glass = new LinearSrgb(0, 0, 1, 0.5);
+   * glass.over(new LinearSrgb(1, 1, 0)); // r 0.5, g 0.5, b 0.5, alpha 1
+   * ```
+   */
+  over(backdrop: LinearSrgb): this {
+    const [channels, alpha] = sourceOver(this.coords, this.alpha, backdrop.coords, backdrop.alpha);
+    return this.assign(channels, alpha);
   }
 
   /**

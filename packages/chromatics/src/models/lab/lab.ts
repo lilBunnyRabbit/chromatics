@@ -3,7 +3,7 @@ import { finite } from "../../core/channel.js";
 import { RectangularColor } from "../../core/families/rectangular.js";
 import { readFunction, serialize, type CssOptions } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
-import { deltaE2000, labToXyz, xyzToLab } from "../../core/cielab.js";
+import { deltaE2000, deltaE94, deltaECmc, labToXyz, xyzToLab, type Delta94Application } from "../../core/cielab.js";
 import { D50_WHITE } from "../../core/matrices.js";
 import type { Edge } from "../../core/model.js";
 import { clamp } from "../../core/polar.js";
@@ -120,6 +120,35 @@ export class Lab extends RectangularColor {
    */
   deltaE2000(other: Lab): number {
     return deltaE2000(this, other);
+  }
+
+  /**
+   * CIE94 color difference from this reference to the sample `other` (CIE 116-1995). Not symmetric: the
+   * reference's chroma sets the weights. `application` picks CIE 116's weights, graphic arts (default) or
+   * textiles. Superseded by {@link deltaE2000}; kept for workflows specified in ΔE94.
+   *
+   * @example
+   * ```ts
+   * standard.to(Lab).deltaE94(sample.to(Lab));
+   * standard.to(Lab).deltaE94(sample.to(Lab), { application: "textiles" });
+   * ```
+   */
+  deltaE94(other: Lab, options: { application?: Delta94Application } = {}): number {
+    return deltaE94(this, other, options.application ?? "graphic-arts");
+  }
+
+  /**
+   * CMC l:c color difference from this reference to the sample `other` (Clarke, McDonald & Rigg 1984;
+   * BS 6923). Not symmetric. Default 2:1, the acceptability setting; 1:1 is perceptibility.
+   *
+   * @example
+   * ```ts
+   * standard.to(Lab).deltaECmc(sample.to(Lab));            // l 2, c 1
+   * standard.to(Lab).deltaECmc(sample.to(Lab), { l: 1 });  // 1:1
+   * ```
+   */
+  deltaECmc(other: Lab, options: { l?: number; c?: number } = {}): number {
+    return deltaECmc(this, other, options.l ?? 2, options.c ?? 1);
   }
 
   /**

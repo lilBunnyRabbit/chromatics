@@ -3,7 +3,7 @@ import { finite } from "../../core/channel.js";
 import { readFunction, serialize } from "../../core/css.js";
 import { edge } from "../../core/edge.js";
 import { RectangularColor } from "../../core/families/rectangular.js";
-import { deltaE2000, labToXyz, xyzToLab } from "../../core/cielab.js";
+import { deltaE2000, deltaE94, deltaECmc, labToXyz, xyzToLab, type Delta94Application } from "../../core/cielab.js";
 import { D65_WHITE } from "../../core/matrices.js";
 import type { Edge } from "../../core/model.js";
 import { Xyz65 } from "../xyz65/xyz65.js";
@@ -109,6 +109,35 @@ export class Lab65 extends RectangularColor {
   /** CIEDE2000 to `other`, kL = kC = kH = 1 (CIE 142-2001, after Sharma, Wu & Dalal 2005). Symmetric. */
   deltaE2000(other: Lab65): number {
     return deltaE2000(this, other);
+  }
+
+  /**
+   * CIE94 color difference from this reference to the sample `other` (CIE 116-1995). Not symmetric: the
+   * reference's chroma sets the weights. `application` picks CIE 116's weights, graphic arts (default) or
+   * textiles. Superseded by {@link deltaE2000}; kept for workflows specified in ΔE94.
+   *
+   * @example
+   * ```ts
+   * standard.to(Lab65).deltaE94(sample.to(Lab65));
+   * standard.to(Lab65).deltaE94(sample.to(Lab65), { application: "textiles" });
+   * ```
+   */
+  deltaE94(other: Lab65, options: { application?: Delta94Application } = {}): number {
+    return deltaE94(this, other, options.application ?? "graphic-arts");
+  }
+
+  /**
+   * CMC l:c color difference from this reference to the sample `other` (Clarke, McDonald & Rigg 1984;
+   * BS 6923). Not symmetric. Default 2:1, the acceptability setting; 1:1 is perceptibility.
+   *
+   * @example
+   * ```ts
+   * standard.to(Lab65).deltaECmc(sample.to(Lab65));            // l 2, c 1
+   * standard.to(Lab65).deltaECmc(sample.to(Lab65), { l: 1 });  // 1:1
+   * ```
+   */
+  deltaECmc(other: Lab65, options: { l?: number; c?: number } = {}): number {
+    return deltaECmc(this, other, options.l ?? 2, options.c ?? 1);
   }
 
   /**

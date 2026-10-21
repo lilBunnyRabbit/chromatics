@@ -6,6 +6,8 @@ import { invalid, parseFunction, readAlpha, readColorFunction, serialize, type C
 import { edge } from "../../core/edge.js";
 import type { Edge } from "../../core/model.js";
 import { linearToSrgb, srgbToLinear } from "../../core/transfer.js";
+import { applyFilter, type FilterName } from "../../core/filter.js";
+import { sourceOver } from "../../core/composite.js";
 import { LinearSrgb } from "../linear-srgb/linear-srgb.js";
 
 // WCAG 2.2 #dfn-relative-luminance, Note 1: "L = 0.2126 * R + 0.7152 * G + 0.0722 * B", with the sRGB
@@ -115,6 +117,42 @@ export class Srgb extends RgbColor {
     const a = wcagLuminance(this);
     const b = wcagLuminance(other);
     return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  }
+
+  /**
+   * Applies a CSS filter function, as `filter: name(amount)` does in a browser, and returns this color
+   * (mutates). Filter Effects 1 §13.1 matrices and transfer functions, on these gamma-encoded channels
+   * (§5: "Filter Functions must operate in the sRGB color space"). Amounts are CSS's as numbers: 1 is
+   * 100%, hue-rotate in degrees. Grayscale, sepia and invert treat amounts over 1 as 1, as CSS does.
+   * Results are not clamped: `saturate` and `contrast` can leave [0, 1].
+   *
+   * @throws {RangeError} on a negative amount (CSS doesn't allow them), except for hue-rotate.
+   *
+   * @example
+   * ```ts
+   * c.to(Srgb).filter("grayscale", 1);
+   * c.to(Srgb).filter("contrast", 1.8).filter("brightness", 0.5);
+   * ```
+   */
+  filter(name: FilterName, amount: number): this {
+    return this.assign(applyFilter(name, amount, [this._r, this._g, this._b]), this.alpha);
+  }
+
+  /**
+   * Composites this color over `backdrop` (Porter-Duff source-over, CSS Compositing 1) in gamma-encoded
+   * sRGB, which is what browsers do, and returns this color (mutates): the result is what shows when this
+   * color, at its alpha, is painted on `backdrop`. For linear-light compositing, `LinearSrgb.over()`.
+   *
+   * @example
+   * ```ts
+   * const text = fg.to(Srgb);
+   * text.alpha = 0.7;
+   * text.over(bg.to(Srgb)).contrast(bg.to(Srgb));
+   * ```
+   */
+  over(backdrop: Srgb): this {
+    const [channels, alpha] = sourceOver(this.coords, this.alpha, backdrop.coords, backdrop.alpha);
+    return this.assign(channels, alpha);
   }
 
   /**

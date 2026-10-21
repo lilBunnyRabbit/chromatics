@@ -72,6 +72,49 @@ function f(v: number): number {
   return v > EPSILON ? Math.cbrt(v) : (KAPPA * v + 16) / 116;
 }
 
+/** CIE94 weights: CIE 116-1995 gives graphic arts (kL 1, K1 0.045, K2 0.015) and textiles (kL 2, 0.048, 0.014). */
+export type Delta94Application = "graphic-arts" | "textiles";
+
+const CIE94: Record<Delta94Application, readonly [kL: number, k1: number, k2: number]> = {
+  "graphic-arts": [1, 0.045, 0.015],
+  textiles: [2, 0.048, 0.014],
+};
+
+// ΔH² = Δa² + Δb² − ΔC², the hue term both CIE94 and CMC use squared. Rounding can make it a hair below 0
+// for near-identical colors; it is a square, so it is floored at 0.
+function deltaH2(x: LabLike, y: LabLike, c1: number, c2: number): number {
+  return Math.max(0, (x.a - y.a) ** 2 + (x.b - y.b) ** 2 - (c1 - c2) ** 2);
+}
+
+// CIE 116-1995, as restated by Lindbloom (brucelindbloom.com Eqn_DeltaE_CIE94): SL = 1, SC = 1 + K1·C1,
+// SH = 1 + K2·C1, kC = kH = 1. C1 is the reference's (x's) chroma, so the formula is not symmetric.
+export function deltaE94(x: LabLike, y: LabLike, application: Delta94Application): number {
+  const [kL, k1, k2] = CIE94[application];
+  const c1 = Math.hypot(x.a, x.b);
+  const c2 = Math.hypot(y.a, y.b);
+  const sc = 1 + k1 * c1;
+  const sh = 1 + k2 * c1;
+  return Math.sqrt(((x.l - y.l) / kL) ** 2 + ((c1 - c2) / sc) ** 2 + deltaH2(x, y, c1, c2) / sh ** 2);
+}
+
+// CMC l:c (Clarke, McDonald & Rigg 1984; BS 6923:1988), as restated by Lindbloom (Eqn_DeltaE_CMC). x is
+// the reference: its lightness, chroma and hue set the weights, so the formula is not symmetric.
+export function deltaECmc(x: LabLike, y: LabLike, l: number, c: number): number {
+  const c1 = Math.hypot(x.a, x.b);
+  const c2 = Math.hypot(y.a, y.b);
+  const sl = x.l < 16 ? 0.511 : (0.040975 * x.l) / (1 + 0.01765 * x.l);
+  const sc = (0.0638 * c1) / (1 + 0.0131 * c1) + 0.638;
+  const h1 = hueDeg(x.b, x.a);
+  const t =
+    h1 >= 164 && h1 <= 345
+      ? 0.56 + Math.abs(0.2 * Math.cos((h1 + 168) * RAD))
+      : 0.36 + Math.abs(0.4 * Math.cos((h1 + 35) * RAD));
+  const c14 = c1 ** 4;
+  const f = Math.sqrt(c14 / (c14 + 1900));
+  const sh = sc * (f * t + 1 - f);
+  return Math.sqrt(((x.l - y.l) / (l * sl)) ** 2 + ((c1 - c2) / (c * sc)) ** 2 + deltaH2(x, y, c1, c2) / sh ** 2);
+}
+
 export function xyzToLab(x: number, y: number, z: number, white: White): [l: number, a: number, b: number] {
   const fx = f(x / white[0]);
   const fy = f(y / white[1]);

@@ -38,6 +38,14 @@
 > - `gamutMap()` is CSS Color 4 Binary Search with Local MINDE. At lightness ≥ 1 or ≤ 0 it returns the destination's exact white or black, every result lies within [0, 1], and in-gamut colors are unchanged.
 > - `tetradic(angle = 60)` is the rectangle `[h, h + angle, h + 180, h + 180 + angle]`; `tetradic(90)` equals `square()`.
 
+> **Revision 2026-10-21: gap features for the studio switch** (grill 79, ADR-016)
+>
+> - CVD: `simulateCvd(srgb, 'protan' | 'deutan' | 'tritan', severity = 1)` from `/cvd`, a free function for bundle size; Machado 2009 in linear light, severity interpolated between the 0.1 matrices; mutates its argument.
+> - CSS filters: `Srgb.filter(name, amount)`, the seven Filter Effects 1 functions in gamma sRGB.
+> - Compositing: `over(backdrop)` on Srgb and LinearSrgb (source-over).
+> - Lab: `deltaE94(other, { application = 'graphic-arts' })`, `deltaECmc(other, { l = 2, c = 1 })`.
+> - **Implemented 2026-10-21:** on `Lab` and `Lab65`. The Machado table is colour-science's dataset, identical to coloraide's and culori's. A filter amount below 0 throws a RangeError (Filter Effects 1 §6.1: "Negative values are not allowed"); grayscale, sepia and invert take amounts over 1 as 1, as §6.1 requires. A CVD severity outside [0, 1] throws. Compositing uses the alphas as stored, unclamped. References: coloraide @4888fc2d's CVD, filter, compositing and ΔE tests; colour-science @248121e3's ΔE94 / CMC docstrings.
+
 ## Context
 
 Operations are methods on the color's class (ADR-001), and single-result operations mutate and return `this`. Open questions were: how shared operations reach ~100 classes, two-color operations across models, operations needing another model's math, multi-color results, interpolation, gamut mapping. The studio uses op-tables in `families.ts`; binary ops throw across models. [Brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 6, 7, 8, 12.

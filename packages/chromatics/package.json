@@ -27,6 +27,10 @@
       "types": "./dist/all.d.ts",
       "default": "./dist/all.js"
     },
+    "./cvd": {
+      "types": "./dist/cvd.d.ts",
+      "default": "./dist/cvd.js"
+    },
     "./a98-rgb": {
       "types": "./dist/models/a98-rgb/a98-rgb.d.ts",
       "default": "./dist/models/a98-rgb/a98-rgb.js"

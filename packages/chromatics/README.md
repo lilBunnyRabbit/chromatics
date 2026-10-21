@@ -160,14 +160,16 @@ Y′ plus two color differences, as matrices over encoded RGB (`Srgb`, or `Rec20
 
 ## Operations
 
-| What                                                                                          | Where                                                                                                                       |
-| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `mix(other, t)`, `steps(other, n)`, `interpolator(other)`, `Model.gradient(stops, n)`         | every model except the byte model `Srgb8`; hue models take `{ hue: "shorter" \| "longer" \| "increasing" \| "decreasing" }` |
-| `rotateHue`, `complement`, `triadic`, `tetradic`, `square`, `splitComplementary`, `analogous` | hue models                                                                                                                  |
-| `lighten`, `darken`, `saturate`, `desaturate`, `ramp(n)`                                      | perceptual and HSL-family models (see each class)                                                                           |
-| `inGamut()`, `clamp()`, `gamutMap()` (CSS Color 4 MINDE)                                      | RGB models                                                                                                                  |
-| `contrast(other)` (WCAG 2), `luminance()`                                                     | `Srgb`                                                                                                                      |
-| `deltaE76`, `deltaE2000` · `deltaEOk`, `looksSame` · `deltaEuv` · `deltaEItp` · `deltaEz`     | `Lab` · `Oklab` · `Luv65` / `Luv50` · `Ictcp` · `Jzczhz`                                                                    |
+| What                                                                                                               | Where                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `mix(other, t)`, `steps(other, n)`, `interpolator(other)`, `Model.gradient(stops, n)`                              | every model except the byte model `Srgb8`; hue models take `{ hue: "shorter" \| "longer" \| "increasing" \| "decreasing" }` |
+| `rotateHue`, `complement`, `triadic`, `tetradic`, `square`, `splitComplementary`, `analogous`                      | hue models                                                                                                                  |
+| `lighten`, `darken`, `saturate`, `desaturate`, `ramp(n)`                                                           | perceptual and HSL-family models (see each class)                                                                           |
+| `inGamut()`, `clamp()`, `gamutMap()` (CSS Color 4 MINDE)                                                           | RGB models                                                                                                                  |
+| `contrast(other)` (WCAG 2), `luminance()`, `filter(name, amount)` (CSS Filter Effects 1)                           | `Srgb`                                                                                                                      |
+| `over(backdrop)` (source-over: gamma in `Srgb`, linear light in `LinearSrgb`)                                      | `Srgb`, `LinearSrgb`                                                                                                        |
+| `deltaE76`, `deltaE2000`, `deltaE94`, `deltaECmc` · `deltaEOk`, `looksSame` · `deltaEuv` · `deltaEItp` · `deltaEz` | `Lab` / `Lab65` · `Oklab` · `Luv65` / `Luv50` · `Ictcp` · `Jzczhz`                                                          |
+| `simulateCvd(srgb, "protan" \| "deutan" \| "tritan", severity)` from `/cvd` (Machado 2009, linear light)           | a free function on its own subpath, so its table ships only when imported                                                   |
 
 Interpolation is in premultiplied alpha, like CSS `color-mix()`. A grey's hue is 0 and `isAchromatic()` says when it's meaningless; mixing treats it as missing, so white → blue doesn't pass through red.
 

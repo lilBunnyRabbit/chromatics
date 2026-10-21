@@ -579,6 +579,13 @@ Investigation (subagent, Opus): culori is in six studio files; the stored colour
 
 Recorded as [ADR-016](../adrs/016-studio-on-the-package.md). Next: per-feature API grills for CVD, filters, compositing and ΔE94/CMC; then the studio baseline dump; then the switch.
 
+### Grill 79: gap features (decided 2026-10-21)
+
+- **79a, CVD:** `simulateCvd(srgb, 'protan' | 'deutan' | 'tritan', severity = 1)` from a `/cvd` subpath; mutates and returns its argument (recommended). The first free function, because the 297-number Machado table would otherwise ship with `Srgb` / `LinearSrgb`, which are in nearly every bundle. Applied in linear light: Machado 2009 assumes linear RGB (colorspace R 2.1-0 changed its default for this reason; culori applies it to gamma sRGB). Severity is interpolated linearly between the published 0.1 steps (mine: culori snaps to the nearest step, colour-science extrapolates from the next segment).
+- **79b, CSS filters:** `srgb.filter(name, amount)` with the seven Filter Effects 1 functions, gamma sRGB (§5: "Filter Functions must operate in the sRGB color space"); mutates (recommended). One method avoids the clash with the additive `saturate()` on hue models.
+- **79c, compositing:** `over(backdrop)` on Srgb and LinearSrgb, Porter-Duff source-over (CSS Compositing 1); the class is the compositing space (recommended).
+- **79d, ΔE94 / CMC:** `lab.deltaE94(other, { application })`, default graphic arts (CIE 116-1995); `lab.deltaECmc(other, { l = 2, c = 1 })` (recommended). The receiver is the reference.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

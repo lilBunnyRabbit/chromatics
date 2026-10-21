@@ -49,7 +49,10 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
    - [x] Changesets release setup (grill 77; first publish by hand after step 6, runbook in ADR-007)
    - [x] `@lilbunnyrabbit/optional` 1.1.0 published (2026-10-19, npm trusted publishing)
 5. [x] **Monorepo**: this repo hosts the package and the website (2026-10-20, grill 76: `apps/studio` + `packages/chromatics`, Turborepo, CI on `--affected`)
-6. [ ] **Studio on the package**: culori removed from the app
+6. [ ] **Studio on the package**: culori removed from the app (ADR-016)
+   - [x] Gap features in the package (grill 79): `simulateCvd` (`/cvd`), `Srgb.filter`, `over`, `deltaE94` / `deltaECmc`
+   - [ ] Studio culori baseline dump
+   - [ ] The switch
 
 ### Parity gap (2026-10-20)
 
