@@ -561,6 +561,24 @@ ADR-007 had fixed changesets + npm trusted publishing + `0.x`. The owner's `@lil
 - **77e, owner: "no node if possible":** the changesets CLI runs on Bun (`bun --bun x changeset`, tested), but `changeset publish` always shells out to `npm publish`, and `bun publish` has no OIDC or provenance (oven-sh/bun#22423 open; #29374 closed unmerged 2026-06-26; #15601). A Bun script could do npm's token exchange (`lib/utils/oidc.js`), but without provenance. Owner: Bun everywhere, npm only for the publish step (recommended), on the runner's npm, no setup-node.
 - **77f:** Node stays in `ci.yml` as the V8 test target (recommended; ADR-008, and it caught the Hct bug).
 
+### Grill 78: the studio on the package (decided 2026-10-21)
+
+Investigation (subagent, Opus): culori is in six studio files; the stored colour is a culori object in an immutable `ColorValue`; the DSL has 62 constructors, 196 snake_case flat keys and per-model views; saved documents store DSL source, so those names were a compatibility surface. The package lacks CVD, filters, blend, ΔE94/CMC and `clampChroma`.
+
+- **78a, engine:** package classes everywhere (owner, over the recommended `ColorValue` wrapper). Reverses ADR-010 alternative 4.
+- **78b, gaps:** into the package, each sourced, API grilled per feature (recommended).
+- **78c, DSL names:** first "keep every name as an alias"; reversed in 78f/78g by the owner: "i dont like the c.oklch. or c.ok_l - i want this now to be pure based on the classes. no extra sugar" and "follow the new chromatic package. that goes for everything. we dont need backwards compatibility."
+- **78d, gamut:** package css4, accept and review the diff (recommended).
+- **78e, mutation:** `Object.freeze` at the store boundary (recommended).
+- **78f, DSL lookup:** the instances' own members; no lookup table.
+- **78g, app helpers:** none; call sites use the package directly.
+- **78h, DSL syntax:** classes callable without `new` (owner, over the recommended plain `new`).
+- **78i, DSL mutation:** real JS semantics (recommended).
+- **78j, models:** studio = package models; stubs, RAL and aliases stay only as encyclopedia text (recommended).
+- **78k, builtins:** studio design-system features stay; colour free functions go; `ensureContrast` stays a studio builtin for now (recommended).
+
+Recorded as [ADR-016](../adrs/016-studio-on-the-package.md). Next: per-feature API grills for CVD, filters, compositing and ΔE94/CMC; then the studio baseline dump; then the switch.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.
@@ -571,7 +589,6 @@ ADR-007 had fixed changesets + npm trusted publishing + `0.x`. The owner's `@lil
 ## Still open
 
 - Where a catalog entry's name and code live when `get()` returns a plain color.
-- The DSL adapter's shape (clone at the boundary, `member()` onto class methods, the snake_case `ok_l` keys). Decided at migration time.
 - A packed batch type (one shared `Float64Array` for many colors): deferred until a consumer needs it.
 
 ## Action items

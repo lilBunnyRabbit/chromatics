@@ -3,6 +3,8 @@
 **Date:** 2026-10-18
 **Status:** Accepted
 
+> **Revision 2026-10-21 (grill 78, [ADR-016](./016-studio-on-the-package.md)):** the owner chose alternative 4: the app holds package classes directly, and the DSL follows the package with no backwards compatibility. The baseline dump stays, but as a reviewed diff rather than a parity gate.
+
 ## Context
 
 About 30 models are culori-backed in the studio today; about 70 more are hand-written custom modes or stubs. Four earlier rewrites built about 12 of 60 planned models before stalling. [Brainstorm](../brainstorm/2026-10-18-own-color-library.md) grill 14.

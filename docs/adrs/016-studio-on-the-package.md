@@ -1,0 +1,44 @@
+# ADR-016: The studio on the package
+
+**Date:** 2026-10-21
+**Status:** Accepted
+
+## Context
+
+Roadmap step 6. The studio's engine (`apps/studio/src/lib/models/`) stores every colour as a raw culori object inside an immutable `ColorValue`. culori is imported in six files, not just `registry.ts`, and about 1,675 lines of custom culori modes sit beside it. The DSL reaches colours through `member()`, with 62 constructors, 196 flat snake_case channel keys (`ok_l`, `itp_t`) and per-model views (`c.oklch.lighten()`). The package covers 65 of the 66 studio models that ship, but under its own names. The studio has 101 registry entries, including 34 coming-soon stubs, RAL, and alias ids such as scrgb, rec601 and xvycc. Features the studio takes from culori and the package lacks: CVD simulation and CSS-style filters, alpha `blend`, ΔE CIE94 / CMC, `clampChroma`. [Brainstorm](../brainstorm/2026-10-18-own-color-library.md) grill 78.
+
+## Decision
+
+The owner's rule: **follow the package, everywhere; no backwards compatibility.**
+
+- **Colours are package instances (78a).** `ColorValue` goes; app code, analysis, export and state hold package classes. This reverses ADR-010's rejected alternative 4.
+- **Freeze at the store boundary (78e).** Colours entering shared state (evaluation results, scheme entries, roles) are `Object.freeze`d, so a mutating call throws a TypeError at the call site. Local work clones first.
+- **App code calls the package directly (78g).** No studio helper layer for `.hex`, `.toCSS()`, `.channel()`, `.gamutMapped`: call sites write the package chain (`c.to(Srgb).gamutMap().to(Srgb8).toHex()`).
+- **Gamut mapping is the package's CSS Color 4 method (78d).** Out-of-gamut colours' hexes change from culori's `clampChroma`; the baseline dump lists every change for review.
+- **The DSL is the package's API (78f, 78h, 78i).**
+  - The evaluator exposes the package classes and `parse`. Classes can be called without `new` (`Oklch(0.62, 0.15, 250)`); that is the one convenience.
+  - Members are the instances' own properties and methods (`c.to(Oklch).l`, `c.clone().lighten(0.1)`). No flat keys, no `c.oklch` views, no aliases.
+  - JS semantics inside a program: `bg = brand.lighten(0.3)` mutates `brand`. Freezing happens only when results leave the program.
+  - Saved documents and share links that use the old names stop working.
+- **Studio models are the package's models (78j).** The DSL, mixer and pickers expose `/all` under package names. Coming-soon stubs, RAL and alias ids leave the DSL. The `/models` encyclopedia keeps their vault-sourced write-ups as reference text, marked not implemented.
+- **Studio features stay; colour free functions go (78k).** `preview.*`, `tokens`, `roles {}`, `component.*` and `theme()` are kept, fed package instances. `mix()`, `contrast()` and `deltaE()` free functions go in favour of the methods. `ensureContrast()` stays a studio builtin until a package grill decides otherwise.
+- **The missing culori features go into the package (78b),** each with a cited source and the full test matrix, with its API shape grilled per feature, before the switch: CVD simulation, CSS filter effects, alpha compositing, ΔE CIE94 and CMC.
+- **Gate:** a culori baseline dump of the studio (models, hexes, CSS) is generated before the switch and diffed after; differences are reviewed, not forbidden. The Brand Dark golden hexes (`tests/acceptance/brand-dark.test.ts`) must still hold after the example is rewritten in the new DSL.
+
+## Alternatives Considered
+
+1. Keep `ColorValue` as an immutable wrapper over package instances (recommended in grill 78a).
+2. Convention-only or compile-time (`Frozen<T>`) mutation guards.
+3. Keep every DSL name as an alias, or keep old names deprecated (78c, first answered "alias", then reversed by the owner's "no backwards compatibility").
+4. `new Oklch(…)` only, plain JS (recommended in 78h).
+5. Freeze DSL variables after every statement.
+6. A chroma-clamp gamut method in the package for pixel parity.
+7. Gap features in studio code.
+
+## Consequences
+
+- One large PR (ADR-010's big bang), touching most of `src/lib/`, every example, the manifest, autocomplete, hover docs and the tests.
+- Every existing user document and share link breaks.
+- DSL code reads like package code, but `Oklch(…)` without `new` doesn't paste into TS unchanged.
+- A forgotten `clone()` on shared state throws instead of corrupting it; inside a DSL program it silently aliases.
+- Several package APIs (CVD, filters, compositing, ΔE94 / CMC) need grills before the switch.
