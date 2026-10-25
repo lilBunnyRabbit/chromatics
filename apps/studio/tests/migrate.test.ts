@@ -29,8 +29,14 @@ const legacy = await Promise.all(
 
 const hexOf = (v: unknown) => (isColor(v) ? v.to(Srgb).gamutMap().to(Srgb8).toHex() : null);
 
-// review.md: the package's HCT stores the tone as given where culori's re-solved chroma into sRGB.
-const HCT_TONES = new Set(['Showcase:brand_20', 'Showcase:brand_90', 'Showcase:warning']);
+// review.md: the package's HCT stores the tone as given where culori's re-solved chroma into sRGB, and
+// Machado CVD runs in linear light where culori applied it to gamma sRGB (grill 79).
+const KNOWN = new Set([
+	'Showcase:brand_20',
+	'Showcase:brand_90',
+	'Showcase:warning',
+	'Showcase:cvd'
+]);
 
 describe('old examples, upgraded', () => {
 	test('all ten are covered', () => expect(legacy.length).toBe(10));
@@ -49,7 +55,7 @@ describe('old examples, upgraded', () => {
 			test('keeps every in-sRGB hex within one 8-bit step', () => {
 				for (const [name, rec] of Object.entries(baseline[ex.name].entries)) {
 					const v = r.variables.get(name);
-					if (!v || !rec.inGamut || HCT_TONES.has(`${ex.name}:${name}`)) continue;
+					if (!v || !rec.inGamut || KNOWN.has(`${ex.name}:${name}`)) continue;
 					const now = hexOf(v.value);
 					if (now === null) continue;
 					const dE = parse(now).to(Lab65).deltaE2000(parse(rec.hex).to(Lab65));
@@ -121,6 +127,15 @@ describe('rules', () => {
 	test('preview model ids become classes, scale becomes tokens', () => {
 		expect(up('r = preview.ramp(a, "lab")')).toBe('r = preview.ramp(a, Lab)');
 		expect(up('t = scale.text(16)')).toBe('t = tokens.text(16)');
+	});
+
+	test('simulateCVD becomes the simulateCvd builtin', () => {
+		expect(up('a = hex("#ff0000")\nb = a.srgb.simulateCVD("deuteranopia")')).toBe(
+			'a = parse("#ff0000")\nb = simulateCvd(a.to(Srgb), "deutan")'
+		);
+		expect(up('a = RGB(1, 0, 0)\nb = a.simulateCVD("protanomaly", 0.4)')).toBe(
+			'a = Srgb(1, 0, 0)\nb = simulateCvd(a.clone(), "protan", 0.4)'
+		);
 	});
 
 	test('no package equivalent: left as written and flagged', () => {

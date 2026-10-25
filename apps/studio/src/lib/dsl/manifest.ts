@@ -59,6 +59,8 @@ export const BUILTIN_DOCS: Record<string, string> = {
 	parse: 'parse(css) → color — any CSS color string or hex, in the model it names (`#…` is Srgb8)',
 	ensureContrast:
 		'ensureContrast(fg, bg, target?) → color — nearest color to fg that stays legible on bg (target: "AA" | "AAA" | "AA-large" | "AAA-large" | ratio, default "AA"); re-solves when fg/bg change',
+	simulateCvd:
+		'simulateCvd(srgb, "protan" | "deutan" | "tritan", severity = 1) → the same Srgb, as seen with that deficiency (Machado 2009, linear light; mutates)',
 	clamp: 'clamp(value, min, max) → number',
 	abs: 'abs(n) → number',
 	min: 'min(…nums) → number',

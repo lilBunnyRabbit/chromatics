@@ -52,6 +52,9 @@ hsluv_shift = primary.to(Hsluv).rotateHue(40)
 // ── Print preview — CMYK, ink-limited for newsprint ──
 press = primary.to(Cmyk).limitInk(2.4) // 240 % total ink
 
+// ── Color-vision-deficiency simulation (deuteranopia, Machado 2009) ──
+cvd = simulateCvd(accent.to(Srgb), "deutan")
+
 // ── CSS filter effects, applied in sRGB as browsers do ──
 aged = accent.to(Srgb).filter("sepia", 0.6)
 
