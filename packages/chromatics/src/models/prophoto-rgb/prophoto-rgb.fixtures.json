@@ -1,0 +1,5397 @@
+{
+ "retrieved": "2026-10-19",
+ "sources": {
+  "css4": "CSS Color 4 ED, csswg-drafts 3cfa13e88561688b47392ab3ee171fbb8d76d949 css-color-4/Overview.bs",
+  "wpt": "web-platform-tests 38690cce87929f184a529234eff84eaa426609c3 css/css-color/parsing/",
+  "ottosson": "Björn Ottosson, A perceptual color space for image processing, table \"example XYZ and Oklab pairs\"",
+  "wikipedia": "Wikipedia \"HSL and HSV\" oldid 1378989624, Examples table (secondary source)"
+ },
+ "conversions": [
+  {
+   "id": "wpt-5752",
+   "kind": "wpt-relative-color-identity",
+   "input": "color(prophoto-rgb 0.25 0.5 0.75)",
+   "expected": "color(srgb -0.510562 0.61232 0.825249)",
+   "precision": [
+    5e-7,
+    0.000005,
+    5e-7
+   ],
+   "epsilon": 0.001,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-relative-color.html:838"
+  }
+ ],
+ "parse": [
+  {
+   "id": "css4-parse-0041",
+   "kind": "serialization",
+   "input": "color(prophoto-rgb 0.2804 0.40283 0.42259/85%)",
+   "expected": "color(prophoto-rgb 0.28 0.403 0.423 / 0.85)",
+   "precision": [
+    0.005,
+    0.0005,
+    0.0005,
+    0.005
+   ],
+   "src": "css4",
+   "at": "Overview.bs:8431-8436 #serializing-color-function-values",
+   "quote": "<div class=\"example\" id=\"ex-color-prophoto-alpha-serial\">\n<p>The serialized value of</p>\n<pre class=\"lang-css\"><span class=\"swatch\" style=\"--color: rgba(0.003%, 50.196%, 50.196%, 0.85)\"></span> color(prophoto-rgb 0.2804 0.40283 0.42259/85%)</pre>\n<p>is the string \"color(prophoto-rgb 0.28 0.403 0.423 / 0.85)\",\nif three decimal places are retained.\n</p>"
+  },
+  {
+   "id": "wpt-0125",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 0% 0% 0%)",
+   "expected": "color(prophoto-rgb 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:22"
+  },
+  {
+   "id": "wpt-0126",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 10% 10% 10%)",
+   "expected": "color(prophoto-rgb 0.1 0.1 0.1)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:23"
+  },
+  {
+   "id": "wpt-0127",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb .2 .2 25%)",
+   "expected": "color(prophoto-rgb 0.2 0.2 0.25)",
+   "precision": [
+    0.05,
+    0.05,
+    0.005
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:24"
+  },
+  {
+   "id": "wpt-0128",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 0 0 0 / 1)",
+   "expected": "color(prophoto-rgb 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:25"
+  },
+  {
+   "id": "wpt-0129",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 0% 0 0 / 0.5)",
+   "expected": "color(prophoto-rgb 0 0 0 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:26"
+  },
+  {
+   "id": "wpt-0130",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 20% 0 10/0.5)",
+   "expected": "color(prophoto-rgb 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:27"
+  },
+  {
+   "id": "wpt-0131",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 20% 0 10/50%)",
+   "expected": "color(prophoto-rgb 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:28"
+  },
+  {
+   "id": "wpt-0132",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 400% 0 10/50%)",
+   "expected": "color(prophoto-rgb 4 0 10 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:29"
+  },
+  {
+   "id": "wpt-0133",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 50% -160 160)",
+   "expected": "color(prophoto-rgb 0.5 -160 160)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:30"
+  },
+  {
+   "id": "wpt-0134",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 50% -200 200)",
+   "expected": "color(prophoto-rgb 0.5 -200 200)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:31"
+  },
+  {
+   "id": "wpt-0135",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 0 0 0 / -10%)",
+   "expected": "color(prophoto-rgb 0 0 0 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:32"
+  },
+  {
+   "id": "wpt-0136",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 0 0 0 / 110%)",
+   "expected": "color(prophoto-rgb 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:33"
+  },
+  {
+   "id": "wpt-0137",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 0 0 0 / 300%)",
+   "expected": "color(prophoto-rgb 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:34"
+  },
+  {
+   "id": "wpt-0138",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 200 200 200)",
+   "expected": "color(prophoto-rgb 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:35"
+  },
+  {
+   "id": "wpt-0139",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 200 200 200 / 200)",
+   "expected": "color(prophoto-rgb 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:36"
+  },
+  {
+   "id": "wpt-0140",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb -200 -200 -200)",
+   "expected": "color(prophoto-rgb -200 -200 -200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:37"
+  },
+  {
+   "id": "wpt-0141",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb -200 -200 -200 / -200)",
+   "expected": "color(prophoto-rgb -200 -200 -200 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:38"
+  },
+  {
+   "id": "wpt-0142",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 200% 200% 200%)",
+   "expected": "color(prophoto-rgb 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:39"
+  },
+  {
+   "id": "wpt-0143",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 200% 200% 200% / 200%)",
+   "expected": "color(prophoto-rgb 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:40"
+  },
+  {
+   "id": "wpt-0144",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb -200% -200% -200% / -200%)",
+   "expected": "color(prophoto-rgb -2 -2 -2 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:41"
+  },
+  {
+   "id": "wpt-0147",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb none none none / none)",
+   "expected": "color(prophoto-rgb none none none / none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:207"
+  },
+  {
+   "id": "wpt-0148",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb none none none)",
+   "expected": "color(prophoto-rgb none none none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:197"
+  },
+  {
+   "id": "wpt-0149",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 10% none none / none)",
+   "expected": "color(prophoto-rgb 0.1 none none / none)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:47"
+  },
+  {
+   "id": "wpt-0150",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb none none none / 0.5)",
+   "expected": "color(prophoto-rgb none none none / 0.5)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:48"
+  },
+  {
+   "id": "wpt-0151",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 0 0 0 / none)",
+   "expected": "color(prophoto-rgb 0 0 0 / none)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:49"
+  },
+  {
+   "id": "wpt-0360",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 1.00 0.50 0.200)",
+   "expected": "color(prophoto-rgb 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:193"
+  },
+  {
+   "id": "wpt-0361",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 100% 50% 20%)",
+   "expected": "color(prophoto-rgb 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:194"
+  },
+  {
+   "id": "wpt-0362",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 100% 0.5 20%)",
+   "expected": "color(prophoto-rgb 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:195"
+  },
+  {
+   "id": "wpt-0363",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 1.00 50% 0.2)",
+   "expected": "color(prophoto-rgb 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:196"
+  },
+  {
+   "id": "wpt-0364",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 1.00 none 0.2)",
+   "expected": "color(prophoto-rgb 1 none 0.2)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:198"
+  },
+  {
+   "id": "wpt-0365",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 100% none 20%)",
+   "expected": "color(prophoto-rgb 1 none 0.2)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:199"
+  },
+  {
+   "id": "wpt-0366",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 100% none 0.2)",
+   "expected": "color(prophoto-rgb 1 none 0.2)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:200"
+  },
+  {
+   "id": "wpt-0367",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 1.00 0.50 0.200 / 0.6)",
+   "expected": "color(prophoto-rgb 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:203"
+  },
+  {
+   "id": "wpt-0368",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 100% 50% 20% / 60%)",
+   "expected": "color(prophoto-rgb 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:204"
+  },
+  {
+   "id": "wpt-0369",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 100% 0.5 20% / 0.6)",
+   "expected": "color(prophoto-rgb 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:205"
+  },
+  {
+   "id": "wpt-0370",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 1.00 50% 0.2 / 60%)",
+   "expected": "color(prophoto-rgb 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:206"
+  },
+  {
+   "id": "wpt-0371",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 1.00 none 0.2 / none)",
+   "expected": "color(prophoto-rgb 1 none 0.2 / none)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:208"
+  },
+  {
+   "id": "wpt-0372",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 100% none 20% / 30%)",
+   "expected": "color(prophoto-rgb 1 none 0.2 / 0.3)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:209"
+  },
+  {
+   "id": "wpt-0373",
+   "kind": "wpt-computed-value",
+   "input": "color(prophoto-rgb 100% none 0.2 / 23.7%)",
+   "expected": "color(prophoto-rgb 1 none 0.2 / 0.237)",
+   "precision": [
+    0.5,
+    0.05,
+    0.0005
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:210"
+  },
+  {
+   "id": "wpt-4881",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb 0 0 0 0)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:19"
+  },
+  {
+   "id": "wpt-4882",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb 0deg 0% 0)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:20"
+  },
+  {
+   "id": "wpt-4883",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb 0% 0 0 1)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:21"
+  },
+  {
+   "id": "wpt-4884",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb 0% 0 0 10%)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:22"
+  },
+  {
+   "id": "wpt-4885",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb 0% 0 0deg)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:23"
+  },
+  {
+   "id": "wpt-4886",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb 0% 0% 0deg)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:24"
+  },
+  {
+   "id": "wpt-4887",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb 40% 0 0deg)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:25"
+  },
+  {
+   "id": "wpt-4888",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb 50% -200)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:27"
+  },
+  {
+   "id": "wpt-4889",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb 50%)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:28"
+  },
+  {
+   "id": "wpt-4891",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb 50% -200 / 0.5)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:30"
+  },
+  {
+   "id": "wpt-4892",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb 50% / 0.5)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:31"
+  },
+  {
+   "id": "wpt-4893",
+   "kind": "wpt-invalid",
+   "input": "color(prophoto-rgb / 0.5)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:32"
+  },
+  {
+   "id": "wpt-5176",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 0% 0% 0%)",
+   "expected": "color(prophoto-rgb 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:18"
+  },
+  {
+   "id": "wpt-5177",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 10% 10% 10%)",
+   "expected": "color(prophoto-rgb 0.1 0.1 0.1)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:19"
+  },
+  {
+   "id": "wpt-5178",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb .2 .2 25%)",
+   "expected": "color(prophoto-rgb 0.2 0.2 0.25)",
+   "precision": [
+    0.05,
+    0.05,
+    0.005
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:20"
+  },
+  {
+   "id": "wpt-5179",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 0 0 0 / 1)",
+   "expected": "color(prophoto-rgb 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:21"
+  },
+  {
+   "id": "wpt-5180",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 0% 0 0 / 0.5)",
+   "expected": "color(prophoto-rgb 0 0 0 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:22"
+  },
+  {
+   "id": "wpt-5181",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 20% 0 10/0.5)",
+   "expected": "color(prophoto-rgb 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:23"
+  },
+  {
+   "id": "wpt-5182",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 20% 0 10/50%)",
+   "expected": "color(prophoto-rgb 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:24"
+  },
+  {
+   "id": "wpt-5183",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 400% 0 10/50%)",
+   "expected": "color(prophoto-rgb 4 0 10 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:25"
+  },
+  {
+   "id": "wpt-5184",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 50% -160 160)",
+   "expected": "color(prophoto-rgb 0.5 -160 160)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:26"
+  },
+  {
+   "id": "wpt-5185",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 50% -200 200)",
+   "expected": "color(prophoto-rgb 0.5 -200 200)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:27"
+  },
+  {
+   "id": "wpt-5186",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 0 0 0 / -10%)",
+   "expected": "color(prophoto-rgb 0 0 0 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:28"
+  },
+  {
+   "id": "wpt-5187",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 0 0 0 / 110%)",
+   "expected": "color(prophoto-rgb 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:29"
+  },
+  {
+   "id": "wpt-5188",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 0 0 0 / 300%)",
+   "expected": "color(prophoto-rgb 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:30"
+  },
+  {
+   "id": "wpt-5189",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 200 200 200)",
+   "expected": "color(prophoto-rgb 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:31"
+  },
+  {
+   "id": "wpt-5190",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 200 200 200 / 200)",
+   "expected": "color(prophoto-rgb 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:32"
+  },
+  {
+   "id": "wpt-5191",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb -200 -200 -200)",
+   "expected": "color(prophoto-rgb -200 -200 -200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:33"
+  },
+  {
+   "id": "wpt-5192",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb -200 -200 -200 / -200)",
+   "expected": "color(prophoto-rgb -200 -200 -200 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:34"
+  },
+  {
+   "id": "wpt-5193",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 200% 200% 200%)",
+   "expected": "color(prophoto-rgb 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:35"
+  },
+  {
+   "id": "wpt-5194",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 200% 200% 200% / 200%)",
+   "expected": "color(prophoto-rgb 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:36"
+  },
+  {
+   "id": "wpt-5195",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb -200% -200% -200% / -200%)",
+   "expected": "color(prophoto-rgb -2 -2 -2 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:37"
+  },
+  {
+   "id": "wpt-5199",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb none none none / none)",
+   "expected": "color(prophoto-rgb none none none / none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:42"
+  },
+  {
+   "id": "wpt-5200",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb none none none)",
+   "expected": "color(prophoto-rgb none none none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:43"
+  },
+  {
+   "id": "wpt-5201",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 10% none none / none)",
+   "expected": "color(prophoto-rgb 0.1 none none / none)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:44"
+  },
+  {
+   "id": "wpt-5202",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb none none none / 0.5)",
+   "expected": "color(prophoto-rgb none none none / 0.5)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:45"
+  },
+  {
+   "id": "wpt-5203",
+   "kind": "wpt-specified-value",
+   "input": "color(prophoto-rgb 0 0 0 / none)",
+   "expected": "color(prophoto-rgb 0 0 0 / none)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:46"
+  }
+ ],
+ "crossCheck": {
+  "source": "culori 4.0.2",
+  "generated": "2026-10-20",
+  "tolerance": 1e-12,
+  "toleranceFor": {
+   "xyz-d65>xyz-d50": 0.000001,
+   "xyz-d50>xyz-d65": 0.000001,
+   "okhsl>oklab": 0.0001,
+   "okhsv>oklab": 0.0001,
+   "oklab>okhsl": 0.000001,
+   "oklab>okhsv": 1e-7,
+   "jzazbz>xyz-d65": 1e-7
+  },
+  "cases": [
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0,
+     0
+    ],
+    "expected": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0,
+     0.1
+    ],
+    "expected": [
+     0.0004968281041916972,
+     0.000001425404419369957,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0,
+     0.25
+    ],
+    "expected": [
+     0.0025852239479511843,
+     0.00000741703138244539,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0,
+     0.5
+    ],
+    "expected": [
+     0.009002272656542134,
+     0.00002582760339189146,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0,
+     0.75
+    ],
+    "expected": [
+     0.018677400385304545,
+     0.000053585634200119696,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0,
+     0.9
+    ],
+    "expected": [
+     0.025932397601903655,
+     0.00007440028821789442,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0,
+     1
+    ],
+    "expected": [
+     0.0313477341283922,
+     0.0000899369387256,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.1,
+     0
+    ],
+    "expected": [
+     0.0021424791799816616,
+     0.011281828169039068,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.1,
+     0.1
+    ],
+    "expected": [
+     0.002639307284173359,
+     0.011283253573458439,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.1,
+     0.25
+    ],
+    "expected": [
+     0.004727703127932846,
+     0.011289245200421514,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.1,
+     0.5
+    ],
+    "expected": [
+     0.011144751836523796,
+     0.01130765577243096,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.1,
+     0.75
+    ],
+    "expected": [
+     0.020819879565286206,
+     0.011335413803239188,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.1,
+     0.9
+    ],
+    "expected": [
+     0.028074876781885316,
+     0.011356228457256963,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.1,
+     1
+    ],
+    "expected": [
+     0.033490213308373866,
+     0.011371765107764668,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.25,
+     0
+    ],
+    "expected": [
+     0.01114829945678417,
+     0.058704513921814236,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.25,
+     0.1
+    ],
+    "expected": [
+     0.011645127560975866,
+     0.05870593932623361,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.25,
+     0.25
+    ],
+    "expected": [
+     0.013733523404735354,
+     0.058711930953196684,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.25,
+     0.5
+    ],
+    "expected": [
+     0.020150572113326305,
+     0.05873034152520613,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.25,
+     0.75
+    ],
+    "expected": [
+     0.029825699842088715,
+     0.058758099556014354,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.25,
+     0.9
+    ],
+    "expected": [
+     0.03708069705868783,
+     0.05877891421003213,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.25,
+     1
+    ],
+    "expected": [
+     0.04249603358517637,
+     0.05879445086053984,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.5,
+     0
+    ],
+    "expected": [
+     0.03882063348758933,
+     0.20442099065064215,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.5,
+     0.1
+    ],
+    "expected": [
+     0.039317461591781025,
+     0.2044224160550615,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.5,
+     0.25
+    ],
+    "expected": [
+     0.04140585743554052,
+     0.20442840768202458,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.5,
+     0.5
+    ],
+    "expected": [
+     0.04782290614413146,
+     0.20444681825403405,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.5,
+     0.75
+    ],
+    "expected": [
+     0.05749803387289387,
+     0.20447457628484228,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.5,
+     0.9
+    ],
+    "expected": [
+     0.06475303108949299,
+     0.20449539093886004,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.5,
+     1
+    ],
+    "expected": [
+     0.07016836761598153,
+     0.20451092758936776,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.75,
+     0
+    ],
+    "expected": [
+     0.0805428298521869,
+     0.42412097869175125,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.75,
+     0.1
+    ],
+    "expected": [
+     0.0810396579563786,
+     0.42412240409617064,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.75,
+     0.25
+    ],
+    "expected": [
+     0.08312805380013809,
+     0.4241283957231337,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.75,
+     0.5
+    ],
+    "expected": [
+     0.08954510250872903,
+     0.4241468062951431,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.75,
+     0.75
+    ],
+    "expected": [
+     0.09922023023749145,
+     0.42417456432595135,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.75,
+     0.9
+    ],
+    "expected": [
+     0.10647522745409055,
+     0.4241953789799691,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.75,
+     1
+    ],
+    "expected": [
+     0.1118905639805791,
+     0.42421091563047686,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.9,
+     0
+    ],
+    "expected": [
+     0.11182866162427822,
+     0.5888653465605762,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.9,
+     0.1
+    ],
+    "expected": [
+     0.11232548972846992,
+     0.5888667719649956,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.9,
+     0.25
+    ],
+    "expected": [
+     0.11441388557222941,
+     0.5888727635919586,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.9,
+     0.5
+    ],
+    "expected": [
+     0.12083093428082035,
+     0.5888911741639681,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.9,
+     0.75
+    ],
+    "expected": [
+     0.13050606200958276,
+     0.5889189321947763,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.9,
+     0.9
+    ],
+    "expected": [
+     0.13776105922618187,
+     0.5889397468487941,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     0.9,
+     1
+    ],
+    "expected": [
+     0.14317639575267044,
+     0.5889552834993018,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     1,
+     0
+    ],
+    "expected": [
+     0.1351812974005331,
+     0.7118352342418731,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     1,
+     0.1
+    ],
+    "expected": [
+     0.1356781255047248,
+     0.7118366596462925,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     1,
+     0.25
+    ],
+    "expected": [
+     0.1377665213484843,
+     0.7118426512732555,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     1,
+     0.5
+    ],
+    "expected": [
+     0.14418357005707524,
+     0.711861061845265,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     1,
+     0.75
+    ],
+    "expected": [
+     0.15385869778583766,
+     0.7118888198760732,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     1,
+     0.9
+    ],
+    "expected": [
+     0.16111369500243677,
+     0.711909634530091,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0,
+     1,
+     1
+    ],
+    "expected": [
+     0.16652903152892531,
+     0.7119251711805987,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0,
+     0
+    ],
+    "expected": [
+     0.012643749246755704,
+     0.004565678351152696,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0,
+     0.1
+    ],
+    "expected": [
+     0.0131405773509474,
+     0.004567103755572066,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0,
+     0.25
+    ],
+    "expected": [
+     0.015228973194706888,
+     0.004573095382535142,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0,
+     0.5
+    ],
+    "expected": [
+     0.021646021903297837,
+     0.0045915059545445875,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0,
+     0.75
+    ],
+    "expected": [
+     0.03132114963206025,
+     0.004619263985352816,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0,
+     0.9
+    ],
+    "expected": [
+     0.03857614684865936,
+     0.004640078639370591,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0,
+     1
+    ],
+    "expected": [
+     0.043991483375147904,
+     0.004655615289878297,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.1,
+     0
+    ],
+    "expected": [
+     0.014786228426737366,
+     0.015847506520191765,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.1,
+     0.1
+    ],
+    "expected": [
+     0.015283056530929063,
+     0.015848931924611134,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.1,
+     0.25
+    ],
+    "expected": [
+     0.01737145237468855,
+     0.01585492355157421,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.1,
+     0.5
+    ],
+    "expected": [
+     0.023788501083279498,
+     0.015873334123583657,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.1,
+     0.75
+    ],
+    "expected": [
+     0.033463628812041915,
+     0.015901092154391887,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.1,
+     0.9
+    ],
+    "expected": [
+     0.04071862602864102,
+     0.015921906808409658,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.1,
+     1
+    ],
+    "expected": [
+     0.04613396255512957,
+     0.015937443458917365,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.25,
+     0
+    ],
+    "expected": [
+     0.023792048703539875,
+     0.06327019227296693,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.25,
+     0.1
+    ],
+    "expected": [
+     0.024288876807731574,
+     0.0632716176773863,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.25,
+     0.25
+    ],
+    "expected": [
+     0.02637727265149106,
+     0.06327760930434938,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.25,
+     0.5
+    ],
+    "expected": [
+     0.03279432136008201,
+     0.06329601987635883,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.25,
+     0.75
+    ],
+    "expected": [
+     0.042469449088844424,
+     0.06332377790716705,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.25,
+     0.9
+    ],
+    "expected": [
+     0.04972444630544353,
+     0.06334459256118483,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.25,
+     1
+    ],
+    "expected": [
+     0.05513978283193208,
+     0.06336012921169253,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.5,
+     0
+    ],
+    "expected": [
+     0.05146438273434503,
+     0.20898666900179486,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.5,
+     0.1
+    ],
+    "expected": [
+     0.05196121083853673,
+     0.20898809440621421,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.5,
+     0.25
+    ],
+    "expected": [
+     0.05404960668229622,
+     0.2089940860331773,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.5,
+     0.5
+    ],
+    "expected": [
+     0.060466655390887164,
+     0.20901249660518675,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.5,
+     0.75
+    ],
+    "expected": [
+     0.07014178311964958,
+     0.209040254635995,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.5,
+     0.9
+    ],
+    "expected": [
+     0.0773967803362487,
+     0.20906106929001275,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.5,
+     1
+    ],
+    "expected": [
+     0.08281211686273723,
+     0.20907660594052047,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.75,
+     0
+    ],
+    "expected": [
+     0.09318657909894261,
+     0.42868665704290393,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.75,
+     0.1
+    ],
+    "expected": [
+     0.09368340720313431,
+     0.4286880824473233,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.75,
+     0.25
+    ],
+    "expected": [
+     0.0957718030468938,
+     0.4286940740742864,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.75,
+     0.5
+    ],
+    "expected": [
+     0.10218885175548474,
+     0.4287124846462958,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.75,
+     0.75
+    ],
+    "expected": [
+     0.11186397948424716,
+     0.42874024267710403,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.75,
+     0.9
+    ],
+    "expected": [
+     0.11911897670084626,
+     0.4287610573311218,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.75,
+     1
+    ],
+    "expected": [
+     0.12453431322733481,
+     0.42877659398162954,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.9,
+     0
+    ],
+    "expected": [
+     0.12447241087103393,
+     0.5934310249117289,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.9,
+     0.1
+    ],
+    "expected": [
+     0.12496923897522563,
+     0.5934324503161483,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.9,
+     0.25
+    ],
+    "expected": [
+     0.1270576348189851,
+     0.5934384419431113,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.9,
+     0.5
+    ],
+    "expected": [
+     0.13347468352757608,
+     0.5934568525151208,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.9,
+     0.75
+    ],
+    "expected": [
+     0.14314981125633847,
+     0.593484610545929,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.9,
+     0.9
+    ],
+    "expected": [
+     0.15040480847293758,
+     0.5935054251999469,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     0.9,
+     1
+    ],
+    "expected": [
+     0.15582014499942615,
+     0.5935209618504546,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     1,
+     0
+    ],
+    "expected": [
+     0.14782504664728882,
+     0.7164009125930259,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     1,
+     0.1
+    ],
+    "expected": [
+     0.1483218747514805,
+     0.7164023379974452,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     1,
+     0.25
+    ],
+    "expected": [
+     0.15041027059524,
+     0.7164083296244083,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     1,
+     0.5
+    ],
+    "expected": [
+     0.15682731930383095,
+     0.7164267401964177,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     1,
+     0.75
+    ],
+    "expected": [
+     0.16650244703259337,
+     0.716454498227226,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     1,
+     0.9
+    ],
+    "expected": [
+     0.17375744424919248,
+     0.7164753128812438,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.1,
+     1,
+     1
+    ],
+    "expected": [
+     0.17917278077568102,
+     0.7164908495317515,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0,
+     0
+    ],
+    "expected": [
+     0.06579121243107175,
+     0.023757313470109207,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0,
+     0.1
+    ],
+    "expected": [
+     0.06628804053526345,
+     0.023758738874528576,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0,
+     0.25
+    ],
+    "expected": [
+     0.06837643637902294,
+     0.02376473050149165,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0,
+     0.5
+    ],
+    "expected": [
+     0.07479348508761388,
+     0.0237831410735011,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0,
+     0.75
+    ],
+    "expected": [
+     0.0844686128163763,
+     0.02381089910430933,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0,
+     0.9
+    ],
+    "expected": [
+     0.09172361003297541,
+     0.0238317137583271,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0,
+     1
+    ],
+    "expected": [
+     0.09713894655946395,
+     0.023847250408834807,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.1,
+     0
+    ],
+    "expected": [
+     0.0679336916110534,
+     0.03503914163914827,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.1,
+     0.1
+    ],
+    "expected": [
+     0.06843051971524511,
+     0.035040567043567644,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.1,
+     0.25
+    ],
+    "expected": [
+     0.0705189155590046,
+     0.03504655867053072,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.1,
+     0.5
+    ],
+    "expected": [
+     0.07693596426759554,
+     0.03506496924254016,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.1,
+     0.75
+    ],
+    "expected": [
+     0.08661109199635796,
+     0.03509272727334839,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.1,
+     0.9
+    ],
+    "expected": [
+     0.09386608921295705,
+     0.03511354192736617,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.1,
+     1
+    ],
+    "expected": [
+     0.09928142573944561,
+     0.035129078577873875,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.25,
+     0
+    ],
+    "expected": [
+     0.07693951188785592,
+     0.08246182739192344,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.25,
+     0.1
+    ],
+    "expected": [
+     0.07743633999204762,
+     0.08246325279634281,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.25,
+     0.25
+    ],
+    "expected": [
+     0.0795247358358071,
+     0.08246924442330589,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.25,
+     0.5
+    ],
+    "expected": [
+     0.08594178454439805,
+     0.08248765499531534,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.25,
+     0.75
+    ],
+    "expected": [
+     0.09561691227316046,
+     0.08251541302612356,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.25,
+     0.9
+    ],
+    "expected": [
+     0.10287190948975958,
+     0.08253622768014134,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.25,
+     1
+    ],
+    "expected": [
+     0.10828724601624812,
+     0.08255176433064904,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.5,
+     0
+    ],
+    "expected": [
+     0.10461184591866107,
+     0.22817830412075135,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.5,
+     0.1
+    ],
+    "expected": [
+     0.10510867402285277,
+     0.2281797295251707,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.5,
+     0.25
+    ],
+    "expected": [
+     0.10719706986661226,
+     0.22818572115213379,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.5,
+     0.5
+    ],
+    "expected": [
+     0.1136141185752032,
+     0.22820413172414325,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.5,
+     0.75
+    ],
+    "expected": [
+     0.12328924630396562,
+     0.22823188975495148,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.5,
+     0.9
+    ],
+    "expected": [
+     0.13054424352056473,
+     0.22825270440896925,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.5,
+     1
+    ],
+    "expected": [
+     0.13595958004705327,
+     0.22826824105947696,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.75,
+     0
+    ],
+    "expected": [
+     0.14633404228325864,
+     0.4478782921618605,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.75,
+     0.1
+    ],
+    "expected": [
+     0.14683087038745032,
+     0.44787971756627987,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.75,
+     0.25
+    ],
+    "expected": [
+     0.14891926623120982,
+     0.44788570919324294,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.75,
+     0.5
+    ],
+    "expected": [
+     0.15533631493980077,
+     0.44790411976525235,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.75,
+     0.75
+    ],
+    "expected": [
+     0.16501144266856319,
+     0.4479318777960606,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.75,
+     0.9
+    ],
+    "expected": [
+     0.1722664398851623,
+     0.44795269245007835,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.75,
+     1
+    ],
+    "expected": [
+     0.17768177641165084,
+     0.4479682291005861,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.9,
+     0
+    ],
+    "expected": [
+     0.17761987405534996,
+     0.6126226600306854,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.9,
+     0.1
+    ],
+    "expected": [
+     0.17811670215954165,
+     0.6126240854351048,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.9,
+     0.25
+    ],
+    "expected": [
+     0.18020509800330115,
+     0.6126300770620678,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.9,
+     0.5
+    ],
+    "expected": [
+     0.1866221467118921,
+     0.6126484876340773,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.9,
+     0.75
+    ],
+    "expected": [
+     0.1962972744406545,
+     0.6126762456648855,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.9,
+     0.9
+    ],
+    "expected": [
+     0.20355227165725362,
+     0.6126970603189034,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     0.9,
+     1
+    ],
+    "expected": [
+     0.20896760818374216,
+     0.612712596969411,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     1,
+     0
+    ],
+    "expected": [
+     0.20097250983160486,
+     0.7355925477119823,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     1,
+     0.1
+    ],
+    "expected": [
+     0.20146933793579655,
+     0.7355939731164017,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     1,
+     0.25
+    ],
+    "expected": [
+     0.20355773377955605,
+     0.7355999647433648,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     1,
+     0.5
+    ],
+    "expected": [
+     0.209974782488147,
+     0.7356183753153742,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     1,
+     0.75
+    ],
+    "expected": [
+     0.2196499102169094,
+     0.7356461333461825,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     1,
+     0.9
+    ],
+    "expected": [
+     0.22690490743350852,
+     0.7356669480002003,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.25,
+     1,
+     1
+    ],
+    "expected": [
+     0.23232024395999706,
+     0.735682484650708,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0,
+     0
+    ],
+    "expected": [
+     0.22909830816721788,
+     0.08272777049522466,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0,
+     0.1
+    ],
+    "expected": [
+     0.22959513627140957,
+     0.08272919589964403,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0,
+     0.25
+    ],
+    "expected": [
+     0.23168353211516907,
+     0.0827351875266071,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0,
+     0.5
+    ],
+    "expected": [
+     0.23810058082376,
+     0.08275359809861656,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0,
+     0.75
+    ],
+    "expected": [
+     0.24777570855252243,
+     0.08278135612942478,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0,
+     0.9
+    ],
+    "expected": [
+     0.2550307057691215,
+     0.08280217078344256,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0,
+     1
+    ],
+    "expected": [
+     0.2604460422956101,
+     0.08281770743395026,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.1,
+     0
+    ],
+    "expected": [
+     0.23124078734719955,
+     0.09400959866426373,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.1,
+     0.1
+    ],
+    "expected": [
+     0.23173761545139124,
+     0.0940110240686831,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.1,
+     0.25
+    ],
+    "expected": [
+     0.23382601129515074,
+     0.09401701569564617,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.1,
+     0.5
+    ],
+    "expected": [
+     0.24024306000374168,
+     0.09403542626765563,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.1,
+     0.75
+    ],
+    "expected": [
+     0.2499181877325041,
+     0.09406318429846384,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.1,
+     0.9
+    ],
+    "expected": [
+     0.2571731849491032,
+     0.09408399895248162,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.1,
+     1
+    ],
+    "expected": [
+     0.26258852147559175,
+     0.09409953560298932,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.25,
+     0
+    ],
+    "expected": [
+     0.24024660762400205,
+     0.1414322844170389,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.25,
+     0.1
+    ],
+    "expected": [
+     0.24074343572819373,
+     0.14143370982145825,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.25,
+     0.25
+    ],
+    "expected": [
+     0.24283183157195323,
+     0.14143970144842133,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.25,
+     0.5
+    ],
+    "expected": [
+     0.24924888028054418,
+     0.1414581120204308,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.25,
+     0.75
+    ],
+    "expected": [
+     0.2589240080093066,
+     0.14148587005123903,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.25,
+     0.9
+    ],
+    "expected": [
+     0.2661790052259057,
+     0.1415066847052568,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.25,
+     1
+    ],
+    "expected": [
+     0.2715943417523943,
+     0.1415222213557645,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.5,
+     0
+    ],
+    "expected": [
+     0.26791894165480723,
+     0.2871487611458668,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.5,
+     0.1
+    ],
+    "expected": [
+     0.26841576975899895,
+     0.2871501865502862,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.5,
+     0.25
+    ],
+    "expected": [
+     0.2705041656027584,
+     0.28715617817724925,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.5,
+     0.5
+    ],
+    "expected": [
+     0.27692121431134936,
+     0.28717458874925866,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.5,
+     0.75
+    ],
+    "expected": [
+     0.28659634204011175,
+     0.2872023467800669,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.5,
+     0.9
+    ],
+    "expected": [
+     0.29385133925671086,
+     0.28722316143408466,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.5,
+     1
+    ],
+    "expected": [
+     0.29926667578319943,
+     0.2872386980845924,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.75,
+     0
+    ],
+    "expected": [
+     0.3096411380194048,
+     0.5068487491869759,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.75,
+     0.1
+    ],
+    "expected": [
+     0.3101379661235965,
+     0.5068501745913953,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.75,
+     0.25
+    ],
+    "expected": [
+     0.312226361967356,
+     0.5068561662183583,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.75,
+     0.5
+    ],
+    "expected": [
+     0.3186434106759469,
+     0.5068745767903677,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.75,
+     0.75
+    ],
+    "expected": [
+     0.3283185384047093,
+     0.506902334821176,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.75,
+     0.9
+    ],
+    "expected": [
+     0.3355735356213084,
+     0.5069231494751938,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.75,
+     1
+    ],
+    "expected": [
+     0.340988872147797,
+     0.5069386861257015,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.9,
+     0
+    ],
+    "expected": [
+     0.3409269697914961,
+     0.6715931170558008,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.9,
+     0.1
+    ],
+    "expected": [
+     0.34142379789568783,
+     0.6715945424602202,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.9,
+     0.25
+    ],
+    "expected": [
+     0.3435121937394473,
+     0.6716005340871832,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.9,
+     0.5
+    ],
+    "expected": [
+     0.34992924244803825,
+     0.6716189446591927,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.9,
+     0.75
+    ],
+    "expected": [
+     0.35960437017680064,
+     0.6716467026900009,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.9,
+     0.9
+    ],
+    "expected": [
+     0.36685936739339975,
+     0.6716675173440187,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     0.9,
+     1
+    ],
+    "expected": [
+     0.3722747039198883,
+     0.6716830539945264,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     1,
+     0
+    ],
+    "expected": [
+     0.36427960556775096,
+     0.7945630047370977,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     1,
+     0.1
+    ],
+    "expected": [
+     0.3647764336719427,
+     0.7945644301415171,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     1,
+     0.25
+    ],
+    "expected": [
+     0.36686482951570215,
+     0.7945704217684801,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     1,
+     0.5
+    ],
+    "expected": [
+     0.3732818782242931,
+     0.7945888323404896,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     1,
+     0.75
+    ],
+    "expected": [
+     0.3829570059530555,
+     0.7946165903712978,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     1,
+     0.9
+    ],
+    "expected": [
+     0.3902120031696546,
+     0.7946374050253157,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.5,
+     1,
+     1
+    ],
+    "expected": [
+     0.39562733969614317,
+     0.7946529416758233,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0,
+     0
+    ],
+    "expected": [
+     0.4753200655531587,
+     0.17163884626400547,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0,
+     0.1
+    ],
+    "expected": [
+     0.4758168936573504,
+     0.17164027166842483,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0,
+     0.25
+    ],
+    "expected": [
+     0.4779052895011099,
+     0.1716462632953879,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0,
+     0.5
+    ],
+    "expected": [
+     0.48432233820970083,
+     0.17166467386739737,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0,
+     0.75
+    ],
+    "expected": [
+     0.4939974659384632,
+     0.1716924318982056,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0,
+     0.9
+    ],
+    "expected": [
+     0.5012524631550623,
+     0.17171324655222336,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0,
+     1
+    ],
+    "expected": [
+     0.506667799681551,
+     0.17172878320273108,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.1,
+     0
+    ],
+    "expected": [
+     0.47746254473314037,
+     0.18292067443304455,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.1,
+     0.1
+    ],
+    "expected": [
+     0.4779593728373321,
+     0.1829220998374639,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.1,
+     0.25
+    ],
+    "expected": [
+     0.48004776868109156,
+     0.18292809146442698,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.1,
+     0.5
+    ],
+    "expected": [
+     0.4864648173896825,
+     0.18294650203643645,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.1,
+     0.75
+    ],
+    "expected": [
+     0.4961399451184449,
+     0.18297426006724468,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.1,
+     0.9
+    ],
+    "expected": [
+     0.503394942335044,
+     0.18299507472126245,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.1,
+     1
+    ],
+    "expected": [
+     0.5088102788615325,
+     0.18301061137177016,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.25,
+     0
+    ],
+    "expected": [
+     0.4864683650099429,
+     0.2303433601858197,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.25,
+     0.1
+    ],
+    "expected": [
+     0.4869651931141346,
+     0.23034478559023905,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.25,
+     0.25
+    ],
+    "expected": [
+     0.4890535889578941,
+     0.23035077721720212,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.25,
+     0.5
+    ],
+    "expected": [
+     0.495470637666485,
+     0.2303691877892116,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.25,
+     0.75
+    ],
+    "expected": [
+     0.5051457653952475,
+     0.23039694582001982,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.25,
+     0.9
+    ],
+    "expected": [
+     0.5124007626118465,
+     0.2304177604740376,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.25,
+     1
+    ],
+    "expected": [
+     0.5178160991383352,
+     0.2304332971245453,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.5,
+     0
+    ],
+    "expected": [
+     0.514140699040748,
+     0.3760598369146476,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.5,
+     0.1
+    ],
+    "expected": [
+     0.5146375271449397,
+     0.376061262319067,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.5,
+     0.25
+    ],
+    "expected": [
+     0.5167259229886991,
+     0.3760672539460301,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.5,
+     0.5
+    ],
+    "expected": [
+     0.5231429716972902,
+     0.3760856645180395,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.5,
+     0.75
+    ],
+    "expected": [
+     0.5328180994260525,
+     0.3761134225488477,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.5,
+     0.9
+    ],
+    "expected": [
+     0.5400730966426517,
+     0.3761342372028655,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.5,
+     1
+    ],
+    "expected": [
+     0.5454884331691402,
+     0.3761497738533732,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.75,
+     0
+    ],
+    "expected": [
+     0.5558628954053456,
+     0.5957598249557567,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.75,
+     0.1
+    ],
+    "expected": [
+     0.5563597235095373,
+     0.5957612503601761,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.75,
+     0.25
+    ],
+    "expected": [
+     0.5584481193532967,
+     0.5957672419871392,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.75,
+     0.5
+    ],
+    "expected": [
+     0.5648651680618878,
+     0.5957856525591486,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.75,
+     0.75
+    ],
+    "expected": [
+     0.5745402957906501,
+     0.5958134105899568,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.75,
+     0.9
+    ],
+    "expected": [
+     0.5817952930072493,
+     0.5958342252439747,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.75,
+     1
+    ],
+    "expected": [
+     0.5872106295337378,
+     0.5958497618944824,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.9,
+     0
+    ],
+    "expected": [
+     0.5871487271774369,
+     0.7605041928245817,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.9,
+     0.1
+    ],
+    "expected": [
+     0.5876455552816287,
+     0.7605056182290011,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.9,
+     0.25
+    ],
+    "expected": [
+     0.5897339511253881,
+     0.7605116098559641,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.9,
+     0.5
+    ],
+    "expected": [
+     0.5961509998339791,
+     0.7605300204279736,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.9,
+     0.75
+    ],
+    "expected": [
+     0.6058261275627415,
+     0.7605577784587818,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.9,
+     0.9
+    ],
+    "expected": [
+     0.6130811247793406,
+     0.7605785931127996,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     0.9,
+     1
+    ],
+    "expected": [
+     0.6184964613058291,
+     0.7605941297633073,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     1,
+     0
+    ],
+    "expected": [
+     0.6105013629536918,
+     0.8834740805058786,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     1,
+     0.1
+    ],
+    "expected": [
+     0.6109981910578836,
+     0.883475505910298,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     1,
+     0.25
+    ],
+    "expected": [
+     0.613086586901643,
+     0.883481497537261,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     1,
+     0.5
+    ],
+    "expected": [
+     0.619503635610234,
+     0.8834999081092705,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     1,
+     0.75
+    ],
+    "expected": [
+     0.6291787633389964,
+     0.8835276661400787,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     1,
+     0.9
+    ],
+    "expected": [
+     0.6364337605555955,
+     0.8835484807940965,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.75,
+     1,
+     1
+    ],
+    "expected": [
+     0.641849097082084,
+     0.8835640174446042,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0,
+     0
+    ],
+    "expected": [
+     0.659952063660086,
+     0.23830976010731533,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0,
+     0.1
+    ],
+    "expected": [
+     0.6604488917642777,
+     0.2383111855117347,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0,
+     0.25
+    ],
+    "expected": [
+     0.6625372876080371,
+     0.23831717713869777,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0,
+     0.5
+    ],
+    "expected": [
+     0.6689543363166282,
+     0.23833558771070723,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0,
+     0.75
+    ],
+    "expected": [
+     0.6786294640453905,
+     0.23836334574151546,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0,
+     0.9
+    ],
+    "expected": [
+     0.6858844612619897,
+     0.23838416039553323,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0,
+     1
+    ],
+    "expected": [
+     0.6912997977884782,
+     0.23839969704604094,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.1,
+     0
+    ],
+    "expected": [
+     0.6620945428400676,
+     0.24959158827635441,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.1,
+     0.1
+    ],
+    "expected": [
+     0.6625913709442594,
+     0.24959301368077377,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.1,
+     0.25
+    ],
+    "expected": [
+     0.6646797667880188,
+     0.24959900530773685,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.1,
+     0.5
+    ],
+    "expected": [
+     0.6710968154966098,
+     0.2496174158797463,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.1,
+     0.75
+    ],
+    "expected": [
+     0.6807719432253722,
+     0.24964517391055455,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.1,
+     0.9
+    ],
+    "expected": [
+     0.6880269404419713,
+     0.2496659885645723,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.1,
+     1
+    ],
+    "expected": [
+     0.6934422769684598,
+     0.24968152521508002,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.25,
+     0
+    ],
+    "expected": [
+     0.6711003631168702,
+     0.29701427402912955,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.25,
+     0.1
+    ],
+    "expected": [
+     0.6715971912210619,
+     0.29701569943354894,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.25,
+     0.25
+    ],
+    "expected": [
+     0.6736855870648213,
+     0.297021691060512,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.25,
+     0.5
+    ],
+    "expected": [
+     0.6801026357734123,
+     0.2970401016325214,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.25,
+     0.75
+    ],
+    "expected": [
+     0.6897777635021747,
+     0.29706785966332966,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.25,
+     0.9
+    ],
+    "expected": [
+     0.6970327607187738,
+     0.2970886743173474,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.25,
+     1
+    ],
+    "expected": [
+     0.7024480972452624,
+     0.29710421096785516,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.5,
+     0
+    ],
+    "expected": [
+     0.6987726971476753,
+     0.4427307507579575,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.5,
+     0.1
+    ],
+    "expected": [
+     0.699269525251867,
+     0.44273217616237687,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.5,
+     0.25
+    ],
+    "expected": [
+     0.7013579210956264,
+     0.44273816778933994,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.5,
+     0.5
+    ],
+    "expected": [
+     0.7077749698042175,
+     0.44275657836134935,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.5,
+     0.75
+    ],
+    "expected": [
+     0.7174500975329798,
+     0.4427843363921576,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.5,
+     0.9
+    ],
+    "expected": [
+     0.724705094749579,
+     0.44280515104617535,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.5,
+     1
+    ],
+    "expected": [
+     0.7301204312760675,
+     0.4428206876966831,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.75,
+     0
+    ],
+    "expected": [
+     0.7404948935122728,
+     0.6624307387990666,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.75,
+     0.1
+    ],
+    "expected": [
+     0.7409917216164645,
+     0.6624321642034859,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.75,
+     0.25
+    ],
+    "expected": [
+     0.743080117460224,
+     0.662438155830449,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.75,
+     0.5
+    ],
+    "expected": [
+     0.749497166168815,
+     0.6624565664024584,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.75,
+     0.75
+    ],
+    "expected": [
+     0.7591722938975773,
+     0.6624843244332667,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.75,
+     0.9
+    ],
+    "expected": [
+     0.7664272911141765,
+     0.6625051390872845,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.75,
+     1
+    ],
+    "expected": [
+     0.771842627640665,
+     0.6625206757377922,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.9,
+     0
+    ],
+    "expected": [
+     0.7717807252843641,
+     0.8271751066678915,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.9,
+     0.1
+    ],
+    "expected": [
+     0.7722775533885559,
+     0.8271765320723109,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.9,
+     0.25
+    ],
+    "expected": [
+     0.7743659492323153,
+     0.8271825236992739,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.9,
+     0.5
+    ],
+    "expected": [
+     0.7807829979409063,
+     0.8272009342712834,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.9,
+     0.75
+    ],
+    "expected": [
+     0.7904581256696687,
+     0.8272286923020916,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.9,
+     0.9
+    ],
+    "expected": [
+     0.7977131228862678,
+     0.8272495069561094,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     0.9,
+     1
+    ],
+    "expected": [
+     0.8031284594127563,
+     0.8272650436066171,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     1,
+     0
+    ],
+    "expected": [
+     0.795133361060619,
+     0.9501449943491884,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     1,
+     0.1
+    ],
+    "expected": [
+     0.7956301891648108,
+     0.9501464197536078,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     1,
+     0.25
+    ],
+    "expected": [
+     0.7977185850085702,
+     0.9501524113805708,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     1,
+     0.5
+    ],
+    "expected": [
+     0.8041356337171612,
+     0.9501708219525803,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     1,
+     0.75
+    ],
+    "expected": [
+     0.8138107614459236,
+     0.9501985799833885,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     1,
+     0.9
+    ],
+    "expected": [
+     0.8210657586625227,
+     0.9502193946374063,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     0.9,
+     1,
+     1
+    ],
+    "expected": [
+     0.8264810951890113,
+     0.950234931287914,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0,
+     0
+    ],
+    "expected": [
+     0.7977666449006423,
+     0.2880748288194013,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0,
+     0.1
+    ],
+    "expected": [
+     0.798263473004834,
+     0.28807625422382066,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0,
+     0.25
+    ],
+    "expected": [
+     0.8003518688485934,
+     0.28808224585078374,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0,
+     0.5
+    ],
+    "expected": [
+     0.8067689175571845,
+     0.28810065642279314,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0,
+     0.75
+    ],
+    "expected": [
+     0.8164440452859468,
+     0.2881284144536014,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0,
+     0.9
+    ],
+    "expected": [
+     0.823699042502546,
+     0.28814922910761914,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0,
+     1
+    ],
+    "expected": [
+     0.8291143790290345,
+     0.2881647657581269,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.1,
+     0
+    ],
+    "expected": [
+     0.799909124080624,
+     0.29935665698844033,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.1,
+     0.1
+    ],
+    "expected": [
+     0.8004059521848157,
+     0.2993580823928597,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.1,
+     0.25
+    ],
+    "expected": [
+     0.8024943480285751,
+     0.2993640740198228,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.1,
+     0.5
+    ],
+    "expected": [
+     0.8089113967371662,
+     0.2993824845918322,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.1,
+     0.75
+    ],
+    "expected": [
+     0.8185865244659285,
+     0.29941024262264043,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.1,
+     0.9
+    ],
+    "expected": [
+     0.8258415216825277,
+     0.2994310572766582,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.1,
+     1
+    ],
+    "expected": [
+     0.8312568582090162,
+     0.29944659392716594,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.25,
+     0
+    ],
+    "expected": [
+     0.8089149443574265,
+     0.3467793427412155,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.25,
+     0.1
+    ],
+    "expected": [
+     0.8094117724616182,
+     0.3467807681456349,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.25,
+     0.25
+    ],
+    "expected": [
+     0.8115001683053776,
+     0.346786759772598,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.25,
+     0.5
+    ],
+    "expected": [
+     0.8179172170139687,
+     0.3468051703446074,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.25,
+     0.75
+    ],
+    "expected": [
+     0.827592344742731,
+     0.34683292837541563,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.25,
+     0.9
+    ],
+    "expected": [
+     0.8348473419593302,
+     0.3468537430294334,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.25,
+     1
+    ],
+    "expected": [
+     0.8402626784858187,
+     0.34686927967994113,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.5,
+     0
+    ],
+    "expected": [
+     0.8365872783882317,
+     0.4924958194700434,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.5,
+     0.1
+    ],
+    "expected": [
+     0.8370841064924234,
+     0.4924972448744628,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.5,
+     0.25
+    ],
+    "expected": [
+     0.8391725023361828,
+     0.49250323650142586,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.5,
+     0.5
+    ],
+    "expected": [
+     0.8455895510447738,
+     0.49252164707343526,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.5,
+     0.75
+    ],
+    "expected": [
+     0.8552646787735362,
+     0.4925494051042435,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.5,
+     0.9
+    ],
+    "expected": [
+     0.8625196759901353,
+     0.49257021975826126,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.5,
+     1
+    ],
+    "expected": [
+     0.8679350125166239,
+     0.492585756408769,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.75,
+     0
+    ],
+    "expected": [
+     0.8783094747528292,
+     0.7121958075111525,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.75,
+     0.1
+    ],
+    "expected": [
+     0.8788063028570209,
+     0.7121972329155719,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.75,
+     0.25
+    ],
+    "expected": [
+     0.8808946987007803,
+     0.7122032245425349,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.75,
+     0.5
+    ],
+    "expected": [
+     0.8873117474093714,
+     0.7122216351145444,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.75,
+     0.75
+    ],
+    "expected": [
+     0.8969868751381337,
+     0.7122493931453526,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.75,
+     0.9
+    ],
+    "expected": [
+     0.9042418723547329,
+     0.7122702077993704,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.75,
+     1
+    ],
+    "expected": [
+     0.9096572088812214,
+     0.7122857444498781,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.9,
+     0
+    ],
+    "expected": [
+     0.9095953065249205,
+     0.8769401753799775,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.9,
+     0.1
+    ],
+    "expected": [
+     0.9100921346291122,
+     0.8769416007843969,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.9,
+     0.25
+    ],
+    "expected": [
+     0.9121805304728716,
+     0.8769475924113599,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.9,
+     0.5
+    ],
+    "expected": [
+     0.9185975791814627,
+     0.8769660029833694,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.9,
+     0.75
+    ],
+    "expected": [
+     0.928272706910225,
+     0.8769937610141776,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.9,
+     0.9
+    ],
+    "expected": [
+     0.9355277041268242,
+     0.8770145756681954,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     0.9,
+     1
+    ],
+    "expected": [
+     0.9409430406533127,
+     0.8770301123187031,
+     0.8251046025104602
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     1,
+     0
+    ],
+    "expected": [
+     0.9329479423011754,
+     0.9999100630612744,
+     0
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     1,
+     0.1
+    ],
+    "expected": [
+     0.9334447704053671,
+     0.9999114884656938,
+     0.013077026675871614
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     1,
+     0.25
+    ],
+    "expected": [
+     0.9355331662491265,
+     0.9999174800926568,
+     0.0680457531392298
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     1,
+     0.5
+    ],
+    "expected": [
+     0.9419502149577176,
+     0.9999358906646663,
+     0.236949074901062
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     1,
+     0.75
+    ],
+    "expected": [
+     0.9516253426864799,
+     0.9999636486954745,
+     0.491608387315228
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     1,
+     0.9
+    ],
+    "expected": [
+     0.9588803399030791,
+     0.9999844633494923,
+     0.6825673756139949
+    ]
+   },
+   {
+    "to": "xyz-d50",
+    "input": [
+     1,
+     1,
+     1
+    ],
+    "expected": [
+     0.9642956764295676,
+     1,
+     0.8251046025104602
+    ]
+   }
+  ]
+ }
+}

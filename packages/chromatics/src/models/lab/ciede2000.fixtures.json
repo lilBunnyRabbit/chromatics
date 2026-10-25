@@ -1,0 +1,739 @@
+{
+ "source": {
+  "citation": "G. Sharma, W. Wu, E. N. Dalal, \"The CIEDE2000 Color-Difference Formula: Implementation Notes, Supplementary Test Data, and Mathematical Observations,\" Color Research and Application, vol. 30, no. 1, pp. 21-30, February 2005. Table 1.",
+  "urls": {
+   "page": "https://hajim.rochester.edu/ece/sites/gsharma/ciede2000/",
+   "testdata_txt": "https://hajim.rochester.edu/ece/sites/gsharma/ciede2000/dataNprograms/ciede2000testdata.txt",
+   "paper_pdf": "https://hajim.rochester.edu/ece/sites/gsharma/ciede2000/ciede2000noteCRNA.pdf",
+   "xls": "https://hajim.rochester.edu/ece/sites/gsharma/ciede2000/dataNprograms/CIEDE2000.xls"
+  },
+  "retrieved": "2026-10-19",
+  "raw_files": [
+   "raw/sharma/ciede2000testdata.txt",
+   "raw/sharma/ciede2000noteCRNA.pdf",
+   "raw/sharma/paper.txt",
+   "raw/sharma/CIEDE2000.xls",
+   "raw/sharma/xls_dump.tsv",
+   "raw/sharma/index.html",
+   "raw/sharma/deltaE2000test.m"
+  ],
+  "page_quote_columns": "Each row of the file has a pair of CIELAB values and a color difference corresponding to the pair. For each row, columns 1-3 of the file correspond to CIE L*, a*, b* values, respectively, for a reference color; columns 4-6 correspond to L*, a*, b* values, respectively, for a sample color; and column 7 corresponds to the CIEDE2000 color difference between this pair of values.",
+  "page_quote_license": "Personal or research use of the MATLAB program/Excel Spreadsheet is permitted with proper citation and acknowledgement. ... the data and the software are provided as is with no warranty what-so-ever. This is not an official CIE implementation.",
+  "paper_quote_precision": "The values given in Table 1 are listed up to four decimal places. Although such precision would rarely be justified in practical applications, in testing computer implementations, even discrepancies in the fourth place should not be ignored",
+  "paper_quote_symmetry": "the CIEDE2000 color difference formula is designed to be symmetric with respect to the two samples ... It is recommended that implementations of the formula should explicitly test this by interchanging the two sets of data",
+  "paper_quote_groups": {
+   "1-3": "test that the true chroma difference ΔH (a signed quantity) is used [sic: paper text says chroma/ΔH; items 1 and 2 swap ΔH/ΔC wording]",
+   "4-6": "test that the true hue difference ΔC (a signed quantity) is used",
+   "7-16": "test that the arctangent computation for the determination of the hue in Eq. (7) and the computation of mean hue in Eq. (14) are performed correctly",
+   "17-20": "larger differences ... included for this reason",
+   "25-34": "correspond to data published in CIE technical report and in the article by Luo, Cui and Rigg"
+  },
+  "parametric_factors": "kL = kC = kH = 1 (XLS cells k_L, k_C, k_H = 1.0)"
+ },
+ "decimals": {
+  "L1": 4,
+  "a1": 4,
+  "b1": 4,
+  "L2": 4,
+  "a2": 4,
+  "b2": 4,
+  "a1p": 4,
+  "C1p": 4,
+  "h1p": 4,
+  "a2p": 4,
+  "C2p": 4,
+  "h2p": 4,
+  "hbarp": 4,
+  "G": 4,
+  "T": 4,
+  "SL": 4,
+  "SC": 4,
+  "SH": 4,
+  "RT": 4,
+  "dE00": 4,
+  "xls_cached_values": "full double precision (Excel cached formula results, as stored in the .xls)"
+ },
+ "note": "Inputs are the author XLS full-precision values (pairs 21-24 publish rounded inputs whose exact values are needed for dE00 = 1.0000); dE00 is the published 4-decimal value.",
+ "pairs": [
+  {
+   "pair": 1,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.6772,
+    "b1": -79.7751,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.6772,
+    "b1": -79.7751,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485,
+    "dE00": 2.0425
+   }
+  },
+  {
+   "pair": 2,
+   "input": {
+    "L1": 50.0,
+    "a1": 3.1571,
+    "b1": -77.2803,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 3.1571,
+    "b1": -77.2803,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485,
+    "dE00": 2.8615
+   }
+  },
+  {
+   "pair": 3,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.8361,
+    "b1": -74.02,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.8361,
+    "b1": -74.02,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485,
+    "dE00": 3.4412
+   }
+  },
+  {
+   "pair": 4,
+   "input": {
+    "L1": 50.0,
+    "a1": -1.3802,
+    "b1": -84.2814,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": -1.3802,
+    "b1": -84.2814,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485,
+    "dE00": 1.0
+   }
+  },
+  {
+   "pair": 5,
+   "input": {
+    "L1": 50.0,
+    "a1": -1.1848,
+    "b1": -84.8006,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": -1.1848,
+    "b1": -84.8006,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485,
+    "dE00": 1.0
+   }
+  },
+  {
+   "pair": 6,
+   "input": {
+    "L1": 50.0,
+    "a1": -0.9009,
+    "b1": -85.5211,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": -0.9009,
+    "b1": -85.5211,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -82.7485,
+    "dE00": 1.0
+   }
+  },
+  {
+   "pair": 7,
+   "input": {
+    "L1": 50.0,
+    "a1": 0.0,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": -1.0,
+    "b2": 2.0
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 0.0,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": -1.0,
+    "b2": 2.0,
+    "dE00": 2.3669
+   }
+  },
+  {
+   "pair": 8,
+   "input": {
+    "L1": 50.0,
+    "a1": -1.0,
+    "b1": 2.0,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": 0.0
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": -1.0,
+    "b1": 2.0,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": 0.0,
+    "dE00": 2.3669
+   }
+  },
+  {
+   "pair": 9,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.49,
+    "b1": -0.001,
+    "L2": 50.0,
+    "a2": -2.49,
+    "b2": 0.00090000000000001
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.49,
+    "b1": -0.001,
+    "L2": 50.0,
+    "a2": -2.49,
+    "b2": 0.0009,
+    "dE00": 7.1792
+   }
+  },
+  {
+   "pair": 10,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.49,
+    "b1": -0.001,
+    "L2": 50.0,
+    "a2": -2.49,
+    "b2": 0.00100000000000001
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.49,
+    "b1": -0.001,
+    "L2": 50.0,
+    "a2": -2.49,
+    "b2": 0.001,
+    "dE00": 7.1792
+   }
+  },
+  {
+   "pair": 11,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.49,
+    "b1": -0.001,
+    "L2": 50.0,
+    "a2": -2.49,
+    "b2": 0.00110000000000001
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.49,
+    "b1": -0.001,
+    "L2": 50.0,
+    "a2": -2.49,
+    "b2": 0.0011,
+    "dE00": 7.2195
+   }
+  },
+  {
+   "pair": 12,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.49,
+    "b1": -0.001,
+    "L2": 50.0,
+    "a2": -2.49,
+    "b2": 0.00120000000000001
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.49,
+    "b1": -0.001,
+    "L2": 50.0,
+    "a2": -2.49,
+    "b2": 0.0012,
+    "dE00": 7.2195
+   }
+  },
+  {
+   "pair": 13,
+   "input": {
+    "L1": 50.0,
+    "a1": -0.001,
+    "b1": 2.49,
+    "L2": 50.0,
+    "a2": 0.00090000000000001,
+    "b2": -2.49
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": -0.001,
+    "b1": 2.49,
+    "L2": 50.0,
+    "a2": 0.0009,
+    "b2": -2.49,
+    "dE00": 4.8045
+   }
+  },
+  {
+   "pair": 14,
+   "input": {
+    "L1": 50.0,
+    "a1": -0.001,
+    "b1": 2.49,
+    "L2": 50.0,
+    "a2": 0.00100000000000001,
+    "b2": -2.49
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": -0.001,
+    "b1": 2.49,
+    "L2": 50.0,
+    "a2": 0.001,
+    "b2": -2.49,
+    "dE00": 4.8045
+   }
+  },
+  {
+   "pair": 15,
+   "input": {
+    "L1": 50.0,
+    "a1": -0.001,
+    "b1": 2.49,
+    "L2": 50.0,
+    "a2": 0.00110000000000001,
+    "b2": -2.49
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": -0.001,
+    "b1": 2.49,
+    "L2": 50.0,
+    "a2": 0.0011,
+    "b2": -2.49,
+    "dE00": 4.7461
+   }
+  },
+  {
+   "pair": 16,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -2.5
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": 0.0,
+    "b2": -2.5,
+    "dE00": 4.3065
+   }
+  },
+  {
+   "pair": 17,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 73.0,
+    "a2": 25.0,
+    "b2": -18.0
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 73.0,
+    "a2": 25.0,
+    "b2": -18.0,
+    "dE00": 27.1492
+   }
+  },
+  {
+   "pair": 18,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 61.0,
+    "a2": -5.0,
+    "b2": 29.0
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 61.0,
+    "a2": -5.0,
+    "b2": 29.0,
+    "dE00": 22.8977
+   }
+  },
+  {
+   "pair": 19,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 56.0,
+    "a2": -27.0,
+    "b2": -3.0
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 56.0,
+    "a2": -27.0,
+    "b2": -3.0,
+    "dE00": 31.903
+   }
+  },
+  {
+   "pair": 20,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 58.0,
+    "a2": 24.0,
+    "b2": 15.0
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 58.0,
+    "a2": 24.0,
+    "b2": 15.0,
+    "dE00": 19.4535
+   }
+  },
+  {
+   "pair": 21,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": 3.173596279581744,
+    "b2": 0.5853530743128607
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": 3.1736,
+    "b2": 0.5854,
+    "dE00": 1.0
+   }
+  },
+  {
+   "pair": 22,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": 3.2972221020137544,
+    "b2": 7.948024726740442e-09
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": 3.2972,
+    "b2": 0.0,
+    "dE00": 1.0
+   }
+  },
+  {
+   "pair": 23,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": 1.8634208356316273,
+    "b2": 0.5756513997005107
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": 1.8634,
+    "b2": 0.5757,
+    "dE00": 1.0
+   }
+  },
+  {
+   "pair": 24,
+   "input": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": 3.259172047634657,
+    "b2": 0.3349920942090144
+   },
+   "published": {
+    "L1": 50.0,
+    "a1": 2.5,
+    "b1": 0.0,
+    "L2": 50.0,
+    "a2": 3.2592,
+    "b2": 0.335,
+    "dE00": 1.0
+   }
+  },
+  {
+   "pair": 25,
+   "input": {
+    "L1": 60.2574,
+    "a1": -34.0099,
+    "b1": 36.2677,
+    "L2": 60.4626,
+    "a2": -34.1751,
+    "b2": 39.4387
+   },
+   "published": {
+    "L1": 60.2574,
+    "a1": -34.0099,
+    "b1": 36.2677,
+    "L2": 60.4626,
+    "a2": -34.1751,
+    "b2": 39.4387,
+    "dE00": 1.2644
+   }
+  },
+  {
+   "pair": 26,
+   "input": {
+    "L1": 63.0109,
+    "a1": -31.0961,
+    "b1": -5.8663,
+    "L2": 62.8187,
+    "a2": -29.7946,
+    "b2": -4.0864
+   },
+   "published": {
+    "L1": 63.0109,
+    "a1": -31.0961,
+    "b1": -5.8663,
+    "L2": 62.8187,
+    "a2": -29.7946,
+    "b2": -4.0864,
+    "dE00": 1.263
+   }
+  },
+  {
+   "pair": 27,
+   "input": {
+    "L1": 61.2901,
+    "a1": 3.7196,
+    "b1": -5.3901,
+    "L2": 61.4292,
+    "a2": 2.248,
+    "b2": -4.962
+   },
+   "published": {
+    "L1": 61.2901,
+    "a1": 3.7196,
+    "b1": -5.3901,
+    "L2": 61.4292,
+    "a2": 2.248,
+    "b2": -4.962,
+    "dE00": 1.8731
+   }
+  },
+  {
+   "pair": 28,
+   "input": {
+    "L1": 35.0831,
+    "a1": -44.1164,
+    "b1": 3.7933,
+    "L2": 35.0232,
+    "a2": -40.0716,
+    "b2": 1.5901
+   },
+   "published": {
+    "L1": 35.0831,
+    "a1": -44.1164,
+    "b1": 3.7933,
+    "L2": 35.0232,
+    "a2": -40.0716,
+    "b2": 1.5901,
+    "dE00": 1.8645
+   }
+  },
+  {
+   "pair": 29,
+   "input": {
+    "L1": 22.7233,
+    "a1": 20.0904,
+    "b1": -46.694,
+    "L2": 23.0331,
+    "a2": 14.973,
+    "b2": -42.5619
+   },
+   "published": {
+    "L1": 22.7233,
+    "a1": 20.0904,
+    "b1": -46.694,
+    "L2": 23.0331,
+    "a2": 14.973,
+    "b2": -42.5619,
+    "dE00": 2.0373
+   }
+  },
+  {
+   "pair": 30,
+   "input": {
+    "L1": 36.4612,
+    "a1": 47.858,
+    "b1": 18.3852,
+    "L2": 36.2715,
+    "a2": 50.5065,
+    "b2": 21.2231
+   },
+   "published": {
+    "L1": 36.4612,
+    "a1": 47.858,
+    "b1": 18.3852,
+    "L2": 36.2715,
+    "a2": 50.5065,
+    "b2": 21.2231,
+    "dE00": 1.4146
+   }
+  },
+  {
+   "pair": 31,
+   "input": {
+    "L1": 90.8027,
+    "a1": -2.0831,
+    "b1": 1.441,
+    "L2": 91.1528,
+    "a2": -1.6435,
+    "b2": 0.0447
+   },
+   "published": {
+    "L1": 90.8027,
+    "a1": -2.0831,
+    "b1": 1.441,
+    "L2": 91.1528,
+    "a2": -1.6435,
+    "b2": 0.0447,
+    "dE00": 1.4441
+   }
+  },
+  {
+   "pair": 32,
+   "input": {
+    "L1": 90.9257,
+    "a1": -0.5406,
+    "b1": -0.9208,
+    "L2": 88.6381,
+    "a2": -0.8985,
+    "b2": -0.7239
+   },
+   "published": {
+    "L1": 90.9257,
+    "a1": -0.5406,
+    "b1": -0.9208,
+    "L2": 88.6381,
+    "a2": -0.8985,
+    "b2": -0.7239,
+    "dE00": 1.5381
+   }
+  },
+  {
+   "pair": 33,
+   "input": {
+    "L1": 6.7747,
+    "a1": -0.2908,
+    "b1": -2.4247,
+    "L2": 5.8714,
+    "a2": -0.0985,
+    "b2": -2.2286
+   },
+   "published": {
+    "L1": 6.7747,
+    "a1": -0.2908,
+    "b1": -2.4247,
+    "L2": 5.8714,
+    "a2": -0.0985,
+    "b2": -2.2286,
+    "dE00": 0.6377
+   }
+  },
+  {
+   "pair": 34,
+   "input": {
+    "L1": 2.0776,
+    "a1": 0.0795,
+    "b1": -1.135,
+    "L2": 0.9033,
+    "a2": -0.0636,
+    "b2": -0.5514
+   },
+   "published": {
+    "L1": 2.0776,
+    "a1": 0.0795,
+    "b1": -1.135,
+    "L2": 0.9033,
+    "a2": -0.0636,
+    "b2": -0.5514,
+    "dE00": 0.9082
+   }
+  }
+ ]
+}

@@ -1,0 +1,993 @@
+{
+ "retrieved": "2026-10-19",
+ "sources": {
+  "css4": "CSS Color 4 ED, csswg-drafts 3cfa13e88561688b47392ab3ee171fbb8d76d949 css-color-4/Overview.bs",
+  "wpt": "web-platform-tests 38690cce87929f184a529234eff84eaa426609c3 css/css-color/parsing/",
+  "ottosson": "Björn Ottosson, A perceptual color space for image processing, table \"example XYZ and Oklab pairs\"",
+  "wikipedia": "Wikipedia \"HSL and HSV\" oldid 1378989624, Examples table (secondary source)"
+ },
+ "conversions": [
+  {
+   "id": "css4-0031",
+   "kind": "explicit-statement",
+   "input": "color(rec2020 0.42053 0.979780 0.00579)",
+   "expected": "color(display-p3 -0.350289 1.00707 -0.144209)",
+   "precision": [
+    5e-07,
+    5e-06,
+    5e-07
+   ],
+   "src": "css4",
+   "at": "Overview.bs:3955-3962 #color-function",
+   "quote": "<div class=\"example\" id=\"ex-2020-oog-p3\">\nThis very intense lime color is in-gamut for rec.2020:\n<pre class=\"lang-css\">color(rec2020 0.42053 0.979780 0.00579);</pre>\nin LCH, that color is\n<pre class=\"lang-css\">lch(85.9017% 166.116 138.207);</pre>\nin display-p3, that color is\n<pre class=\"lang-css\">color(display-p3 -0.350289 1.00707 -0.144209);</pre>\nand is out of gamut for display-p3"
+  },
+  {
+   "id": "css4-0081",
+   "kind": "explicit-statement",
+   "input": "color(rec2020 0.522 0.557 0.892)",
+   "expected": "color(display-p3 0.445 0.529 0.891)",
+   "precision": 0.0005,
+   "src": "css4",
+   "at": "Overview.bs:4834-4843 #color-convert-intro",
+   "quote": "<div class=\"example\" id=\"ex-same-color\">\nFor example, these different syntactic forms are all the same color:\n<ul>\n<li><span class=\"swatch\" style=\"--color: oklch(65% 0.15 270)\"></span> oklch(65% 0.15 270)</li>\n<li><span class=\"swatch\" style=\"--color: lab(57.9% 11.4 -53.7)\"></span> lab(57.9% 11.4 -53.7)</li>\n<li><span class=\"swatch\" style=\"--color: color(display-p3 0.445 0.529 0.891)\"></span> color(display-p3 0.445 0.529 0.891)</li>\n<li><span class=\"swatch\" style=\"--color: color(rec2020 0.522 0.557 0.892)\"></span> color(rec2020 0.522 0.557 0.892)</li>\n<li><span class=\"swatch\" style=\"--color: #6c88ea\"></span> #6c88ea</li>\n</ul>\n</div>"
+  },
+  {
+   "id": "css4-0077",
+   "kind": "explicit-statement",
+   "input": "color(rec2020 0.522 0.557 0.892)",
+   "expected": "lab(57.9% 11.4 -53.7)",
+   "precision": 0.05,
+   "src": "css4",
+   "at": "Overview.bs:4834-4843 #color-convert-intro",
+   "quote": "<div class=\"example\" id=\"ex-same-color\">\nFor example, these different syntactic forms are all the same color:\n<ul>\n<li><span class=\"swatch\" style=\"--color: oklch(65% 0.15 270)\"></span> oklch(65% 0.15 270)</li>\n<li><span class=\"swatch\" style=\"--color: lab(57.9% 11.4 -53.7)\"></span> lab(57.9% 11.4 -53.7)</li>\n<li><span class=\"swatch\" style=\"--color: color(display-p3 0.445 0.529 0.891)\"></span> color(display-p3 0.445 0.529 0.891)</li>\n<li><span class=\"swatch\" style=\"--color: color(rec2020 0.522 0.557 0.892)\"></span> color(rec2020 0.522 0.557 0.892)</li>\n<li><span class=\"swatch\" style=\"--color: #6c88ea\"></span> #6c88ea</li>\n</ul>\n</div>"
+  },
+  {
+   "id": "css4-0029",
+   "kind": "explicit-statement",
+   "input": "color(rec2020 0.42053 0.979780 0.00579)",
+   "expected": "lch(85.9017% 166.116 138.207)",
+   "precision": [
+    5e-05,
+    0.0005,
+    0.0005
+   ],
+   "src": "css4",
+   "at": "Overview.bs:3955-3962 #color-function",
+   "quote": "<div class=\"example\" id=\"ex-2020-oog-p3\">\nThis very intense lime color is in-gamut for rec.2020:\n<pre class=\"lang-css\">color(rec2020 0.42053 0.979780 0.00579);</pre>\nin LCH, that color is\n<pre class=\"lang-css\">lch(85.9017% 166.116 138.207);</pre>\nin display-p3, that color is\n<pre class=\"lang-css\">color(display-p3 -0.350289 1.00707 -0.144209);</pre>\nand is out of gamut for display-p3"
+  },
+  {
+   "id": "css4-0071",
+   "kind": "explicit-statement",
+   "input": "color(rec2020 0.522 0.557 0.892)",
+   "expected": "oklch(65% 0.15 270)",
+   "precision": [
+    0.5,
+    0.005,
+    0.5
+   ],
+   "src": "css4",
+   "at": "Overview.bs:4834-4843 #color-convert-intro",
+   "quote": "<div class=\"example\" id=\"ex-same-color\">\nFor example, these different syntactic forms are all the same color:\n<ul>\n<li><span class=\"swatch\" style=\"--color: oklch(65% 0.15 270)\"></span> oklch(65% 0.15 270)</li>\n<li><span class=\"swatch\" style=\"--color: lab(57.9% 11.4 -53.7)\"></span> lab(57.9% 11.4 -53.7)</li>\n<li><span class=\"swatch\" style=\"--color: color(display-p3 0.445 0.529 0.891)\"></span> color(display-p3 0.445 0.529 0.891)</li>\n<li><span class=\"swatch\" style=\"--color: color(rec2020 0.522 0.557 0.892)\"></span> color(rec2020 0.522 0.557 0.892)</li>\n<li><span class=\"swatch\" style=\"--color: #6c88ea\"></span> #6c88ea</li>\n</ul>\n</div>"
+  },
+  {
+   "id": "css4-0084",
+   "kind": "explicit-statement",
+   "input": "color(rec2020 0.522 0.557 0.892)",
+   "expected": "#6c88ea",
+   "precision": 0.5,
+   "src": "css4",
+   "at": "Overview.bs:4834-4843 #color-convert-intro",
+   "quote": "<div class=\"example\" id=\"ex-same-color\">\nFor example, these different syntactic forms are all the same color:\n<ul>\n<li><span class=\"swatch\" style=\"--color: oklch(65% 0.15 270)\"></span> oklch(65% 0.15 270)</li>\n<li><span class=\"swatch\" style=\"--color: lab(57.9% 11.4 -53.7)\"></span> lab(57.9% 11.4 -53.7)</li>\n<li><span class=\"swatch\" style=\"--color: color(display-p3 0.445 0.529 0.891)\"></span> color(display-p3 0.445 0.529 0.891)</li>\n<li><span class=\"swatch\" style=\"--color: color(rec2020 0.522 0.557 0.892)\"></span> color(rec2020 0.522 0.557 0.892)</li>\n<li><span class=\"swatch\" style=\"--color: #6c88ea\"></span> #6c88ea</li>\n</ul>\n</div>"
+  },
+  {
+   "id": "wpt-5754",
+   "kind": "wpt-relative-color-identity",
+   "input": "color(rec2020 0.25 0.5 0.75)",
+   "expected": "color(srgb -0.328686 0.491201 0.76185)",
+   "precision": [
+    5e-07,
+    5e-07,
+    5e-06
+   ],
+   "epsilon": 0.001,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-relative-color.html:840"
+  }
+ ],
+ "parse": [
+  {
+   "id": "css4-parse-0040",
+   "kind": "serialization",
+   "input": "color(rec2020 0.400 0.660 0.340)",
+   "expected": "color(rec2020 0.4 0.66 0.34)",
+   "precision": [
+    0.05,
+    0.005,
+    0.005
+   ],
+   "src": "css4",
+   "at": "Overview.bs:8358-8362 #serializing-color-function-values",
+   "quote": "<div class=\"example\" id=\"ex-color-trailzero\">\n<p>The serialized value of</p>\n<pre class=\"lang-css\"><span class=\"swatch\" style=\"--color: rgb(15.06% 71.88% 34.64%)\"></span> color(rec2020 0.400 0.660 0.340)</pre>\n<p>is the string \"color(rec2020 0.4 0.66 0.34)\",\nnot \"color(rec2020 0.400 0.660 0.340)\"."
+  },
+  {
+   "id": "wpt-0094",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 0% 0% 0%)",
+   "expected": "color(rec2020 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:22"
+  },
+  {
+   "id": "wpt-0095",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 10% 10% 10%)",
+   "expected": "color(rec2020 0.1 0.1 0.1)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:23"
+  },
+  {
+   "id": "wpt-0096",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 .2 .2 25%)",
+   "expected": "color(rec2020 0.2 0.2 0.25)",
+   "precision": [
+    0.05,
+    0.05,
+    0.005
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:24"
+  },
+  {
+   "id": "wpt-0097",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 0 0 0 / 1)",
+   "expected": "color(rec2020 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:25"
+  },
+  {
+   "id": "wpt-0098",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 0% 0 0 / 0.5)",
+   "expected": "color(rec2020 0 0 0 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:26"
+  },
+  {
+   "id": "wpt-0099",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 20% 0 10/0.5)",
+   "expected": "color(rec2020 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:27"
+  },
+  {
+   "id": "wpt-0100",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 20% 0 10/50%)",
+   "expected": "color(rec2020 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:28"
+  },
+  {
+   "id": "wpt-0101",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 400% 0 10/50%)",
+   "expected": "color(rec2020 4 0 10 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:29"
+  },
+  {
+   "id": "wpt-0102",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 50% -160 160)",
+   "expected": "color(rec2020 0.5 -160 160)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:30"
+  },
+  {
+   "id": "wpt-0103",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 50% -200 200)",
+   "expected": "color(rec2020 0.5 -200 200)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:31"
+  },
+  {
+   "id": "wpt-0104",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 0 0 0 / -10%)",
+   "expected": "color(rec2020 0 0 0 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:32"
+  },
+  {
+   "id": "wpt-0105",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 0 0 0 / 110%)",
+   "expected": "color(rec2020 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:33"
+  },
+  {
+   "id": "wpt-0106",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 0 0 0 / 300%)",
+   "expected": "color(rec2020 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:34"
+  },
+  {
+   "id": "wpt-0107",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 200 200 200)",
+   "expected": "color(rec2020 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:35"
+  },
+  {
+   "id": "wpt-0108",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 200 200 200 / 200)",
+   "expected": "color(rec2020 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:36"
+  },
+  {
+   "id": "wpt-0109",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 -200 -200 -200)",
+   "expected": "color(rec2020 -200 -200 -200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:37"
+  },
+  {
+   "id": "wpt-0110",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 -200 -200 -200 / -200)",
+   "expected": "color(rec2020 -200 -200 -200 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:38"
+  },
+  {
+   "id": "wpt-0111",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 200% 200% 200%)",
+   "expected": "color(rec2020 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:39"
+  },
+  {
+   "id": "wpt-0112",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 200% 200% 200% / 200%)",
+   "expected": "color(rec2020 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:40"
+  },
+  {
+   "id": "wpt-0113",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 -200% -200% -200% / -200%)",
+   "expected": "color(rec2020 -2 -2 -2 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:41"
+  },
+  {
+   "id": "wpt-0116",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 none none none / none)",
+   "expected": "color(rec2020 none none none / none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:227"
+  },
+  {
+   "id": "wpt-0117",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 none none none)",
+   "expected": "color(rec2020 none none none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:217"
+  },
+  {
+   "id": "wpt-0118",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 10% none none / none)",
+   "expected": "color(rec2020 0.1 none none / none)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:47"
+  },
+  {
+   "id": "wpt-0119",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 none none none / 0.5)",
+   "expected": "color(rec2020 none none none / 0.5)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:48"
+  },
+  {
+   "id": "wpt-0120",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 0 0 0 / none)",
+   "expected": "color(rec2020 0 0 0 / none)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:49"
+  },
+  {
+   "id": "wpt-0374",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 1.00 0.50 0.200)",
+   "expected": "color(rec2020 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:213"
+  },
+  {
+   "id": "wpt-0375",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 100% 50% 20%)",
+   "expected": "color(rec2020 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:214"
+  },
+  {
+   "id": "wpt-0376",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 100% 0.5 20%)",
+   "expected": "color(rec2020 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:215"
+  },
+  {
+   "id": "wpt-0377",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 1.00 50% 0.2)",
+   "expected": "color(rec2020 1 0.5 0.2)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:216"
+  },
+  {
+   "id": "wpt-0378",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 1.00 none 0.2)",
+   "expected": "color(rec2020 1 none 0.2)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:218"
+  },
+  {
+   "id": "wpt-0379",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 100% none 20%)",
+   "expected": "color(rec2020 1 none 0.2)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:219"
+  },
+  {
+   "id": "wpt-0380",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 100% none 0.2)",
+   "expected": "color(rec2020 1 none 0.2)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:220"
+  },
+  {
+   "id": "wpt-0381",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 1.00 0.50 0.200 / 0.6)",
+   "expected": "color(rec2020 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:223"
+  },
+  {
+   "id": "wpt-0382",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 100% 50% 20% / 60%)",
+   "expected": "color(rec2020 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:224"
+  },
+  {
+   "id": "wpt-0383",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 100% 0.5 20% / 0.6)",
+   "expected": "color(rec2020 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:225"
+  },
+  {
+   "id": "wpt-0384",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 1.00 50% 0.2 / 60%)",
+   "expected": "color(rec2020 1 0.5 0.2 / 0.6)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:226"
+  },
+  {
+   "id": "wpt-0385",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 1.00 none 0.2 / none)",
+   "expected": "color(rec2020 1 none 0.2 / none)",
+   "precision": [
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:228"
+  },
+  {
+   "id": "wpt-0386",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 100% none 20% / 30%)",
+   "expected": "color(rec2020 1 none 0.2 / 0.3)",
+   "precision": [
+    0.5,
+    0.05,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:229"
+  },
+  {
+   "id": "wpt-0387",
+   "kind": "wpt-computed-value",
+   "input": "color(rec2020 100% none 0.2 / 23.7%)",
+   "expected": "color(rec2020 1 none 0.2 / 0.237)",
+   "precision": [
+    0.5,
+    0.05,
+    0.0005
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-computed-color-function.html:230"
+  },
+  {
+   "id": "wpt-4868",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 0 0 0 0)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:19"
+  },
+  {
+   "id": "wpt-4869",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 0deg 0% 0)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:20"
+  },
+  {
+   "id": "wpt-4870",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 0% 0 0 1)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:21"
+  },
+  {
+   "id": "wpt-4871",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 0% 0 0 10%)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:22"
+  },
+  {
+   "id": "wpt-4872",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 0% 0 0deg)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:23"
+  },
+  {
+   "id": "wpt-4873",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 0% 0% 0deg)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:24"
+  },
+  {
+   "id": "wpt-4874",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 40% 0 0deg)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:25"
+  },
+  {
+   "id": "wpt-4875",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 50% -200)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:27"
+  },
+  {
+   "id": "wpt-4876",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 50%)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:28"
+  },
+  {
+   "id": "wpt-4878",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 50% -200 / 0.5)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:30"
+  },
+  {
+   "id": "wpt-4879",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 50% / 0.5)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:31"
+  },
+  {
+   "id": "wpt-4880",
+   "kind": "wpt-invalid",
+   "input": "color(rec2020 / 0.5)",
+   "expected": null,
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-invalid-color-function.html:32"
+  },
+  {
+   "id": "wpt-5142",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 0% 0% 0%)",
+   "expected": "color(rec2020 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:18"
+  },
+  {
+   "id": "wpt-5143",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 10% 10% 10%)",
+   "expected": "color(rec2020 0.1 0.1 0.1)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:19"
+  },
+  {
+   "id": "wpt-5144",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 .2 .2 25%)",
+   "expected": "color(rec2020 0.2 0.2 0.25)",
+   "precision": [
+    0.05,
+    0.05,
+    0.005
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:20"
+  },
+  {
+   "id": "wpt-5145",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 0 0 0 / 1)",
+   "expected": "color(rec2020 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:21"
+  },
+  {
+   "id": "wpt-5146",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 0% 0 0 / 0.5)",
+   "expected": "color(rec2020 0 0 0 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:22"
+  },
+  {
+   "id": "wpt-5147",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 20% 0 10/0.5)",
+   "expected": "color(rec2020 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:23"
+  },
+  {
+   "id": "wpt-5148",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 20% 0 10/50%)",
+   "expected": "color(rec2020 0.2 0 10 / 0.5)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:24"
+  },
+  {
+   "id": "wpt-5149",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 400% 0 10/50%)",
+   "expected": "color(rec2020 4 0 10 / 0.5)",
+   "precision": [
+    0.5,
+    0.5,
+    0.5,
+    0.05
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:25"
+  },
+  {
+   "id": "wpt-5150",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 50% -160 160)",
+   "expected": "color(rec2020 0.5 -160 160)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:26"
+  },
+  {
+   "id": "wpt-5151",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 50% -200 200)",
+   "expected": "color(rec2020 0.5 -200 200)",
+   "precision": [
+    0.05,
+    0.5,
+    0.5
+   ],
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:27"
+  },
+  {
+   "id": "wpt-5152",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 0 0 0 / -10%)",
+   "expected": "color(rec2020 0 0 0 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:28"
+  },
+  {
+   "id": "wpt-5153",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 0 0 0 / 110%)",
+   "expected": "color(rec2020 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:29"
+  },
+  {
+   "id": "wpt-5154",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 0 0 0 / 300%)",
+   "expected": "color(rec2020 0 0 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:30"
+  },
+  {
+   "id": "wpt-5155",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 200 200 200)",
+   "expected": "color(rec2020 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:31"
+  },
+  {
+   "id": "wpt-5156",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 200 200 200 / 200)",
+   "expected": "color(rec2020 200 200 200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:32"
+  },
+  {
+   "id": "wpt-5157",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 -200 -200 -200)",
+   "expected": "color(rec2020 -200 -200 -200)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:33"
+  },
+  {
+   "id": "wpt-5158",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 -200 -200 -200 / -200)",
+   "expected": "color(rec2020 -200 -200 -200 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:34"
+  },
+  {
+   "id": "wpt-5159",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 200% 200% 200%)",
+   "expected": "color(rec2020 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:35"
+  },
+  {
+   "id": "wpt-5160",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 200% 200% 200% / 200%)",
+   "expected": "color(rec2020 2 2 2)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:36"
+  },
+  {
+   "id": "wpt-5161",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 -200% -200% -200% / -200%)",
+   "expected": "color(rec2020 -2 -2 -2 / 0)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:37"
+  },
+  {
+   "id": "wpt-5165",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 none none none / none)",
+   "expected": "color(rec2020 none none none / none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:42"
+  },
+  {
+   "id": "wpt-5166",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 none none none)",
+   "expected": "color(rec2020 none none none)",
+   "precision": null,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:43"
+  },
+  {
+   "id": "wpt-5167",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 10% none none / none)",
+   "expected": "color(rec2020 0.1 none none / none)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:44"
+  },
+  {
+   "id": "wpt-5168",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 none none none / 0.5)",
+   "expected": "color(rec2020 none none none / 0.5)",
+   "precision": 0.05,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:45"
+  },
+  {
+   "id": "wpt-5169",
+   "kind": "wpt-specified-value",
+   "input": "color(rec2020 0 0 0 / none)",
+   "expected": "color(rec2020 0 0 0 / none)",
+   "precision": 0.5,
+   "exact": true,
+   "src": "wpt",
+   "at": "css/css-color/parsing/color-valid-color-function.html:46"
+  }
+ ]
+}

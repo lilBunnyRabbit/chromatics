@@ -1,3 +1,6 @@
+# Local agent worktrees
+.claude/
+
 # Package Managers
 package-lock.json
 pnpm-lock.yaml
@@ -5,8 +8,15 @@ yarn.lock
 bun.lock
 bun.lockb
 
-# Miscellaneous
-/static/
+# The studio formats itself: its plugins live in its own node_modules
+apps/studio/
+
+# Build output
+.turbo/
+packages/chromatics/dist/
 
 # Research vault — preserve the Obsidian markdown verbatim (don't reflow)
 /docs/
+
+# Package fixtures: generated / transcribed JSON, kept as written
+packages/chromatics/**/*.fixtures.json

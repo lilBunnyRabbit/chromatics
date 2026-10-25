@@ -1,0 +1,338 @@
+{
+  "name": "@lilbunnyrabbit/chromatics",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Every color model and color system, typed, with cited math and exhaustive tests.",
+  "author": "Andraž Mesarič-Sirec <amesaricsirec@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lilBunnyRabbit/chromatics.git",
+    "directory": "packages/chromatics"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "THIRD_PARTY_NOTICES.md",
+    "!dist/**/*.test.*",
+    "!dist/**/*.domain.*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./all": {
+      "types": "./dist/all.d.ts",
+      "default": "./dist/all.js"
+    },
+    "./cvd": {
+      "types": "./dist/cvd.d.ts",
+      "default": "./dist/cvd.js"
+    },
+    "./a98-rgb": {
+      "types": "./dist/models/a98-rgb/a98-rgb.d.ts",
+      "default": "./dist/models/a98-rgb/a98-rgb.js"
+    },
+    "./aces2065-1": {
+      "types": "./dist/models/aces2065-1/aces2065-1.d.ts",
+      "default": "./dist/models/aces2065-1/aces2065-1.js"
+    },
+    "./acescc": {
+      "types": "./dist/models/acescc/acescc.d.ts",
+      "default": "./dist/models/acescc/acescc.js"
+    },
+    "./acescct": {
+      "types": "./dist/models/acescct/acescct.d.ts",
+      "default": "./dist/models/acescct/acescct.js"
+    },
+    "./acescg": {
+      "types": "./dist/models/acescg/acescg.d.ts",
+      "default": "./dist/models/acescg/acescg.js"
+    },
+    "./cam16": {
+      "types": "./dist/models/cam16/cam16.d.ts",
+      "default": "./dist/models/cam16/cam16.js"
+    },
+    "./cam16-lcd": {
+      "types": "./dist/models/cam16-lcd/cam16-lcd.d.ts",
+      "default": "./dist/models/cam16-lcd/cam16-lcd.js"
+    },
+    "./cam16-scd": {
+      "types": "./dist/models/cam16-scd/cam16-scd.d.ts",
+      "default": "./dist/models/cam16-scd/cam16-scd.js"
+    },
+    "./cam16-ucs": {
+      "types": "./dist/models/cam16-ucs/cam16-ucs.d.ts",
+      "default": "./dist/models/cam16-ucs/cam16-ucs.js"
+    },
+    "./ciecam02": {
+      "types": "./dist/models/ciecam02/ciecam02.d.ts",
+      "default": "./dist/models/ciecam02/ciecam02.js"
+    },
+    "./cmy": {
+      "types": "./dist/models/cmy/cmy.d.ts",
+      "default": "./dist/models/cmy/cmy.js"
+    },
+    "./cmyk": {
+      "types": "./dist/models/cmyk/cmyk.d.ts",
+      "default": "./dist/models/cmyk/cmyk.js"
+    },
+    "./cubehelix": {
+      "types": "./dist/models/cubehelix/cubehelix.d.ts",
+      "default": "./dist/models/cubehelix/cubehelix.js"
+    },
+    "./din99": {
+      "types": "./dist/models/din99/din99.d.ts",
+      "default": "./dist/models/din99/din99.js"
+    },
+    "./din99-lch": {
+      "types": "./dist/models/din99-lch/din99-lch.d.ts",
+      "default": "./dist/models/din99-lch/din99-lch.js"
+    },
+    "./din99o": {
+      "types": "./dist/models/din99o/din99o.d.ts",
+      "default": "./dist/models/din99o/din99o.js"
+    },
+    "./din99o-lch": {
+      "types": "./dist/models/din99o-lch/din99o-lch.d.ts",
+      "default": "./dist/models/din99o-lch/din99o-lch.js"
+    },
+    "./display-p3": {
+      "types": "./dist/models/display-p3/display-p3.d.ts",
+      "default": "./dist/models/display-p3/display-p3.js"
+    },
+    "./hct": {
+      "types": "./dist/models/hct/hct.d.ts",
+      "default": "./dist/models/hct/hct.js"
+    },
+    "./hpluv": {
+      "types": "./dist/models/hpluv/hpluv.d.ts",
+      "default": "./dist/models/hpluv/hpluv.js"
+    },
+    "./hsi": {
+      "types": "./dist/models/hsi/hsi.d.ts",
+      "default": "./dist/models/hsi/hsi.js"
+    },
+    "./hsl": {
+      "types": "./dist/models/hsl/hsl.d.ts",
+      "default": "./dist/models/hsl/hsl.js"
+    },
+    "./hsluv": {
+      "types": "./dist/models/hsluv/hsluv.d.ts",
+      "default": "./dist/models/hsluv/hsluv.js"
+    },
+    "./hsp": {
+      "types": "./dist/models/hsp/hsp.d.ts",
+      "default": "./dist/models/hsp/hsp.js"
+    },
+    "./hsv": {
+      "types": "./dist/models/hsv/hsv.d.ts",
+      "default": "./dist/models/hsv/hsv.js"
+    },
+    "./hunter-lab": {
+      "types": "./dist/models/hunter-lab/hunter-lab.d.ts",
+      "default": "./dist/models/hunter-lab/hunter-lab.js"
+    },
+    "./hwb": {
+      "types": "./dist/models/hwb/hwb.d.ts",
+      "default": "./dist/models/hwb/hwb.js"
+    },
+    "./ictcp": {
+      "types": "./dist/models/ictcp/ictcp.d.ts",
+      "default": "./dist/models/ictcp/ictcp.js"
+    },
+    "./ictcp-hlg": {
+      "types": "./dist/models/ictcp-hlg/ictcp-hlg.d.ts",
+      "default": "./dist/models/ictcp-hlg/ictcp-hlg.js"
+    },
+    "./ipt": {
+      "types": "./dist/models/ipt/ipt.d.ts",
+      "default": "./dist/models/ipt/ipt.js"
+    },
+    "./jzazbz": {
+      "types": "./dist/models/jzazbz/jzazbz.d.ts",
+      "default": "./dist/models/jzazbz/jzazbz.js"
+    },
+    "./jzczhz": {
+      "types": "./dist/models/jzczhz/jzczhz.d.ts",
+      "default": "./dist/models/jzczhz/jzczhz.js"
+    },
+    "./lab": {
+      "types": "./dist/models/lab/lab.d.ts",
+      "default": "./dist/models/lab/lab.js"
+    },
+    "./lab65": {
+      "types": "./dist/models/lab65/lab65.d.ts",
+      "default": "./dist/models/lab65/lab65.js"
+    },
+    "./lch": {
+      "types": "./dist/models/lch/lch.d.ts",
+      "default": "./dist/models/lch/lch.js"
+    },
+    "./lch65": {
+      "types": "./dist/models/lch65/lch65.d.ts",
+      "default": "./dist/models/lch65/lch65.js"
+    },
+    "./lchuv50": {
+      "types": "./dist/models/lchuv50/lchuv50.d.ts",
+      "default": "./dist/models/lchuv50/lchuv50.js"
+    },
+    "./lchuv65": {
+      "types": "./dist/models/lchuv65/lchuv65.d.ts",
+      "default": "./dist/models/lchuv65/lchuv65.js"
+    },
+    "./linear-display-p3": {
+      "types": "./dist/models/linear-display-p3/linear-display-p3.d.ts",
+      "default": "./dist/models/linear-display-p3/linear-display-p3.js"
+    },
+    "./linear-srgb": {
+      "types": "./dist/models/linear-srgb/linear-srgb.d.ts",
+      "default": "./dist/models/linear-srgb/linear-srgb.js"
+    },
+    "./lms": {
+      "types": "./dist/models/lms/lms.d.ts",
+      "default": "./dist/models/lms/lms.js"
+    },
+    "./luv50": {
+      "types": "./dist/models/luv50/luv50.d.ts",
+      "default": "./dist/models/luv50/luv50.js"
+    },
+    "./luv65": {
+      "types": "./dist/models/luv65/luv65.d.ts",
+      "default": "./dist/models/luv65/luv65.js"
+    },
+    "./okhsl": {
+      "types": "./dist/models/okhsl/okhsl.d.ts",
+      "default": "./dist/models/okhsl/okhsl.js"
+    },
+    "./okhsv": {
+      "types": "./dist/models/okhsv/okhsv.d.ts",
+      "default": "./dist/models/okhsv/okhsv.js"
+    },
+    "./oklab": {
+      "types": "./dist/models/oklab/oklab.d.ts",
+      "default": "./dist/models/oklab/oklab.js"
+    },
+    "./oklch": {
+      "types": "./dist/models/oklch/oklch.d.ts",
+      "default": "./dist/models/oklch/oklch.js"
+    },
+    "./prophoto-rgb": {
+      "types": "./dist/models/prophoto-rgb/prophoto-rgb.d.ts",
+      "default": "./dist/models/prophoto-rgb/prophoto-rgb.js"
+    },
+    "./rec2020": {
+      "types": "./dist/models/rec2020/rec2020.d.ts",
+      "default": "./dist/models/rec2020/rec2020.js"
+    },
+    "./rec2100-hlg": {
+      "types": "./dist/models/rec2100-hlg/rec2100-hlg.d.ts",
+      "default": "./dist/models/rec2100-hlg/rec2100-hlg.js"
+    },
+    "./rec2100-pq": {
+      "types": "./dist/models/rec2100-pq/rec2100-pq.d.ts",
+      "default": "./dist/models/rec2100-pq/rec2100-pq.js"
+    },
+    "./ryb": {
+      "types": "./dist/models/ryb/ryb.d.ts",
+      "default": "./dist/models/ryb/ryb.js"
+    },
+    "./smpte-c": {
+      "types": "./dist/models/smpte-c/smpte-c.d.ts",
+      "default": "./dist/models/smpte-c/smpte-c.js"
+    },
+    "./srgb": {
+      "types": "./dist/models/srgb/srgb.d.ts",
+      "default": "./dist/models/srgb/srgb.js"
+    },
+    "./srgb8": {
+      "types": "./dist/models/srgb8/srgb8.d.ts",
+      "default": "./dist/models/srgb8/srgb8.js"
+    },
+    "./tsl": {
+      "types": "./dist/models/tsl/tsl.d.ts",
+      "default": "./dist/models/tsl/tsl.js"
+    },
+    "./uvw64": {
+      "types": "./dist/models/uvw64/uvw64.d.ts",
+      "default": "./dist/models/uvw64/uvw64.js"
+    },
+    "./uvy60": {
+      "types": "./dist/models/uvy60/uvy60.d.ts",
+      "default": "./dist/models/uvy60/uvy60.js"
+    },
+    "./uvy76": {
+      "types": "./dist/models/uvy76/uvy76.d.ts",
+      "default": "./dist/models/uvy76/uvy76.js"
+    },
+    "./xyb": {
+      "types": "./dist/models/xyb/xyb.d.ts",
+      "default": "./dist/models/xyb/xyb.js"
+    },
+    "./xyy": {
+      "types": "./dist/models/xyy/xyy.d.ts",
+      "default": "./dist/models/xyy/xyy.js"
+    },
+    "./xyz50": {
+      "types": "./dist/models/xyz50/xyz50.d.ts",
+      "default": "./dist/models/xyz50/xyz50.js"
+    },
+    "./xyz65": {
+      "types": "./dist/models/xyz65/xyz65.d.ts",
+      "default": "./dist/models/xyz65/xyz65.js"
+    },
+    "./ycbcr-2020": {
+      "types": "./dist/models/ycbcr-2020/ycbcr-2020.d.ts",
+      "default": "./dist/models/ycbcr-2020/ycbcr-2020.js"
+    },
+    "./ycbcr-601": {
+      "types": "./dist/models/ycbcr-601/ycbcr-601.d.ts",
+      "default": "./dist/models/ycbcr-601/ycbcr-601.js"
+    },
+    "./ycbcr-709": {
+      "types": "./dist/models/ycbcr-709/ycbcr-709.d.ts",
+      "default": "./dist/models/ycbcr-709/ycbcr-709.js"
+    },
+    "./ycgco": {
+      "types": "./dist/models/ycgco/ycgco.d.ts",
+      "default": "./dist/models/ycgco/ycgco.js"
+    },
+    "./ydbdr": {
+      "types": "./dist/models/ydbdr/ydbdr.d.ts",
+      "default": "./dist/models/ydbdr/ydbdr.js"
+    },
+    "./yiq": {
+      "types": "./dist/models/yiq/yiq.d.ts",
+      "default": "./dist/models/yiq/yiq.js"
+    },
+    "./yuv": {
+      "types": "./dist/models/yuv/yuv.d.ts",
+      "default": "./dist/models/yuv/yuv.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run && bunx --bun vitest run",
+    "test:node": "vitest run",
+    "test:bun": "bunx --bun vitest run",
+    "test:all": "vitest run && bunx --bun vitest run",
+    "matrices": "bun scripts/matrices/derive.ts",
+    "fixtures:culori": "bun scripts/fixtures/culori.ts",
+    "exports": "bun scripts/exports.ts"
+  },
+  "dependencies": {
+    "@lilbunnyrabbit/optional": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.2",
+    "@types/culori": "4.0.1",
+    "culori": "4.0.2",
+    "fast-check": "4.10.2",
+    "typescript": "^5.9.3",
+    "vitest": "5.0.3"
+  }
+}

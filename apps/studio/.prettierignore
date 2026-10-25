@@ -1,0 +1,5 @@
+.svelte-kit/
+build/
+static/
+tests/fixtures/baseline/
+src/lib/dsl/package-docs.json

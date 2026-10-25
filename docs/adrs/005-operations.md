@@ -1,0 +1,84 @@
+# ADR-005: Operations
+
+**Date:** 2026-10-18
+**Status:** Accepted
+
+> **Revision 2026-10-19: the operation set** ([brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 33–42)
+>
+> - **Families (internal, not exported):** rectangular, RGB (extends rectangular) and hue. Generic user code uses unions of the model classes.
+> - **Adjust:**
+>   - Methods: `lighten` / `darken` / `saturate` / `desaturate`.
+>   - The amount is a fraction of the channel's reference range: `lighten(0.1)` is +0.1 in Oklch and +10 in Lab.
+>   - On Oklch, Lch, Hsl (s, l), Hsv (s, v); lighten / darken only on Lab and Oklab; none on Hwb.
+> - **Interpolation:**
+>   - `mix(b, t)` requires t and extrapolates outside [0, 1].
+>   - `steps(b, n)` returns n ≥ 2 colors, both ends included.
+>   - `interpolator(b)` returns a function of t.
+>   - `Model.gradient(stops, n)` is the multi-stop form.
+>   - Hue models take `{ hue: 'shorter' | 'longer' | 'increasing' | 'decreasing' }`, default `shorter`.
+>   - An achromatic end takes the other end's hue.
+> - **Harmonies (hue models):**
+>   - `rotateHue(deg)` and `complement()` mutate.
+>   - `triadic()`, `tetradic()`, `square()`, `splitComplementary(angle = 30)` return arrays that start with a copy of the receiver.
+>   - `analogous(angle = 30, count = 3)` is centred on the receiver.
+> - **Ramp:**
+>   - `ramp(n, { from = 0.05, to = 0.95 })` on Oklch, Lch, Lab, Oklab and Hsl.
+>   - Lightness is evenly spaced as a fraction of the range; the receiver's hue and chroma are kept; steps are raw (no gamut mapping).
+> - **Gamut (RGB classes):** `inGamut(tolerance = 7.5e-5)`, `clamp()`, `gamutMap({ method: 'css4' | 'clip' })`. The default is CSS Color 4 `#binsearch`.
+> - **Metrics:**
+>   - Srgb: `luminance()` and `contrast(other)` (WCAG 2.x).
+>   - Lab: `deltaE76` and `deltaE2000`.
+>   - Oklab: `deltaEOk` and `looksSame`.
+>   - APCA waits on a license check.
+>
+> **Revision 2026-10-19: implemented** (grills 43–45)
+>
+> - `contrast()` uses WCAG 2.2's literal relative luminance (`0.2126 / 0.7152 / 0.0722`, threshold 0.04045); `luminance()` is the exact Y. They differ in the 4th decimal.
+> - APCA is not shipped: its license conflicts with MIT (grill 44).
+> - `gamutMap()` is CSS Color 4 Binary Search with Local MINDE. At lightness ≥ 1 or ≤ 0 it returns the destination's exact white or black, every result lies within [0, 1], and in-gamut colors are unchanged.
+> - `tetradic(angle = 60)` is the rectangle `[h, h + angle, h + 180, h + 180 + angle]`; `tetradic(90)` equals `square()`.
+
+> **Revision 2026-10-21: gap features for the studio switch** (grill 79, ADR-016)
+>
+> - CVD: `simulateCvd(srgb, 'protan' | 'deutan' | 'tritan', severity = 1)` from `/cvd`, a free function for bundle size; Machado 2009 in linear light, severity interpolated between the 0.1 matrices; mutates its argument.
+> - CSS filters: `Srgb.filter(name, amount)`, the seven Filter Effects 1 functions in gamma sRGB.
+> - Compositing: `over(backdrop)` on Srgb and LinearSrgb (source-over).
+> - Lab: `deltaE94(other, { application = 'graphic-arts' })`, `deltaECmc(other, { l = 2, c = 1 })`.
+> - **Implemented 2026-10-21:** on `Lab` and `Lab65`. The Machado table is colour-science's dataset, identical to coloraide's and culori's. A filter amount below 0 throws a RangeError (Filter Effects 1 §6.1: "Negative values are not allowed"); grayscale, sepia and invert take amounts over 1 as 1, as §6.1 requires. A CVD severity outside [0, 1] throws. Compositing uses the alphas as stored, unclamped. References: coloraide @4888fc2d's CVD, filter, compositing and ΔE tests; colour-science @248121e3's ΔE94 / CMC docstrings.
+
+> **Revision 2026-10-25: methods the studio switch needs** (grill 81, ADR-017)
+>
+> - `set(values)` / `shift(deltas)` on `Color`: replace or add raw channel units, keys typed from the instance's writable number properties (`ChannelPatch<T>`, channels and alpha); mutate. An unknown key or a non-finite value throws a TypeError and writes nothing.
+> - `Hsl.tint(t)` / `shade(t)` / `tone(t)`: Sass `color.scale` in HSL. `Hct.tones(list)`, no default list. `Xyy.cct()`, McCamy 1992. `Cmyk.totalInk()` / `limitInk(max)` in ADR-004 fractions; `limitInk` is a heuristic with no independent source, and throws a RangeError for `max` below 0 or not finite.
+> - Not added: `maxChroma` (the migrator expands it through `gamutMap()`); studio inventions (invert, suppressCone, deltaExyb).
+> - **Implemented 2026-10-25.** References: colour-science @248121e3 `test_mccamy1992.py`; sass-site @5701c5d1 `modules/color.md` examples, matched to ±0.5 per byte (the hex's precision: the tint example's blue is exactly 223.5 before rounding).
+
+## Context
+
+Operations are methods on the color's class (ADR-001), and single-result operations mutate and return `this`. Open questions were: how shared operations reach ~100 classes, two-color operations across models, operations needing another model's math, multi-color results, interpolation, gamut mapping. The studio uses op-tables in `families.ts`; binary ops throw across models. [Brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 6, 7, 8, 12.
+
+## Decision
+
+- **Shared operations come from a shallow family base chain**: `Color → CylindricalColor | RectangularColor | RgbSpace … → model`, model-specific extras on the class. A model in two families gets the second family's operations by delegation.
+- **Two-color operations are same-model by type**: `mix(other: this, t)`. Metrics too: `bg.to(Srgb).contrast(fg.to(Srgb))`, `a.to(Lab).deltaE2000(b.to(Lab))`, `a.to(Oklab).deltaEOk(b.to(Oklab))`. The working space is always visible at the call site.
+- **Metrics live on the model whose math they are** (`Srgb.contrast`, `Lab.deltaE2000`, `Oklab.deltaEOk`). A method on `Color` that needs `Lab` would be a circular import and drag the Lab chain into every bundle.
+- **Several results are new instances; the receiver is untouched**: `c.triadic()`, `c.ramp(11)`, `a.steps(b, n)`.
+- **Interpolation:** `a.mix(b, t, opts)` mutates `a`; `a.steps(b, n, opts)` returns `T[]` including both ends; `a.interpolator(b, opts)` returns `(t) => T`; `Oklch.gradient([a, b, c], n)` for multiple stops. Alpha is premultiplied (CSS Color 4 §12.3). Hue strategy defaults to `shorter`, with `longer` / `increasing` / `decreasing` per call.
+- **Gamut operations live on RGB-space classes** (`Srgb`, `DisplayP3`, `Rec2020`, …): `inGamut()`, `clamp()`, `gamutMap()` (CSS Color 4 §13), each mutating that color. `c.to(Srgb).gamutMap().to(Oklch)`.
+
+## Alternatives Considered
+
+1. Mixins: TS4094 blocks `private` / `protected` members in emitted `.d.ts`.
+2. Explicit per-class methods over shared functions: most boilerplate.
+3. Converting the argument into the receiver's model: `oklch.mix(lab)` vs `lab.mix(oklch)` differ invisibly.
+4. A space option per call (`{ in: Oklab }`).
+5. Metrics accepting any `Color`: the metric fixes its own space, so nothing would be hidden. The owner chose one rule for every two-color method.
+6. Metrics on `Color`, loaded lazily or eagerly: lazy throws when a model isn't imported, eager ships every chain.
+7. `oklch.gamutMap(Srgb)` staying in OKLCH: the owner kept the class-bound rule.
+8. Straight alpha (today's studio): differs from browsers.
+
+## Consequences
+
+- Mutating and non-mutating methods coexist; the rule is "one result mutates, several are new".
+- Two-color calls are longer (`fg.to(Srgb)`), in exchange for a visible working space.
+- TS is structural, so the literal model tags (ADR-001) are what make `other: this` reject the wrong model.
