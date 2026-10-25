@@ -276,6 +276,7 @@ export function generate(): Record<string, string> {
 		'- **Out-of-sRGB colours** (most example diffs): culori clipped each channel; the package gamut-maps (CSS Color 4 MINDE, ADR-016 78d), so hue holds and the hex moves.',
 		"- **In-sRGB hexes within ~2 ΔE**: colours on the gamut edge that culori's 1e-5 tolerance called in-gamut, mapped instead of clipped; and one-byte rounding.",
 		"- **HCT**: culori's HCT re-solved chroma into sRGB on every write; the package stores the tone and chroma as given (ADR-012), and display gamut-maps. Showcase `brand_20` / `brand_90` / `warning`.",
+		'- **Brand Dark example**: replaced by the v4 two-mode theme (owner, 2026-10-25), so its culori entries have no counterpart; the v4 hexes are pinned in `tests/acceptance/brand-dark.test.ts` against the culori-era output of the same source.',
 		'- **CVD** (Showcase `cvd`): Machado 2009 runs in linear light in the package; culori applied the same matrices to gamma sRGB and snapped severity to 0.1 steps (grill 79).',
 		'- **Okhsl, HSP corners**: degenerate corners (s = 1 at l = 0 / 1) land on different out-of-gamut points before mapping.',
 		"- **RYB** (Gossett cube, Newton inverse; throws where the cube can't reach: the 4 errors), **SMPTE-C** (170M curve; the studio's was linear), **Rec. 2100 PQ** (white at 203 cd/m²), **Rec. 2020** and **ACES**: the package follows the spec where the studio approximated (ROADMAP parity table).",

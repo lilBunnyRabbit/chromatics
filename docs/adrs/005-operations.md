@@ -50,7 +50,8 @@
 >
 > - `set(values)` / `shift(deltas)` on `Color`: replace or add raw channel units, keys typed from the instance's writable number properties (`ChannelPatch<T>`, channels and alpha); mutate. An unknown key or a non-finite value throws a TypeError and writes nothing.
 > - `Hsl.tint(t)` / `shade(t)` / `tone(t)`: Sass `color.scale` in HSL. `Hct.tones(list)`, no default list. `Xyy.cct()`, McCamy 1992. `Cmyk.totalInk()` / `limitInk(max)` in ADR-004 fractions; `limitInk` is a heuristic with no independent source, and throws a RangeError for `max` below 0 or not finite.
-> - Not added: `maxChroma` (the migrator expands it through `gamutMap()`); studio inventions (invert, suppressCone, deltaExyb).
+> - Not added: `maxChroma`; studio inventions (invert, suppressCone, deltaExyb).
+> - **Correction 2026-10-25 (owner):** 81b's expansion through `gamutMap()` is not within a JND of the edge where the ceiling is small: it reads the chroma of the CSS 4 clipped point, 20% over at L 0.255 (0.0613 vs a true 0.0511). The exact sRGB ceiling needs no package change: `Oklch(L, 0.5, h).to(Okhsl).set({ s: 1 }).to(Oklch).c` (Okhsl keeps L and hue; s = 1 is the sRGB edge), matching a 40-step bisection to ~1e-12. The migrator and the examples use it.
 > - **Implemented 2026-10-25.** References: colour-science @248121e3 `test_mccamy1992.py`; sass-site @5701c5d1 `modules/color.md` examples, matched to ±0.5 per byte (the hex's precision: the tint example's blue is exactly 223.5 before rounding).
 
 ## Context

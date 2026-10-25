@@ -18,9 +18,9 @@ primary   = seed.to(Srgb).gamutMap().to(Oklch)
 secondary = seed.clone().rotateHue(150).to(Srgb).gamutMap().to(Oklch)
 tertiary  = seed.clone().rotateHue(-90).to(Srgb).gamutMap().to(Oklch)
 
-// Most vivid in-gamut accent at the same lightness: ask for too much chroma, let gamutMap() trim it
+// Most vivid in-gamut accent at the same lightness: Okhsl saturation 1 is the sRGB edge
 vivid  = seed.clone().rotateHue(60)
-accent = Oklch(vivid.l, vivid.to(Oklch).set({ c: 0.5 }).to(Srgb).gamutMap().to(Oklch).c, vivid.h)
+accent = Oklch(vivid.l, vivid.to(Oklch).set({ c: 0.5 }).to(Okhsl).set({ s: 1 }).to(Oklch).c, vivid.h)
 
 // Readable button text, auto-chosen by WCAG contrast (via sRGB)
 primary_fg = primary.to(Srgb).contrast(foreground.to(Srgb)) >= 4.5 ? foreground : background
