@@ -1,4 +1,6 @@
+import { Srgb } from '@lilbunnyrabbit/chromatics';
 import { parse } from '@lilbunnyrabbit/chromatics/all';
+import { simulateCvd } from '@lilbunnyrabbit/chromatics/cvd';
 import { ensureContrast, wcagTargetRatio } from '../color/contrast-guard.js';
 import { MODEL_CLASSES, color, num, str, type DSLValue } from './values.js';
 import { preview } from './preview.js';
@@ -20,6 +22,20 @@ export function createEnvironment(): Map<string, DSLValue> {
 			color(bg),
 			wcagTargetRatio(typeof t === 'number' ? t : str(t))
 		);
+	});
+
+	// The package's one free function the DSL exposes (owner, 2026-10-25): same signature, mutates its Srgb.
+	env.set('simulateCvd', (c: DSLValue, deficiency: DSLValue, severity?: DSLValue) => {
+		const target = color(c);
+		if (!target.is(Srgb))
+			throw new Error('simulateCvd takes an Srgb color: simulateCvd(c.to(Srgb), "deutan")');
+		const kind = str(deficiency);
+		if (kind !== 'protan' && kind !== 'deutan' && kind !== 'tritan') {
+			throw new Error(
+				`simulateCvd: deficiency must be "protan", "deutan" or "tritan", got "${kind}"`
+			);
+		}
+		return simulateCvd(target, kind, severity === undefined ? 1 : num(severity));
 	});
 
 	env.set('preview', preview as unknown as DSLValue);

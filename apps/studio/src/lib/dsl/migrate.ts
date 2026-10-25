@@ -72,6 +72,14 @@ interface Out {
 }
 
 const HUE_WHEEL_MODELS = new Set(['hsl', 'hsv', 'hwb', 'hsi']);
+const CVD_KINDS: Record<string, string> = {
+	protanopia: 'protan',
+	protanomaly: 'protan',
+	deuteranopia: 'deutan',
+	deuteranomaly: 'deutan',
+	tritanopia: 'tritan',
+	tritanomaly: 'tritan'
+};
 const OLD_HCT_TONES = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100];
 
 // Old `preview.*` and `scale.*` that took a model id string.
@@ -752,6 +760,25 @@ class Migrator {
 			}
 			case 'luminance':
 				return scalar(`${this.as(recv, 'Srgb')}.luminance()`);
+			case 'simulateCVD': {
+				const node = (n.arguments as Node[])[0];
+				const kind =
+					node?.type === 'Literal' && typeof node.value === 'string'
+						? CVD_KINDS[node.value.toLowerCase()]
+						: undefined;
+				if (!kind)
+					return this.unmapped(
+						n,
+						'.simulateCVD(): the deficiency must be a literal such as "deuteranopia"'
+					);
+				this.change(`.simulateCVD("${String(node.value)}") → simulateCvd(…, "${kind}")`);
+				const severity = a(1) === undefined ? '' : `, ${a(1)}`;
+				return color(
+					'Srgb',
+					`simulateCvd(${this.own(recv, 'Srgb')}, "${kind}"${severity})`,
+					'srgb'
+				);
+			}
 			case 'grayscale':
 				this.change('.grayscale() → .to(Srgb).filter("grayscale", 1)');
 				return color('Srgb', `${recv.text}.to(Srgb).filter("grayscale", 1)`, 'srgb');

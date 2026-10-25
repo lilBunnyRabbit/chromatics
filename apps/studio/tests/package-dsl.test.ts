@@ -1,7 +1,7 @@
 // ADR-016 78f/h/i: the DSL is the package's API, with JS semantics inside a program and frozen
 // colours once it returns.
 import { describe, expect, test } from 'bun:test';
-import { Hsl, Oklch, Srgb8 } from '@lilbunnyrabbit/chromatics';
+import { Hsl, Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 import { evaluate } from '../src/lib/dsl/evaluator';
 
 const run = (src: string) => evaluate(src);
@@ -83,6 +83,29 @@ describe('mutation semantics', () => {
 		expect(a.clone().lighten(0.1).l).toBeCloseTo(0.6, 12);
 		const list = value('a = Oklch(0.5, 0.1, 30)\nlist = [a, Oklch(0.2, 0, 0)]', 'list') as Oklch[];
 		expect(list.every((c) => Object.isFrozen(c))).toBe(true);
+	});
+});
+
+describe('simulateCvd', () => {
+	test('is the package function: mutates and returns its Srgb', () => {
+		const r = run(
+			'a = Srgb(0.9, 0.2, 0.2)\nb = simulateCvd(a, "deutan")\nc = simulateCvd(Srgb(0.9, 0.2, 0.2), "deutan", 0)'
+		);
+		expect(r.errors).toEqual([]);
+		expect(r.variables.get('b')?.value).toBe(r.variables.get('a')?.value);
+		expect((r.variables.get('c')?.value as Srgb).coords).toEqual([0.9, 0.2, 0.2]);
+	});
+
+	test('needs an Srgb and a known deficiency', () => {
+		expect(run('b = simulateCvd(Oklch(0.5, 0.1, 30), "deutan")').errors[0].message).toContain(
+			'Srgb'
+		);
+		expect(run('b = simulateCvd(Srgb(1, 0, 0), "deuteranopia")').errors[0].message).toContain(
+			'"deutan"'
+		);
+		expect(run('b = simulateCvd(Srgb(1, 0, 0), "deutan", 2)').errors[0].message).toMatch(
+			/severity|range/i
+		);
 	});
 });
 

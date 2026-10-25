@@ -14,7 +14,7 @@
 > - `ensureContrast` returns a copy of `fg` when it already passes, otherwise an Oklch colour.
 > - Hover and autocomplete read the package's JSDoc through a generated `src/lib/dsl/package-docs.json` (`scripts/package-docs.ts`, freshness test), and the receiver variable's model from the last evaluation. The package now exports the `ChannelPatch` type it uses.
 > - Lost by decision: friendly channel labels (the package has names only; `/models` shows the package's channel JSDoc), stable/experimental badges, `scale.*` and the free `token()`.
-> - Not exposed: `simulateCvd` (the DSL has classes and `parse` only, per 78f); old `simulateCVD()` calls are migration leftovers.
+> - `simulateCvd` is exposed as a builtin (owner, 2026-10-25, bending 78f by one package function): the package's signature, an Srgb argument it mutates. The migrator rewrites old `simulateCVD("deuteranopia" …)` to `simulateCvd(c.to(Srgb), "deutan")`; results differ from culori's, which applied Machado to gamma sRGB.
 > - Gate: `apps/studio/tests/fixtures/baseline/review.md`. Brand Dark: 38 of 38 hexes identical. Other example changes are out-of-sRGB colours (clip → CSS 4 mapping), a 1-byte rounding on gamut edges, and HCT tones (the package stores the tone as given).
 
 ## Context
