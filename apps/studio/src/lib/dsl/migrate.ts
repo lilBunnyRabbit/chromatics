@@ -72,6 +72,20 @@ interface Out {
 }
 
 const HUE_WHEEL_MODELS = new Set(['hsl', 'hsv', 'hwb', 'hsi']);
+// The old RGB family's accessors (luminance, contrastWCAG, simulateCVD …) lived on these models.
+const RGB_FAMILY = new Set([
+	'srgb',
+	'p3',
+	'a98',
+	'prophoto',
+	'rec2020',
+	'aces',
+	'acescg',
+	'acescc',
+	'acescct',
+	'scrgb',
+	'smptec'
+]);
 const CVD_KINDS: Record<string, string> = {
 	protanopia: 'protan',
 	protanomaly: 'protan',
@@ -525,6 +539,10 @@ class Migrator {
 					text: `${recv.text}.to(Srgb).gamutMap().to(Oklch)`,
 					info: { old: 'oklch', cls: 'Oklch', fresh: true }
 				};
+			case 'luminance':
+				if (!recv.info.old || !RGB_FAMILY.has(recv.info.old)) return null;
+				this.change('.luminance → .to(Srgb).luminance()');
+				return { text: `${this.as(recv, 'Srgb')}.luminance()`, info: { scalar: true } };
 			case 'totalInk':
 				if (recv.info.old !== 'cmyk') return null;
 				this.change('.totalInk → totalInk() × 100 (the package uses fractions)');
@@ -670,10 +688,19 @@ class Migrator {
 				this.change(`.gamutMap() → .to(${dest}).gamutMap().to(Oklch)`);
 				return color('Oklch', `${recv.text}.to(${dest}).gamutMap().to(Oklch)`);
 			}
-			case 'maxChroma':
+			case 'maxChroma': {
 				if (old !== 'oklch') break;
-				this.change('.maxChroma() → gamut-mapped chroma (within a JND of the edge, grill 81b)');
-				return scalar(`${recv.text}.to(Oklch).set({ c: 0.5 }).to(Srgb).gamutMap().to(Oklch).c`);
+				const node = (n.arguments as Node[])[0];
+				if (node && !(node.type === 'Literal' && node.value === 'rgb')) {
+					return this.unmapped(
+						n,
+						'.maxChroma(space): only the sRGB ceiling has a package expression'
+					);
+				}
+				// Okhsl s = 1 is the sRGB edge at the same lightness and hue; the probe chroma keeps the hue.
+				this.change('.maxChroma() → the sRGB ceiling via Okhsl s = 1');
+				return scalar(`${recv.text}.to(Oklch).set({ c: 0.5 }).to(Okhsl).set({ s: 1 }).to(Oklch).c`);
+			}
 			case 'mix': {
 				const cls = clsOf(old);
 				if (!cls || !['oklch', 'oklab', 'ryb'].includes(old)) break;

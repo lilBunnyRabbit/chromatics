@@ -129,6 +129,23 @@ describe('rules', () => {
 		expect(up('t = scale.text(16)')).toBe('t = tokens.text(16)');
 	});
 
+	test('maxChroma becomes the exact sRGB ceiling (Okhsl s = 1)', () => {
+		const src = up('a = OKLCH(0.255, 0.05, 230.47)\nm = a.maxChroma()');
+		expect(src).toBe(
+			'a = Oklch(0.255, 0.05, 230.47)\nm = a.to(Oklch).set({ c: 0.5 }).to(Okhsl).set({ s: 1 }).to(Oklch).c'
+		);
+		const m = evaluate(src).variables.get('m')?.value as number;
+		// The ceiling at L 0.255 on this hue, from a 40-step bisection on inGamut(0) (theme port, 2026-10-25).
+		expect(m).toBeCloseTo(0.0511, 3);
+		expect(migrate('a = OKLCH(0.5, 0.1, 30)\nm = a.maxChroma("p3")').leftovers.length).toBe(1);
+	});
+
+	test('the RGB family .luminance accessor becomes a call', () => {
+		expect(up('a = hex("#ff0000")\ny = a.srgb.luminance')).toBe(
+			'a = parse("#ff0000")\ny = a.to(Srgb).luminance()'
+		);
+	});
+
 	test('simulateCVD becomes the simulateCvd builtin', () => {
 		expect(up('a = hex("#ff0000")\nb = a.srgb.simulateCVD("deuteranopia")')).toBe(
 			'a = parse("#ff0000")\nb = simulateCvd(a.to(Srgb), "deutan")'
