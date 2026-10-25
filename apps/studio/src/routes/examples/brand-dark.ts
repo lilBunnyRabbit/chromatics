@@ -67,6 +67,11 @@ info    = Oklch(foreground.l, background.c * 6, h_info)
 // measured, at most 0.02 in either mode. Every solve in the file targets it.
 legible = 4.55
 
+// Every luminance below is WCAG's own, read back from its contrast against
+// black: ratio = (Y + 0.05) / 0.05. The package's \`luminance()\` is the exact Y,
+// which differs from WCAG's rounded 0.2126 / 0.7152 / 0.0722 in the 5th decimal —
+// enough to tip cottontail's blue off a rounding edge. The contract is WCAG's.
+
 // ── Dark ladder reach — SOLVED ──
 // WCAG contrast is a ratio of relative luminances, (Yl + 0.05) / (Yd + 0.05),
 // so a contrast target inverts into a luminance target with one division, and
@@ -76,9 +81,9 @@ legible = 4.55
 // rung is the seed lifted to where that text still reads \`legible\`. Move the
 // seed and this re-solves.
 dimmest = min(
-  foreground.to(Srgb).luminance(), primary.to(Srgb).luminance(),   secondary.to(Srgb).luminance(),
-  tertiary.to(Srgb).luminance(),   accent.to(Srgb).luminance(),    success.to(Srgb).luminance(),
-  warning.to(Srgb).luminance(),    error.to(Srgb).luminance(),     info.to(Srgb).luminance()
+  (foreground.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05), (primary.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05),   (secondary.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05),
+  (tertiary.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05),   (accent.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05),    (success.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05),
+  (warning.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05),    (error.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05),     (info.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05)
 )
 span = background.to(Xyy).set({ Y: (dimmest + 0.05) / legible - 0.05 }).to(Oklch).l - background.l
 
@@ -162,7 +167,7 @@ light_background = Oklch(top, Oklch(top, 0.5, light_bh).to(Okhsl).set({ s: 1 }).
 // chroma is then stated, the seed's, as in dark.
 light_foreground = Oklch(
   light_background.clone().complement().to(Xyy).set({
-    Y: (light_background.to(Srgb).luminance() + 0.05) / 8 - 0.05
+    Y: ((light_background.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05) + 0.05) / 8 - 0.05
   }).to(Oklch).l,
   background.c,
   (light_bh + 180) % 360
@@ -182,7 +187,7 @@ light_foreground = Oklch(
 // the contract: the ladder descends until the text reads \`legible\`, the mirror
 // of dark's \`span\`. Steps 3.2 · 2.9 · 2.7 above, 8.3 · 6.1 · 4.9 below — the
 // page sits near white, so the only depth a light ladder can have is below it.
-light_span = top - light_background.to(Xyy).set({ Y: legible * (light_foreground.to(Srgb).luminance() + 0.05) - 0.05 }).to(Oklch).l
+light_span = top - light_background.to(Xyy).set({ Y: legible * ((light_foreground.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05) + 0.05) - 0.05 }).to(Oklch).l
 light_up   = 1 - top
 
 light_background_lightest = Oklch(top + light_up,         Oklch(top + light_up,         0.5, light_bh).to(Okhsl).set({ s: 1 }).to(Oklch).c * tint, light_bh)
@@ -212,7 +217,7 @@ light_background_darkest  = Oklch(top - light_span,       Oklch(top - light_span
 // each, dark's "furthest from both walls" rule, in the one arc a warm page
 // leaves open. 9.5 ΔE from the text; at the text's own lightness it read 3.7.
 light_u  = light_background.c
-light_y  = (light_background_dark.to(Srgb).luminance() + 0.05) / legible - 0.05
+light_y  = ((light_background_dark.to(Srgb).contrast(Srgb(0, 0, 0)) * 0.05 - 0.05) + 0.05) / legible - 0.05
 light_nl = light_background_dark.to(Xyy).set({ Y: light_y }).to(Oklch).l
 light_bl = Oklch(light_nl, light_u * 6, h_success).to(Xyy).set({ Y: light_y }).to(Oklch).l
 

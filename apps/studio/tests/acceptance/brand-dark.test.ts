@@ -54,9 +54,8 @@ test('brand-dark renders the full 18-variant background chroma study', () => {
 
 // ── The editor example ("Brand Dark") is the v4 two-mode theme the brand guide ships (owner,
 // 2026-10-25). Its golden hexes are the culori-era studio's output for the same source (theme port
-// report, evaluated at 365c747), so the package port can't drift. One deliberate exception:
-// cottontail, whose blue sits on a rounding edge and moved one byte with the package's exact
-// luminance (owner accepted, 2026-10-25).
+// report, evaluated at 365c747), so the package port can't drift. Byte for byte: the theme reads
+// WCAG's luminance, not the package's exact Y, so cottontail stays off its rounding edge.
 const V4_GOLDEN: Record<string, string> = {
 	background: '#17252c',
 	foreground: '#b1aba8',
@@ -74,7 +73,7 @@ const V4_GOLDEN: Record<string, string> = {
 	background_dark: '#111d23',
 	background_darker: '#0b1519',
 	background_darkest: '#060d11',
-	cottontail: '#e3f9b3',
+	cottontail: '#e3f9b2',
 	light_background: '#f6eddb',
 	light_foreground: '#414754',
 	light_background_lightest: '#ffffff',
