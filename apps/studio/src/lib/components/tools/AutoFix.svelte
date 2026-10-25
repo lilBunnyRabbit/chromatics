@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
+	import { Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { app } from '$lib/state/app.svelte';
-	import { ensureContrast } from '$lib/color/contrast-guard';
 	import { contrastRatio } from '$lib/analysis/contrast';
 	import { apcaContrast } from '$lib/analysis/apca';
 	import { uniqueName } from '$lib/dsl/emit';
@@ -23,9 +22,9 @@
 	let targetId = $state('aa');
 	const target = $derived(TARGETS.find((t) => t.id === targetId)!);
 
-	// The very solver the emitted `ensureContrast(…)` call runs — preview == result.
+	// The very call the emitted `ensureContrast(…)` builtin makes — preview == result.
 	const fixed = $derived.by(() =>
-		fg && bg ? ensureContrast(fg.color, bg.color, target.ratio) : null
+		fg && bg ? fg.color.to(Srgb).ensureContrast(bg.color.to(Srgb), target.ratio).to(Oklch) : null
 	);
 	const changed = $derived(
 		!!(

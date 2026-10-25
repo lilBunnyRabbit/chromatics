@@ -1,8 +1,7 @@
 import { test, expect, describe } from 'bun:test';
 import { Cam16, HunterLab, Srgb, Srgb8, Xyy, type Color } from '@lilbunnyrabbit/chromatics';
 import { parse } from '@lilbunnyrabbit/chromatics/all';
-import { evaluate } from '../src/lib/dsl/evaluator';
-import { MODEL_CLASSES } from '../src/lib/dsl/values';
+import { evaluate, MODEL_CLASSES } from '@lilbunnyrabbit/chromatics-dsl';
 
 const PROBES = ['#1a8cff', '#7ac26a', '#e49b39', '#b5a2d2'];
 

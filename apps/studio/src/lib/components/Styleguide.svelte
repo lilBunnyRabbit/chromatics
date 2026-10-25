@@ -11,8 +11,8 @@
 	import { app } from '$lib/state/app.svelte';
 	import { ui } from '$lib/state/ui.svelte';
 	import { cssVars, NONE_ROLE, type Roles } from '$lib/scheme/roles';
-	import { isToken } from '$lib/scheme/tokens';
-	import { kebab } from '$lib/export';
+	import { isToken } from '@lilbunnyrabbit/chromatics-dsl/scheme';
+	import { kebab } from '@lilbunnyrabbit/chromatics-dsl/export';
 	import { simulateVision, visionSimulations } from '$lib/analysis/cvd';
 	import { wcagLevels, wcagColor } from '$lib/analysis/wcag';
 	import type { ResolveCtx } from '$lib/render/resolve';

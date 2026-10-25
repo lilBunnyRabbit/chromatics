@@ -1,7 +1,7 @@
 {
   "name": "chromatics-monorepo",
   "private": true,
-  "description": "Chromatics: the @lilbunnyrabbit/chromatics color package and the studio that uses it.",
+  "description": "Chromatics: the @lilbunnyrabbit/chromatics color package, the @lilbunnyrabbit/chromatics-dsl color language and the studio that uses them.",
   "author": "Andraž Mesarič-Sirec",
   "license": "MIT",
   "homepage": "https://lilbunnyrabbit.github.io/chromatics/",
@@ -26,7 +26,7 @@
     "lint": "prettier --check . && bun --filter studio lint",
     "format": "prettier --write . && bun --filter studio format",
     "changeset": "bun --bun x changeset",
-    "release": "turbo run check test build --filter=@lilbunnyrabbit/chromatics && bun --bun x changeset publish"
+    "release": "turbo run check test build --filter=@lilbunnyrabbit/chromatics --filter=@lilbunnyrabbit/chromatics-dsl && bun --bun x changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "3.0.3",

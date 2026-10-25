@@ -1,12 +1,14 @@
 import { test, expect, describe } from 'bun:test';
-import { evaluate } from '../src/lib/dsl/evaluator';
+import { evaluate } from '@lilbunnyrabbit/chromatics-dsl';
 import { schemeFromEvalResult } from '../src/lib/scheme/adapter';
-import { tokensFromScheme, buildTokenVars, isToken } from '../src/lib/scheme/tokens';
 import {
+	tokensFromScheme,
+	buildTokenVars,
+	isToken,
 	componentsFromScheme,
-	auditPairsFromComponents,
 	type ButtonSpec
-} from '../src/lib/scheme/components';
+} from '@lilbunnyrabbit/chromatics-dsl/scheme';
+import { auditPairsFromComponents } from '../src/lib/scheme/components';
 import { themeRolesFromScheme } from '../src/lib/scheme/theme-config';
 import { resolveRoles, emptyRoles, DEFAULT_OPACITIES } from '../src/lib/scheme/roles';
 import { resolveRef, resolveColor, refAlpha, type ResolveCtx } from '../src/lib/render/resolve';

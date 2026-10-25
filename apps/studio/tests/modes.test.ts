@@ -7,14 +7,13 @@
  */
 import { Oklch } from '@lilbunnyrabbit/chromatics';
 import { test, expect, describe } from 'bun:test';
-import { evaluate } from '../src/lib/dsl/evaluator';
+import { evaluate } from '@lilbunnyrabbit/chromatics-dsl';
 import { schemeFromEvalResult } from '../src/lib/scheme/adapter';
 import { themeRolesFromScheme } from '../src/lib/scheme/theme-config';
 import { deriveScheme } from '../src/lib/scheme/derive';
 import { darkRolesFor, modeWarnings, modeFragilePairs } from '../src/lib/scheme/modes';
 import { toStyleguideCss } from '../src/lib/export/styleguide';
-import { tokensFromScheme } from '../src/lib/scheme/tokens';
-import { componentsFromScheme } from '../src/lib/scheme/components';
+import { tokensFromScheme, componentsFromScheme } from '@lilbunnyrabbit/chromatics-dsl/scheme';
 import { emptyRoles, DEFAULT_OPACITIES, type AuditPair } from '../src/lib/scheme/roles';
 import { manifest } from '../src/lib/dsl/manifest';
 

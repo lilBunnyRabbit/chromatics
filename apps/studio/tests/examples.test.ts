@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test';
-import { evaluate } from '../src/lib/dsl/evaluator';
+import { evaluate } from '@lilbunnyrabbit/chromatics-dsl';
 import { examples } from '../src/routes/examples';
 
 for (const ex of examples) {

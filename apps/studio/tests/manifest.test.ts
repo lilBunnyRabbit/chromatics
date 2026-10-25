@@ -2,8 +2,7 @@ import { test, expect, describe } from 'bun:test';
 import { Oklch } from '@lilbunnyrabbit/chromatics';
 import { models } from '@lilbunnyrabbit/chromatics/all';
 import { manifest } from '../src/lib/dsl/manifest';
-import { evaluate } from '../src/lib/dsl/evaluator';
-import { MODEL_CLASSES } from '../src/lib/dsl/values';
+import { createEnvironment, evaluate, MODEL_CLASSES } from '@lilbunnyrabbit/chromatics-dsl';
 
 const PROBE = 'Oklch(0.6, 0.12, 250)';
 
@@ -59,6 +58,18 @@ describe('manifest <-> runtime (anti-drift)', () => {
 				expect(typeof value, `${ns}.${m.name}`).toBe('function');
 			}
 		}
+	});
+
+	test('the documented namespaces and builtins are exactly the package environment', () => {
+		const env = createEnvironment();
+		for (const ns of ['preview', 'tokens', 'component', 'theme']) {
+			const documented = (manifest.viewMembers.get(ns) ?? []).map((m) => m.name).sort();
+			const real = env.get(ns);
+			expect(documented, ns).toEqual(Object.keys(real as object).sort());
+		}
+		const models = new Set(MODEL_CLASSES.map(([n]) => n));
+		const builtins = [...env.keys()].filter((k) => !models.has(k)).sort();
+		expect(manifest.builtins.filter((b) => b !== 'roles').sort()).toEqual(builtins);
 	});
 
 	test('every builtin is defined in the environment', () => {

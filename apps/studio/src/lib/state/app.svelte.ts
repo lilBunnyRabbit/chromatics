@@ -11,11 +11,10 @@
  * inputs.
  */
 import type { DocSettings } from '$lib/persistence/documents';
-import type { EvalResult } from '$lib/dsl/evaluator';
+import type { EvalResult } from '@lilbunnyrabbit/chromatics-dsl';
 import type { Scheme } from '$lib/scheme/types';
 import type { VisionSimulation } from '$lib/analysis/cvd';
-import type { StyleTokens } from '$lib/scheme/tokens';
-import type { NamedComponent } from '$lib/scheme/components';
+import type { StyleTokens, NamedComponent } from '@lilbunnyrabbit/chromatics-dsl/scheme';
 import { deriveScheme, type RenderedScheme } from '$lib/scheme/derive';
 import type { ModeWarning, ModeFragilePair } from '$lib/scheme/modes';
 import {

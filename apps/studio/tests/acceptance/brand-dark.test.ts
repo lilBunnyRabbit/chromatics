@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test';
-import { evaluate } from '../../src/lib/dsl/evaluator';
+import { evaluate } from '@lilbunnyrabbit/chromatics-dsl';
 import { source } from '../fixtures/brand-dark';
 import { source as example } from '../../src/routes/examples/brand-dark';
 import { Color, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';

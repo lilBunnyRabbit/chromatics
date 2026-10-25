@@ -14,7 +14,7 @@
 		ButtonSize,
 		CardSpec,
 		TypeStep
-	} from '$lib/scheme/components';
+	} from '@lilbunnyrabbit/chromatics-dsl/scheme';
 
 	let { name, spec, ctx }: { name: string; spec: ComponentSpec; ctx: ResolveCtx } = $props();
 
