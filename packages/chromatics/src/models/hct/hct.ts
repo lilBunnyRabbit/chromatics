@@ -201,6 +201,20 @@ export class Hct extends HueColor {
   }
 
   /**
+   * New colors with this one's hue and chroma at each of the given tones (0–100), in order: a Material
+   * tonal palette before gamut mapping. Tones are stored as given, not clamped.
+   *
+   * @throws {TypeError} when a tone isn't a finite number.
+   * @example
+   * ```ts
+   * primary.to(Hct).tones([40, 90, 10, 100]);
+   * ```
+   */
+  tones(tones: readonly number[]): Hct[] {
+    return tones.map((t) => new Hct(this._h, this._c, t, this.alpha));
+  }
+
+  /**
    * Parses `hct(h c t [/ alpha])`: hue in degrees or angle units, `c` and `t` as numbers. Not CSS.
    *
    * @throws {SyntaxError} on any other syntax.

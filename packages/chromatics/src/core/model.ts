@@ -65,6 +65,18 @@ export type ChannelValues<M extends ColorModel> = { [K in ChannelName<M>]: numbe
   alpha?: number;
 };
 
+type IfEquals<X, Y, A, B> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? A : B;
+
+/**
+ * The writable number properties of a color instance (its channels and alpha), all optional: what
+ * `set()` and `shift()` take. `ChannelPatch<Oklch>` is `{ l?: number; c?: number; h?: number; alpha?: number }`.
+ */
+export type ChannelPatch<T> = {
+  [K in keyof T as T[K] extends number
+    ? IfEquals<{ [Q in K]: T[K] }, { -readonly [Q in K]: T[K] }, K, never>
+    : never]?: number;
+};
+
 /** The options object a target model accepts in `to()` / `from()`, or `undefined` when it takes none. */
 export type OptionsOf<M> = "__options" extends keyof M ? NonNullable<M["__options" & keyof M]> : undefined;
 

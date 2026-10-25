@@ -124,6 +124,27 @@ export class Hsl extends HueColor {
   }
 
   /**
+   * Moves lightness `t` of the way toward white, `l + (1 − l) · t`, and returns this color (mutates). The
+   * same as Sass `color.scale($lightness: t)` in HSL. Not clamped.
+   */
+  tint(t: number): this {
+    this.l = this._l + (1 - this._l) * t;
+    return this;
+  }
+
+  /** Moves lightness `t` of the way toward black, `l · (1 − t)` (mutates). Sass `color.scale($lightness: −t)`. Not clamped. */
+  shade(t: number): this {
+    this.l = this._l * (1 - t);
+    return this;
+  }
+
+  /** Moves saturation `t` of the way toward grey, `s · (1 − t)` (mutates). Sass `color.scale($saturation: −t)`. Not clamped. */
+  tone(t: number): this {
+    this.s = this._s * (1 - t);
+    return this;
+  }
+
+  /**
    * `n` new colors with this one's other channels and `l` evenly spaced from `from` to `to` (fractions
    * of the range, default 0.05–0.95). Steps are raw: map each for display, `c.to(Srgb).gamutMap()`.
    *

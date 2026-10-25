@@ -46,6 +46,13 @@
 > - Lab: `deltaE94(other, { application = 'graphic-arts' })`, `deltaECmc(other, { l = 2, c = 1 })`.
 > - **Implemented 2026-10-21:** on `Lab` and `Lab65`. The Machado table is colour-science's dataset, identical to coloraide's and culori's. A filter amount below 0 throws a RangeError (Filter Effects 1 §6.1: "Negative values are not allowed"); grayscale, sepia and invert take amounts over 1 as 1, as §6.1 requires. A CVD severity outside [0, 1] throws. Compositing uses the alphas as stored, unclamped. References: coloraide @4888fc2d's CVD, filter, compositing and ΔE tests; colour-science @248121e3's ΔE94 / CMC docstrings.
 
+> **Revision 2026-10-25: methods the studio switch needs** (grill 81, ADR-017)
+>
+> - `set(values)` / `shift(deltas)` on `Color`: replace or add raw channel units, keys typed from the instance's writable number properties (`ChannelPatch<T>`, channels and alpha); mutate. An unknown key or a non-finite value throws a TypeError and writes nothing.
+> - `Hsl.tint(t)` / `shade(t)` / `tone(t)`: Sass `color.scale` in HSL. `Hct.tones(list)`, no default list. `Xyy.cct()`, McCamy 1992. `Cmyk.totalInk()` / `limitInk(max)` in ADR-004 fractions; `limitInk` is a heuristic with no independent source, and throws a RangeError for `max` below 0 or not finite.
+> - Not added: `maxChroma` (the migrator expands it through `gamutMap()`); studio inventions (invert, suppressCone, deltaExyb).
+> - **Implemented 2026-10-25.** References: colour-science @248121e3 `test_mccamy1992.py`; sass-site @5701c5d1 `modules/color.md` examples, matched to ±0.5 per byte (the hex's precision: the tint example's blue is exactly 223.5 before rounding).
+
 ## Context
 
 Operations are methods on the color's class (ADR-001), and single-result operations mutate and return `this`. Open questions were: how shared operations reach ~100 classes, two-color operations across models, operations needing another model's math, multi-color results, interpolation, gamut mapping. The studio uses op-tables in `families.ts`; binary ops throw across models. [Brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 6, 7, 8, 12.

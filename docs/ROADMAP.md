@@ -51,6 +51,7 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
 5. [x] **Monorepo**: this repo hosts the package and the website (2026-10-20, grill 76: `apps/studio` + `packages/chromatics`, Turborepo, CI on `--affected`)
 6. [ ] **Studio on the package**: culori removed from the app (ADR-016)
    - [x] Gap features in the package (grill 79): `simulateCvd` (`/cvd`), `Srgb.filter`, `over`, `deltaE94` / `deltaECmc`
+   - [x] Methods the switch needs (grill 81, 2026-10-25): `set` / `shift` on every class, `Hsl.tint` / `shade` / `tone`, `Hct.tones`, `Xyy.cct`, `Cmyk.totalInk` / `limitInk`
    - [x] Studio culori baseline dump (2026-10-25): `apps/studio/tests/fixtures/baseline/`, every backed model on a 48-colour grid plus its own channel corners, and every example's entries, roles, theme vars and CSS export
    - [ ] The switch
    - [ ] Old-script upgrade (ADR-017, grill 80): `dsl/migrate.ts` codemod, review diff, v1 detection banner; built with the switch

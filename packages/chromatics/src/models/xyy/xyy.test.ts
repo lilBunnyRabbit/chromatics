@@ -35,3 +35,19 @@ describe("Xyy references", () => {
     expect([...new Xyy(0.3457, 0, 0.5).to(Xyz65).coords]).toEqual([0, 0, 0]);
   });
 });
+
+// colour-science @ 248121e3 colour/temperature/tests/test_mccamy1992.py, 8 decimals.
+describe("cct (McCamy 1992)", () => {
+  it.each([
+    [0.3127, 0.329, 6505.08059131],
+    [0.44757, 0.40745, 2857.28961266],
+    [0.252520939374083, 0.252220883926284, 19501.6195313],
+  ])("x %d, y %d is %d K", (x, y, k) => {
+    expect(new Xyy(x, y, 1).cct()).toBeCloseTo(k, 7);
+  });
+
+  it("ignores Y and is not finite at y = 0.1858", () => {
+    expect(new Xyy(0.3127, 0.329, 0.2).cct()).toBe(new Xyy(0.3127, 0.329, 1).cct());
+    expect(Number.isFinite(new Xyy(0.3, 0.1858, 1).cct())).toBe(false);
+  });
+});

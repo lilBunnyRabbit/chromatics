@@ -1,6 +1,6 @@
 import { Optional } from "@lilbunnyrabbit/optional";
 import { finite } from "./channel.js";
-import type { ChannelValues, ColorModel, OptionsArgs } from "./model.js";
+import type { ChannelPatch, ChannelValues, ColorModel, OptionsArgs } from "./model.js";
 import { convert } from "./router.js";
 
 /**
@@ -65,6 +65,53 @@ export abstract class Color {
   clone(): this {
     const model = this.constructor as ColorModel<this>;
     return new model(...this.coords, this.alpha);
+  }
+
+  /**
+   * Replaces the given channels (and alpha) and returns this color (mutates). Raw channel units, written
+   * through the setters in channel order, so hues wrap. Nothing is written when any value is invalid.
+   *
+   * @throws {TypeError} on a key that isn't a channel or `alpha`, or a value that isn't a finite number.
+   * @example
+   * ```ts
+   * seed.clone().set({ l: 0.95 });
+   * ```
+   */
+  set(values: ChannelPatch<this>): this {
+    return this.write(values as Record<string, unknown>, false);
+  }
+
+  /**
+   * Adds the given amounts to channels (and alpha) and returns this color (mutates). Raw channel units,
+   * unlike `lighten()`, whose amount is a fraction of the range: `shift({ c: 0.04 })` adds 0.04 to Oklch
+   * c. Hues wrap; nothing is clamped. Nothing is written when any value is invalid.
+   *
+   * @throws {TypeError} on a key that isn't a channel or `alpha`, or a result that isn't a finite number.
+   * @example
+   * ```ts
+   * background.clone().shift({ l: -0.03, c: 0.01 });
+   * ```
+   */
+  shift(deltas: ChannelPatch<this>): this {
+    return this.write(deltas as Record<string, unknown>, true);
+  }
+
+  private write(values: Record<string, unknown>, add: boolean): this {
+    const names = [...Object.keys((this.constructor as ColorModel).channels), "alpha"];
+    const target = this as unknown as Record<string, number>;
+    for (const key of Object.keys(values)) {
+      if (!names.includes(key)) throw new TypeError(`${this.model} has no channel "${key}"`);
+    }
+    const writes: [string, number][] = [];
+    for (const name of names) {
+      const v = values[name];
+      if (v === undefined) continue;
+      const next = typeof v === "number" ? (add ? target[name]! + v : v) : NaN;
+      if (!Number.isFinite(next)) throw new TypeError(`${this.model}.${name} must be a finite number`);
+      writes.push([name, next]);
+    }
+    for (const [name, v] of writes) target[name] = v;
+    return this;
   }
 
   /** `{ model, ...channels, alpha }`, so `JSON.stringify` shows channels by name. */

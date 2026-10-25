@@ -131,7 +131,7 @@ A Bun + Turborepo monorepo (ADR-007, grill 76): the studio in `apps/studio` (pri
 ```sh
 bun install
 bun run dev            # studio dev server
-bun run test           # studio bun:test (423 across 32 files) + package Vitest on node and bun (8,672)
+bun run test           # studio bun:test (423 across 32 files) + package Vitest on node and bun (8,699)
 bun run check          # studio svelte-check (expect 0 errors / 0 warnings) + package tsc
 bun run build          # studio static build → apps/studio/build/, package → packages/chromatics/dist/
 bun run lint           # prettier --check: root config for the package and repo files, the studio its own

@@ -82,6 +82,22 @@ export class Xyy extends RectangularColor {
   }
 
   /**
+   * Correlated colour temperature in kelvin from the chromaticity, by McCamy's cubic (McCamy 1992, Color
+   * Res. Appl. 17(2) 142–144): `n = (x − 0.3320) / (y − 0.1858)`, `T = −449n³ + 3525n² − 6823.3n + 5520.33`.
+   * The fit holds for roughly 2000–12500 K near the Planckian locus; outside it the cubic's value is
+   * returned as is, and it is not finite at y = 0.1858.
+   *
+   * @example
+   * ```ts
+   * new Xyy(0.3127, 0.329, 1).cct(); // ≈ 6505 (D65)
+   * ```
+   */
+  cct(): number {
+    const n = (this._x - 0.332) / (this._y - 0.1858);
+    return -449 * n ** 3 + 3525 * n ** 2 - 6823.3 * n + 5520.33;
+  }
+
+  /**
    * Parses `xyy(x y Y [/ alpha])`, numbers only. Not CSS; nothing clamps.
    *
    * @throws {SyntaxError} on any other syntax.

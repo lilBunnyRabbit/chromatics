@@ -70,3 +70,26 @@ describe("Cmyk extras", () => {
     expect(c.to(Srgb).r).toBeCloseTo(-0.5, 15);
   });
 });
+
+// No independent source exists for proportional ink limiting (grill 81c): these check the definition.
+describe("totalInk / limitInk", () => {
+  it("totalInk is c + m + y + k as a fraction", () => {
+    expect(new Cmyk(0.6, 0.5, 0.4, 0.9).totalInk()).toBeCloseTo(2.4, 15);
+  });
+
+  it("limitInk scales every ink by max / total, mutates and chains", () => {
+    const c = new Cmyk(0.8, 0.8, 0.8, 0.8);
+    expect(c.limitInk(2.4)).toBe(c);
+    c.coords.forEach((v) => expect(v).toBeCloseTo(0.6, 15));
+    expect(c.totalInk()).toBeCloseTo(2.4, 15);
+  });
+
+  it("leaves a color at or under the limit unchanged", () => {
+    expect(new Cmyk(0.6, 0.6, 0.6, 0.6).limitInk(2.4).coords).toEqual([0.6, 0.6, 0.6, 0.6]);
+    expect(new Cmyk(0, 0, 0, 0).limitInk(0).coords).toEqual([0, 0, 0, 0]);
+  });
+
+  it.each([-0.1, NaN, Infinity])("throws a RangeError for max %d", (max) => {
+    expect(() => new Cmyk(1, 1, 1, 1).limitInk(max)).toThrow(RangeError);
+  });
+});

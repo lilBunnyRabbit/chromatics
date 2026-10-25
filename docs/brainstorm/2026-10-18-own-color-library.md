@@ -597,6 +597,19 @@ Owner, 2026-10-25: "if i have old scripts to modify them and use the new system"
 
 Test gate: every current example, migrated, evaluates in the new DSL to the baseline's hexes, except reviewed differences (gamut mapping, CMC default). Built with the switch, since its output must run on the new evaluator. Recorded as [ADR-017](../adrs/017-dsl-migration.md).
 
+### Grill 81: studio methods the package lacks (decided 2026-10-25)
+
+Owner: "grill first", before the switch. Of 73 studio method names on backed models, 54 are missing from the package by name. Renames (rotate → rotateHue, contrastWCAG → contrast, deltaECMC → deltaECmc, deltaEitp → deltaEItp, deltaEok → deltaEOk, gamutMapped → `to(Srgb).gamutMap()`, simulateCVD → `simulateCvd`, blend → LinearSrgb `mix`) are the migrator's job, not API. Example usage: shift 22 (all Brand Dark), atTone 7, atLightness 6, the rest 0–1.
+
+- **81a, set / shift:** chainable `set({ … })` (replace channels) and `shift({ … })` (add raw channel units) on every class; typed from the instance's writable number properties (channels and alpha); mutate and return this (recommended). Attack accepted: `lighten(x)` is a fraction of the range, `shift({ l: x })` raw units. Mine: unknown keys throw a TypeError (a DSL typo must not be ignored), writes go through the setters in the class's channel order, then alpha.
+- **81b, maxChroma:** dropped; the migrator expands to `clone().set({ c: 0.5 }).to(Srgb).gamutMap().to(Oklch).c`, approximate within the CSS 4 JND (owner's pick over the recommended `Oklch.maxChroma(gamut)`).
+- **81c, domain API (owner picked all four):**
+  - `Xyy.cct()`: McCamy 1992, `n = (x − 0.3320) / (y − 0.1858)`, `−449n³ + 3525n² − 6823.3n + 5520.33`; colour-science @248121e3 `temperature/mccamy1992.py` and its tests. Not clamped to the fit's range; non-finite at y = 0.1858. isWarm expands to `cct() < 5000`.
+  - `Hct.tones(list)`: new colours at the given tones, hue and chroma kept. Mine: no default list (Material sources disagree: 13 tones in the studio, 18 in Theme Builder exports); materialRoles expands to `tones([40, 90, 10, 100])`, tonalPalette to the studio's 13-tone list.
+  - `Cmyk.totalInk()` and `Cmyk.limitInk(max)`: ADR-004 fractions, so TAC 240 % is `2.4` (the migrator divides by 100). limitInk scales the four inks by one factor when over the limit, else leaves them. No independent source: a heuristic, not ISO 12647 or GCR; owner accepted that in the grill. Tests check the definition.
+  - `Hsl.tint(t)` / `shade(t)` / `tone(t)`: `l + (1 − l)t`, `l(1 − t)`, `s(1 − t)`; not clamped. These are Sass `color.scale` with `$lightness: ±t` / `$saturation: −t` in HSL, so the Sass docs' examples are the reference vectors (sass-site @5701c5d1 `documentation/modules/color.md`: `#036` shade 0.3 → `#002447`, `#6b717f` tone 0.3 → `#6e727c`, `#e1d7d2` tint 0.3 → `#eae3e0`).
+- **Flagged by the migrator, no API:** invert, suppressCone, deltaExyb (studio inventions, no source); RAL code / name / nearest (dropped, licensing). Predicates and scale-type ops (meetsAA, isGray, isPerceptiblyDifferent, exposure, scaleLuminance, scaleChroma, premultiply, separations, isRichBlack) expand to expressions.
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

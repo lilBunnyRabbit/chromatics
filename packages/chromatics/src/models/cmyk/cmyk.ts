@@ -115,6 +115,26 @@ export class Cmyk extends RectangularColor {
     return [this._c, this._m, this._y, this._k];
   }
 
+  /** Total area coverage, `c + m + y + k`, as a fraction: 2.4 is a 240 % TAC. */
+  totalInk(): number {
+    return this._c + this._m + this._y + this._k;
+  }
+
+  /**
+   * Scales all four inks by one factor so that {@link totalInk} is `max` (a fraction: 2.4 for 240 %), and
+   * returns this color (mutates). Unchanged when already at or under the limit. A proportional
+   * heuristic, not a print standard's black generation (GCR): it changes the color.
+   *
+   * @throws {RangeError} when `max` isn't a finite number ≥ 0.
+   */
+  limitInk(max: number): this {
+    if (!(Number.isFinite(max) && max >= 0)) throw new RangeError(`cmyk.limitInk: max must be ≥ 0, got ${max}`);
+    const total = this.totalInk();
+    if (total <= max) return this;
+    const f = max / total;
+    return this.assign([this._c * f, this._m * f, this._y * f, this._k * f], this.alpha);
+  }
+
   /**
    * Parses CSS Color 5 §6 `device-cmyk()`: the modern form `device-cmyk(c m y k [/ alpha])` with numbers
    * 0–1, percentages or `none`, and the legacy `device-cmyk(c, m, y, k)` with numbers only and no alpha.

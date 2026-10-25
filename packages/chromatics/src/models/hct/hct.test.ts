@@ -73,3 +73,24 @@ describe("Hct references", () => {
     expect(c.to(Srgb).gamutMap().inGamut(0)).toBe(true);
   });
 });
+
+describe("tones", () => {
+  it("returns new colors at each tone with hue, chroma and alpha kept", () => {
+    const c = new Hct(250, 40, 50, 0.5);
+    const out = c.tones([40, 90, 10, 100]);
+    expect(out.map((t) => [...t.coords, t.alpha])).toEqual([
+      [250, 40, 40, 0.5],
+      [250, 40, 90, 0.5],
+      [250, 40, 10, 0.5],
+      [250, 40, 100, 0.5],
+    ]);
+    expect(out.every((t) => t !== c)).toBe(true);
+    expect(c.coords).toEqual([250, 40, 50]);
+  });
+
+  it("stores tones unclamped and throws a TypeError on NaN", () => {
+    expect(new Hct(250, 40, 50).tones([-5, 120]).map((t) => t.t)).toEqual([-5, 120]);
+    expect(() => new Hct(250, 40, 50).tones([NaN])).toThrow(TypeError);
+    expect(new Hct(250, 40, 50).tones([])).toEqual([]);
+  });
+});
