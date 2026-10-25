@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { onMount } from 'svelte';
-	import { allModels, getModel, ColorValue, hex, type ModelDef } from '$lib/models';
-	import { seedVals, channelGradient, fmtChannel } from '$lib/mixer/engine';
+	import { Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
+	import { parse } from '@lilbunnyrabbit/chromatics/all';
+	import { CATALOG, infoByName, type ModelInfo } from '$lib/color/catalog';
+	import { LEGACY_MODEL_IDS, LEGACY_REFERENCE } from '$lib/color/legacy';
+	import { seedVals, buildFromVals, channelGradient, fmtChannel } from '$lib/mixer/engine';
+	import { manifest } from '$lib/dsl/manifest';
 	import { MODEL_DOCS } from '$lib/dsl/model-docs';
 	import { ENCYCLOPEDIA } from '$lib/dsl/encyclopedia';
-	import { CHANNEL_DOCS } from '$lib/dsl/channel-docs';
 	import { ui } from '$lib/state/ui.svelte';
 	import { welcome } from '$lib/state/welcome.svelte';
 	import GamutPlane from '$lib/components/GamutPlane.svelte';
@@ -19,7 +22,7 @@
 		blurb: string;
 	}
 	const FAMILY: Record<string, FamilyMeta> = {
-		'perceptual-cylindrical': {
+		perceptual: {
 			label: 'Perceptual · cylindrical',
 			blurb: 'Lightness–chroma–hue spaces where equal numeric steps look like equal visual steps.'
 		},
@@ -44,6 +47,10 @@
 			blurb: 'Luma–chroma encodings behind television and image compression.'
 		},
 		subtractive: { label: 'Subtractive / print', blurb: 'Ink models for the printed page.' },
+		appearance: {
+			label: 'Color appearance',
+			blurb: 'Models that predict how a color looks under given viewing conditions.'
+		},
 		other: { label: 'Concepts & niche', blurb: 'Conceptual and special-purpose representations.' },
 		system: {
 			label: 'Color systems',
@@ -51,59 +58,107 @@
 		}
 	};
 	const FAMILY_ORDER = [
-		'perceptual-cylindrical',
+		'perceptual',
 		'lab',
 		'hue',
 		'rgb',
 		'tristimulus',
 		'video',
 		'subtractive',
+		'appearance',
 		'other',
 		'system'
 	];
 
-	const STATUS_LABEL: Record<string, string> = {
-		stable: 'Stable',
-		experimental: 'Experimental',
-		'coming-soon': 'Coming soon'
-	};
-
 	interface Entry {
-		def: ModelDef;
+		/** URL hash and list key: the package export name, or the old id for reference-only entries. */
+		slug: string;
+		/** Key into ENCYCLOPEDIA / MODEL_DOCS (old studio id); '' for package models with no write-up. */
+		doc: string;
+		label: string;
+		family: string;
+		info: ModelInfo | null;
+		/** Reference-only alias: the package model with the same math. */
+		sameAs: ModelInfo | null;
 		aka: string;
 		summary: string;
 	}
-	const entries: Entry[] = allModels()
-		.filter((m) => m.id !== 'root')
-		.map((m) => ({
-			def: m,
-			aka: MODEL_DOCS[m.id]?.aka ?? '',
-			summary: ENCYCLOPEDIA[m.id]?.summary ?? MODEL_DOCS[m.id]?.about ?? ''
-		}));
+
+	// The first old id per package model owns its write-up; later ids (scrgb → LinearSrgb) are aliases.
+	const docIdOf = new Map<string, string>();
+	for (const [id, name] of Object.entries(LEGACY_MODEL_IDS))
+		if (!docIdOf.has(name)) docIdOf.set(name, id);
+	const ownsDoc = new Set(docIdOf.values());
+
+	function texts(doc: string): Pick<Entry, 'aka' | 'summary'> {
+		return {
+			aka: MODEL_DOCS[doc]?.aka ?? '',
+			summary: ENCYCLOPEDIA[doc]?.summary ?? MODEL_DOCS[doc]?.about ?? ''
+		};
+	}
+
+	const entries: Entry[] = [
+		...CATALOG.map((info) => {
+			const doc = docIdOf.get(info.name) ?? '';
+			return {
+				slug: info.name,
+				doc,
+				label: info.label,
+				family: info.family,
+				info,
+				sameAs: null,
+				...texts(doc)
+			};
+		}),
+		...Object.keys(ENCYCLOPEDIA)
+			.filter((id) => !ownsDoc.has(id))
+			.map((id) => {
+				const [label, family] = LEGACY_REFERENCE[id] ?? [id, 'other'];
+				const same = LEGACY_MODEL_IDS[id];
+				return {
+					slug: id,
+					doc: id,
+					label,
+					family,
+					info: null,
+					sameAs: same ? (infoByName(same) ?? null) : null,
+					...texts(id)
+				};
+			})
+	];
+	const bySlug = new Map(entries.map((e) => [e.slug, e]));
+	const byDoc = new Map(entries.filter((e) => e.doc).map((e) => [e.doc, e]));
+
+	/** A hash or relation id → entry: package names first, then old ids (ADR-017 upgrade path). */
+	function resolve(id: string): Entry | undefined {
+		return bySlug.get(id) ?? byDoc.get(id) ?? bySlug.get(LEGACY_MODEL_IDS[id] ?? '');
+	}
 
 	const counts = {
 		total: entries.length,
-		systems: entries.filter((e) => e.def.family === 'system').length
+		implemented: entries.filter((e) => e.info).length
 	};
 
 	// ── selection + search state ──
-	let selectedId = $state('oklch');
+	let selectedSlug = $state('Oklch');
 	let query = $state('');
 	let mobileDetail = $state(false); // mobile: list vs detail view
 	let showGamut = $state(false); // gamut map collapsed by default
 	let show3d = $state(false); // 3D model viewer collapsed by default
 
-	const def = $derived(getModel(selectedId) as ModelDef);
-	const enc = $derived(ENCYCLOPEDIA[selectedId]);
-	const doc = $derived(MODEL_DOCS[selectedId]);
-	const aka = $derived(doc?.aka ?? '');
+	const entry = $derived(bySlug.get(selectedSlug) ?? entries[0]);
+	const info = $derived(entry.info);
+	const enc = $derived(entry.doc ? ENCYCLOPEDIA[entry.doc] : undefined);
+	const doc = $derived(entry.doc ? MODEL_DOCS[entry.doc] : undefined);
+	const aka = $derived(entry.aka);
 
 	const q = $derived(query.trim().toLowerCase());
 	function matches(e: Entry) {
 		if (!q) return true;
 		return (
-			e.def.label.toLowerCase().includes(q) ||
-			e.def.id.includes(q) ||
+			e.label.toLowerCase().includes(q) ||
+			e.slug.toLowerCase().includes(q) ||
+			e.doc.includes(q) ||
 			e.aka.toLowerCase().includes(q) ||
 			e.summary.toLowerCase().includes(q)
 		);
@@ -112,7 +167,7 @@
 		FAMILY_ORDER.map((f) => ({
 			family: f,
 			meta: FAMILY[f],
-			items: entries.filter((e) => e.def.family === f && matches(e))
+			items: entries.filter((e) => e.family === f && matches(e))
 		})).filter((g) => g.items.length)
 	);
 	const resultCount = $derived(groups.reduce((n, g) => n + g.items.length, 0));
@@ -121,38 +176,39 @@
 	// One "active color" (pin) persists across navigation, so clicking a related
 	// model or a cross-model readout CONVERTS that color into the new model rather
 	// than resetting it — and the color field lets you paste/type any hex or color.
-	let pin = $state<ColorValue>(hex(SEED));
+	let pin = $state<Color>(parse(SEED));
 	let vals = $state<number[]>([]);
 	let seededFor = '';
 
-	// Read this color's channels in the selected model (range-midpoint fallback for
-	// undefined/NaN fields, e.g. achromatic hue). Shared with the Mixer engine.
-	function colorToVals(c: ColorValue): number[] {
-		return seedVals(c, def);
-	}
-
 	// Seed the sliders from the active color whenever the model changes.
 	$effect(() => {
-		if (!def?.ctor) {
+		if (!info) {
 			vals = [];
-			seededFor = selectedId;
+			seededFor = selectedSlug;
 			return;
 		}
-		if (selectedId === seededFor) return;
-		seededFor = selectedId;
-		vals = colorToVals(pin);
+		if (selectedSlug === seededFor) return;
+		seededFor = selectedSlug;
+		vals = seedVals(pin, info);
 	});
 
-	const current = $derived.by(() => {
-		if (!def?.ctor || vals.length !== def.channels.length) return null;
+	const current = $derived(
+		info && vals.length === info.channels.length ? buildFromVals(info, vals.map(Number)) : null
+	);
+	const curHex = $derived.by(() => {
 		try {
-			return ColorValue.from(def.ctor.build(vals.map(Number)));
+			return current ? current.to(Srgb).gamutMap().to(Srgb8).toHex() : null;
 		} catch {
 			return null;
 		}
 	});
-	const curHex = $derived(current?.hex ?? null);
-	const inGamut = $derived(current?.inGamut ?? false);
+	const inGamut = $derived.by(() => {
+		try {
+			return current ? current.to(Srgb).inGamut() : false;
+		} catch {
+			return false;
+		}
+	});
 
 	// Dragging a slider updates the active color so it carries to the next model.
 	function commitPin() {
@@ -173,83 +229,73 @@
 			colorError = false;
 			return;
 		}
-		let c: ColorValue | null = null;
+		let c: Color;
 		try {
-			c = hex(raw);
+			c = parse(raw);
 		} catch {
-			c = null;
-		}
-		if (!c) {
 			colorError = raw.length >= 4; // don't flash red on partial typing
 			return;
 		}
 		colorError = false;
 		pin = c;
-		if (def?.ctor) vals = colorToVals(c);
+		if (info) vals = seedVals(c, info);
 	}
 
 	// Per-channel gradient track: sample the color produced by sweeping ONLY this
 	// channel across its range while the others hold their current value — so the
 	// slider previews where moving it will push the color. Shared with the Mixer.
 	const gradients = $derived.by(() => {
-		if (!def?.ctor || vals.length !== def.channels.length) return [];
-		return def.channels.map((_, i) => channelGradient(def, vals, i, 16));
+		if (!info || vals.length !== info.channels.length) return [];
+		return info.channels.map((_, i) => channelGradient(info, vals, i, 16));
 	});
 
 	const fv = fmtChannel;
 
-	const dslCall = $derived.by(() => {
-		if (!def?.ctor) return '';
-		return `${def.ctor.name}(${vals.map((v) => fv(v)).join(', ')})`;
-	});
+	const dslCall = $derived(info ? `${info.name}(${vals.map((v) => fv(v)).join(', ')})` : '');
+	const ctorInfo = $derived(
+		info ? manifest.constructors.find((c) => c.name === info.name) : undefined
+	);
 
-	// "This color across other models" — projects the live color into each mode
-	// directly (via culoriField) so flat-key collisions never mislabel a channel.
-	const READOUT_IDS = ['srgb', 'oklch', 'hsl', 'lab', 'hsv', 'p3'];
+	const READOUT_NAMES = ['Srgb', 'Oklch', 'Hsl', 'Lab', 'Hsv', 'DisplayP3'];
 	const readouts = $derived.by(() => {
 		if (!current) return [];
-		return READOUT_IDS.filter((id) => id !== selectedId)
-			.slice(0, 5)
-			.map((id) => {
-				const d = getModel(id);
-				if (!d) return null;
-				let proj: Record<string, number | undefined> = {};
-				try {
-					proj = current.project(d.mode) as unknown as Record<string, number | undefined>;
-				} catch {
-					return null;
-				}
-				return {
-					id,
-					label: d.label,
-					chans: d.channels.map((ch) => ({ key: ch.localKey, v: proj[ch.culoriField] }))
-				};
-			})
-			.filter((x): x is NonNullable<typeof x> => x !== null);
+		const out: { name: string; label: string; chans: { key: string; v: number }[] }[] = [];
+		for (const name of READOUT_NAMES) {
+			const r = infoByName(name);
+			if (!r || name === selectedSlug || out.length === 5) continue;
+			let coords: readonly number[];
+			try {
+				coords = current.to(r.model).coords;
+			} catch {
+				continue;
+			}
+			out.push({
+				name,
+				label: r.label,
+				chans: r.channels.map((ch, i) => ({ key: ch.name, v: coords[i] }))
+			});
+		}
+		return out;
 	});
 
-	// The 2-D gamut plane works for any constructable model with ≥2 channels.
-	const canPlane = $derived(!!def?.ctor && def.channels.length >= 2 && def.family !== 'system');
-	// The 3-D viewer needs a constructable, 3-channel model (it plots a point cloud).
-	const can3d = $derived(
-		!!def?.backed &&
-			!!def?.ctor &&
-			def.channels.length === 3 &&
-			def.family !== 'system' &&
-			def.family !== 'other'
-	);
+	const canPlane = $derived(!!info && info.channels.length >= 2);
+	// The 3-D viewer plots a 3-channel layout.
+	const can3d = $derived(!!info && info.channels.length === 3);
 	function pickPlane(xi: number, xVal: number, yi: number, yVal: number) {
 		vals[xi] = xVal;
 		vals[yi] = yVal;
 		commitPin();
 	}
 
-	// ── relationships ──
+	// ── relationships (encyclopedia ids are old studio ids) ──
 	function relName(id: string) {
-		return getModel(id)?.label ?? id;
+		return resolve(id)?.label ?? id;
+	}
+	function relSlug(id: string) {
+		return resolve(id)?.slug ?? id;
 	}
 	function relExists(id: string) {
-		return !!getModel(id);
+		return !!resolve(id);
 	}
 	const relationGroups = $derived(
 		[
@@ -261,31 +307,42 @@
 	// Models that point AT this one (incoming links) — the other half of the graph.
 	const referencedBy = $derived.by(() => {
 		const out: string[] = [];
+		if (!entry.doc) return out;
 		for (const e of entries) {
-			const r = ENCYCLOPEDIA[e.def.id]?.relations;
+			const r = e.doc ? ENCYCLOPEDIA[e.doc]?.relations : undefined;
 			if (!r) continue;
 			const all = [...(r.derivedFrom ?? []), ...(r.convertsTo ?? []), ...(r.related ?? [])];
-			if (all.includes(selectedId) && e.def.id !== selectedId) out.push(e.def.id);
+			if (all.includes(entry.doc) && e.slug !== entry.slug) out.push(e.slug);
 		}
 		return out.slice(0, 12);
 	});
+	// Implemented models a reference-only entry points the reader to.
+	const alternatives = $derived(
+		[
+			...(entry.sameAs ? [entry.sameAs.name] : []),
+			...(relationGroups.at(-1)?.ids ?? [])
+				.map((id) => resolve(id))
+				.filter((e): e is Entry => !!e?.info)
+				.map((e) => e.slug)
+		]
+			.filter((s, i, all) => all.indexOf(s) === i)
+			.slice(0, 4)
+	);
 
-	// ── DSL methods ──
-	const methods = $derived(def ? [...def.methods.values()] : []);
-	function sig(m: (typeof methods)[number]) {
-		return m.kind === 'method'
-			? `(${m.params.map((p) => p.name + (p.optional ? '?' : '')).join(', ')}) → ${m.returns}`
-			: `→ ${m.returns}`;
-	}
+	// ── package methods (the DSL is the package's API) ──
+	const methods = $derived(
+		info ? (manifest.modelMembers.get(info.name) ?? []).filter((m) => m.kind === 'method') : []
+	);
+	const memberDoc = (name: string) =>
+		info ? (manifest.modelMembers.get(info.name)?.find((m) => m.name === name)?.doc ?? '') : '';
 
 	const fmtNum = (v: number) => (Number.isInteger(v) ? String(v) : String(+v.toFixed(3)));
 
-	// ── channels table rows (registry name/range ⊕ encyclopedia description) ──
+	// ── channels table rows (package range + the package's own channel doc) ──
 	const channelRows = $derived(
-		(def?.channels ?? []).map((ch, i) => ({
-			key: ch.localKey,
-			name: ch.label,
-			about: CHANNEL_DOCS[def.id]?.[i] ?? '',
+		(info?.channels ?? []).map((ch) => ({
+			key: ch.name,
+			about: memberDoc(ch.name),
 			min: fmtNum(ch.range[0]),
 			max: fmtNum(ch.range[1])
 		}))
@@ -293,24 +350,25 @@
 
 	// ── selection helpers + hash deep-linking ──
 	function select(id: string, fromHash = false) {
-		if (!getModel(id)) return;
-		selectedId = id;
+		const e = resolve(id);
+		if (!e) return;
+		selectedSlug = e.slug;
 		mobileDetail = true;
 		if (!fromHash && typeof history !== 'undefined') {
-			history.replaceState(history.state, '', `#${id}`);
+			history.replaceState(history.state, '', `#${e.slug}`);
 		}
 		document.querySelector('.enc-detail')?.scrollTo({ top: 0 });
 	}
 
 	onMount(() => {
-		const fromHash = decodeURIComponent(location.hash.replace(/^#/, ''));
-		if (fromHash && getModel(fromHash)) {
-			selectedId = fromHash;
+		const fromHash = resolve(decodeURIComponent(location.hash.replace(/^#/, '')));
+		if (fromHash) {
+			selectedSlug = fromHash.slug;
 			mobileDetail = true; // deep-link lands on the entry, not the index
 		}
 		const onHash = () => {
 			const id = decodeURIComponent(location.hash.replace(/^#/, ''));
-			if (id && getModel(id)) select(id, true);
+			if (id) select(id, true);
 		};
 		window.addEventListener('hashchange', onHash);
 		return () => window.removeEventListener('hashchange', onHash);
@@ -412,15 +470,19 @@
 				{#each groups as g (g.family)}
 					<div class="enc-group">
 						<div class="enc-group-head">{g.meta?.label ?? g.family}</div>
-						{#each g.items as e (e.def.id)}
+						{#each g.items as e (e.slug)}
 							<button
 								class="enc-row"
-								class:active={e.def.id === selectedId}
-								onclick={() => select(e.def.id)}
+								class:active={e.slug === selectedSlug}
+								onclick={() => select(e.slug)}
 							>
-								<span class="enc-dot {e.def.status}" title={STATUS_LABEL[e.def.status]}></span>
-								<span class="enc-row-label">{e.def.label}</span>
-								<code class="enc-row-id">.{e.def.id}</code>
+								<span
+									class="enc-dot"
+									class:reference={!e.info}
+									title={e.info ? 'Implemented' : 'Not implemented'}
+								></span>
+								<span class="enc-row-label">{e.label}</span>
+								<code class="enc-row-id">{e.slug}</code>
 							</button>
 						{/each}
 					</div>
@@ -456,22 +518,24 @@
 				</div>
 				<div class="hero-meta">
 					<div class="hero-titlerow">
-						<h2 class="hero-title">{def.label}</h2>
-						<code class="hero-id">.{def.id}</code>
-						<span class="status-badge {def.status}">{STATUS_LABEL[def.status]}</span>
+						<h2 class="hero-title">{entry.label}</h2>
+						<code class="hero-id">{entry.slug}</code>
+						<span class="status-badge" class:reference={!info}
+							>{info ? 'Implemented' : 'Not implemented'}</span
+						>
 					</div>
 					{#if aka}<div class="hero-aka">{aka}</div>{/if}
 					{#if enc?.summary}<p class="hero-summary">{enc.summary}.</p>{/if}
 					<div class="hero-tags">
-						<span class="tag">{FAMILY[def.family]?.label ?? def.family}</span>
-						{#if def.ctor}
-							<code class="tag tag-code"
-								>{def.ctor.name}({def.ctor.params.map((p) => p.name).join(', ')})</code
+						<span class="tag">{FAMILY[entry.family]?.label ?? entry.family}</span>
+						{#if info}
+							<code class="tag tag-code" title={ctorInfo?.doc}
+								>{info.name}{ctorInfo?.params ?? ''}</code
+							>
+							<span class="tag"
+								>{info.channels.length} channel{info.channels.length === 1 ? '' : 's'}</span
 							>
 						{/if}
-						{#if def.channels.length}<span class="tag"
-								>{def.channels.length} channel{def.channels.length === 1 ? '' : 's'}</span
-							>{/if}
 						{#if methods.length}<span class="tag"
 								>{methods.length} method{methods.length === 1 ? '' : 's'}</span
 							>{/if}
@@ -482,7 +546,7 @@
 			<!-- live playground -->
 			<section class="card">
 				<h3 class="card-title">Interactive</h3>
-				{#if def.ctor && current}
+				{#if info && current}
 					<div class="play">
 						<div class="play-left">
 							<div class="play-swatch-row">
@@ -511,11 +575,13 @@
 								</div>
 							</div>
 							<div class="play-sliders">
-								{#each def.channels as ch, i (ch.key)}
+								{#each info.channels as ch, i (ch.name)}
 									<div class="play-slider">
 										<div class="play-slabel">
-											<code>.{ch.localKey}</code>
-											<span class="play-chname">{ch.label}</span>
+											<code>.{ch.name}</code>
+											<span class="play-chname" title={memberDoc(ch.name)}
+												>{memberDoc(ch.name)}</span
+											>
 											<span class="play-val">{fv(vals[i])}</span>
 										</div>
 										<input
@@ -540,13 +606,13 @@
 						<div class="play-right">
 							<div class="readout-head">This color in other models</div>
 							<div class="readout">
-								{#each readouts as r (r.id)}
+								{#each readouts as r (r.name)}
 									<button
 										class="readout-row"
-										onclick={() => select(r.id)}
+										onclick={() => select(r.name)}
 										title="Open {r.label} with this color"
 									>
-										<code class="readout-id">.{r.id}</code>
+										<code class="readout-id">{r.name}</code>
 										<span class="readout-chans">
 											{#each r.chans as c (c.key)}
 												<span class="readout-chan"><i>{c.key}</i>{fv(c.v)}</span>
@@ -558,7 +624,7 @@
 							<p class="readout-note">
 								The same color, read through each model's lens — <strong>click any row</strong> to
 								open that model with this color carried over. In the DSL:
-								<code>c.{readouts[0]?.id ?? 'hsl'}</code>.
+								<code>c.to({readouts[0]?.name ?? 'Hsl'})</code>.
 							</p>
 						</div>
 					</div>
@@ -575,7 +641,7 @@
 							</button>
 							{#if showGamut}
 								<div class="gamut-body">
-									<GamutPlane {def} {vals} markerColor={curHex ?? '#888'} onpick={pickPlane} />
+									<GamutPlane {info} {vals} markerColor={curHex ?? '#888'} onpick={pickPlane} />
 								</div>
 							{/if}
 						</div>
@@ -593,7 +659,7 @@
 							</button>
 							{#if show3d}
 								<div class="gamut-body">
-									<ModelViewer seed={curHex ?? '#3aa0ff'} pinnedId={def.id} compact />
+									<ModelViewer seed={curHex ?? '#3aa0ff'} pinned={info.name} compact />
 								</div>
 							{/if}
 						</div>
@@ -601,18 +667,14 @@
 				{:else}
 					<div class="play-stub">
 						<p>
-							<strong>{def.label}</strong> isn't directly constructable in the DSL{def.status ===
-							'coming-soon'
-								? ' yet'
-								: ''}. {#if def.status === 'coming-soon'}Its lookups are advertised but throw an
-								actionable error until a licensed dataset is wired in.{/if}
+							<strong>{entry.label}</strong> is not implemented in the package{#if entry.sameAs}: it
+								is the same math as <strong>{entry.sameAs.label}</strong> under another name{/if}.
+							This entry is reference text only.
 						</p>
-						{#if relationGroups.length}
+						{#if alternatives.length}
 							<p class="play-stub-alt">
-								Reach for a backed alternative:
-								{#each relationGroups[relationGroups.length - 1].ids
-									.filter(relExists)
-									.slice(0, 4) as id, i (id)}
+								Reach for an implemented model:
+								{#each alternatives as id, i (id)}
 									{i > 0 ? ' · ' : ''}<button class="rel-chip inline" onclick={() => select(id)}
 										>{relName(id)}</button
 									>
@@ -646,7 +708,6 @@
 							<div class="chan-tr">
 								<span class="chan-c">
 									<code class="chan-key">.{r.key}</code>
-									<span class="chan-name">{r.name}</span>
 								</span>
 								<span class="chan-about">{r.about}</span>
 								<code class="chan-num" data-l="min">{r.min}</code>
@@ -689,7 +750,7 @@
 						<div class="rel-chips">
 							{#each g.ids.filter(relExists) as id (id)}
 								<button class="rel-chip" onclick={() => select(id)}>
-									{relName(id)}<code>.{id}</code>
+									{relName(id)}<code>{relSlug(id)}</code>
 								</button>
 							{/each}
 						</div>
@@ -701,7 +762,7 @@
 						<div class="rel-chips">
 							{#each referencedBy as id (id)}
 								<button class="rel-chip ghost" onclick={() => select(id)}>
-									{relName(id)}<code>.{id}</code>
+									{relName(id)}<code>{id}</code>
 								</button>
 							{/each}
 						</div>
@@ -709,24 +770,22 @@
 				{/if}
 				<p class="rel-note">
 					<strong>Click any</strong> to convert into that model with your current color carried
-					over. In Chromatics every value is model-agnostic, so <em>any</em> color reaches
-					<em>any</em>
-					of these directly as a view — <code>c.{selectedId}</code>, <code>c.oklch</code>,
-					<code>c.lab</code> … The links above are the color-science lineage; the engine doesn't make
-					you walk it.
+					over. <em>Any</em> color converts to <em>any</em> model directly —
+					<code>c.to({info?.name ?? 'Oklch'})</code>, <code>c.to(Oklch)</code>,
+					<code>c.to(Lab)</code> … The links above are the color-science lineage; the conversion graph
+					doesn't make you walk it.
 				</p>
 			</section>
 
 			<!-- DSL methods -->
 			{#if methods.length}
 				<section class="card">
-					<h3 class="card-title">DSL — methods &amp; accessors</h3>
+					<h3 class="card-title">DSL — methods</h3>
 					<div class="methods">
 						{#each methods as m (m.name)}
 							<div class="method">
-								<code class="m-name {m.kind === 'method' ? 'is-method' : 'is-prop'}">.{m.name}</code
-								>
-								<code class="m-sig">{sig(m)}</code>
+								<code class="m-name is-method">.{m.name}</code>
+								<code class="m-sig">{m.detail}</code>
 								<span class="m-doc">{m.doc}</span>
 							</div>
 						{/each}
@@ -761,7 +820,7 @@
 			{/if}
 
 			<div class="enc-foot">
-				Stored in OKLCH · routed through culori · {counts.total} models &amp; systems registered
+				{counts.implemented} models implemented in @lilbunnyrabbit/chromatics · {counts.total} entries
 			</div>
 		</main>
 	</div>
@@ -909,15 +968,9 @@
 		height: 7px;
 		border-radius: 99px;
 		flex-shrink: 0;
-		background: var(--text-faint);
-	}
-	.enc-dot.stable {
 		background: #3fb27f;
 	}
-	.enc-dot.experimental {
-		background: var(--warn);
-	}
-	.enc-dot.coming-soon {
+	.enc-dot.reference {
 		background: var(--text-faint);
 		opacity: 0.55;
 	}
@@ -1041,19 +1094,15 @@
 		border-radius: 99px;
 		padding: 2px 9px;
 	}
-	.status-badge.stable {
+	.status-badge {
 		color: #3fb27f;
 		border: 1px solid color-mix(in srgb, #3fb27f 40%, transparent);
 		background: color-mix(in srgb, #3fb27f 10%, transparent);
 	}
-	.status-badge.experimental {
-		color: var(--warn);
-		border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
-		background: color-mix(in srgb, var(--warn) 10%, transparent);
-	}
-	.status-badge.coming-soon {
+	.status-badge.reference {
 		color: var(--text-faint);
 		border: 1px solid var(--border);
+		background: none;
 	}
 
 	/* cards */
@@ -1090,22 +1139,6 @@
 		line-height: 1.62;
 		color: var(--text);
 		margin: 0;
-	}
-	.prose-sub {
-		font-size: 12.5px;
-		line-height: 1.55;
-		color: var(--text-muted);
-		margin: 10px 0 0;
-		padding-top: 10px;
-		border-top: 1px solid var(--border);
-	}
-	.prose-sub-k {
-		font-size: 9px;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--accent);
-		margin-right: 6px;
 	}
 	.bullets {
 		margin: 0;
@@ -1443,11 +1476,6 @@
 		font-weight: 600;
 		color: var(--syn-prop, var(--accent));
 	}
-	.chan-name {
-		font-size: 12.5px;
-		color: var(--text);
-		font-weight: 550;
-	}
 	.chan-about {
 		font-size: 12.5px;
 		line-height: 1.45;
@@ -1560,9 +1588,6 @@
 	}
 	.m-name.is-method {
 		color: var(--syn-method, var(--accent));
-	}
-	.m-name.is-prop {
-		color: var(--syn-prop, var(--accent));
 	}
 	.m-sig {
 		font-family: 'JetBrains Mono', ui-monospace, monospace;

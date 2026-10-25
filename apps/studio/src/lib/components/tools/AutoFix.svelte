@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { app } from '$lib/state/app.svelte';
-	import { ensureContrastValue } from '$lib/models';
+	import { ensureContrast } from '$lib/color/contrast-guard';
 	import { contrastRatio } from '$lib/analysis/contrast';
 	import { apcaContrast } from '$lib/analysis/apca';
 	import { uniqueName } from '$lib/dsl/emit';
@@ -24,9 +25,15 @@
 
 	// The very solver the emitted `ensureContrast(…)` call runs — preview == result.
 	const fixed = $derived.by(() =>
-		fg && bg ? ensureContrastValue(fg.color, bg.color, target.ratio) : null
+		fg && bg ? ensureContrast(fg.color, bg.color, target.ratio) : null
 	);
-	const changed = $derived(!!(fg && fixed && fixed.hex !== fg.color.hex));
+	const changed = $derived(
+		!!(
+			fg &&
+			fixed &&
+			fixed.to(Srgb).gamutMap().to(Srgb8).toHex() !== fg.color.to(Srgb).gamutMap().to(Srgb8).toHex()
+		)
+	);
 	const beforeRatio = $derived(fg && bg ? contrastRatio(fg.color, bg.color) : 0);
 	const afterRatio = $derived(fixed && bg ? contrastRatio(fixed, bg.color) : 0);
 	const beforeApca = $derived(fg && bg ? apcaContrast(fg.color, bg.color) : 0);
@@ -78,7 +85,14 @@
 			<div class="compare">
 				<div class="side">
 					<div class="cap">Before</div>
-					<div class="demo" style="background:{bg.color.hex}; color:{fg.color.hex}">
+					<div
+						class="demo"
+						style="background:{bg.color.to(Srgb).gamutMap().to(Srgb8).toHex()}; color:{fg.color
+							.to(Srgb)
+							.gamutMap()
+							.to(Srgb8)
+							.toHex()}"
+					>
 						Aa Sample text
 					</div>
 					<div class="metrics">
@@ -91,7 +105,14 @@
 				<div class="arrow">→</div>
 				<div class="side">
 					<div class="cap">After</div>
-					<div class="demo" style="background:{bg.color.hex}; color:{fixed.hex}">
+					<div
+						class="demo"
+						style="background:{bg.color.to(Srgb).gamutMap().to(Srgb8).toHex()}; color:{fixed
+							.to(Srgb)
+							.gamutMap()
+							.to(Srgb8)
+							.toHex()}"
+					>
 						Aa Sample text
 					</div>
 					<div class="metrics">
@@ -99,7 +120,7 @@
 							>WCAG {afterRatio.toFixed(2)}</span
 						>
 						<span class="m">APCA {Math.round(afterApca)}</span>
-						<span class="hx">{fixed.hex}</span>
+						<span class="hx">{fixed.to(Srgb).gamutMap().to(Srgb8).toHex()}</span>
 					</div>
 				</div>
 			</div>

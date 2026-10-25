@@ -3,6 +3,7 @@
  * Figma, or a brand doc. Self-contained markup (system font, no external refs)
  * so it rasterizes cleanly to PNG via an <img>/canvas round-trip.
  */
+import { Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 import type { Scheme, SchemeEntry } from '../scheme/types.js';
 
 function fmtOklch(e: SchemeEntry): string {
@@ -10,7 +11,7 @@ function fmtOklch(e: SchemeEntry): string {
 		const s = v.toFixed(d);
 		return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
 	};
-	return `oklch(${f(e.color.channel('ok_l'), 3)} ${f(e.color.channel('ok_c'), 4)} ${f(e.color.channel('ok_h'), 1)})`;
+	return `oklch(${f(e.color.to(Oklch).l, 3)} ${f(e.color.to(Oklch).c, 4)} ${f(e.color.to(Oklch).h, 1)})`;
 }
 
 /** Readable label color (black/white) over a given swatch, by relative luminance. */
@@ -20,9 +21,9 @@ function labelOn(e: SchemeEntry): string {
 		return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
 	};
 	const Y =
-		0.2126 * lin(e.color.channel('r')) +
-		0.7152 * lin(e.color.channel('g')) +
-		0.0722 * lin(e.color.channel('b'));
+		0.2126 * lin(e.color.to(Srgb).r) +
+		0.7152 * lin(e.color.to(Srgb).g) +
+		0.0722 * lin(e.color.to(Srgb).b);
 	return Y > 0.36 ? '#11181c' : '#ffffff';
 }
 
@@ -76,7 +77,7 @@ export function toSwatchSVG(scheme: Scheme, opts: SwatchOptions = {}): string {
 		.map((e, i) => {
 			const cx = pad + (i % cols) * (cardW + gap);
 			const cy = headerH + pad + Math.floor(i / cols) * (cardH + gap);
-			const fill = e.color.hex;
+			const fill = e.color.to(Srgb).gamutMap().to(Srgb8).toHex();
 			const lab = labelOn(e);
 			return `  <g transform="translate(${cx} ${cy})" clip-path="url(#cardClip)">
     <rect width="${cardW}" height="${swatchH}" fill="${fill}"/>

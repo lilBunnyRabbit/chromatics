@@ -1,19 +1,30 @@
-// ADR-016 gate: regenerated after the switch and diffed; differences are reviewed, not forbidden.
-import { mkdirSync, writeFileSync } from 'node:fs';
+// ADR-016 gate: `culori/` is the studio before the switch, frozen; `package/` is the same records
+// from the package, read back under the old model ids, channel names and units so the two compare
+// record for record. `review.md` summarises every difference; differences are reviewed, not forbidden.
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import '../src/lib/models/defs/index';
-import { ColorValue } from '../src/lib/models/value';
-import { allModels, parse, type CuloriColor } from '../src/lib/models/registry';
-import type { ModelDef } from '../src/lib/models/types';
+import { Lab65, Oklch, Srgb, Srgb8, type Color, type ColorModel } from '@lilbunnyrabbit/chromatics';
+import { parse } from '@lilbunnyrabbit/chromatics/all';
+import { infoByName } from '../src/lib/color/catalog';
+import {
+	LEGACY_CHANNEL_CHANGES,
+	LEGACY_CHANNELS,
+	LEGACY_INCOMPATIBLE,
+	LEGACY_MODEL_IDS
+} from '../src/lib/color/legacy';
 import { deriveScheme } from '../src/lib/scheme/derive';
 import { emptyRoles, DEFAULT_OPACITIES } from '../src/lib/scheme/roles';
 import { exportScheme } from '../src/lib/export/index';
 import { examples } from '../src/routes/examples/index';
 
-const OUT = join(dirname(fileURLToPath(import.meta.url)), '../tests/fixtures/baseline');
+const DIR = join(dirname(fileURLToPath(import.meta.url)), '../tests/fixtures/baseline');
 
 type Num = number | string | null;
+type Rec = Record<string, unknown>;
+
+const read = (file: string) =>
+	JSON.parse(readFileSync(join(DIR, file), 'utf8')) as Record<string, Rec>;
 
 // 12 significant digits: last-bit float noise from a reordered conversion is not a finding.
 function num(v: unknown): Num {
@@ -31,88 +42,83 @@ function safe<T>(f: () => T): T | { error: string } {
 	}
 }
 
-function channels(def: ModelDef, c: ColorValue): Record<string, Num> {
-	const native = c.project(def.mode) as unknown as Record<string, number | undefined>;
-	const out: Record<string, Num> = {};
-	for (const ch of def.channels) {
-		const v = native[ch.culoriField];
-		out[ch.localKey] = v === undefined ? null : num(v * (ch.scale ?? 1));
-	}
-	return out;
+const hexOf = (c: Color) => c.to(Srgb).gamutMap().to(Srgb8).toHex();
+const cssOf = (c: Color) => (c as Color & { toCss?: () => string }).toCss?.() ?? c.toString();
+
+function changeOf(old: string, ch: string) {
+	const c = LEGACY_CHANNEL_CHANGES[old]?.[ch];
+	return { name: c?.name ?? ch, scale: c?.scale ?? 1, offset: c?.offset ?? 0 };
 }
 
-function record(def: ModelDef, c: ColorValue) {
+function record(old: string, c: Color) {
 	return {
-		channels: safe(() => channels(def, c)),
-		hex: safe(() => c.hex),
-		css: safe(() => c.toCSS()),
-		inGamut: safe(() => c.inGamut),
-		gamutMapped: safe(() => c.gamutMapped.hex)
+		channels: safe(() => {
+			const out: Record<string, Num> = {};
+			const values = c as unknown as Record<string, number>;
+			for (const ch of LEGACY_CHANNELS[old]) {
+				const { name, scale, offset } = changeOf(old, ch);
+				out[ch] = num((values[name] - offset) / scale);
+			}
+			return out;
+		}),
+		hex: safe(() => hexOf(c)),
+		css: safe(() => cssOf(c)),
+		inGamut: safe(() => c.to(Srgb).inGamut()),
+		gamutMapped: safe(() => hexOf(c))
 	};
 }
 
-function grid(): { id: string; color: CuloriColor }[] {
-	const out: { id: string; color: CuloriColor }[] = [];
-	const levels = [0, 0.5, 1];
-	for (const r of levels)
-		for (const g of levels)
-			for (const b of levels)
-				out.push({ id: `srgb(${r} ${g} ${b})`, color: { mode: 'rgb', r, g, b } });
-	for (const v of [0.1, 0.2, 0.8, 0.9])
-		out.push({ id: `srgb(${v} ${v} ${v})`, color: { mode: 'rgb', r: v, g: v, b: v } });
-	for (const hexInput of ['#6c5ce7', '#e74c3c', '#2ecc71', '#f1c40f'])
-		out.push({ id: hexInput, color: parse(hexInput) as CuloriColor });
-	for (const l of [0.3, 0.6, 0.9])
-		for (const h of [0, 90, 180, 270])
-			out.push({ id: `oklch(${l} 0.35 ${h})`, color: { mode: 'oklch', l, c: 0.35, h } });
-	out.push({ id: 'oklch(0.5 0 none)', color: { mode: 'oklch', l: 0.5, c: 0 } });
-	return out;
+function gridColor(id: string): Color {
+	const rgb = /^srgb\(([\d.]+) ([\d.]+) ([\d.]+)\)$/.exec(id);
+	if (rgb) return new Srgb(Number(rgb[1]), Number(rgb[2]), Number(rgb[3]));
+	const lch = /^oklch\(([\d.]+) ([\d.]+) (\d+|none)\)$/.exec(id);
+	if (lch) return new Oklch(Number(lch[1]), Number(lch[2]), lch[3] === 'none' ? 0 : Number(lch[3]));
+	return parse(id);
 }
 
-// Built in the model itself, so the model → sRGB direction is recorded too.
-function corners(def: ModelDef): { id: string; color: CuloriColor }[] {
-	const axes = def.channels.map((ch) => {
-		const [lo, hi] = ch.range;
-		return [lo, (lo + hi) / 2, hi].map((v) => ({ ch, v }));
-	});
-	let combos: { ch: ModelDef['channels'][number]; v: number }[][] = [[]];
-	for (const axis of axes) combos = combos.flatMap((p) => axis.map((a) => [...p, a]));
-	return combos.map((combo) => {
-		const color: Record<string, number | string> = { mode: def.mode };
-		for (const { ch, v } of combo) color[ch.culoriField] = v / (ch.scale ?? 1);
-		return {
-			id: combo.map(({ ch, v }) => `${ch.localKey}=${num(v)}`).join(' '),
-			color: color as unknown as CuloriColor
-		};
-	});
+function nativeColor(old: string, model: ColorModel, id: string): Color {
+	const values: Record<string, number> = {};
+	for (const part of id.split(' ')) {
+		const [ch, v] = part.split('=');
+		const { name, scale, offset } = changeOf(old, ch);
+		values[name] = Number(v) * scale + offset;
+	}
+	return (model as unknown as { of(v: Record<string, number>): Color }).of(values);
 }
 
-function models() {
-	const out: Record<string, unknown> = {};
-	const inputs = grid().map((g) => ({ id: g.id, value: ColorValue.from(g.color) }));
-	for (const def of allModels()
-		.filter((d) => d.backed && d.id !== 'root')
-		.sort((a, b) => a.id.localeCompare(b.id))) {
-		const fromGrid: Record<string, unknown> = {};
-		for (const { id, value } of inputs) fromGrid[id] = safe(() => record(def, value.to(def.id)));
-		const native: Record<string, unknown> = {};
-		for (const { id, color } of corners(def))
-			native[id] = safe(() => record(def, ColorValue.from(color)));
-		out[def.id] = { mode: def.mode, label: def.label, status: def.status, fromGrid, native };
+function models(culori: Record<string, Rec>): Record<string, Rec> {
+	const out: Record<string, Rec> = {};
+	for (const [old, before] of Object.entries(culori)) {
+		const name = LEGACY_MODEL_IDS[old];
+		const info = name ? infoByName(name) : undefined;
+		if (!info || LEGACY_INCOMPATIBLE[old]) {
+			out[old] = {
+				package: name ?? null,
+				skipped: name ? LEGACY_INCOMPATIBLE[old] : 'no package model'
+			};
+			continue;
+		}
+		const fromGrid: Rec = {};
+		for (const id of Object.keys(before.fromGrid as Rec)) {
+			fromGrid[id] = safe(() => record(old, gridColor(id).to(info.model)));
+		}
+		const native: Rec = {};
+		for (const id of Object.keys(before.native as Rec)) {
+			native[id] = safe(() => record(old, nativeColor(old, info.model, id)));
+		}
+		out[old] = { package: name, fromGrid, native };
 	}
 	return out;
 }
 
-function exampleRecords() {
-	const out: Record<string, unknown> = {};
+function exampleRecords(): Record<string, Rec> {
+	const out: Record<string, Rec> = {};
 	for (const ex of examples) {
 		const r = deriveScheme(ex.source, { roles: emptyRoles(), opacities: DEFAULT_OPACITIES });
-		const entries: Record<string, unknown> = {};
-		for (const e of r.scheme.entries)
-			entries[e.name] = {
-				model: e.color.model,
-				...record(allModels().find((d) => d.mode === e.color.model)!, e.color)
-			};
+		const entries: Rec = {};
+		for (const e of r.scheme.entries) {
+			entries[e.name] = { model: e.color.model, hex: hexOf(e.color), css: cssOf(e.color) };
+		}
 		out[ex.name] = {
 			errors: r.result.errors.map((e) => `${e.line}: ${e.message}`),
 			entries,
@@ -146,14 +152,147 @@ function serialize(data: Record<string, unknown>): string {
 	return `{\n${lines.join(',\n')}\n}\n`;
 }
 
+const dE = (a: string, b: string) => parse(a).to(Lab65).deltaE2000(parse(b).to(Lab65));
+const isHex = (v: unknown): v is string => typeof v === 'string' && v.startsWith('#');
+const failed = (r: Rec | undefined) =>
+	!r || 'error' in r || !!(r.channels as Rec | undefined)?.error;
+
+function exampleReview(before: Record<string, Rec>, after: Record<string, Rec>): string[] {
+	const summary = [
+		'## Examples',
+		'',
+		'Each example as it was (old DSL, culori) against its rewrite (migrated by `dsl/migrate.ts`, then hand-polished).',
+		'',
+		'| Example | Same hex | Changed, was in sRGB | Changed, was out of sRGB | Max ΔE (was in sRGB) | Errors |',
+		'| --- | --- | --- | --- | --- | --- |'
+	];
+	const rows: string[] = [];
+	for (const [name, b] of Object.entries(before)) {
+		const a = after[name];
+		const was = b.entries as Record<string, Rec>;
+		const now = (a?.entries ?? {}) as Record<string, Rec>;
+		let same = 0;
+		let inG = 0;
+		let outG = 0;
+		let max = 0;
+		for (const [k, rec] of Object.entries(was)) {
+			const hex = now[k]?.hex;
+			if (!isHex(hex) || !isHex(rec.hex)) {
+				rows.push(`| ${name} | ${k} | ${String(rec.hex)} → removed | | |`);
+				continue;
+			}
+			if (hex === rec.hex) {
+				same++;
+				continue;
+			}
+			const d = dE(rec.hex, hex);
+			if (rec.inGamut) {
+				inG++;
+				max = Math.max(max, d);
+			} else outG++;
+			rows.push(
+				`| ${name} | ${k} | ${rec.hex} → ${hex} | ${d.toFixed(2)} | ${rec.inGamut ? 'in' : 'out of'} sRGB |`
+			);
+		}
+		const errors = (a?.errors as string[] | undefined)?.length ?? 'missing';
+		summary.push(`| ${name} | ${same} | ${inG} | ${outG} | ${max.toFixed(2)} | ${errors} |`);
+	}
+	return [
+		...summary,
+		'',
+		'### Changed entries',
+		'',
+		'| Example | Entry | Hex | ΔE | Culori colour was |',
+		'| --- | --- | --- | --- | --- |',
+		...rows
+	];
+}
+
+function modelReview(culori: Record<string, Rec>, pkg: Record<string, Rec>): string[] {
+	const out = [
+		'## Models',
+		'',
+		'The 48 grid colours converted into each model, and each model built at its channel corners, read back in the old channel names and units. Channel Δ is the largest absolute difference in old units.',
+		'',
+		'| Old id | Package | Records | Max channel Δ | Hex changed (was in sRGB) | Max ΔE (was in sRGB) | Errors culori → package |',
+		'| --- | --- | --- | --- | --- | --- | --- |'
+	];
+	for (const [old, before] of Object.entries(culori)) {
+		const after = pkg[old];
+		if (!after || after.skipped) {
+			out.push(
+				`| ${old} | ${String(after?.package ?? '—')} | skipped: ${String(after?.skipped)} | | | | |`
+			);
+			continue;
+		}
+		let n = 0;
+		let maxCh = 0;
+		let hexChanged = 0;
+		let maxDE = 0;
+		let errBefore = 0;
+		let errAfter = 0;
+		for (const part of ['fromGrid', 'native'] as const) {
+			for (const [id, rb] of Object.entries(before[part] as Record<string, Rec>)) {
+				const ra = (after[part] as Record<string, Rec>)[id];
+				n++;
+				if (failed(rb)) errBefore++;
+				if (failed(ra)) {
+					errAfter++;
+					continue;
+				}
+				const cb = rb.channels as Record<string, unknown> | undefined;
+				const ca = ra.channels as Record<string, unknown>;
+				for (const ch of Object.keys(cb ?? {})) {
+					const x = cb?.[ch];
+					const y = ca[ch];
+					if (typeof x !== 'number' || typeof y !== 'number') continue;
+					const d = Math.abs(x - y);
+					maxCh = Math.max(maxCh, ch === 'h' ? Math.min(d % 360, 360 - (d % 360)) : d);
+				}
+				if (isHex(rb.hex) && isHex(ra.hex) && rb.hex !== ra.hex && rb.inGamut === true) {
+					hexChanged++;
+					maxDE = Math.max(maxDE, dE(rb.hex, ra.hex));
+				}
+			}
+		}
+		out.push(
+			`| ${old} | ${String(after.package)} | ${n} | ${maxCh.toPrecision(3)} | ${hexChanged} | ${maxDE.toFixed(2)} | ${errBefore} → ${errAfter} |`
+		);
+	}
+	return out;
+}
+
 export function generate(): Record<string, string> {
+	const culori = read('culori/models.json');
+	const pkg = models(culori);
+	const exAfter = exampleRecords();
+	const review = [
+		'# Culori → package baseline review',
+		'',
+		'Generated by `bun run baseline` (ADR-016 gate). Hex is what the studio displays: culori clipped out-of-sRGB channels, the package gamut-maps them (CSS Color 4). ΔE is CIEDE2000 (D65) between the two hexes.',
+		'',
+		'## Known differences',
+		'',
+		'- **Out-of-sRGB colours** (most example diffs): culori clipped each channel; the package gamut-maps (CSS Color 4 MINDE, ADR-016 78d), so hue holds and the hex moves.',
+		"- **In-sRGB hexes within ~2 ΔE**: colours on the gamut edge that culori's 1e-5 tolerance called in-gamut, mapped instead of clipped; and one-byte rounding.",
+		"- **HCT**: culori's HCT re-solved chroma into sRGB on every write; the package stores the tone and chroma as given (ADR-012), and display gamut-maps. Showcase `brand_20` / `brand_90` / `warning`.",
+		'- **Okhsl, HSP corners**: degenerate corners (s = 1 at l = 0 / 1) land on different out-of-gamut points before mapping.',
+		"- **RYB** (Gossett cube, Newton inverse; throws where the cube can't reach: the 4 errors), **SMPTE-C** (170M curve; the studio's was linear), **Rec. 2100 PQ** (white at 203 cd/m²), **Rec. 2020** and **ACES**: the package follows the spec where the studio approximated (ROADMAP parity table).",
+		'- **Skipped**: CAM16 / CIECAM02 (old J C h, now J M h), TSL (tint angle), XYB (B = S′), RAL (licensing).',
+		'- **Achromatic hues**: culori left hue undefined, the package stores 0 (ADR-003), so hue Δ up to 180 on greys is not a finding.',
+		'',
+		...exampleReview(read('culori/examples.json'), exAfter),
+		'',
+		...modelReview(culori, pkg)
+	];
 	return {
-		'models.json': serialize(models()),
-		'examples.json': serialize(exampleRecords())
+		'package/models.json': serialize(pkg),
+		'package/examples.json': serialize(exAfter),
+		'review.md': review.join('\n') + '\n'
 	};
 }
 
 if (import.meta.main) {
-	mkdirSync(OUT, { recursive: true });
-	for (const [file, text] of Object.entries(generate())) writeFileSync(join(OUT, file), text);
+	mkdirSync(join(DIR, 'package'), { recursive: true });
+	for (const [file, text] of Object.entries(generate())) writeFileSync(join(DIR, file), text);
 }

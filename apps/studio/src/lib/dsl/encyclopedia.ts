@@ -54,7 +54,7 @@ export const ENCYCLOPEDIA: Record<string, EncyclopediaEntry> = {
 			'Gamut-aware color adjustment for sRGB, P3, and Rec.2020'
 		],
 		benefitsHere: [
-			'OKLCH is the perceptual workhorse for color math in Chromatics — a color built with OKLCH(l, c, h) stays OKLCH, and any other color reaches it via the c.oklch view; lightness/chroma/hue tweaks there are perceptually even.',
+			'OKLCH is the perceptual workhorse for color math in Chromatics — a color built with Oklch(l, c, h) stays Oklch, and any other color reaches it with c.to(Oklch); lightness/chroma/hue tweaks there are perceptually even.',
 			'Its registered methods gamutMap, maxChroma, isInGamut, atLightness, and atChroma let you keep a color in a target gamut while holding hue and tweaking only chroma or lightness.',
 			"rotateHue, complementary, triadic, and analogous build perceptually even harmonies that translate cleanly into any other model's view."
 		],
@@ -124,7 +124,7 @@ export const ENCYCLOPEDIA: Record<string, EncyclopediaEntry> = {
 			'Generating simple harmony schemes (complementary, triadic, analogous) by rotating hue'
 		],
 		benefitsHere: [
-			'Construct or rebuild a color directly with HSL(h, s, l), or read a channel off any color via the .hsl view — e.g. OKLCH(0.7,0.12,250).hsl.h.',
+			'Construct or rebuild a color directly with Hsl(h, s, l), or read a channel off any color by converting — e.g. Oklch(0.7, 0.12, 250).to(Hsl).h.',
 			"Reach for HSL's registered tint, shade, and tone methods to add white, black, or gray without leaving the model.",
 			'Use rotateHue, complementary, triadic, and analogous on the .hsl view for fast wheel-based scheme building.',
 			'Stable and fully backed; the most familiar space for emitting CSS hsl() strings, though OKLCH is preferable when perceptual uniformity matters.'

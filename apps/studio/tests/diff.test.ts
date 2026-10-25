@@ -10,18 +10,18 @@ import { emptyRoles, DEFAULT_OPACITIES } from '../src/lib/scheme/roles';
 
 const base = { roles: emptyRoles(), opacities: DEFAULT_OPACITIES };
 
-const A = `bg = OKLCH(0.98, 0.01, 250)
-fg = OKLCH(0.25, 0.02, 250)
-primary = OKLCH(0.55, 0.15, 250)`;
+const A = `bg = Oklch(0.98, 0.01, 250)
+fg = Oklch(0.25, 0.02, 250)
+primary = Oklch(0.55, 0.15, 250)`;
 
 // fg pushed much lighter — body text contrast collapses (AAA → Fail).
-const B_LIGHT_FG = `bg = OKLCH(0.98, 0.01, 250)
-fg = OKLCH(0.85, 0.02, 250)
-primary = OKLCH(0.55, 0.15, 250)`;
+const B_LIGHT_FG = `bg = Oklch(0.98, 0.01, 250)
+fg = Oklch(0.85, 0.02, 250)
+primary = Oklch(0.55, 0.15, 250)`;
 
 // A + a new accent color.
 const A_PLUS_ACCENT = `${A}
-accent = OKLCH(0.6, 0.12, 30)`;
+accent = Oklch(0.6, 0.12, 30)`;
 
 const render = (src: string) => deriveScheme(src, base);
 
@@ -93,16 +93,16 @@ describe('added / removed colors and roles', () => {
 });
 
 describe('dark mode is compared too', () => {
-	const DARK = `bg = OKLCH(0.98, 0.01, 250)
-fg = OKLCH(0.25, 0.02, 250)
-primary = OKLCH(0.55, 0.15, 250)
-bg_dark = OKLCH(0.18, 0.01, 250)
-fg_dark = OKLCH(0.92, 0.02, 250)
+	const DARK = `bg = Oklch(0.98, 0.01, 250)
+fg = Oklch(0.25, 0.02, 250)
+primary = Oklch(0.55, 0.15, 250)
+bg_dark = Oklch(0.18, 0.01, 250)
+fg_dark = Oklch(0.92, 0.02, 250)
 dark = theme.dark({ bg: "bg_dark", fg: "fg_dark" })`;
 	// Break the dark foreground so a dark pair regresses.
 	const DARK2 = DARK.replace(
-		'fg_dark = OKLCH(0.92, 0.02, 250)',
-		'fg_dark = OKLCH(0.30, 0.02, 250)'
+		'fg_dark = Oklch(0.92, 0.02, 250)',
+		'fg_dark = Oklch(0.30, 0.02, 250)'
 	);
 
 	test('hasDark surfaces and dark contrast diffs populate', () => {
@@ -121,9 +121,9 @@ dark = theme.dark({ bg: "bg_dark", fg: "fg_dark" })`;
 describe('robustness', () => {
 	test('disjoint audit labels never crash (add/remove rows)', () => {
 		// Different component sets → different audit labels on each side.
-		const withComponents = `bg = OKLCH(0.98,0.01,250)
-fg = OKLCH(0.25,0.02,250)
-primary = OKLCH(0.55,0.15,250)
+		const withComponents = `bg = Oklch(0.98,0.01,250)
+fg = Oklch(0.25,0.02,250)
+primary = Oklch(0.55,0.15,250)
 component { btn = button(primary, fg) }`;
 		expect(() => diffSchemes(render(A), render(withComponents))).not.toThrow();
 	});

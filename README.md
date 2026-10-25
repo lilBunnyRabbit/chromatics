@@ -12,7 +12,7 @@ Write a tiny program that derives a whole palette from one brand color, inspect 
 
 </div>
 
-> Built with SvelteKit + Svelte 5, [culori](https://culorijs.org/) for color math, and CodeMirror for the editor. Stored canonically in OKLCH.
+> Built with SvelteKit + Svelte 5, our own [`@lilbunnyrabbit/chromatics`](packages/chromatics) for color math, and CodeMirror for the editor.
 
 ---
 
@@ -24,23 +24,24 @@ A small, expression-oriented language for generating palettes. Every value is a 
 
 ```text
 // Dark mode — change the brand color, the rest follows.
-brand = hex("#6c5ce7")
+brand = parse("#6c5ce7")
 
-bg      = OKLCH(0.17, brand.ok_c * 0.3, brand.ok_h)
-surface = bg.lighten(0.05)
-fg      = OKLCH(0.96, 0.012, brand.ok_h)
-muted   = fg.darken(0.32)
+bg      = Oklch(0.17, brand.to(Oklch).c * 0.3, brand.to(Oklch).h)
+surface = bg.clone().lighten(0.05)
+fg      = Oklch(0.96, 0.012, brand.to(Oklch).h)
+muted   = fg.clone().darken(0.32)
 
-primary = brand.oklch.gamutMap()
-accent  = brand.oklch.rotate(150)
+primary = brand.to(Srgb).gamutMap().to(Oklch)
+accent  = brand.to(Oklch).rotateHue(150)
 
-success = HSL(155, 0.5, 0.55)
-error   = hex("#e74c3c")
+success = Hsl(155, 0.5, 0.55)
+error   = parse("#e74c3c")
 ```
 
-- **Constructors** for every backed space — `OKLCH`, `OKLAB`, `HSL`, `HSV`, `HWB`, `LAB`, `LCH`, `RGB`, `P3`, `hex(...)`.
-- **Channel accessors** on any color regardless of how it was made — `c.ok_c`, `c.lab_a`, `c.h`, `c.r` … and per-model views: `c.oklch`, `c.hsl`, `c.lab`.
-- **Operations** — `lighten` / `darken`, `rotate`, `saturate`, `mix`, `tint` / `shade` / `tone`, `gamutMap`, harmony helpers, and more (each model contributes its own).
+- **The DSL is the [`@lilbunnyrabbit/chromatics`](packages/chromatics) API**: every model is its class (`Oklch`, `Lab`, `Hsl`, `DisplayP3`, `Hct`, … 70 of them), callable with or without `new`, plus `parse("…")` for any CSS colour.
+- **Convert** with `c.to(Lab)` (a new colour); read channels as properties (`c.to(Oklch).l`); set them with `c.l = 0.5`, `c.set({ … })` or `c.shift({ … })`.
+- **Operations** are the model's own methods — `lighten` / `darken`, `rotateHue`, `mix`, `tint` / `shade` / `tone`, `gamutMap`, `contrast`, `deltaE2000`, harmonies, … They change the colour in place, as in JavaScript; `clone()` first to keep the original.
+- **Old scripts** written for the pre-package DSL get an "Upgrade script" review that rewrites them and keeps their results.
 - **Scheme output** — name your colors and they become a role-mapped scheme you can export or theme with.
 - **Design surfaces as blocks** — `tokens { … }` (type/space/radius/shadow + custom token groups), `component { … }` (button/card/type specs), `preview { … }` (cards that render in the Inspector) and `roles { primary = brand, … }` (bind theme roles to your named colors). Inside a block you call the primitives bare — no repeated `preview.` / `component.` prefix; the dotted forms (`preview.x`, `theme({…})`, …) still work too.
 - A CodeMirror editor with autocompletion, hover docs, inline diagnostics and shareable URLs.
@@ -59,9 +60,9 @@ A tabbed workspace around the editor:
 
 ### 🌈 100 color models & systems
 
-The whole engine is built on one canonical store (OKLCH) with every other space as a lazy [culori](https://culorijs.org/) projection — so any color reaches any model as a view, with no privileged "base".
+Every color is an instance of the package's class for the model it was built in, and any color converts to any other model.
 
-- **`/models`** — an interactive encyclopedia of all 100 spaces (perceptual, RGB working/display, CIE tristimulus, video/broadcast, subtractive/print, color systems). Each entry has a live channel playground, a 2-D gamut plane, a pinned 3-D model viewer, cross-model read-outs, and relationship cross-links. 65+ are fully convertible; the rest are documented stubs.
+- **`/models`** — an interactive encyclopedia of all 100 spaces (perceptual, RGB working/display, CIE tristimulus, video/broadcast, subtractive/print, color systems). Each entry has a live channel playground, a 2-D gamut plane, a pinned 3-D model viewer, cross-model read-outs, and relationship cross-links. 70 are implemented; the rest are documented as reference.
 - **`/mixer`** — a cross-model mixer: one card per model, every channel a slider. Drag any slider to set a single color and watch every _other_ model re-read it live, with the model you're editing locked so it never jumps. Grouped by family with toggles.
 
 ### ♿ Accessibility & analysis
@@ -84,15 +85,13 @@ Hex / CSS, swatch SVG, Markdown tables, and round-trippable DSL source.
 
 ## As a library
 
-The color engine is framework-light and exported as a Svelte package — `culori` lives behind a single seam (the model registry), so it stays swappable.
+The color math is its own package, [`@lilbunnyrabbit/chromatics`](packages/chromatics): every model as a typed class, conversions through a declared graph, cited sources for every number.
 
 ```js
-import { ColorValue, OKLCH, hex, allModels, getModel } from "chromatics";
+import { Oklch, Srgb, Srgb8 } from "@lilbunnyrabbit/chromatics";
 
-const c = hex("#6c5ce7");
-c.oklch.l; // lightness
-c.lighten(0.1).hex; // → "#…"
-allModels().length; // every registered model/system
+const c = new Oklch(0.57, 0.2, 283);
+c.clone().lighten(0.1).to(Srgb).gamutMap().to(Srgb8).toHex(); // → "#…"
 ```
 
 ---

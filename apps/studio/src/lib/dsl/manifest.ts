@@ -1,55 +1,64 @@
 /**
- * The token manifest — ONE source derived from the model registry, consumed
- * four ways: the evaluator environment (constructors/builtins), the CodeMirror
- * highlighter (token sets), autocomplete (context-aware members), and the docs.
- * This is what kills the "three-places drift".
+ * The token manifest: one source for the highlighter, autocomplete, hover and the docs overlay, built
+ * from the package's own classes and the JSDoc `scripts/package-docs.ts` extracts (ADR-016: the DSL
+ * is the package's API).
  */
-import { allModels, CHANNELS } from '../models/index.js';
-import type { ModelDef, MethodDef, ParamDef, ChannelDef, ModelStatus } from '../models/index.js';
+import docsJson from './package-docs.json' with { type: 'json' };
+import { CATALOG, type ModelInfo } from '../color/catalog.js';
 import { PREVIEW_SIGNATURES } from './preview.js';
-import { SCALE_SIGNATURES, TOKEN_DOC, TOKENS_SIGNATURES, TOKENS_DOC } from './tokens.js';
+import { TOKENS_SIGNATURES, TOKENS_DOC } from './tokens.js';
 import { COMPONENT_SIGNATURES } from './components.js';
 import { THEME_DOC, ROLES_DOC, THEME_SIGNATURES } from './theme.js';
 
+type PackedMember = [kind: 0 | 1, sig: number, doc: number];
+interface PackedDocs {
+	strings: string[];
+	models: Record<
+		string,
+		{
+			doc: number;
+			constructor: number;
+			members: Record<string, PackedMember>;
+			statics: Record<string, PackedMember>;
+		}
+	>;
+	functions: Record<string, PackedMember>;
+}
+const docs = docsJson as unknown as PackedDocs;
+
 export interface ConstructorInfo {
 	name: string;
-	params: ParamDef[];
+	params: string;
 	doc: string;
-	model: string;
 }
 
 export interface MemberInfo {
 	name: string;
-	kind: 'method' | 'accessor' | 'channel' | 'view';
-	detail: string; // signature or return type
+	kind: 'method' | 'property';
+	detail: string;
 	doc: string;
-	model: string;
-	backed: boolean;
-	status: ModelStatus;
+	owner: string;
 }
 
 export interface TokenManifest {
 	constructors: ConstructorInfo[];
 	builtins: string[];
-	// highlighter token sets
 	constructorNames: Set<string>;
 	builtinNames: Set<string>;
-	methodNames: Set<string>; // callable members across all views + root
-	propertyNames: Set<string>; // channel keys + localKeys + view names + accessors
-	// completion
-	valueMembers: MemberInfo[]; // members on a bare value
-	viewMembers: Map<string, MemberInfo[]>; // model id -> its members
-	members: Map<string, MemberInfo>; // flat name -> info (for hover lookup)
-	models: ModelDef[];
+	methodNames: Set<string>;
+	propertyNames: Set<string>;
+	modelMembers: Map<string, MemberInfo[]>;
+	valueMembers: MemberInfo[];
+	/** `Oklch.` statics and `preview.` / `tokens.` … namespace members. */
+	viewMembers: Map<string, MemberInfo[]>;
+	members: Map<string, MemberInfo>;
+	models: readonly ModelInfo[];
 }
 
-/** One-line docs for the free builtin functions (used by hover + autocomplete). */
 export const BUILTIN_DOCS: Record<string, string> = {
-	mix: 'mix(a, b, ratio?) → color — perceptual blend in OKLCH',
-	contrast: 'contrast(a, b) → number — WCAG contrast ratio (1–21)',
+	parse: 'parse(css) → color — any CSS color string or hex, in the model it names (`#…` is Srgb8)',
 	ensureContrast:
 		'ensureContrast(fg, bg, target?) → color — nearest color to fg that stays legible on bg (target: "AA" | "AAA" | "AA-large" | "AAA-large" | ratio, default "AA"); re-solves when fg/bg change',
-	deltaE: 'deltaE(a, b) → number — CIEDE2000 perceptual difference',
 	clamp: 'clamp(value, min, max) → number',
 	abs: 'abs(n) → number',
 	min: 'min(…nums) → number',
@@ -59,225 +68,82 @@ export const BUILTIN_DOCS: Record<string, string> = {
 	ceil: 'ceil(n) → number',
 	preview: 'preview.* — values that render as cards in the Inspector',
 	tokens: TOKENS_DOC,
-	scale: 'scale.* — token generators (alias of tokens.*)',
-	token: TOKEN_DOC,
 	component: 'component.* — component specs that render in the Styleguide tab',
 	theme: THEME_DOC,
 	roles: ROLES_DOC
 };
 
-const BUILTINS = [
-	'mix',
-	'contrast',
-	'ensureContrast',
-	'deltaE',
-	'clamp',
-	'abs',
-	'min',
-	'max',
-	'round',
-	'floor',
-	'ceil',
-	'preview',
-	'tokens',
-	'scale',
-	'token',
-	'component',
-	'theme',
-	'roles'
-];
+const BUILTINS = Object.keys(BUILTIN_DOCS);
 
-function sig(params: ParamDef[]): string {
-	return '(' + params.map((p) => p.name + (p.optional ? '?' : '')).join(', ') + ')';
+const unpack = (name: string, [kind, sig, doc]: PackedMember, owner: string): MemberInfo => ({
+	name,
+	kind: kind === 0 ? 'method' : 'property',
+	detail: docs.strings[sig],
+	doc: docs.strings[doc],
+	owner
+});
+
+function namespace(id: string, sigs: Record<string, { sig: string; doc: string }>): MemberInfo[] {
+	return Object.entries(sigs).map(([name, s]) => ({
+		name,
+		kind: 'method',
+		detail: `${s.sig} → ${id}`,
+		doc: s.doc,
+		owner: id
+	}));
 }
 
-function memberInfo(def: MethodDef, m: ModelDef): MemberInfo {
-	return {
-		name: def.name,
-		kind: def.kind,
-		detail: def.kind === 'method' ? `${sig(def.params)} → ${def.returns}` : def.returns,
-		doc: def.doc,
-		model: m.id,
-		backed: m.backed,
-		status: m.status
-	};
-}
-
-export function buildManifest(
-	models: ModelDef[],
-	channels: Map<string, ChannelDef & { modelId: string; mode: string }>
-): TokenManifest {
+export function buildManifest(): TokenManifest {
 	const constructors: ConstructorInfo[] = [];
 	const methodNames = new Set<string>();
 	const propertyNames = new Set<string>();
-	const valueMembers: MemberInfo[] = [];
+	const modelMembers = new Map<string, MemberInfo[]>();
 	const viewMembers = new Map<string, MemberInfo[]>();
-	const root = models.find((m) => m.id === 'root');
+	const valueByName = new Map<string, MemberInfo>();
 
-	for (const m of models) {
-		if (m.ctor) {
-			constructors.push({
-				name: m.ctor.name,
-				params: m.ctor.params,
-				doc: `Construct a color in ${m.label}`,
-				model: m.id
-			});
-		}
-		if (m.id === 'root') continue;
-
-		// the view name is itself a member of a bare value
-		propertyNames.add(m.id);
-		valueMembers.push({
-			name: m.id,
-			kind: 'view',
-			detail: `${m.label} view`,
-			doc: `Think/act in ${m.label}`,
-			model: m.id,
-			backed: m.backed,
-			status: m.status
+	for (const info of CATALOG) {
+		const d = docs.models[info.name];
+		if (!d) throw new Error(`package-docs.json has no ${info.name}: run bun run package-docs`);
+		constructors.push({
+			name: info.name,
+			params: docs.strings[d.constructor],
+			doc: docs.strings[d.doc] || `A color in ${info.label}`
 		});
-
-		const members: MemberInfo[] = [];
-		for (const ch of m.channels) {
-			propertyNames.add(ch.localKey);
-			members.push({
-				name: ch.localKey,
-				kind: 'channel',
-				detail: 'number',
-				doc: ch.label,
-				model: m.id,
-				backed: m.backed,
-				status: m.status
-			});
-		}
-		for (const def of m.methods.values()) {
-			members.push(memberInfo(def, m));
-			if (def.kind === 'method') methodNames.add(def.name);
-			else propertyNames.add(def.name);
-		}
-		viewMembers.set(m.id, members);
-	}
-
-	// preview.* namespace members — autocomplete after `preview.`
-	const previewMembers: MemberInfo[] = Object.entries(PREVIEW_SIGNATURES).map(([name, s]) => {
-		methodNames.add(name);
-		return {
-			name,
-			kind: 'method' as const,
-			detail: `${s.sig} → preview`,
-			doc: s.doc,
-			model: 'preview',
-			backed: true,
-			status: 'stable' as const
-		};
-	});
-	viewMembers.set('preview', previewMembers);
-
-	// design-system namespaces — autocomplete after `scale.` and `component.`
-	const registerNamespace = (id: string, sigs: Record<string, { sig: string; doc: string }>) => {
-		const members: MemberInfo[] = Object.entries(sigs).map(([name, s]) => {
-			methodNames.add(name);
-			return {
-				name,
-				kind: 'method' as const,
-				detail: `${s.sig} → ${id}`,
-				doc: s.doc,
-				model: id,
-				backed: true,
-				status: 'stable' as const
-			};
-		});
-		viewMembers.set(id, members);
-	};
-	registerNamespace('tokens', TOKENS_SIGNATURES);
-	registerNamespace('scale', SCALE_SIGNATURES);
-	registerNamespace('component', COMPONENT_SIGNATURES);
-	// theme is a callable builtin AND a namespace: theme.light({…}) / theme.dark({…})
-	registerNamespace('theme', THEME_SIGNATURES);
-
-	// Channel accessors on a bare value, in `ColorValue.member()`'s own dispatch
-	// order: the color's OWN model's un-prefixed channels win, then the flat index.
-	// So `.l` is native lightness on OKLCH/Lab/…, and only falls back to hsl.l on a
-	// model with no local `l`; `.c` / `.a` / `.k` are native-only (no flat key).
-	const localOwners = new Map<string, ModelDef>();
-	for (const m of models) {
-		if (m.id === 'root') continue;
-		for (const ch of m.channels) if (!localOwners.has(ch.localKey)) localOwners.set(ch.localKey, m);
-	}
-	const seenValue = new Set<string>();
-	// 1) flat index (ok_l, hwb_w, lab_a, lr…) + the hsl/srgb flat keys
-	for (const [key, ch] of channels) {
-		propertyNames.add(key);
-		seenValue.add(key);
-		valueMembers.push({
-			name: key,
-			kind: 'channel',
-			detail: 'number',
-			doc: localOwners.has(key)
-				? `${ch.label} — the color's own model (${ch.modelId} when it has no ${key})`
-				: `${ch.label} (${ch.modelId})`,
-			model: ch.modelId,
-			backed: true,
-			status: 'stable'
-		});
-	}
-	// 2) native-only local keys (c, a, k, w, x…) — reachable bare on their model
-	for (const [key, m] of localOwners) {
-		if (seenValue.has(key)) continue;
-		seenValue.add(key);
-		propertyNames.add(key);
-		const ch = m.channels.find((c) => c.localKey === key)!;
-		valueMembers.push({
-			name: key,
-			kind: 'channel',
-			detail: 'number',
-			doc: `${ch.label} — the color's own model (e.g. ${m.id})`,
-			model: m.id,
-			backed: m.backed,
-			status: m.status
-		});
-	}
-
-	// root flat-shortcuts on a bare value (lighten, rotate, hex accessor…)
-	if (root) {
-		for (const def of root.methods.values()) {
-			valueMembers.push(memberInfo(def, root));
-			if (def.kind === 'method') methodNames.add(def.name);
-			else propertyNames.add(def.name);
+		const instance = Object.entries(d.members).map(([n, m]) => unpack(n, m, info.name));
+		modelMembers.set(info.name, instance);
+		viewMembers.set(
+			info.name,
+			Object.entries(d.statics).map(([n, m]) => unpack(n, m, info.name))
+		);
+		for (const m of instance) {
+			(m.kind === 'method' ? methodNames : propertyNames).add(m.name);
+			if (!valueByName.has(m.name)) valueByName.set(m.name, m);
 		}
 	}
 
-	// hex is a free constructor, not a model ctor
-	constructors.push({
-		name: 'hex',
-		params: [{ name: 'css', kind: 'string' }],
-		doc: 'Parse a CSS / hex color string',
-		model: 'srgb'
-	});
+	viewMembers.set('preview', namespace('preview', PREVIEW_SIGNATURES));
+	viewMembers.set('tokens', namespace('tokens', TOKENS_SIGNATURES));
+	viewMembers.set('component', namespace('component', COMPONENT_SIGNATURES));
+	viewMembers.set('theme', namespace('theme', THEME_SIGNATURES));
+	for (const list of viewMembers.values()) for (const m of list) methodNames.add(m.name);
 
-	// flat name -> info, for hover lookup (value members first, then view methods)
-	const members = new Map<string, MemberInfo>();
-	for (const vm of valueMembers) if (!members.has(vm.name)) members.set(vm.name, vm);
-	for (const list of viewMembers.values()) {
-		for (const m of list) {
-			if ((m.kind === 'method' || m.kind === 'accessor') && !members.has(m.name)) {
-				members.set(m.name, m);
-			}
-		}
-	}
+	const members = new Map<string, MemberInfo>(valueByName);
+	for (const list of viewMembers.values())
+		for (const m of list) if (!members.has(m.name)) members.set(m.name, m);
 
 	return {
 		constructors,
 		builtins: BUILTINS,
-		constructorNames: new Set(constructors.map((c) => c.name).filter((n) => n !== 'hex')),
-		builtinNames: new Set([...BUILTINS, 'hex']),
+		constructorNames: new Set(constructors.map((c) => c.name)),
+		builtinNames: new Set(BUILTINS),
 		methodNames,
 		propertyNames,
-		valueMembers,
+		modelMembers,
+		valueMembers: [...valueByName.values()],
 		viewMembers,
 		members,
-		models
+		models: CATALOG
 	};
 }
 
-export const manifest = buildManifest(allModels(), CHANNELS);
+export const manifest = buildManifest();

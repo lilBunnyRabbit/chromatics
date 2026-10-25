@@ -8,6 +8,7 @@
 	import Validate from '$lib/components/Validate.svelte';
 	import History from '$lib/components/History.svelte';
 	import Docs from '$lib/components/Docs.svelte';
+	import UpgradeBanner from '$lib/components/UpgradeBanner.svelte';
 	import ExportPanel from '$lib/components/ExportPanel.svelte';
 	import DocControls from '$lib/components/DocControls.svelte';
 	import { app } from '$lib/state/app.svelte';
@@ -20,6 +21,7 @@
 	import { encodeHash } from '$lib/persistence/url-hash';
 
 	let showDocs = $state(false);
+	let showUpgrade = $state(false);
 	function onKey(e: KeyboardEvent) {
 		if (e.key === 'Escape' && showDocs) showDocs = false;
 		if (e.key === 'Escape' && moreOpen) moreOpen = false;
@@ -195,6 +197,14 @@
 						>
 						API reference
 					</button>
+					<button
+						class="btn btn-api {showUpgrade ? 'btn-accent' : ''}"
+						onclick={() => (showUpgrade = !showUpgrade)}
+						aria-pressed={showUpgrade}
+						title="Upgrade a script written for the old DSL to the package API"
+					>
+						Upgrade script
+					</button>
 					<div class="spacer"></div>
 					<select
 						class="select swatch-pick"
@@ -224,6 +234,7 @@
 						>
 					</button>
 				</div>
+				<UpgradeBanner bind:open={showUpgrade} />
 				<div class="editor-host scroll">
 					<Editor bind:value={app.source} completionSource={completion} {hover} {swatch} />
 				</div>

@@ -1,70 +1,106 @@
 import { test, expect, describe } from 'bun:test';
+import { Oklch } from '@lilbunnyrabbit/chromatics';
+import { models } from '@lilbunnyrabbit/chromatics/all';
 import { manifest } from '../src/lib/dsl/manifest';
-import { OKLCH, getModel, CHANNELS } from '../src/lib/models';
+import { evaluate } from '../src/lib/dsl/evaluator';
+import { MODEL_CLASSES } from '../src/lib/dsl/values';
 
-const probe = OKLCH(0.6, 0.12, 250);
+const PROBE = 'Oklch(0.6, 0.12, 250)';
+
+function reach(prelude: string, expr: string): { value: unknown; error?: string } {
+	const r = evaluate(`${prelude}\nx = ${expr}`);
+	return { value: r.variables.get('x')?.value, error: r.errors[0]?.message };
+}
 
 describe('manifest <-> runtime (anti-drift)', () => {
-	test('constructors cover registered ctors + hex', () => {
-		const names = manifest.constructors.map((c) => c.name);
-		expect(names).toContain('OKLCH');
-		expect(names).toContain('HWB');
-		expect(names).toContain('LAB');
-		expect(names).toContain('hex');
+	test('constructors are exactly the package models, by export name', () => {
+		expect(manifest.constructors.map((c) => c.name)).toEqual(MODEL_CLASSES.map(([n]) => n));
+		expect(manifest.constructors).toHaveLength(models.length);
+		expect(manifest.constructorNames.has('Oklch')).toBe(true);
+		expect(manifest.constructorNames.has('Hwb')).toBe(true);
 	});
 
-	test('every channel accessor on a bare value resolves to a number', () => {
-		for (const m of manifest.valueMembers.filter((x) => x.kind === 'channel')) {
-			// Flat-index keys read off ANY color; native-only local keys (c, a, k…)
-			// read off a color that is actually in the owning model.
-			if (CHANNELS.has(m.name)) {
-				expect(typeof probe.channel(m.name)).toBe('number');
-				expect(typeof probe.member(m.name)).toBe('number');
-				continue;
-			}
-			const def = getModel(m.model);
-			if (!def?.backed) continue;
-			expect(typeof probe.to(m.model).member(m.name)).toBe('number');
+	test('every constructor is callable in the DSL', () => {
+		for (const { name } of manifest.constructors) {
+			const { value, error } = reach('', `${PROBE}.to(${name})`);
+			expect(error, name).toBeUndefined();
+			expect(value, name).toBeDefined();
 		}
 	});
 
-	test('every flat shortcut resolves on a value', () => {
-		for (const m of manifest.valueMembers.filter(
-			(x) => x.kind === 'method' || x.kind === 'accessor'
-		)) {
-			const v = probe.member(m.name);
-			expect(v).toBeDefined();
-			if (m.kind === 'method') expect(typeof v).toBe('function');
-		}
-	});
-
-	test('every view member resolves on its view', () => {
-		for (const [id, members] of manifest.viewMembers) {
-			const def = getModel(id);
-			if (!def?.backed) continue;
-			const view = probe.view(id);
+	test('every documented instance member resolves on an instance of its model', () => {
+		for (const [name, members] of manifest.modelMembers) {
+			const prelude = `c = ${PROBE}.to(${name})`;
 			for (const m of members) {
-				const v = view.member(m.name);
-				expect(v).toBeDefined();
-				if (m.kind === 'method') expect(typeof v).toBe('function');
+				const { value, error } = reach(prelude, `c.${m.name}`);
+				expect(error, `${name}.${m.name}`).toBeUndefined();
+				if (m.kind === 'method') expect(typeof value, `${name}.${m.name}`).toBe('function');
+				else expect(value, `${name}.${m.name}`).toBeDefined();
 			}
+		}
+	});
+
+	test('every documented static resolves on its class', () => {
+		for (const { name } of manifest.constructors) {
+			for (const m of manifest.viewMembers.get(name) ?? []) {
+				const { error } = reach('', `${name}.${m.name}`);
+				expect(error, `${name}.${m.name}`).toBeUndefined();
+			}
+		}
+	});
+
+	test('every namespace member resolves', () => {
+		for (const ns of ['preview', 'tokens', 'component', 'theme']) {
+			const members = manifest.viewMembers.get(ns);
+			expect(members?.length, ns).toBeGreaterThan(0);
+			for (const m of members ?? []) {
+				const { value, error } = reach('', `${ns}.${m.name}`);
+				expect(error, `${ns}.${m.name}`).toBeUndefined();
+				expect(typeof value, `${ns}.${m.name}`).toBe('function');
+			}
+		}
+	});
+
+	test('every builtin is defined in the environment', () => {
+		for (const b of manifest.builtins) {
+			if (b === 'roles') continue;
+			const { error } = reach('', b);
+			expect(error, b).toBeUndefined();
 		}
 	});
 
 	test('token sets are populated and cover known tokens', () => {
 		expect(manifest.methodNames.has('rotateHue')).toBe(true);
 		expect(manifest.methodNames.has('deltaE2000')).toBe(true);
-		expect(manifest.propertyNames.has('hwb_w')).toBe(true);
-		expect(manifest.propertyNames.has('oklch')).toBe(true); // view name
-		expect(manifest.constructorNames.has('OKLCH')).toBe(true);
-		expect(manifest.constructorNames.has('hex')).toBe(false); // hex highlights as builtin
-		expect(manifest.builtinNames.has('hex')).toBe(true);
-		expect(manifest.builtinNames.has('mix')).toBe(true);
+		expect(manifest.methodNames.has('to')).toBe(true);
+		expect(manifest.propertyNames.has('w')).toBe(true);
+		expect(manifest.builtinNames.has('parse')).toBe(true);
+		expect(manifest.builtinNames.has('ensureContrast')).toBe(true);
 	});
 
-	test('a registered model surfaces everywhere (adding a model = data only)', () => {
-		expect(manifest.viewMembers.has('hwb')).toBe(true);
-		expect(manifest.constructors.some((c) => c.name === 'HWB')).toBe(true);
-		expect(manifest.viewMembers.get('hwb')!.map((x) => x.name)).toContain('addWhite');
+	test('the old names are not in the manifest (ADR-016 78f, 78k)', () => {
+		for (const old of ['OKLCH', 'HWB', 'LAB', 'hex'])
+			expect(manifest.constructorNames.has(old), old).toBe(false);
+		for (const old of ['hex', 'mix', 'contrast', 'deltaE', 'token'])
+			expect(manifest.builtinNames.has(old), old).toBe(false);
+		expect(manifest.propertyNames.has('hwb_w')).toBe(false);
+		expect(manifest.propertyNames.has('oklch')).toBe(false);
+		expect(manifest.viewMembers.has('scale')).toBe(false);
+	});
+
+	test('package internals are not documented as members', () => {
+		for (const members of manifest.modelMembers.values()) {
+			for (const m of members) {
+				expect(m.name.startsWith('_'), m.name).toBe(false);
+				expect(['assign', 'write', 'alphaOf', 'constructor']).not.toContain(m.name);
+			}
+		}
+	});
+
+	test('a model surfaces everywhere from the package alone', () => {
+		expect(manifest.modelMembers.get('Hwb')!.map((x) => x.name)).toContain('w');
+		expect(manifest.modelMembers.get('Oklch')!.map((x) => x.name)).toContain('lighten');
+		expect(manifest.viewMembers.get('Oklch')!.map((x) => x.name)).toContain('parse');
+		expect(manifest.models.some((m) => m.model === Oklch)).toBe(true);
 	});
 });

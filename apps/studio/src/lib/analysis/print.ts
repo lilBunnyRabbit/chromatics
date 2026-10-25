@@ -4,8 +4,7 @@
  * limit, and the proofed appearance after ink-limiting. The CMYK model is the
  * app's naive (profile-less) one, so this is directional, not a contract proof.
  */
-import { ColorValue } from '../models/index.js';
-import type { CuloriColor } from '../models/registry.js';
+import { Cmyk, Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
 
 export interface PrintProof {
 	c: number;
@@ -30,30 +29,23 @@ export const INK_LIMITS = [
 	{ label: 'Sheetfed (320%)', value: 320 }
 ];
 
-export function printProof(color: ColorValue, inkLimit = 300): PrintProof {
-	const p = color.project('cmyk') as unknown as Record<string, number | undefined>;
-	const c = p.c ?? 0,
-		m = p.m ?? 0,
-		y = p.y ?? 0,
-		k = p.k ?? 0;
-	const total = c + m + y + k;
-	const totalInk = total * 100;
-	const max = inkLimit / 100;
-	const overInk = total > max;
-
-	let proof = { c, m, y, k };
-	if (overInk && total > 0) {
-		const f = max / total;
-		proof = { c: c * f, m: m * f, y: y * f, k: k * f };
-	}
-	const proofHex = ColorValue.from({ mode: 'cmyk', ...proof } as unknown as CuloriColor).hex;
-
+export function printProof(color: Color, inkLimit = 300): PrintProof {
+	const ink = color.to(Cmyk);
+	const { c, m, y, k } = ink;
+	const total = ink.totalInk();
+	const overInk = total > inkLimit / 100;
+	const proofHex = ink
+		.limitInk(inkLimit / 100)
+		.to(Srgb)
+		.gamutMap()
+		.to(Srgb8)
+		.toHex();
 	return {
 		c,
 		m,
 		y,
 		k,
-		totalInk,
+		totalInk: total * 100,
 		overInk,
 		proofHex,
 		richBlack: k > 0.5 && c + m + y > 0.1

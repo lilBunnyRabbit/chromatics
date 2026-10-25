@@ -15,7 +15,7 @@ import type { CompletionContext, Completion } from '@codemirror/autocomplete';
 
 describe('enclosingBlock', () => {
 	test('top-level text is in no block', () => {
-		expect(enclosingBlock('brand = hex("#6c5ce7")\n')).toBeNull();
+		expect(enclosingBlock('brand = parse("#6c5ce7")\n')).toBeNull();
 	});
 
 	test('reports the block once it is open', () => {
@@ -44,7 +44,7 @@ describe('enclosingBlock', () => {
 	});
 
 	test('a block keyword in a comment does not open a block', () => {
-		expect(enclosingBlock('// preview {\nbrand = hex("#fff")\n')).toBeNull();
+		expect(enclosingBlock('// preview {\nbrand = parse("#fff")\n')).toBeNull();
 	});
 
 	test('only a keyword immediately followed by `{` opens a block', () => {
@@ -112,7 +112,7 @@ describe('block-aware autocomplete', () => {
 		expect(res!.options.some((o: Completion) => o.label === 'brand')).toBe(true);
 	});
 
-	test('inside a tokens block, scale generators are offered', () => {
+	test('inside a tokens block, token generators are offered', () => {
 		const doc = 'tokens {\n  te';
 		expect(labels(doc, doc.length)).toContain('text');
 	});
@@ -122,7 +122,7 @@ describe('block-aware autocomplete', () => {
 		const opts = labels(doc, doc.length);
 		expect(opts).toContain('primary');
 		expect(opts).toContain('primaryFg');
-		expect(opts).not.toContain('OKLCH');
+		expect(opts).not.toContain('Oklch');
 	});
 
 	test('roles block: right side (after `=`) offers named colors', () => {
@@ -133,9 +133,29 @@ describe('block-aware autocomplete', () => {
 	});
 
 	test('at top level, constructors and builtins are offered (no block members)', () => {
-		const doc = 'x = OK';
+		const doc = 'x = Ok';
 		const opts = labels(doc, doc.length);
-		expect(opts).toContain('OKLCH');
+		expect(opts).toContain('Oklch');
 		expect(opts).not.toContain('ramp');
+	});
+});
+
+describe('member autocomplete', () => {
+	const members = (doc: string, modelOf?: (n: string) => string | undefined) =>
+		(chromaCompletions(() => ['c'], modelOf)(fakeCtx(doc, doc.length))?.options ?? []).map(
+			(o: Completion) => o.label
+		);
+
+	test("after a colour variable, its model's members", () => {
+		const opts = members('x = c.', (n) => (n === 'c' ? 'Oklch' : undefined));
+		expect(opts).toContain('lighten');
+		expect(opts).toContain('l');
+		expect(opts).not.toContain('w');
+	});
+
+	test('after a class, its statics; after a namespace, its members', () => {
+		expect(members('x = Oklch.')).toContain('parse');
+		expect(members('x = preview.')).toContain('ramp');
+		expect(members('x = tokens.')).toContain('token');
 	});
 });

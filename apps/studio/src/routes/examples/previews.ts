@@ -4,22 +4,22 @@ export const source = `// Preview primitives — values that RENDER in the Inspe
 // These aren't colors; each one draws itself as a card.
 // Inside a \`preview { }\` block you call them bare — no \`preview.\` prefix.
 // Open the Inspector tab to see them all.
-brand   = OKLCH(0.62, 0.16, 264)
-accent  = brand.rotateHue(150).gamutMap()
-bg      = OKLCH(0.16, 0.02, 264)
-surface = OKLCH(0.22, 0.02, 264)
-fg      = OKLCH(0.96, 0.01, 264)
-wide    = OKLCH(0.72, 0.32, 150)   // beyond sRGB on purpose
+brand   = Oklch(0.62, 0.16, 264)
+accent  = brand.clone().rotateHue(150).to(Srgb).gamutMap().to(Oklch)
+bg      = Oklch(0.16, 0.02, 264)
+surface = Oklch(0.22, 0.02, 264)
+fg      = Oklch(0.96, 0.01, 264)
+wide    = Oklch(0.72, 0.32, 150)   // beyond sRGB on purpose
 
 preview {
   // ── Relationships ── (each derivation can pick the model it works in)
   brand_ramp      = ramp(brand)                        // OKLCH lightness (default)
-  brand_ramp_lab  = ramp(brand, "lab")                 // …or any model's lightness axis
-  brand_to_accent = gradient(brand, accent, "oklab", 7)
-  spectrum        = gradient(brand, accent, { space: "lch", hue: "longer" })
+  brand_ramp_lab  = ramp(brand, Lab)                 // …or any model's lightness axis
+  brand_to_accent = gradient(brand, accent, Oklab, 7)
+  spectrum        = gradient(brand, accent, { space: Lch, hue: "longer" })
   triad           = harmony(brand, "triadic")          // rotate on the OKLCH wheel
-  triad_hsl       = harmony(brand, "triadic", "hsl")   // …vs the classic HSL wheel
-  blend           = mix(brand, accent, 5)
+  triad_hsl       = harmony(brand, "triadic", Hsl)   // …vs the classic HSL wheel
+  blend           = brand.clone().mix(accent, 5)
 
   // ── Accessibility ──
   body_text     = pair(fg, bg)              // type specimen + WCAG + APCA
@@ -28,8 +28,8 @@ preview {
   legibility    = onBackgrounds(brand, [bg, surface, fg])
 
   // ── Single color ──
-  brand_3d     = space(brand, "oklch")
-  brand_ch     = channels(brand, "oklch")
+  brand_3d     = space(brand, Oklch)
+  brand_ch     = channels(brand, Oklch)
   gamut_check  = gamut(wide)
   press        = print(brand)
   closest_name = name(brand)

@@ -4,20 +4,25 @@
  * the desktop workspace and the mobile editor sheet host the exact same editor
  * behaviour without duplicating the (non-trivial) hover logic.
  */
+import { Srgb, Srgb8, type Color, type ColorModel } from '@lilbunnyrabbit/chromatics';
 import { app } from '$lib/state/app.svelte';
-import { isColorValue, formatOwnModel } from '$lib/models';
+import { isColor, modelName } from './values';
 import { chromaCompletions } from './complete';
 import { chromaHover } from './hover';
 import { chromaSwatches, type SwatchMode } from './swatch-deco';
 
-export const completion = chromaCompletions(() => app.result.order);
+const modelOf = (name: string) => {
+	const v = app.result.variables.get(name)?.value;
+	return isColor(v) ? modelName(v.constructor as ColorModel) : undefined;
+};
+
+export const completion = chromaCompletions(() => app.result.order, modelOf);
 
 const hexOf = (name: string) => {
 	const e = app.scheme.byName.get(name);
-	return e ? e.color.hex : null;
+	return e ? e.color.to(Srgb).gamutMap().to(Srgb8).toHex() : null;
 };
 
-/** Build the inline-swatch extension for a given marker style. */
 export function makeSwatches(mode: SwatchMode) {
 	return chromaSwatches(hexOf, mode);
 }
@@ -25,16 +30,15 @@ export function makeSwatches(mode: SwatchMode) {
 export const hover = chromaHover((name) => {
 	const e = app.scheme.byName.get(name);
 	if (e) {
-		const c = e.color;
-		// Show the color in its OWN model (how it was authored), not always OKLCH.
-		const own = formatOwnModel(c, e.model);
-		return { hex: c.hex, text: own === c.hex ? c.hex : `${c.hex} · ${own}` };
+		const hex = e.color.to(Srgb).gamutMap().to(Srgb8).toHex();
+		const own = (e.color as Color & { toCss?: () => string }).toCss?.() ?? e.color.toString();
+		return { hex, text: own === hex ? hex : `${hex} · ${own}` };
 	}
 	const v = app.result.variables.get(name);
-	if (v && !isColorValue(v.value)) {
+	if (v) {
 		const val =
 			typeof v.value === 'number' ? String(Math.round(v.value * 10000) / 10000) : String(v.value);
 		return { text: `= ${val}` };
 	}
 	return null;
-});
+}, modelOf);

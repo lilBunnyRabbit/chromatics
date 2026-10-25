@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { hex } from '$lib/models';
+	import { parse } from '@lilbunnyrabbit/chromatics/all';
 	import { quantize, rgbToHex } from '$lib/analysis/quantize';
 	import { nearestName } from '$lib/color-names';
 	import { uniqueName } from '$lib/dsl/emit';
@@ -16,7 +16,7 @@
 		const rgb = quantize(lastData, count);
 		colors = rgb.map((c) => {
 			const h = rgbToHex(c);
-			return { hex: h, name: nearestName(hex(h)).name };
+			return { hex: h, name: nearestName(parse(h)).name };
 		});
 	}
 
@@ -58,7 +58,7 @@
 		const lines = colors.map((c) => {
 			const name = uniqueName(c.name, taken);
 			taken.add(name);
-			return `${name} = hex("${c.hex}")`;
+			return `${name} = parse("${c.hex}")`;
 		});
 		insert(lines, `Extracted from ${fileName || 'image'}`);
 	}

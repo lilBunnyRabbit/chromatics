@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { app } from '$lib/state/app.svelte';
 	import { contrastRatio } from '$lib/analysis/contrast';
 	import { wcagLevels, wcagColor } from '$lib/analysis/wcag';
@@ -19,7 +20,14 @@
 			.map((e) => {
 				const wc = contrastRatio(e.color, bg.color);
 				const lc = apcaContrast(e.color, bg.color);
-				return { name: e.name, hex: e.color.hex, wc, levels: wcagLevels(wc), lc, use: apcaUse(lc) };
+				return {
+					name: e.name,
+					hex: e.color.to(Srgb).gamutMap().to(Srgb8).toHex(),
+					wc,
+					levels: wcagLevels(wc),
+					lc,
+					use: apcaUse(lc)
+				};
 			});
 	});
 
@@ -30,7 +38,11 @@
 	// — Print soft-proof —
 	let inkLimit = $state(300);
 	const proofs = $derived.by(() =>
-		entries.map((e) => ({ name: e.name, hex: e.color.hex, ...printProof(e.color, inkLimit) }))
+		entries.map((e) => ({
+			name: e.name,
+			hex: e.color.to(Srgb).gamutMap().to(Srgb8).toHex(),
+			...printProof(e.color, inkLimit)
+		}))
 	);
 </script>
 

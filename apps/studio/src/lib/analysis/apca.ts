@@ -5,7 +5,7 @@
  * better, especially in dark mode. Faithful port of the public APCA 0.1.9
  * constants (apca-w3). Returns a signed Lc in roughly [-108, +106].
  */
-import type { ColorValue } from '../models/index.js';
+import { Srgb, type Color } from '@lilbunnyrabbit/chromatics';
 
 const mainTRC = 2.4;
 const Rco = 0.2126729,
@@ -25,9 +25,10 @@ const deltaYmin = 0.0005,
 	loClip = 0.1;
 
 /** Screen luminance (Ys) from a color's clamped sRGB, using APCA's simple 2.4 TRC. */
-function srgbToY(c: ColorValue): number {
+function srgbToY(c: Color): number {
 	const lin = (v: number) => Math.pow(Math.min(1, Math.max(0, v)), mainTRC);
-	return Rco * lin(c.channel('r')) + Gco * lin(c.channel('g')) + Bco * lin(c.channel('b'));
+	const { r, g, b } = c.to(Srgb);
+	return Rco * lin(r) + Gco * lin(g) + Bco * lin(b);
 }
 
 /** APCA's soft black-level clamp. */
@@ -40,7 +41,7 @@ function softClamp(y: number): number {
  * background; negative ≈ light text on a dark background. Magnitude is what the
  * readability thresholds compare against.
  */
-export function apcaContrast(text: ColorValue, bg: ColorValue): number {
+export function apcaContrast(text: Color, bg: Color): number {
 	const Ytxt = softClamp(srgbToY(text));
 	const Ybg = softClamp(srgbToY(bg));
 	if (Math.abs(Ytxt - Ybg) < deltaYmin) return 0;

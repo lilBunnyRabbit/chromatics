@@ -1,8 +1,8 @@
 /**
  * Context-aware autocomplete, driven by the manifest:
- *  - at expression start  → constructors + builtins + live user variables
- *  - after `value.`       → channel accessors, view names, flat shortcuts
- *  - after `value.view.`  → ONLY that view's channels + methods
+ *  - at expression start  → model classes + builtins + live user variables
+ *  - after `color.`       → that variable's model's members (from the last evaluation), else every model's
+ *  - after `Oklch.`       → the class's statics; after `preview.` / `tokens.` … → the namespace's members
  *  - inside a `preview {}` / `component {}` / `tokens {}` block → that block's
  *    bare members surface first; inside `roles {}` → role keys then color names
  */
@@ -10,25 +10,15 @@ import type { CompletionContext, CompletionResult, Completion } from '@codemirro
 import { manifest, type MemberInfo } from './manifest.js';
 import { enclosingBlock, blockMembers, ROLE_KEYS, MAPPING_BLOCKS } from './block-scope.js';
 
-const KIND_TO_TYPE: Record<MemberInfo['kind'], string> = {
-	method: 'method',
-	accessor: 'property',
-	channel: 'property',
-	view: 'namespace'
-};
-
 function toCompletion(m: MemberInfo): Completion {
-	const info =
-		m.status === 'experimental'
-			? `${m.doc} — experimental`
-			: m.status === 'coming-soon'
-				? `${m.doc} — coming soon (needs @lilbunnyrabbit/chromatics)`
-				: m.doc;
-	const boost = m.status === 'coming-soon' ? -50 : m.status === 'experimental' ? -10 : 0;
-	return { label: m.name, type: KIND_TO_TYPE[m.kind], detail: m.detail, info, boost };
+	return { label: m.name, type: m.kind, detail: m.detail, info: m.doc };
 }
 
-export function chromaCompletions(getVars: () => string[]) {
+/** `modelOf(name)` is the model name of a variable's value at the last evaluation, if it's a color. */
+export function chromaCompletions(
+	getVars: () => string[],
+	modelOf: (name: string) => string | undefined = () => undefined
+) {
 	return (ctx: CompletionContext): CompletionResult | null => {
 		const chain = ctx.matchBefore(/[\w.]+$/);
 
@@ -40,7 +30,11 @@ export function chromaCompletions(getVars: () => string[]) {
 				const segs = before.split('.');
 				const prev = segs[segs.length - 1];
 				if (prev && /^[A-Za-z_]/.test(prev)) {
-					const members = manifest.viewMembers.get(prev) ?? manifest.valueMembers;
+					const own = segs.length === 1 ? modelOf(prev) : undefined;
+					const members =
+						manifest.viewMembers.get(prev) ??
+						(own ? manifest.modelMembers.get(own) : undefined) ??
+						manifest.valueMembers;
 					return {
 						from: ctx.pos - (partial[1]?.length ?? 0),
 						options: members.map(toCompletion),
@@ -79,7 +73,7 @@ export function chromaCompletions(getVars: () => string[]) {
 				(c): Completion => ({
 					label: c.name,
 					type: 'class',
-					detail: '(' + c.params.map((p) => p.name).join(', ') + ')',
+					detail: c.params,
 					info: c.doc
 				})
 			),

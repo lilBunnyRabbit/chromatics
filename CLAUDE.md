@@ -10,7 +10,7 @@ Guidance for working in this repo. **Keep it current** — see _Maintaining this
 4. [docs/adrs/README.md](docs/adrs/README.md): the ADR index, accepted vs implemented.
 5. The latest log in [docs/brainstorm/](docs/brainstorm/) for the area you touch.
 
-**Current focus:** our own npm color package, replacing the culori wrapper (`src/lib/models/`). Built on a branch first, then this repo becomes a monorepo hosting the package and the website. The API is being decided with the owner, question by question. Until an ADR says otherwise, nothing about the package's shape is decided.
+**Current focus:** our own npm color package; the studio now runs on it (roadmap step 6, ADR-016). Built on a branch first, then this repo becomes a monorepo hosting the package and the website. The API is being decided with the owner, question by question. Until an ADR says otherwise, nothing about the package's shape is decided.
 
 ## Hard rules
 
@@ -36,7 +36,7 @@ The earlier hand-written libraries died partly on unverified math (`// TODO: AI 
 - Conversion to and from every direct neighbour, both directions; round-trip within the ADR tolerance.
 - Reference vectors from a cited independent source.
 - Parse ↔ format round-trip for every string form the model supports.
-- During the migration: parity against a culori baseline dump, so the studio's golden hexes (`tests/acceptance/brand-dark.test.ts`) can't regress.
+- The studio switch is gated by the culori baseline (`apps/studio/tests/fixtures/baseline/`, `review.md`) and the Brand Dark golden hexes (`tests/acceptance/brand-dark.test.ts`), which must not regress.
 
 Break the code once on purpose and check the test fails.
 
@@ -104,9 +104,9 @@ If work is blocked on the owner, finish everything that doesn't depend on the an
 
 ## What this is
 
-**Chromatics** — a scriptable **color language** (a small JS-subset DSL) plus an **interactive studio** for designing, analyzing and exploring color. Write a tiny program that derives a whole palette from one brand color; inspect any color across ~100 color models; check accessibility; preview it on real UI — all in the browser. Stored canonically in **OKLCH**; every other space is a lazy [culori](https://culorijs.org/) projection.
+**Chromatics** — a scriptable **color language** (a small JS-subset DSL) plus an **interactive studio** for designing, analyzing and exploring color. Write a tiny program that derives a whole palette from one brand color; inspect any color across ~100 color models; check accessibility; preview it on real UI — all in the browser. Colours are instances of the `@lilbunnyrabbit/chromatics` package's classes, in the model they were built in.
 
-Repo layout: the studio app lives in `apps/studio/`; app paths in this file (`src/…`, `static/…`, `tests/…`, `package.json`) are relative to it. The color package lives in `packages/chromatics/` and replaces culori (behind one seam, the registry) at roadmap step 6.
+Repo layout: the studio app lives in `apps/studio/`; app paths in this file (`src/…`, `static/…`, `tests/…`, `package.json`) are relative to it. The color package lives in `packages/chromatics/`; the studio runs on it since roadmap step 6 (ADR-016).
 
 ## Repo, branch & deployment
 
@@ -122,7 +122,7 @@ Repo layout: the studio app lives in `apps/studio/`; app paths in this file (`sr
 
 ## Stack
 
-SvelteKit 2 + **Svelte 5 runes** + TypeScript + **Bun** workspaces + **Turborepo** + CodeMirror 6 + culori + Tailwind v4 + `adapter-static` (static SPA, deployed to GitHub Pages on push to `master`).
+SvelteKit 2 + **Svelte 5 runes** + TypeScript + **Bun** workspaces + **Turborepo** + CodeMirror 6 + `@lilbunnyrabbit/chromatics` + Tailwind v4 + `adapter-static` (static SPA, deployed to GitHub Pages on push to `master`).
 
 ## Commands / gates
 
@@ -131,7 +131,7 @@ A Bun + Turborepo monorepo (ADR-007, grill 76): the studio in `apps/studio` (pri
 ```sh
 bun install
 bun run dev            # studio dev server
-bun run test           # studio bun:test (423 across 32 files) + package Vitest on node and bun (8,699)
+bun run test           # studio bun:test (466 across 28 files) + package Vitest on node and bun (8,699)
 bun run check          # studio svelte-check (expect 0 errors / 0 warnings) + package tsc
 bun run build          # studio static build → apps/studio/build/, package → packages/chromatics/dist/
 bun run lint           # prettier --check: root config for the package and repo files, the studio its own
@@ -141,7 +141,7 @@ bun run changeset      # add a changeset for the package (changesets on Bun)
 
 One workspace: `bunx turbo run test --filter=studio` (or `--filter=@lilbunnyrabbit/chromatics`). Before calling any change done: **`bun run check` + `bun run test` + `bun run build` + `bun run lint` all green.** CI (`.github/workflows/ci.yml`) runs `lint` and `turbo run check test build --affected` on every push and pull request; `deploy.yml` builds only the studio. `release.yml` (changesets, on `master`) opens the Version Packages PR and publishes on its merge; the package stays `"private": true` until the first publish (ADR-007 runbook). Note: Bun resolves `./x.js` imports to `x.ts`. The studio's `bun test` is scoped to its `tests/` (`apps/studio/bunfig.toml`).
 
-Studio generator (run from `apps/studio`): `bun run baseline` rewrites the culori baseline in `tests/fixtures/baseline/` (ADR-016 gate; `tests/baseline.test.ts` fails when it is stale). Regenerate it only at the switch, then review the diff.
+Studio generators (run from `apps/studio`): `bun run baseline` regenerates `tests/fixtures/baseline/package/` and `review.md` against the frozen `culori/` dump (ADR-016 gate; `tests/baseline.test.ts` fails when stale; read the review diff before committing). `bun run package-docs` regenerates `src/lib/dsl/package-docs.json` from the package's JSDoc (a test fails when stale).
 
 Package generators (run from `packages/chromatics`):
 
@@ -217,9 +217,9 @@ If work is blocked on the owner, finish everything that doesn't depend on the an
 
 ## What this is
 
-**Chromatics** — a scriptable **color language** (a small JS-subset DSL) plus an **interactive studio** for designing, analyzing and exploring color. Write a tiny program that derives a whole palette from one brand color; inspect any color across ~100 color models; check accessibility; preview it on real UI — all in the browser. Stored canonically in **OKLCH**; every other space is a lazy [culori](https://culorijs.org/) projection.
+**Chromatics** — a scriptable **color language** (a small JS-subset DSL) plus an **interactive studio** for designing, analyzing and exploring color. Write a tiny program that derives a whole palette from one brand color; inspect any color across ~100 color models; check accessibility; preview it on real UI — all in the browser. Colours are instances of the `@lilbunnyrabbit/chromatics` package's classes, in the model they were built in.
 
-Repo layout: the studio app lives in `apps/studio/`; app paths in this file (`src/…`, `static/…`, `tests/…`, `package.json`) are relative to it. The color package lives in `packages/chromatics/` and replaces culori (behind one seam, the registry) at roadmap step 6.
+Repo layout: the studio app lives in `apps/studio/`; app paths in this file (`src/…`, `static/…`, `tests/…`, `package.json`) are relative to it. The color package lives in `packages/chromatics/`; the studio runs on it since roadmap step 6 (ADR-016).
 
 ## Repo, branch & deployment
 
@@ -235,7 +235,7 @@ Repo layout: the studio app lives in `apps/studio/`; app paths in this file (`sr
 
 ## Stack
 
-SvelteKit 2 + **Svelte 5 runes** + TypeScript + **Bun** workspaces + **Turborepo** + CodeMirror 6 + culori + Tailwind v4 + `adapter-static` (static SPA, deployed to GitHub Pages on push to `master`).
+SvelteKit 2 + **Svelte 5 runes** + TypeScript + **Bun** workspaces + **Turborepo** + CodeMirror 6 + `@lilbunnyrabbit/chromatics` + Tailwind v4 + `adapter-static` (static SPA, deployed to GitHub Pages on push to `master`).
 
 ## Commands / gates
 
@@ -244,7 +244,7 @@ Run from the **repo root** (the Bash shell cwd can drift into subdirs — `cd` f
 ```sh
 bun install
 bun run dev            # dev server
-bun test               # unit tests (bun:test) — currently 423 across 32 files
+bun test               # unit tests (bun:test) — currently 466 across 28 files
 bun run check          # svelte-kit sync + svelte-check (expect 0 errors / 0 warnings)
 bunx vite build        # static build → build/  (also: bun run build)
 bun run format         # prettier --write
@@ -267,27 +267,25 @@ Formatting: `bunx prettier --write packages/chromatics` from the root; the packa
 
 ## Architecture
 
-### Color engine — `src/lib/models/`
+### Color — `@lilbunnyrabbit/chromatics` + `src/lib/color/` (ADR-016)
 
-The hybrid "A+C" design. Immutable, **model-tagged** color values (a color is stored natively in the model it was built in — there is no single canonical store) + a data-driven model registry + one runtime view class.
+Colours are **package instances** (`packages/chromatics`, workspace dependency): mutable classes, methods mutate and return `this`, `to(Model)` always returns a new instance. There is no studio wrapper: app code writes the package chain at the call site (display hex = `c.to(Srgb).gamutMap().to(Srgb8).toHex()`, gamut test = `c.to(Srgb).inGamut()`, CSS = `c.to(Oklch).toCss()`). Colours leaving a DSL program are `Object.freeze`d, so app code that forgets `clone()` throws instead of corrupting shared state.
 
-- `value.ts` — `ColorValue` (immutable; native `_native` + `_model` tag; lazy `project(mode)` cache; `channel`/`view`/`member` dispatch; `.hex/.inGamut/.gamutMapped/.toCSS`). **Channel accessors and per-model views (`c.oklch`, `c.lab`, `c.ok_h`, …) are resolved dynamically at runtime via `member()` — they are NOT on the static TS type.** In typed `.ts`/`.svelte` code, `c.oklch.lighten(…)` will fail `svelte-check`; only the DSL evaluator reaches them. If you need a value's hex in component code, derive it through the DSL (`evaluate`) or use typed methods. **Bare channels are model-local**: `member()` resolves the color's OWN model's `localKey` **first**, so an OKLCH color's `.l/.c/.h` are its own coordinates and a Lab color's `.b` is Lab _b_ — same rule as methods ("channels and ops live on the model the color is already in"). Only then does it fall back to the flat `CHANNELS` index, which still serves cross-model namespaced reads (`.ok_l`, `.lab_a`) and the un-namespaced `h/s/l` (hsl) + `r/g/b` (srgb) keys for models that have no local channel of that name. `ColorValue.channel(key)` (used by components/analysis) is the **flat-index-only** low-level read and is unaffected.
-- `view.ts` — `ModelView`, the single runtime class (channel → method → cross-model re-entry).
-- `registry.ts` — the **only** culori importer; `toMode/getModel/allModels/CHANNELS/register/defineModel` + gamut helpers.
-- `types.ts`, `families.ts`, `util.ts` — model/method/channel defs, op-tables + factories, coercions. `families.ts` has `mkHarmonyNative(mode)` (the per-model rotateHue/complementary/triadic/analogous set); `util.ts` has `lerpInMode(…, hueStrategy)` + `rotateHueInMode` (the model-generic interpolate/rotate primitives).
-- `spaces.ts` — **the "pick a model" source of truth** for the three model-parameterized studio derivations: `INTERP_SPACES` (gradient/mix), `HUE_MODELS` + `harmonyColors()` (per-model harmony), `RAMP_MODELS` + `rampColors()` (tonal ramps). Curated lists the DSL cards + Studio pickers both read; an anti-drift test (`derivations.test.ts`) checks every mode resolves. OKLCH stays the default everywhere; colors round-trip back to native storage and gamut-map at display.
-- `defs/*.ts` — one file (or group) per model; `defs/index.ts` barrel side-effect-registers all. `modes/` holds custom culori modes.
-- **~100 registered models & systems** (stable + experimental + coming-soon stubs). Adding a model is a pure data file that auto-surfaces everywhere via the DSL manifest (proven by an anti-drift test).
+- `catalog.ts` — `CATALOG` / `infoOf` / `infoByName`: the package's 70 models with studio labels and families (mixer, pickers, `/models`, docs).
+- `spaces.ts` — **the "pick a model" source of truth**: `INTERP_SPACES` + `mixIn` (gradient/mix), `HUE_MODELS` + `rotateIn` / `harmonyColors` (harmony), `RAMP_MODELS` + `rampColors` (tonal ramps). Entries hold the model **class**; pickers use its export name.
+- `contrast-guard.ts` — `ensureContrast` / `wcagTargetRatio`, the engine of the `ensureContrast` builtin and the Auto-fix tool.
+- `legacy.ts` — ADR-017: the **one place** the old DSL's names live (old model ids → package names, old constructors, flat keys, unit changes, the `/models` reference table for models with no package class). Nothing here is accepted by the evaluator.
 
 ### DSL — `src/lib/dsl/`
 
-- `evaluator.ts` — acorn parse → controlled AST walk (no raw `eval`); per-statement try/catch; returns `EvalResult`. Also desugars **block scoping** — `tokens { … }` / `component { … }` / `preview { … }` / `roles { … }` (a length-preserving rewrite to a labeled statement, so offsets/line numbers are untouched). The first three are **builder** blocks: the namespace's members are called **bare** (`ramp(c)` ≡ `preview.ramp(c)`) and each line becomes a top-level variable. `roles { role = color }` is a **mapping** block: the RHS is captured as a color _name_ (not evaluated) and the block aggregates into one `roles` theme-config variable. The dotted forms (`preview.x`, `tokens.x`, `token()`, `scale.x`, `theme({…})`) all still work.
-- `environment.ts` — constructors generated from `manifest.constructors` + free fns (`mix`/`contrast`/`ensureContrast`/`deltaE`/math). **`ensureContrast(fg, bg, target?)`** (engine: `models/solve.ts`) is the **contrast-guard combinator** — it returns the nearest color to `fg` (OKLCH lightness, then chroma) whose gamut-mapped form meets the WCAG `target` (`"AA"`/`"AAA"`/`"AA-large"`/`"AAA-large"`/raw ratio, default `"AA"`) against `bg`, preserving hue and best-effort-ing to black/white when unreachable. Because the DSL re-evaluates on every edit, defining `fg = ensureContrast(seed, bg, "AAA")` keeps the pair legible as the seed changes — the reactive answer to the CD-13 "maintained accessibility" question (no role-graph solver, no source rewrite). The Studio **Auto-fix** tool (`components/tools/AutoFix.svelte`) previews with the same solver and emits this live call.
-- `manifest.ts` — **the single source of truth**: constructors/builtins/members/docs, built from `allModels()` + `CHANNELS`. An anti-drift test asserts everything stays in sync.
+- `values.ts` — `DSLValue`, coercions (`num`/`str`/`color`/`model`), `MODEL_CLASSES` (package classes by **export name**, never `class.name`: a minified build renames classes), `freezeColors`.
+- `evaluator.ts` — acorn parse → controlled AST walk (no raw `eval`); per-statement try/catch; returns `EvalResult`. **The DSL is the package API** (ADR-016): model classes are callable with or without `new`, members are the instance's own (package internals hidden by name: `_*`, `assign`, `write`, `alphaOf`), channel assignment (`c.l = 0.5`, `+=`…), JS mutation semantics inside a program, colours frozen on return. Also desugars **block scoping** — `tokens { … }` / `component { … }` / `preview { … }` / `roles { … }` (a length-preserving rewrite to a labeled statement, so offsets/line numbers are untouched). The first three are **builder** blocks: the namespace's members are called **bare** (`ramp(c)` ≡ `preview.ramp(c)`) and each line becomes a top-level variable. `roles { role = color }` is a **mapping** block: the RHS is captured as a color _name_ (not evaluated) and the block aggregates into one `roles` theme-config variable. The dotted forms (`preview.x`, `tokens.x`, `theme({…})`) work too.
+- `environment.ts` — the package classes, `parse`, `ensureContrast`, the design-system namespaces and math. No colour free functions (ADR-016 78k): `a.to(Oklab).mix(b.to(Oklab))`, `fg.to(Srgb).contrast(bg.to(Srgb))`, `a.to(Lab65).deltaE2000(b.to(Lab65))`. **`ensureContrast(fg, bg, target?)`** (engine: `color/contrast-guard.ts`) is the **contrast-guard combinator** — it returns the nearest color to `fg` (OKLCH lightness, then chroma) whose gamut-mapped form meets the WCAG `target` (`"AA"`/`"AAA"`/`"AA-large"`/`"AAA-large"`/raw ratio, default `"AA"`) against `bg`, preserving hue and best-effort-ing to black/white when unreachable. Because the DSL re-evaluates on every edit, defining `fg = ensureContrast(seed, bg, "AAA")` keeps the pair legible as the seed changes — the reactive answer to the CD-13 "maintained accessibility" question (no role-graph solver, no source rewrite). The Studio **Auto-fix** tool (`components/tools/AutoFix.svelte`) previews with the same solver and emits this live call.
+- `manifest.ts` — **the single source of truth** for highlighter, autocomplete, hover and the Docs overlay, built from the package classes plus `package-docs.json` (the package's JSDoc and signatures, extracted by `scripts/package-docs.ts`; regenerate with `bun run package-docs` after a package API change). Autocomplete and hover use the receiver variable's model from the last evaluation.
+- `migrate.ts` — ADR-017: old-DSL → package-DSL codemod (AST, old model inference so results are kept; `clone()`/`to()` before mutating calls; leftovers flagged `// migrate:`). A no-op on new code. UI: `components/UpgradeBanner.svelte` (banner when the source is old, "Upgrade script" in the editor header, review diff, Apply).
 - `lang.ts` / `complete.ts` / `hover.ts` / `swatch-deco.ts` / `block-scope.ts` / `editor-bindings.ts` — CodeMirror language, autocomplete, hover docs, inline color markers, the **block-aware editor** seam, and the bindings the editor consumes. `block-scope.ts` (manifest-driven, no drift) tells both the highlighter and autocomplete which `label { … }` block wraps the cursor: inside a builder block the bare members highlight as methods + complete first; inside `roles {}` role keys complete on the left, named colors on the right.
-- `preview.ts` — `preview.*` primitives that render as cards. Three relationship previews are **model-parameterized** (idiomatic per-primitive arg): `gradient(from, to, space?|{space,hue,stops})` (any `INTERP_SPACES` space + hue strategy `shorter/longer/increasing/decreasing`), `ramp(base, model?)` (any `RAMP_MODELS` lightness axis — the once-dead `mode` arg, now live), `harmony(base, scheme?, model?)` (any `HUE_MODELS` wheel). `c.ramp(model?)` also returns **real colors** (feeds `tokens`/`roles`), and the curated hue models gain the full `c.<model>.triadic()` etc. set. The ramp/gradient cards flag **out-of-sRGB** stops (dashed marker) and the ramp shows **ΔE2000 spacing** between shades (perceptual evenness). The Studio **Harmony / Ramp / Gradient** tools (`components/tools/`) each carry the matching model/space picker and generate model-aware DSL. `components.ts` / `tokens.ts` / `theme.ts` — the `component.*` / `tokens.*` / `theme()` namespaces for the styleguide. **`tokens.*`** is the canonical design-token namespace (`text`/`space`/`radius`/`shadow` + `token()` for arbitrary groups); `scale.*` and the free `token()` are kept as back-compat aliases. `tokens`/`component`/`preview` each work as a dotted namespace **or** a builder `name { … }` block; `roles { role = color }` is a mapping block (alias of `theme({…})`).
+- `preview.ts` — `preview.*` primitives that render as cards. Three relationship previews are **model-parameterized** (idiomatic per-primitive arg): `gradient(from, to, space?|{space,hue,stops})` (any `INTERP_SPACES` space + hue strategy `shorter/longer/increasing/decreasing`), `ramp(base, Model?)` (any `RAMP_MODELS` lightness axis), `harmony(base, scheme?, Model?)` (any `HUE_MODELS` wheel); model args are classes (`preview.ramp(c, Lab)`). The ramp/gradient cards flag **out-of-sRGB** stops (dashed marker) and the ramp shows **ΔE2000 spacing** between shades (perceptual evenness). The Studio **Harmony / Ramp / Gradient** tools (`components/tools/`) each carry the matching model/space picker and generate model-aware DSL. `components.ts` / `tokens.ts` / `theme.ts` — the `component.*` / `tokens.*` / `theme()` namespaces for the styleguide. **`tokens.*`** is the design-token namespace (`text`/`space`/`radius`/`shadow` + `tokens.token()` for arbitrary groups). `tokens`/`component`/`preview` each work as a dotted namespace **or** a builder `name { … }` block; `roles { role = color }` is a mapping block (alias of `theme({…})`).
 - `model-docs.ts`, `channel-docs.ts`, `encyclopedia.ts` — vault-distilled copy for docs & `/models`.
-- `color.ts` — **legacy**, kept only as a test parity oracle; dead in the app.
 
 ### Other libs
 
@@ -333,10 +331,10 @@ An **Obsidian vault** (markdown, not part of the build — `adapter-static` only
 
 ## Gotchas
 
-- **`apps/studio/package.json` `sideEffects` must keep `"**/models/**"`** — otherwise the model registry is tree-shaken out and the static build crashes on boot (`No constructor registered for oklch`).
 - Run gates from the repo **root** (`turbo` fans out). `turbo.json` sets `agentGuidance: false` so `turbo` stops writing an `AGENTS.md`; build tasks see only env vars listed in `turbo.json` (`BASE_PATH`), so a new build-time var must be added there.
-- Dynamic color accessors (`.oklch`, `.ok_h`, …) don't exist on the static type — see the engine note above.
-- **A bare channel means "this color's own model"** (`value.ts#member`), so `.l` is _not_ globally HSL: it's OKLCH L on an OKLCH color, Lab L\* on a Lab color, and only falls back to `hsl.l` when the native model has no `l`. Adding a channel whose `localKey` collides with a **method name on the same model** would silently shadow the method — `tests/native-channels.test.ts` guards that. Component/analysis code that wants a specific space must keep using `c.channel('ok_l')`/`c.channel('r')` (flat index), never `member()`.
+- **Scheme colours are frozen.** Never call a mutating method on `e.color` (or a preview's colours) in app code: start from `to(Model)` or `clone()`. A mutation throws a TypeError at the call site.
+- **DSL snippets in UI copy and emitters** (Welcome hero, tool codegen in `components/tools/`, `scheme/flow.ts` scaffolds, `dsl/emit.ts`) must be new-DSL and must `clone()` before a mutating call, or the inserted code silently changes its source colour. `tests/migrate.test.ts` checks the shipped examples need no upgrade.
+- **Package unit conventions** (ADR-004): percentages are 0–1 fractions, including `Hsluv` / `Hpluv` `s` and `l` and `Cmyk.totalInk()`. The studio's old values were 0–100.
 - Theme/mobile detection happens **only after mount** on purpose; don't read `matchMedia`/`localStorage` during render.
 - **A UI role override beats the DSL, not the other way round** (`deriveScheme`'s `mergeRoles` / `applyOverrides`). It used to be inverted, which silently made every Preview dropdown a no-op the moment a `roles {}` block existed. Overrides are per mode (`app.roles` / `app.darkRoles`) — a new preview surface must bind `app.modeOverrides`, never `app.roles` directly, or it will edit light while showing dark.
 - **`ui.embed` / `ui.sourceLocked` are the embed's two kill-switches.** `embed` suppresses every write that would leak an iframe's presentation into the visitor's own studio (`chromatics:theme` + `chromatics:ui` in `+layout.svelte`, the auto-opening welcome modal) **and** the reads that would override the embed's URL params; `sourceLocked` makes `tools/shared.ts#insert` a no-op and hides the Design System scaffold CTAs. Any new persistence write in `+layout` or new source-mutating panel must respect them, or an embed will start writing to its host's visitors.

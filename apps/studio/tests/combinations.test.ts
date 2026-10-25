@@ -23,12 +23,12 @@ import { source as brandDark } from './fixtures/brand-dark';
 const scheme = (src: string) => schemeFromEvalResult(evaluate(src), src);
 
 const SRC = `
-white = OKLCH(1, 0, 0)
-near_white = OKLCH(0.97, 0.005, 250)
-ink = OKLCH(0.18, 0.02, 250)
-mid_gray = OKLCH(0.62, 0.01, 250)
-brand = OKLCH(0.55, 0.16, 250)
-brand_soft = OKLCH(0.72, 0.10, 250)
+white = Oklch(1, 0, 0)
+near_white = Oklch(0.97, 0.005, 250)
+ink = Oklch(0.18, 0.02, 250)
+mid_gray = Oklch(0.62, 0.01, 250)
+brand = Oklch(0.55, 0.16, 250)
+brand_soft = Oklch(0.72, 0.10, 250)
 `;
 
 describe('combinationCtx precomputation', () => {
@@ -64,7 +64,7 @@ describe('combinationCtx precomputation', () => {
 	});
 
 	test('the CVD worst case catches a red/green pair that normal vision separates', () => {
-		const rg = scheme(`red = OKLCH(0.55, 0.19, 25)\ngreen = OKLCH(0.55, 0.19, 145)`);
+		const rg = scheme(`red = Oklch(0.55, 0.19, 25)\ngreen = Oklch(0.55, 0.19, 145)`);
 		const c = combinationCtx(rg.entries);
 		expect(c.dE[0][1]).toBeGreaterThan(30); // obviously different to normal vision
 		expect(c.cvdDE[0][1]).toBeLessThan(10); // …and near-identical to a dichromat
@@ -145,7 +145,7 @@ describe('scoreCombination', () => {
 	});
 
 	test('out-of-sRGB colors are named, and cost score', () => {
-		const wide = scheme(`${SRC}\nneon = OKLCH(0.75, 0.36, 145)`);
+		const wide = scheme(`${SRC}\nneon = Oklch(0.75, 0.36, 145)`);
 		const wctx = combinationCtx(wide.entries);
 		const r = scoreCombination(wctx, {
 			bg: 'ink',
@@ -218,7 +218,7 @@ describe('rankCombinations', () => {
 	});
 
 	test('a single color yields no combinations', () => {
-		expect(rankCombinations(combinationCtx(scheme('only = OKLCH(0.5,0,0)').entries))).toEqual([]);
+		expect(rankCombinations(combinationCtx(scheme('only = Oklch(0.5,0,0)').entries))).toEqual([]);
 	});
 });
 

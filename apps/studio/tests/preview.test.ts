@@ -1,4 +1,5 @@
 import { test, expect, describe } from 'bun:test';
+import { Lab, Oklab, Oklch } from '@lilbunnyrabbit/chromatics';
 import { evaluate } from '../src/lib/dsl/evaluator';
 import { isPreview, PREVIEW_MEMBERS } from '../src/lib/dsl/preview';
 import { examples } from '../src/routes/examples';
@@ -7,15 +8,15 @@ const val = (src: string, name: string) => evaluate(src).variables.get(name)?.va
 
 describe('preview primitives', () => {
 	test('preview.gradient tags a descriptor with defaults', () => {
-		const v = val('a=OKLCH(0.6,0.1,200)\nb=OKLCH(0.5,0.1,20)\ng=preview.gradient(a,b)', 'g');
+		const v = val('a=Oklch(0.6,0.1,200)\nb=Oklch(0.5,0.1,20)\ng=preview.gradient(a,b)', 'g');
 		expect(isPreview(v)).toBe(true);
 		expect((v as Record<string, unknown>).__preview).toBe('gradient');
-		expect((v as Record<string, unknown>).space).toBe('oklab');
+		expect((v as Record<string, unknown>).space).toBe(Oklab);
 		expect((v as Record<string, unknown>).stops).toBe(7);
 	});
 
 	test('preview.pair carries fg + bg colors', () => {
-		const v = val('a=OKLCH(0.95,0.02,200)\nb=OKLCH(0.2,0.02,200)\np=preview.pair(a,b)', 'p');
+		const v = val('a=Oklch(0.95,0.02,200)\nb=Oklch(0.2,0.02,200)\np=preview.pair(a,b)', 'p');
 		expect(isPreview(v)).toBe(true);
 		const d = v as Record<string, unknown>;
 		expect(d.__preview).toBe('pair');
@@ -25,7 +26,7 @@ describe('preview primitives', () => {
 
 	test('every preview member produces a tagged descriptor', () => {
 		const src =
-			`a=OKLCH(0.6,0.12,260)\nb=a.oklch.rotateHue(120).oklch.gamutMap()\n` +
+			`a=Oklch(0.6,0.12,260)\nb=a.clone().rotateHue(120)\n` +
 			`m_gradient=preview.gradient(a,b)\nm_ramp=preview.ramp(a)\nm_harmony=preview.harmony(a,"triadic")\nm_mix=preview.mix(a,b)\n` +
 			`m_pair=preview.pair(a,b)\nm_cvd=preview.cvd(a)\nm_onBackgrounds=preview.onBackgrounds(a,[a,b])\n` +
 			`m_space=preview.space(a)\nm_channels=preview.channels(a)\nm_gamut=preview.gamut(a)\nm_print=preview.print(a)\nm_name=preview.name(a)\nm_temperature=preview.temperature(a)\n` +
@@ -37,6 +38,16 @@ describe('preview primitives', () => {
 			expect(isPreview(v)).toBe(true);
 			expect((v as Record<string, unknown>).__preview).toBe(member);
 		}
+	});
+
+	test('model arguments are package classes', () => {
+		const r = evaluate(
+			'a=Oklch(0.6,0.12,260)\nr=preview.ramp(a)\nr2=preview.ramp(a,Lab)\nbad=preview.ramp(a,"lab")'
+		);
+		expect((r.variables.get('r')?.value as Record<string, unknown>).model).toBe(Oklch);
+		expect((r.variables.get('r2')?.value as Record<string, unknown>).model).toBe(Lab);
+		// ADR-016 78f: no string model ids in the DSL.
+		expect(r.errors.map((e) => e.line)).toEqual([4]);
 	});
 
 	test('the Previews example evaluates with no errors', () => {

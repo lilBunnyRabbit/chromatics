@@ -4,26 +4,26 @@ export const source = `// ── Design System — colors, tokens and components
 // Change \`brand\`; the palette, the type scale and every component follow.
 // Open the Design System tab — toggle Light / Dark in its toolbar.
 
-brand = hex("#6c5ce7")
+brand = parse("#6c5ce7")
 
 // Light theme — surfaces & text from the brand's hue (perceptual lightness)
-background   = OKLCH(0.99, 0.006, brand.ok_h)
-surface      = OKLCH(0.965, 0.012, brand.ok_h)
-foreground   = OKLCH(0.24, 0.03, brand.ok_h)
-border       = OKLCH(0.90, 0.012, brand.ok_h)
+background   = Oklch(0.99, 0.006, brand.to(Oklch).h)
+surface      = Oklch(0.965, 0.012, brand.to(Oklch).h)
+foreground   = Oklch(0.24, 0.03, brand.to(Oklch).h)
+border       = Oklch(0.90, 0.012, brand.to(Oklch).h)
 
-primary      = OKLCH(0.55, 0.18, brand.ok_h)
-primary_fg   = OKLCH(0.99, 0.01, brand.ok_h)
-secondary    = OKLCH(0.58, 0.15, (brand.ok_h + 150) % 360)
-secondary_fg = OKLCH(0.99, 0.01, (brand.ok_h + 150) % 360)
-accent       = OKLCH(0.60, 0.17, (brand.ok_h - 45 + 360) % 360)
-accent_fg    = OKLCH(0.99, 0.01, brand.ok_h)
+primary      = Oklch(0.55, 0.18, brand.to(Oklch).h)
+primary_fg   = Oklch(0.99, 0.01, brand.to(Oklch).h)
+secondary    = Oklch(0.58, 0.15, (brand.to(Oklch).h + 150) % 360)
+secondary_fg = Oklch(0.99, 0.01, (brand.to(Oklch).h + 150) % 360)
+accent       = Oklch(0.60, 0.17, (brand.to(Oklch).h - 45 + 360) % 360)
+accent_fg    = Oklch(0.99, 0.01, brand.to(Oklch).h)
 
 // Dark surfaces & text — same hues, inverted lightness (primary/accent stay shared)
-background_d = OKLCH(0.18, 0.02, brand.ok_h)
-surface_d    = background_d.lighten(0.06)
-foreground_d = OKLCH(0.96, 0.012, brand.ok_h)
-border_d     = surface_d.lighten(0.14)
+background_d = Oklch(0.18, 0.02, brand.to(Oklch).h)
+surface_d    = background_d.clone().lighten(0.06)
+foreground_d = Oklch(0.96, 0.012, brand.to(Oklch).h)
+border_d     = surface_d.clone().lighten(0.14)
 
 // Bind theme roles to named colors, with a nested \`dark { }\` re-binding.
 // Dark mode is pure role re-binding — both modes share one palette & audit.

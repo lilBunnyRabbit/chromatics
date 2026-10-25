@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { onMount } from 'svelte';
-	import { hex, ColorValue } from '$lib/models';
+	import { Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
+	import { parse } from '@lilbunnyrabbit/chromatics/all';
 	import { ui } from '$lib/state/ui.svelte';
 	import { welcome } from '$lib/state/welcome.svelte';
 	import { orderedMixerModels, seedVals, buildFromVals, readableText } from '$lib/mixer/engine';
@@ -9,19 +10,19 @@
 
 	const SEED = '#cf65c3';
 	const models = orderedMixerModels();
-	const byId = new Map(models.map((m) => [m.id, m]));
-	const seed0 = hex(SEED);
+	const byName = new Map(models.map((m) => [m.name, m]));
+	const seed0 = parse(SEED);
 
 	// ── canonical state ──
-	// One color (stored as OKLCH inside ColorValue — there is no "base" model).
-	let color = $state<ColorValue>(seed0);
-	// Per-model slider positions, keyed by id. Authoritative + instant.
+	// One color, in whichever model it was last built in.
+	let color = $state<Color>(seed0);
+	// Per-model slider positions, keyed by export name. Authoritative + instant.
 	let vals = $state<Record<string, number[]>>(
-		Object.fromEntries(models.map((m) => [m.id, seedVals(seed0, m)]))
+		Object.fromEntries(models.map((m) => [m.name, seedVals(seed0, m)]))
 	);
 	// rAF-coalesced snapshot driving the gradient tracks (kept off the per-drag path).
 	let gradVals = $state<Record<string, number[]>>(
-		Object.fromEntries(models.map((m) => [m.id, seedVals(seed0, m)]))
+		Object.fromEntries(models.map((m) => [m.name, seedVals(seed0, m)]))
 	);
 	// The model being edited — never re-seeded from `color`, so its slider can't
 	// jump under the finger (the rule that makes cross-model editing stable). Stays
@@ -37,8 +38,8 @@
 		const c = color;
 		const skip = active;
 		for (const m of models) {
-			if (m.id === skip) continue;
-			vals[m.id] = seedVals(c, m);
+			if (m.name === skip) continue;
+			vals[m.name] = seedVals(c, m);
 		}
 	});
 
@@ -49,7 +50,7 @@
 		cancelAnimationFrame(rafId);
 		rafId = requestAnimationFrame(() => {
 			if (all) {
-				gradVals = Object.fromEntries(models.map((m) => [m.id, vals[m.id]]));
+				gradVals = Object.fromEntries(models.map((m) => [m.name, vals[m.name]]));
 			} else if (active) {
 				gradVals = { ...gradVals, [active]: vals[active] };
 			}
@@ -64,7 +65,7 @@
 		cur[index] = value;
 		// Commit the slider value only if it forms a real color, so vals[id] never
 		// holds an orphaned (un-buildable) set that the reseed effect would clobber.
-		const c = buildFromVals(byId.get(id)!, cur);
+		const c = buildFromVals(byName.get(id)!, cur);
 		if (c) {
 			vals[id] = cur;
 			color = c;
@@ -80,7 +81,7 @@
 	}
 	/** Set the color from outside the grid (hex field, random, reset): clears the
 	 *  active lock so EVERY model — including the last one dragged — re-seeds. */
-	function setColor(c: ColorValue) {
+	function setColor(c: Color) {
 		dragging = false;
 		active = null;
 		color = c;
@@ -105,7 +106,7 @@
 		const fromHash = location.hash.replace(/^#/, '');
 		if (fromHash) {
 			try {
-				setColor(hex(fromHash.startsWith('#') ? fromHash : `#${fromHash}`));
+				setColor(parse(fromHash.startsWith('#') ? fromHash : `#${fromHash}`));
 			} catch {
 				/* ignore a bad hash */
 			}
@@ -123,7 +124,7 @@
 	let hexErr = $state(false);
 	// Keep the field mirroring the live color, except while it's being edited.
 	$effect(() => {
-		if (!hexFocused) hexInput = color.hex;
+		if (!hexFocused) hexInput = hex;
 	});
 	function applyHex() {
 		const raw = hexInput.trim();
@@ -132,7 +133,7 @@
 			return;
 		}
 		try {
-			const c = hex(raw);
+			const c = parse(raw);
 			hexErr = false;
 			setColor(c);
 		} catch {
@@ -143,14 +144,14 @@
 	function randomColor() {
 		const b = () => Math.floor(Math.random() * 256);
 		const h2 = (n: number) => n.toString(16).padStart(2, '0');
-		setColor(hex(`#${h2(b())}${h2(b())}${h2(b())}`));
+		setColor(parse(`#${h2(b())}${h2(b())}${h2(b())}`));
 	}
 
 	let copied = $state(false);
 	let copyTimer = 0;
 	async function copyHex() {
 		try {
-			await navigator.clipboard.writeText(color.hex);
+			await navigator.clipboard.writeText(hex);
 			copied = true;
 			clearTimeout(copyTimer);
 			copyTimer = window.setTimeout(() => (copied = false), 1100);
@@ -160,48 +161,46 @@
 	}
 
 	// ── derived display ──
-	const mapped = $derived(color.gamutMapped); // always displayable
-	const bg = $derived(mapped.hex);
+	const mapped = $derived(color.to(Srgb).gamutMap());
+	const rgb255 = $derived(mapped.to(Srgb8));
+	const hex = $derived(rgb255.toHex());
+	const bg = $derived(hex);
 	const ink = $derived(readableText(mapped));
-	const inGamut = $derived(color.inGamut);
-	const rgb255 = $derived.by(() => {
-		const c = mapped.project('rgb') as unknown as Record<'r' | 'g' | 'b', number>;
-		return {
-			r: Math.round((c.r ?? 0) * 255),
-			g: Math.round((c.g ?? 0) * 255),
-			b: Math.round((c.b ?? 0) * 255)
-		};
-	});
+	const inGamut = $derived(color.to(Srgb).inGamut());
 
 	// ── search ──
 	let query = $state('');
 	const q = $derived(query.trim().toLowerCase());
 	const shown = $derived(
-		models.filter((m) => !q || m.label.toLowerCase().includes(q) || m.id.includes(q))
+		models.filter(
+			(m) =>
+				!q ||
+				m.label.toLowerCase().includes(q) ||
+				m.name.toLowerCase().includes(q) ||
+				m.id.includes(q)
+		)
 	);
 
 	// ── group by family (taxonomy shared with the /models encyclopedia) ──
 	const FAMILY_LABEL: Record<string, string> = {
-		'perceptual-cylindrical': 'Perceptual · cylindrical',
+		perceptual: 'Perceptual · cylindrical',
 		lab: 'Perceptual · opponent (ΔE)',
 		hue: 'Hue · RGB-cylindrical',
 		rgb: 'RGB · working & display',
 		tristimulus: 'Tristimulus & chromaticity',
 		video: 'Video / broadcast',
 		subtractive: 'Subtractive / print',
-		other: 'Concepts & niche',
-		system: 'Color systems'
+		appearance: 'Color appearance'
 	};
 	const FAMILY_ORDER = [
-		'perceptual-cylindrical',
+		'perceptual',
 		'lab',
 		'hue',
 		'rgb',
 		'tristimulus',
 		'video',
 		'subtractive',
-		'other',
-		'system'
+		'appearance'
 	];
 	// Families that actually have cards, in display order (stable — drives the toggle bar).
 	const families = FAMILY_ORDER.filter((f) => models.some((m) => m.family === f)).map((f) => ({
@@ -260,7 +259,7 @@
 				style:background={bg}
 				onclick={copyHex}
 				title="Copy hex"
-				aria-label="Copy hex color {color.hex}"
+				aria-label="Copy hex color {hex}"
 			>
 				<span class="swatch-copied" class:show={copied} style:color={ink}>copied</span>
 			</button>
@@ -314,7 +313,7 @@
 		</div>
 
 		<button class="tbtn" onclick={randomColor} title="Random color">Random</button>
-		<button class="tbtn" onclick={() => setColor(hex(SEED))} title="Reset">Reset</button>
+		<button class="tbtn" onclick={() => setColor(parse(SEED))} title="Reset">Reset</button>
 		<a class="tbtn" href="{base}/models" title="Color models & systems encyclopedia">Models</a>
 		<button
 			class="icon-btn"
@@ -403,13 +402,13 @@
 						<span class="fam-count">{g.items.length}</span>
 					</div>
 					<div class="masonry">
-						{#each g.items as m (m.id)}
+						{#each g.items as m (m.name)}
 							<ModelCard
-								def={m}
-								values={vals[m.id]}
-								gradValues={gradVals[m.id]}
-								editing={dragging && active === m.id}
-								oninput={(i, v) => onChannelInput(m.id, i, v)}
+								info={m}
+								values={vals[m.name]}
+								gradValues={gradVals[m.name]}
+								editing={dragging && active === m.name}
+								oninput={(i, v) => onChannelInput(m.name, i, v)}
 								onrelease={endDrag}
 							/>
 						{/each}
@@ -708,8 +707,8 @@
 	}
 
 	/* per-family accent colors (shared by the toggle dots and section headers) */
-	.famchip-dot.perceptual-cylindrical,
-	.fam-dot.perceptual-cylindrical {
+	.famchip-dot.perceptual,
+	.fam-dot.perceptual {
 		background: #7c7cf2;
 	}
 	.famchip-dot.lab,
@@ -735,6 +734,10 @@
 	.famchip-dot.subtractive,
 	.fam-dot.subtractive {
 		background: #d9a324;
+	}
+	.famchip-dot.appearance,
+	.fam-dot.appearance {
+		background: #8fbf5a;
 	}
 
 	/* ── family section ── */

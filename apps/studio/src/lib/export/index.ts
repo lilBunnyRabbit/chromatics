@@ -1,5 +1,6 @@
 /** Scheme → string exporters. All pure and testable. */
-import type { ColorValue } from '../models/index.js';
+import { Oklch, Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
+import { infoByName } from '../color/catalog.js';
 import type { Scheme, SchemeEntry } from '../scheme/types.js';
 import { toSwatchSVG } from './swatch.js';
 
@@ -18,7 +19,8 @@ function fmtOklch(e: SchemeEntry): string {
 		const s = v.toFixed(d);
 		return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
 	};
-	return `oklch(${f(e.color.channel('ok_l'), 5)} ${f(e.color.channel('ok_c'), 5)} ${f(e.color.channel('ok_h'), 5)})`;
+	const { l, c, h } = e.color.to(Oklch);
+	return `oklch(${f(l, 5)} ${f(c, 5)} ${f(h, 5)})`;
 }
 
 // ── Color representation ────────────────────────────────────────────────────
@@ -34,7 +36,7 @@ export type ColorFormatMode = 'as-defined' | 'single';
 
 export interface ColorFormat {
 	mode: ColorFormatMode;
-	/** as-defined → fallback model for non-CSS colors; single → the target model. */
+	/** as-defined → fallback model for non-CSS colors; single → the target model. `hex` or a model name. */
 	model: string;
 }
 
@@ -43,25 +45,23 @@ export const DEFAULT_COLOR_FORMAT: ColorFormat = { mode: 'as-defined', model: 'h
 /** The CSS-renderable models — the menu for single-model output and the fallback. */
 export const CSS_COLOR_MODELS: { id: string; label: string }[] = [
 	{ id: 'hex', label: 'Hex' },
-	{ id: 'oklch', label: 'OKLCH' },
-	{ id: 'oklab', label: 'OKLab' },
-	{ id: 'lab', label: 'CIELAB' },
-	{ id: 'lch', label: 'CIELCH' },
-	{ id: 'hsl', label: 'HSL' },
-	{ id: 'hwb', label: 'HWB' },
-	{ id: 'srgb', label: 'sRGB' },
-	{ id: 'p3', label: 'Display P3' },
-	{ id: 'rec2020', label: 'Rec. 2020' },
-	{ id: 'a98', label: 'A98 RGB' },
-	{ id: 'prophoto', label: 'ProPhoto' },
-	{ id: 'lin', label: 'Linear sRGB' },
-	{ id: 'xyz', label: 'XYZ (D65)' },
-	{ id: 'xyz50', label: 'XYZ (D50)' }
+	{ id: 'Oklch', label: 'OKLCH' },
+	{ id: 'Oklab', label: 'OKLab' },
+	{ id: 'Lab', label: 'CIELAB' },
+	{ id: 'Lch', label: 'CIELCH' },
+	{ id: 'Hsl', label: 'HSL' },
+	{ id: 'Hwb', label: 'HWB' },
+	{ id: 'Srgb', label: 'sRGB' },
+	{ id: 'DisplayP3', label: 'Display P3' },
+	{ id: 'Rec2020', label: 'Rec. 2020' },
+	{ id: 'A98Rgb', label: 'A98 RGB' },
+	{ id: 'ProphotoRgb', label: 'ProPhoto' },
+	{ id: 'LinearSrgb', label: 'Linear sRGB' },
+	{ id: 'Xyz65', label: 'XYZ (D65)' },
+	{ id: 'Xyz50', label: 'XYZ (D50)' }
 ];
 
-// CSS Color 4 predefined-RGB and XYZ spaces accepted inside color(). Anything
-// culori serialises as color(--custom …) / color(cmyk …) is NOT one of these and
-// won't render — those colors take the fallback instead.
+// CSS Color 4 predefined-RGB and XYZ spaces accepted inside color(); anything else won't render.
 const CSS_PREDEFINED = new Set([
 	'srgb',
 	'srgb-linear',
@@ -84,21 +84,15 @@ export function isCssColor(css: string): boolean {
 	return m ? CSS_PREDEFINED.has(m[1].toLowerCase()) : false;
 }
 
-/** Round long floats in a serialized color to 4 dp — clean, readable output. */
-function roundCss(css: string): string {
-	return css.replace(/-?\d+\.\d+/g, (m) => {
-		const n = Number(m);
-		return Number.isFinite(n) ? String(Math.round(n * 1e4) / 1e4) : m;
-	});
+function cssOf(color: Color): string | null {
+	const css = (color as Color & { toCss?: () => string }).toCss?.();
+	return css && isCssColor(css) ? css : null;
 }
 
-function formatIn(color: ColorValue, model: string): string | null {
-	try {
-		if (model === 'hex') return color.hex;
-		return roundCss(color.to(model).toCSS());
-	} catch {
-		return null;
-	}
+function formatIn(color: Color, model: string): string | null {
+	if (model === 'hex') return color.to(Srgb).gamutMap().to(Srgb8).toHex();
+	const info = infoByName(model);
+	return info ? cssOf(color.to(info.model)) : null;
 }
 
 /** Serialize one entry's color per the chosen ColorFormat (always valid CSS). */
@@ -106,13 +100,13 @@ export function serializeColor(
 	entry: SchemeEntry,
 	fmt: ColorFormat = DEFAULT_COLOR_FORMAT
 ): string {
-	if (fmt.mode === 'single') {
-		return formatIn(entry.color, fmt.model) ?? entry.color.hex;
-	}
-	// as-defined: keep the authoring model when it's valid CSS, else the fallback.
-	const own = formatIn(entry.color, entry.model);
-	if (own && isCssColor(own)) return own;
-	return formatIn(entry.color, fmt.model) ?? entry.color.hex;
+	if (fmt.mode === 'single')
+		return formatIn(entry.color, fmt.model) ?? entry.color.to(Srgb).gamutMap().to(Srgb8).toHex();
+	return (
+		cssOf(entry.color) ??
+		formatIn(entry.color, fmt.model) ??
+		entry.color.to(Srgb).gamutMap().to(Srgb8).toHex()
+	);
 }
 
 /** :root { --name: <color>; } — each color per the chosen representation. */
@@ -131,9 +125,9 @@ export function toTokens(scheme: Scheme, fmt: ColorFormat = DEFAULT_COLOR_FORMAT
 			$value: serializeColor(e, fmt),
 			$extensions: {
 				'com.chromatics': {
-					hex: e.color.hex,
+					hex: e.color.to(Srgb).gamutMap().to(Srgb8).toHex(),
 					oklch: fmtOklch(e),
-					model: e.model,
+					model: e.color.model,
 					...(e.description ? { source: e.description } : {})
 				}
 			}

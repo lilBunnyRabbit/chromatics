@@ -3,15 +3,12 @@
  * that are too close to tell apart. A palette with two near-identical colors
  * reads as a mistake; this finds those pairs before a user ships them.
  */
-import type { ColorValue } from '../models/index.js';
-import { differenceCiede2000 } from '../models/registry.js';
+import { Lab65, type Color } from '@lilbunnyrabbit/chromatics';
 import type { SchemeEntry } from '../scheme/types.js';
 
-const de = differenceCiede2000();
-
 /** CIEDE2000 ΔE between two colors (0 = identical; ~2.3 = just noticeable). */
-export function deltaE2000(a: ColorValue, b: ColorValue): number {
-	return de(a.project('lab'), b.project('lab'));
+export function deltaE2000(a: Color, b: Color): number {
+	return a.to(Lab65).deltaE2000(b.to(Lab65));
 }
 
 export type SimilarityLevel = 'identical' | 'imperceptible' | 'very-close' | 'close' | 'distinct';

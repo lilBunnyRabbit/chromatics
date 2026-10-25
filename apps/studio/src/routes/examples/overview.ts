@@ -4,20 +4,20 @@ export const source = `// ── Chromatics ── colors as relationships, not 
 // Define ONE brand color; everything else is derived from it.
 // Change \`brand\` and the whole palette re-derives. Edit and watch.
 
-brand = hex("#6c5ce7")             // ← the one color everything follows
+brand = parse("#6c5ce7")             // ← the one color everything follows
 
 // Brand as a true OKLCH color, then accents on the hue wheel
-primary = brand.oklch.gamutMap()
-accent  = primary.rotate(-150).gamutMap()   // a related, shifted hue
-muted   = primary.desaturate(0.08).gamutMap()
+primary = brand.to(Oklch).to(Srgb).gamutMap().to(Oklch)
+accent  = primary.clone().rotateHue(-150).to(Srgb).gamutMap().to(Oklch)   // a related, shifted hue
+muted   = primary.clone().shift({ c: -0.08 }).to(Srgb).gamutMap().to(Oklch)
 
 // Dark-mode surfaces & text from the brand's hue (perceptual lightness)
-bg      = OKLCH(0.17, brand.ok_c * 0.25, brand.ok_h)
-surface = bg.lighten(0.05)
-fg      = OKLCH(0.96, 0.012, brand.ok_h)
+bg      = Oklch(0.17, brand.to(Oklch).c * 0.25, brand.to(Oklch).h)
+surface = bg.clone().lighten(0.05)
+fg      = Oklch(0.96, 0.012, brand.to(Oklch).h)
 
 // Button text auto-picked so it always passes WCAG contrast
-primary_fg = primary.srgb.contrastWCAG(fg) >= 4.5 ? fg : bg
+primary_fg = primary.to(Srgb).contrast(fg.to(Srgb)) >= 4.5 ? fg : bg
 
 // ── See it — previews render as cards in the Inspector ──────────────
 // Inside a \`preview { }\` block you call the primitives bare (no prefix).

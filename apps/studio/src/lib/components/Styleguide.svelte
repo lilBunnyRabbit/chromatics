@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	/**
 	 * The Design System tab — a guided flow (Roles → Light/Dark → Components →
 	 * Tokens → Handoff) layered over the SAME derived state, not a new pipeline.
@@ -50,7 +51,7 @@
 	const activeRoles = $derived(app.modeRoles);
 	const themeVars = $derived(cssVars(simScheme, activeRoles, app.opacities));
 	const namedVars = $derived(
-		simEntries.map((e) => `--color-${kebab(e.name)}:${e.color.toCSS()}`).join(';')
+		simEntries.map((e) => `--color-${kebab(e.name)}:${e.color.to(Oklch).toCss()}`).join(';')
 	);
 	const styleStr = $derived([themeVars, app.tokenVars, namedVars].filter(Boolean).join(';'));
 	const ctx: ResolveCtx = $derived({
@@ -127,7 +128,7 @@
 	/** "name #hex" for a role target, or a placeholder when it resolves to nothing. */
 	function describe(name: string): string {
 		const e = name ? app.scheme.byName.get(name) : undefined;
-		return e ? `${e.name} ${e.color.hex}` : 'none';
+		return e ? `${e.name} ${e.color.to(Srgb).gamutMap().to(Srgb8).toHex()}` : 'none';
 	}
 
 	const roleRows: [keyof Roles, string, boolean][] = [
@@ -229,7 +230,8 @@
 									<div
 										class="role-swatch"
 										style="background: {active
-											? (app.scheme.byName.get(active)?.color.toCSS() ?? 'var(--border-strong)')
+											? (app.scheme.byName.get(active)?.color.to(Oklch).toCss() ??
+												'var(--border-strong)')
 											: 'var(--border-strong)'}"
 									></div>
 									<label class="role-label">
@@ -316,7 +318,7 @@
 								<div class="role-row">
 									<div
 										class="role-swatch"
-										style="background: {app.scheme.byName.get(target)?.color.toCSS() ??
+										style="background: {app.scheme.byName.get(target)?.color.to(Oklch).toCss() ??
 											'var(--border-strong)'}"
 									></div>
 									<span class="role-name">{role} → {target}</span>
@@ -358,7 +360,7 @@
 					{#if !tokensAuthored}
 						<p class="step-hint">
 							Showing the default scales. <strong>Add token scales</strong> writes
-							<code>scale.text/space/radius</code> and a <code>font</code> token you can tune.
+							<code>tokens.text/space/radius</code> and a <code>font</code> token you can tune.
 						</p>
 					{/if}
 					<div class="sg-surface" style={styleStr}>

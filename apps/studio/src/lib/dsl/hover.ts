@@ -1,7 +1,7 @@
 /**
  * Editor hover tooltips, driven by the manifest:
  *  - hover a live variable → its swatch + value
- *  - hover a constructor / builtin / method / channel / view → signature + doc
+ *  - hover a model class / builtin / member → signature + the package's JSDoc
  */
 import { hoverTooltip, type Tooltip } from '@codemirror/view';
 import { manifest, BUILTIN_DOCS } from './manifest.js';
@@ -18,34 +18,26 @@ interface Tip {
 	swatch?: string;
 }
 
-function lookup(name: string, getVarInfo: (n: string) => VarInfo | null): Tip | null {
-	// 1) live user variable
+function lookup(
+	name: string,
+	receiver: string | null,
+	getVarInfo: (n: string) => VarInfo | null,
+	modelOf: (n: string) => string | undefined
+): Tip | null {
+	if (receiver !== null) {
+		const varModel = modelOf(receiver);
+		const list = varModel
+			? manifest.modelMembers.get(varModel)
+			: manifest.viewMembers.get(receiver);
+		const m = list?.find((x) => x.name === name) ?? manifest.members.get(name);
+		return m ? { title: `${m.owner}.${name}`, detail: m.detail, doc: m.doc } : null;
+	}
 	const v = getVarInfo(name);
 	if (v) return { title: name, detail: v.hex ? 'color' : 'value', doc: v.text, swatch: v.hex };
-	// 2) constructor
 	const ctor = manifest.constructors.find((c) => c.name === name);
-	if (ctor)
-		return {
-			title: name,
-			detail: '(' + ctor.params.map((p) => p.name).join(', ') + ') → color',
-			doc: ctor.doc
-		};
-	// 3) builtin function
+	if (ctor) return { title: name, detail: `${ctor.params} → color`, doc: ctor.doc };
 	if (manifest.builtinNames.has(name) && BUILTIN_DOCS[name])
 		return { title: name, detail: 'function', doc: BUILTIN_DOCS[name] };
-	// 4) member: method / accessor / channel / view
-	const m = manifest.members.get(name);
-	if (m) {
-		const detail =
-			m.kind === 'view' ? 'view namespace' : m.kind === 'channel' ? 'channel · number' : m.detail;
-		const doc =
-			m.status === 'experimental'
-				? `${m.doc} — experimental`
-				: m.status === 'coming-soon'
-					? `${m.doc} — coming soon (needs @lilbunnyrabbit/chromatics)`
-					: m.doc;
-		return { title: name, detail, doc };
-	}
 	return null;
 }
 
@@ -82,12 +74,17 @@ function render(tip: Tip): HTMLElement {
 	return dom;
 }
 
-export function chromaHover(getVarInfo: (n: string) => VarInfo | null) {
+export function chromaHover(
+	getVarInfo: (n: string) => VarInfo | null,
+	modelOf: (n: string) => string | undefined = () => undefined
+) {
 	return hoverTooltip((view, pos): Tooltip | null => {
 		const word = view.state.wordAt(pos);
 		if (!word) return null;
 		const text = view.state.sliceDoc(word.from, word.to);
-		const tip = lookup(text, getVarInfo);
+		const before = view.state.sliceDoc(Math.max(0, word.from - 80), word.from);
+		const receiver = /([A-Za-z_]\w*)\.$/.exec(before)?.[1] ?? (before.endsWith('.') ? '' : null);
+		const tip = lookup(text, receiver, getVarInfo, modelOf);
 		if (!tip) return null;
 		return {
 			pos: word.from,

@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { modelName } from '$lib/dsl/values';
+	import { DisplayP3, Oklch, Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
 	import ModelViewer from '$lib/components/ModelViewer.svelte';
-	import { getModel } from '$lib/models';
+	import { infoOf } from '$lib/color/catalog';
 	import { printProof } from '$lib/analysis/print';
 	import { nearestName } from '$lib/color-names';
 
@@ -20,26 +22,28 @@
 	// ── channels ──────────────────────────────────────────────
 	const channelRows = $derived.by(() => {
 		if (data?.__preview !== 'channels') return [];
-		const chans = getModel(data.model)?.channels ?? getModel('oklch')?.channels ?? [];
-		return chans.map((ch) => {
-			const value = data.color.channel(ch.key);
+		const info = infoOf(data.model ?? Oklch);
+		const coords = (data.color as Color).to(info.model).coords;
+		return info.channels.map((ch, i) => {
+			const value = coords[i];
 			const [lo, hi] = ch.range;
 			const span = hi - lo;
 			const fill = span === 0 ? 0 : clamp(((value - lo) / span) * 100);
-			return { label: ch.label, value, fill };
+			return { label: ch.name, value, fill };
 		});
 	});
 
 	// ── gamut ─────────────────────────────────────────────────
 	const gamut = $derived.by(() => {
 		if (data?.__preview !== 'gamut') return null;
-		const c = data.color;
-		const inSRGB = c.inGamut;
+		const c = data.color as Color;
+		const inSRGB = c.to(Srgb).inGamut();
+		const mapped = c.to(Srgb).gamutMap().to(Srgb8).toHex();
 		return {
-			hex: c.hex,
+			hex: mapped,
 			inSRGB,
-			inP3: c.inP3,
-			mappedHex: inSRGB ? null : c.gamutMapped.hex
+			inP3: c.to(DisplayP3).inGamut(),
+			mappedHex: inSRGB ? null : mapped
 		};
 	});
 
@@ -69,7 +73,7 @@
 	// ── temperature ───────────────────────────────────────────
 	const temp = $derived.by(() => {
 		if (data?.__preview !== 'temperature') return null;
-		let h = data.color.channel('ok_h');
+		let h = data.color.to(Oklch).h;
 		if (!Number.isFinite(h)) h = 0;
 		h = ((h % 360) + 360) % 360;
 		const warm = (h >= 0 && h <= 90) || (h >= 300 && h <= 360);
@@ -94,7 +98,7 @@
 		<div class="space-box">
 			<ModelViewer seed={data.color.hex} />
 		</div>
-		<div class="caption">{data.model}</div>
+		<div class="caption">{modelName(data.model)}</div>
 	{:else if data.__preview === 'channels'}
 		<div class="channels">
 			{#each channelRows as ch (ch.label)}
@@ -107,7 +111,7 @@
 				</div>
 			{/each}
 		</div>
-		<div class="caption">{data.model}</div>
+		<div class="caption">{modelName(data.model)}</div>
 	{:else if data.__preview === 'gamut'}
 		{#if gamut}
 			<div class="gamut">

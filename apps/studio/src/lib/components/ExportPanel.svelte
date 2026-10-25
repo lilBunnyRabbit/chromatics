@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { app } from '$lib/state/app.svelte';
 	import {
 		exportScheme,
@@ -50,7 +51,10 @@
 		{ label: 'Light', value: '#fbfcfd' },
 		{ label: 'White', value: '#ffffff' },
 		{ label: 'Black', value: '#0b0b0c' },
-		...app.scheme.entries.map((e) => ({ label: e.name, value: e.color.hex }))
+		...app.scheme.entries.map((e) => ({
+			label: e.name,
+			value: e.color.to(Srgb).gamutMap().to(Srgb8).toHex()
+		}))
 	]);
 	const sgInput: StyleguideInput = $derived({
 		scheme: app.scheme,

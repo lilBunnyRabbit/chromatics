@@ -5,6 +5,7 @@
  * inherit light + warn); worst-of-both flags pairs that fail in either mode; and
  * the styleguide CSS export gains a `.dark` block.
  */
+import { Oklch } from '@lilbunnyrabbit/chromatics';
 import { test, expect, describe } from 'bun:test';
 import { evaluate } from '../src/lib/dsl/evaluator';
 import { schemeFromEvalResult } from '../src/lib/scheme/adapter';
@@ -18,11 +19,11 @@ import { emptyRoles, DEFAULT_OPACITIES, type AuditPair } from '../src/lib/scheme
 import { manifest } from '../src/lib/dsl/manifest';
 
 const SRC = `
-bg = OKLCH(0.96, 0.01, 250)
-fg = OKLCH(0.20, 0.02, 250)
-primary = OKLCH(0.60, 0.15, 250)
-bg_dark = OKLCH(0.18, 0.02, 250)
-fg_dark = OKLCH(0.95, 0.01, 250)
+bg = Oklch(0.96, 0.01, 250)
+fg = Oklch(0.20, 0.02, 250)
+primary = Oklch(0.60, 0.15, 250)
+bg_dark = Oklch(0.18, 0.02, 250)
+fg_dark = Oklch(0.95, 0.01, 250)
 light = theme({ bg: "bg", fg: "fg", primary: "primary" })
 dark = theme.dark({ bg: "bg_dark", fg: "fg_dark" })
 `;
@@ -107,10 +108,10 @@ describe('per-mode role overrides (the preview override seam)', () => {
 
 	test('dark is previewable with NO dark theme authored', () => {
 		const noDark = `
-bg = OKLCH(0.96, 0.01, 250)
-fg = OKLCH(0.20, 0.02, 250)
-primary = OKLCH(0.60, 0.15, 250)
-bg_dark = OKLCH(0.18, 0.02, 250)
+bg = Oklch(0.96, 0.01, 250)
+fg = Oklch(0.20, 0.02, 250)
+primary = Oklch(0.60, 0.15, 250)
+bg_dark = Oklch(0.18, 0.02, 250)
 roles {
   bg = bg
   fg = fg
@@ -161,7 +162,7 @@ describe('dual-mode styleguide CSS', () => {
 		const css = toStyleguideCss({ ...input, darkRoles: r.darkEffectiveRoles });
 		expect(css).toContain('.dark {');
 		// the dark bg color differs from light → its value appears under .dark
-		const darkBg = s.byName.get('bg_dark')!.color.toCSS();
+		const darkBg = s.byName.get('bg_dark')!.color.to(Oklch).toCss();
 		expect(css).toContain(`--bg:${darkBg}`);
 	});
 });
@@ -177,11 +178,11 @@ describe('manifest registers the theme namespace', () => {
 
 describe('block syntax: roles {} + nested/sibling light/dark', () => {
 	const COLORS = `
-bg = OKLCH(0.96, 0.01, 250)
-fg = OKLCH(0.20, 0.02, 250)
-primary = OKLCH(0.60, 0.15, 250)
-bg_dark = OKLCH(0.18, 0.02, 250)
-fg_dark = OKLCH(0.95, 0.01, 250)
+bg = Oklch(0.96, 0.01, 250)
+fg = Oklch(0.20, 0.02, 250)
+primary = Oklch(0.60, 0.15, 250)
+bg_dark = Oklch(0.18, 0.02, 250)
+fg_dark = Oklch(0.95, 0.01, 250)
 `;
 
 	test('legacy flat roles {} is unchanged — light base, no dark', () => {

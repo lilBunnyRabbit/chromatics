@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { contrastRatio } from '$lib/analysis/contrast';
 	import { wcagLevels, wcagColor } from '$lib/analysis/wcag';
 	import { apcaContrast, apcaUse, apcaColor } from '$lib/analysis/apca';
@@ -9,7 +10,9 @@
 	const kind = $derived(data?.__preview as string);
 
 	// — pair —
-	const pairCss = $derived(kind === 'pair' ? { bg: data.bg.toCSS(), fg: data.fg.toCSS() } : null);
+	const pairCss = $derived(
+		kind === 'pair' ? { bg: data.bg.to(Oklch).toCss(), fg: data.fg.to(Oklch).toCss() } : null
+	);
 	const ratio = $derived(kind === 'pair' ? contrastRatio(data.fg, data.bg) : 0);
 	const wcag = $derived(kind === 'pair' ? wcagLevels(ratio) : null);
 	const lc = $derived(kind === 'pair' ? apcaContrast(data.fg, data.bg) : 0);
@@ -57,16 +60,16 @@
 		<!-- ── Color-vision-deficiency swatches ──────────── -->
 		<div class="swatch-row">
 			<div class="swatch-cell">
-				<div class="swatch" style="background:{data.color.toCSS()}"></div>
+				<div class="swatch" style="background:{data.color.to(Oklch).toCss()}"></div>
 				<span class="sw-label">Normal</span>
-				<span class="sw-hex">{data.color.hex}</span>
+				<span class="sw-hex">{data.color.to(Srgb).gamutMap().to(Srgb8).toHex()}</span>
 			</div>
 			{#each cvdModes as s (s.value)}
 				{@const sim = simulateVision(data.color, s.value)}
 				<div class="swatch-cell">
-					<div class="swatch" style="background:{sim.hex}"></div>
+					<div class="swatch" style="background:{sim.to(Srgb).gamutMap().to(Srgb8).toHex()}"></div>
 					<span class="sw-label">{s.label}</span>
-					<span class="sw-hex">{sim.hex}</span>
+					<span class="sw-hex">{sim.to(Srgb).gamutMap().to(Srgb8).toHex()}</span>
 				</div>
 			{/each}
 		</div>
@@ -83,9 +86,12 @@
 					{@const r = contrastRatio(data.color, bg)}
 					{@const lv = wcagLevels(r).normal}
 					<div class="tile-cell">
-						<div class="tile" style="background:{bg.toCSS()}; color:{data.color.toCSS()}">
+						<div
+							class="tile"
+							style="background:{bg.to(Oklch).toCss()}; color:{data.color.to(Oklch).toCss()}"
+						>
 							<span class="aa">Aa</span>
-							<span class="dot" style="background:{data.color.toCSS()}"></span>
+							<span class="dot" style="background:{data.color.to(Oklch).toCss()}"></span>
 						</div>
 						<div class="tile-meta">
 							<span class="t-ratio">{r.toFixed(1)}</span>

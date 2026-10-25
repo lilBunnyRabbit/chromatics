@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { app } from '$lib/state/app.svelte';
-	import { HUE_MODELS, type ColorValue } from '$lib/models';
-	import { rotateHueInMode, wrapHue } from '$lib/models/util';
+	import type { Color } from '@lilbunnyrabbit/chromatics';
+	import { HUE_MODELS, rotateIn } from '$lib/color/spaces';
+	import { modelName } from '$lib/dsl/values';
 	import { uniqueName } from '$lib/dsl/emit';
 	import { takenNames, insert, oklchText } from './shared';
 
@@ -11,10 +13,10 @@
 	const base = $derived(entries[idx]);
 
 	// Which hue wheel to rotate on — OKLCH/HSL/CAM16/… give different harmonies.
-	let modelId = $state('oklch');
-	const hm = $derived(HUE_MODELS.find((m) => m.id === modelId) ?? HUE_MODELS[0]);
-	const hueOf = (c: ColorValue) =>
-		(c.project(hm.mode) as unknown as Record<string, number | undefined>).h ?? 0;
+	let modelId = $state('Oklch');
+	const hm = $derived(HUE_MODELS.find((m) => modelName(m.model) === modelId) ?? HUE_MODELS[0]);
+	const hueOf = (c: Color) => (c.to(hm.model) as unknown as { h: number }).h;
+	const wrapHue = (h: number) => ((h % 360) + 360) % 360;
 
 	type Scheme = { label: string; offsets: { n: string; d: number }[] };
 	const SCHEMES: Record<string, Scheme> = {
@@ -57,17 +59,14 @@
 		return SCHEMES[scheme].offsets.map((o) => ({
 			name: o.n,
 			deg: o.d,
-			color: rotateHueInMode(base.color, hm.mode, o.d).gamutMapped,
+			color: rotateIn(base.color, hm.model, o.d).to(Srgb).gamutMap(),
 			hue: wrapHue(baseHue + o.d)
 		}));
 	});
 
-	// Codegen rotates on the chosen model's own wheel; OKLCH keeps its idiomatic
-	// gamutMap(), other models use the root `.gamutMapped` accessor.
+	// `to()` returns a new colour, so the base stays untouched under the DSL's mutation semantics.
 	function harmExpr(b: string, deg: number): string {
-		return modelId === 'oklch'
-			? `${b}.oklch.rotateHue(${deg}).oklch.gamutMap()`
-			: `${b}.${modelId}.rotateHue(${deg}).gamutMapped`;
+		return `${b}.to(${modelId}).rotateHue(${deg})`;
 	}
 
 	function apply() {
@@ -103,7 +102,8 @@
 			<label class="field">
 				<span>Wheel</span>
 				<select class="select" bind:value={modelId}>
-					{#each HUE_MODELS as m (m.id)}<option value={m.id}>{m.label}</option>{/each}
+					{#each HUE_MODELS as m (m.label)}<option value={modelName(m.model)}>{m.label}</option
+						>{/each}
 				</select>
 			</label>
 			<button class="btn btn-accent" onclick={apply}
@@ -128,7 +128,7 @@
 						cx={92 * Math.cos(a)}
 						cy={92 * Math.sin(a)}
 						r="11"
-						fill={base.color.hex}
+						fill={base.color.to(Srgb).gamutMap().to(Srgb8).toHex()}
 						stroke="var(--text)"
 						stroke-width="1.5"
 					/>
@@ -147,7 +147,7 @@
 						cx={92 * Math.cos(a)}
 						cy={92 * Math.sin(a)}
 						r="9"
-						fill={r.color.hex}
+						fill={r.color.to(Srgb8).toHex()}
 						stroke="var(--surface)"
 						stroke-width="1.5"
 					/>
@@ -155,15 +155,16 @@
 			</svg>
 			<div class="swatches">
 				<div class="sw-row base-row">
-					<span class="sw" style="background:{base.color.hex}"></span>
+					<span class="sw" style="background:{base.color.to(Srgb).gamutMap().to(Srgb8).toHex()}"
+					></span>
 					<span class="sw-name">{base.name}</span>
 					<span class="sw-meta">{oklchText(base.color)} · base</span>
 				</div>
 				{#each results as r (r.name)}
 					<div class="sw-row">
-						<span class="sw" style="background:{r.color.hex}"></span>
+						<span class="sw" style="background:{r.color.to(Srgb8).toHex()}"></span>
 						<span class="sw-name">{r.name}</span>
-						<span class="sw-meta">{r.color.hex} · +{r.deg}°</span>
+						<span class="sw-meta">{r.color.to(Srgb8).toHex()} · +{r.deg}°</span>
 					</div>
 				{/each}
 			</div>

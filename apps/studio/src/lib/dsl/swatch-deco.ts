@@ -15,7 +15,16 @@ import {
 	WidgetType
 } from '@codemirror/view';
 import { RangeSetBuilder, StateEffect, type Range } from '@codemirror/state';
-import { parse, oklch, formatHex, wcagLuminance } from 'culori';
+import { Oklch, Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
+import { parse } from '@lilbunnyrabbit/chromatics/all';
+
+function tryParse(css: string): Color | null {
+	try {
+		return parse(css);
+	} catch {
+		return null;
+	}
+}
 
 export type SwatchMode = 'square' | 'dot' | 'background' | 'underline' | 'text' | 'outline';
 
@@ -47,9 +56,9 @@ function isCode(prefix: string): boolean {
 
 /** Black or white text — whichever has more WCAG contrast on the `hex` chip. */
 function readableInk(hex: string): string {
-	const col = parse(hex);
+	const col = tryParse(hex);
 	if (!col) return '#fff';
-	const L = wcagLuminance(col); // 0..1
+	const L = col.to(Srgb).luminance();
 	const onWhite = 1.05 / (L + 0.05);
 	const onBlack = (L + 0.05) / 0.05;
 	return onWhite >= onBlack ? '#fff' : '#000';
@@ -63,8 +72,8 @@ function readableInk(hex: string): string {
 function bgLuminance(view: EditorView): number {
 	let el: Element | null = view.scrollDOM;
 	while (el) {
-		const col = parse(getComputedStyle(el).backgroundColor);
-		if (col && (col.alpha ?? 1) > 0.05) return wcagLuminance(col);
+		const col = tryParse(getComputedStyle(el).backgroundColor);
+		if (col && col.alpha > 0.05) return col.to(Srgb).luminance();
 		el = el.parentElement;
 	}
 	return 0.1; // assume a darkish editor if nothing opaque was found
@@ -77,11 +86,11 @@ function bgLuminance(view: EditorView): number {
  * dark L. Returns null if the colour can't be parsed.
  */
 function readableText(hex: string, bgLum: number): string | null {
-	const c = oklch(hex);
-	if (!c) return null;
-	const darkBg = bgLum < 0.4;
-	const l = darkBg ? Math.max(c.l, 0.66) : Math.min(c.l, 0.5);
-	return formatHex({ mode: 'oklch', l, c: c.c, h: c.h }) ?? hex;
+	const col = tryParse(hex);
+	if (!col) return null;
+	const c = col.to(Oklch);
+	c.l = bgLum < 0.4 ? Math.max(c.l, 0.66) : Math.min(c.l, 0.5);
+	return c.to(Srgb).gamutMap().to(Srgb8).toHex();
 }
 
 class SwatchWidget extends WidgetType {

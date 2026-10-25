@@ -1,4 +1,5 @@
 <script lang="ts">
+	import UpgradeBanner from '$lib/components/UpgradeBanner.svelte';
 	/**
 	 * Full-screen DSL editor for phones. Hosts the existing (fully fluid) Editor
 	 * verbatim plus the error strip; the editor is the single source of truth, so
@@ -24,6 +25,7 @@
 		{/if}
 	{/snippet}
 
+	<UpgradeBanner />
 	<div class="m-editor-host">
 		<Editor bind:value={app.source} completionSource={completion} {hover} {swatch} />
 	</div>

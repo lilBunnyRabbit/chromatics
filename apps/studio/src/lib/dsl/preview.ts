@@ -8,8 +8,17 @@
  * Each function returns `{ __preview: <type>, ...refs }` where the refs are the
  * actual ColorValues — the render components do the drawing.
  */
-import { color, num, str, obj } from '../models/util.js';
-import type { DSLValue, DSLFunction, PlainObject } from '../models/index.js';
+import { Oklab, Oklch, type ColorModel } from '@lilbunnyrabbit/chromatics';
+import {
+	color,
+	num,
+	str,
+	obj,
+	model,
+	type DSLValue,
+	type DSLFunction,
+	type PlainObject
+} from './values.js';
 
 /** A rendered-preview descriptor (a plain object marked with `__preview`). */
 export type PreviewValue = PlainObject & { __preview: string };
@@ -29,6 +38,7 @@ function def(build: (a: DSLValue[]) => PlainObject): DSLFunction {
 }
 const colorsOf = (a: DSLValue[]) => a.map((x) => color(x));
 const optStr = (v: DSLValue | undefined, d: string) => (v === undefined ? d : str(v));
+const optModel = (v: DSLValue | undefined, d: ColorModel) => (v === undefined ? d : model(v));
 const optInt = (v: DSLValue | undefined, d: number) => (v === undefined ? d : Math.round(num(v)));
 /** A plain options object if `v` is one, else null (strings/numbers/colors → null). */
 const asOpts = (v: DSLValue | undefined): PlainObject | null => {
@@ -49,7 +59,7 @@ export const preview: Record<string, DSLFunction> = {
 			__preview: 'gradient',
 			from: color(from),
 			to: color(to),
-			space: o ? optStr(o.space, 'oklab') : optStr(space, 'oklab'),
+			space: o ? optModel(o.space, Oklab) : optModel(space, Oklab),
 			hue: o ? optStr(o.hue, 'shorter') : 'shorter',
 			stops: o ? optInt(o.stops, 7) : optInt(stops, 7)
 		};
@@ -57,13 +67,13 @@ export const preview: Record<string, DSLFunction> = {
 	ramp: def(([base, mode]) => ({
 		__preview: 'ramp',
 		base: color(base),
-		mode: optStr(mode, 'oklch')
+		model: optModel(mode, Oklch)
 	})),
-	harmony: def(([base, scheme, model]) => ({
+	harmony: def(([base, scheme, hueModel]) => ({
 		__preview: 'harmony',
 		base: color(base),
 		scheme: optStr(scheme, 'complementary'),
-		model: optStr(model, 'oklch')
+		model: optModel(hueModel, Oklch)
 	})),
 	mix: def(([from, to, steps]) => ({
 		__preview: 'mix',
@@ -82,15 +92,15 @@ export const preview: Record<string, DSLFunction> = {
 	})),
 
 	// — Single-color analysis —
-	space: def(([c, model]) => ({
+	space: def(([c, m]) => ({
 		__preview: 'space',
 		color: color(c),
-		model: optStr(model, 'oklch')
+		model: optModel(m, Oklch)
 	})),
-	channels: def(([c, model]) => ({
+	channels: def(([c, m]) => ({
 		__preview: 'channels',
 		color: color(c),
-		model: optStr(model, 'oklch')
+		model: optModel(m, Oklch)
 	})),
 	gamut: def(([c]) => ({ __preview: 'gamut', color: color(c) })),
 	print: def(([c]) => ({ __preview: 'print', color: color(c) })),

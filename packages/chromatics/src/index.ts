@@ -1,6 +1,6 @@
 export { Color } from "./core/color.js";
 export type { CssOptions } from "./core/css.js";
-export type { Channel, ChannelName, ChannelValues, ColorModel, OptionsOf } from "./core/model.js";
+export type { Channel, ChannelName, ChannelPatch, ChannelValues, ColorModel, OptionsOf } from "./core/model.js";
 export type { Surround, ViewingConditions } from "./core/cam.js";
 export { A98Rgb } from "./models/a98-rgb/a98-rgb.js";
 export { Cam16 } from "./models/cam16/cam16.js";

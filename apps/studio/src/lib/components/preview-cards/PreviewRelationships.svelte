@@ -1,6 +1,14 @@
 <script lang="ts">
-	import { lerpInMode, type HueStrategy } from '$lib/models/util';
-	import { interpSpace, rampColors, harmonyColors, type ColorValue } from '$lib/models';
+	import { modelName } from '$lib/dsl/values';
+	import { Oklab, Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
+	import {
+		interpSpace,
+		mixIn,
+		rampColors,
+		rampModel,
+		harmonyColors,
+		type HueStrategy
+	} from '$lib/color/spaces';
 	import { deltaE2000 } from '$lib/analysis/similarity';
 
 	let { data }: { data: any } = $props();
@@ -8,7 +16,7 @@
 	const r1 = (n: number) => Math.round(n * 10) / 10;
 
 	// ── gradient ──────────────────────────────────────────────
-	const gradientSpace = $derived(interpSpace(data?.space ?? 'oklab'));
+	const gradientSpace = $derived(interpSpace(data?.space ?? Oklab));
 
 	// stops + 2 discrete chips: from, intermediates, to. Each chip is gamut-mapped
 	// (perceptual midpoints that leave sRGB clamp by chroma, not by hue twist) and
@@ -17,11 +25,14 @@
 		if (data?.__preview !== 'gradient') return [];
 		const n = Math.max(0, data.stops | 0);
 		const hue = (data.hue ?? 'shorter') as HueStrategy;
-		const chip = (c: ColorValue) => ({ hex: c.gamutMapped.hex, oog: !c.inGamut });
+		const chip = (c: Color) => ({
+			hex: c.to(Srgb).gamutMap().to(Srgb8).toHex(),
+			oog: !c.to(Srgb).inGamut()
+		});
 		const out = [chip(data.from)];
 		for (let i = 1; i <= n; i++) {
 			const t = i / (n + 1);
-			out.push(chip(lerpInMode(data.from, data.to, gradientSpace.mode, t, hue)));
+			out.push(chip(mixIn(data.from, data.to, gradientSpace.model, t, hue)));
 		}
 		out.push(chip(data.to));
 		return out;
@@ -40,11 +51,11 @@
 	// ── ramp ──────────────────────────────────────────────────
 	const rampSteps = $derived.by(() => {
 		if (data?.__preview !== 'ramp') return [];
-		return rampColors(data.base, data.mode).map((s) => ({
-			hex: s.color.gamutMapped.hex,
+		return rampColors(data.base, data.model).map((s) => ({
+			hex: s.color.to(Srgb).gamutMap().to(Srgb8).toHex(),
 			shade: s.shade,
-			oog: !s.color.inGamut,
-			color: s.color as ColorValue
+			oog: !s.color.to(Srgb).inGamut(),
+			color: s.color
 		}));
 	});
 
@@ -52,7 +63,7 @@
 	// makes the model choice legible (an even ramp has tight ΔE min↔max).
 	const rampCaption = $derived.by(() => {
 		const steps = rampSteps;
-		if (steps.length < 2) return data?.mode ?? '';
+		if (steps.length < 2) return data?.model ? rampModel(data.model).label : '';
 		let min = Infinity;
 		let max = 0;
 		for (let i = 1; i < steps.length; i++) {
@@ -61,7 +72,7 @@
 			if (dE > max) max = dE;
 		}
 		const oog = steps.filter((s) => s.oog).length;
-		const base = `${data.mode} · ΔE ${r1(min)}–${r1(max)}`;
+		const base = `${rampModel(data.model).label} · ΔE ${r1(min)}–${r1(max)}`;
 		return oog > 0 ? `${base} · ${oog} out of sRGB` : base;
 	});
 
@@ -74,7 +85,7 @@
 			return { x: Math.cos(a) * R, y: Math.sin(a) * R };
 		};
 		const swatches = harmonyColors(data.base, data.scheme, data.model).map((s) => ({
-			hex: s.color.gamutMapped.hex,
+			hex: s.color.to(Srgb).gamutMap().to(Srgb8).toHex(),
 			hue: s.hue,
 			isBase: s.base,
 			...pt(s.hue)
@@ -91,7 +102,7 @@
 		const out: { hex: string }[] = [];
 		for (let i = 0; i < n; i++) {
 			const t = n === 1 ? 0 : i / (n - 1);
-			out.push({ hex: lerpInMode(data.from, data.to, 'oklab', t).gamutMapped.hex });
+			out.push({ hex: mixIn(data.from, data.to, Oklab, t).to(Srgb).gamutMap().to(Srgb8).toHex() });
 		}
 		return out;
 	});
@@ -152,7 +163,7 @@
 					{/each}
 				</div>
 			</div>
-			<div class="caption">{data.scheme} · {data.model}</div>
+			<div class="caption">{data.scheme} · {modelName(data.model)}</div>
 		{/if}
 	{:else if data.__preview === 'mix'}
 		<div class="mix">

@@ -7,6 +7,7 @@
  *  - toStyleguideCss   → :root vars (colors + roles + tokens) + utility classes
  *  - toStyleguideHtml  → a self-contained .html styleguide page (the deliverable)
  */
+import { Oklch } from '@lilbunnyrabbit/chromatics';
 import type { Scheme } from '../scheme/types.js';
 import type { Roles, Opacities } from '../scheme/roles.js';
 import { cssVars } from '../scheme/roles.js';
@@ -41,7 +42,7 @@ function rootBlock(input: StyleguideInput): string {
 	const { scheme, tokens, roles, opacities } = input;
 	const lines = [
 		...declList(cssVars(scheme, roles, opacities)),
-		...scheme.entries.map((e) => `  --color-${kebab(e.name)}: ${e.color.toCSS()};`),
+		...scheme.entries.map((e) => `  --color-${kebab(e.name)}: ${e.color.to(Oklch).toCss()};`),
 		...declList(buildTokenVars(tokens))
 	];
 	return `:root {\n${lines.join('\n')}\n}`;

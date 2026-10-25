@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Oklch } from '@lilbunnyrabbit/chromatics';
 	import type { SchemeEntry } from '$lib/scheme/types';
 
 	let { entries }: { entries: SchemeEntry[] } = $props();
@@ -11,7 +12,7 @@
 	);
 
 	/** A CSS color for the lead brand mark, falling back to the chrome primary. */
-	const brand1 = $derived(primaryEntry ? primaryEntry.color.toCSS() : 'var(--primary)');
+	const brand1 = $derived(primaryEntry ? primaryEntry.color.to(Oklch).toCss() : 'var(--primary)');
 
 	/** Up to three brand colors for multi-color marks; cycles when fewer are defined. */
 	const brandColors = $derived.by<string[]>(() => {
@@ -21,7 +22,7 @@
 		const ordered = primaryEntry
 			? [primaryEntry, ...brand.filter((e) => e !== primaryEntry)]
 			: brand;
-		for (const e of ordered) pool.push(e.color.toCSS());
+		for (const e of ordered) pool.push(e.color.to(Oklch).toCss());
 		const out: string[] = [];
 		for (let i = 0; i < 3; i++) out.push(pool[i % pool.length]);
 		return out;
@@ -32,7 +33,7 @@
 	/** Pick black/white text for a brand fill by its OKLCH lightness, when we know it. */
 	function fgFor(entry: SchemeEntry | null): string {
 		if (!entry) return '#fff';
-		const l = entry.color.channel('ok_l');
+		const l = entry.color.to(Oklch).l;
 		return l >= 0.62 ? '#111' : '#fff';
 	}
 
@@ -42,7 +43,7 @@
 		(primaryEntry ? brand.filter((e) => e !== primaryEntry) : brand)[0] ?? null
 	);
 	const secondaryFill = $derived(
-		secondaryEntry ? secondaryEntry.color.toCSS() : 'var(--secondary)'
+		secondaryEntry ? secondaryEntry.color.to(Oklch).toCss() : 'var(--secondary)'
 	);
 	const secondaryFg = $derived(secondaryEntry ? fgFor(secondaryEntry) : 'var(--secondary-fg)');
 

@@ -15,6 +15,7 @@
  * palette's most legible label on that primary, because a combination the user
  * has to hand-fix isn't a candidate.
  */
+import { Srgb } from '@lilbunnyrabbit/chromatics';
 import type { SchemeEntry } from '../scheme/types.js';
 import { contrastRatio } from './contrast.js';
 import { apcaContrast, apcaUse, type ApcaUse } from './apca.js';
@@ -117,7 +118,7 @@ export function combinationCtx(entries: SchemeEntry[]): CombinationCtx {
 		cvdRatio: square(n, 1),
 		cvdDE: square(n),
 		bestLabel: new Array<number>(n).fill(-1),
-		outOfGamut: entries.map((e) => !e.color.inGamut)
+		outOfGamut: entries.map((e) => !e.color.to(Srgb).inGamut())
 	};
 	if (n === 0) return ctx;
 

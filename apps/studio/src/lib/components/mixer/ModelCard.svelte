@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import type { ModelDef } from '$lib/models';
+	import type { ModelInfo } from '$lib/color/catalog';
 	import { channelGradient, fmtChannel } from '$lib/mixer/engine';
 
 	let {
-		def,
+		info,
 		values,
 		gradValues,
 		editing = false,
 		oninput,
 		onrelease
 	}: {
-		def: ModelDef;
+		info: ModelInfo;
 		/** Live slider positions (authoritative, updated every frame). */
 		values: number[];
 		/** rAF-coalesced source for the gradient tracks (kept off the per-frame path). */
@@ -23,27 +23,20 @@
 	} = $props();
 
 	// Recomputes only when gradValues (this card's coalesced snapshot) changes.
-	const grads = $derived(def.channels.map((_, i) => channelGradient(def, gradValues, i)));
-
-	const STATUS_TITLE: Record<string, string> = {
-		stable: 'Stable · exact culori-backed conversion',
-		experimental: 'Experimental · faithful but not spec-certified',
-		'coming-soon': 'Coming soon'
-	};
+	const grads = $derived(info.channels.map((_, i) => channelGradient(info, gradValues, i)));
 </script>
 
 <article class="card" class:editing aria-current={editing ? 'true' : undefined}>
 	<header class="card-h">
-		<span class="dot {def.status}" title={STATUS_TITLE[def.status]}></span>
-		<span class="name" title={def.label}>{def.label}</span>
-		<code class="id">.{def.id}</code>
+		<span class="name" title={info.label}>{info.label}</span>
+		<code class="id">{info.name}</code>
 		<a
 			class="ext"
-			href="{base}/models#{def.id}"
-			title="Open {def.label} in the encyclopedia"
+			href="{base}/models#{info.name}"
+			title="Open {info.label} in the encyclopedia"
 			target="_blank"
 			rel="noopener"
-			aria-label="Open {def.label} in the encyclopedia"
+			aria-label="Open {info.label} in the encyclopedia"
 		>
 			<svg
 				width="12"
@@ -58,9 +51,9 @@
 		</a>
 	</header>
 	<div class="rows">
-		{#each def.channels as ch, i (ch.key)}
+		{#each info.channels as ch, i (ch.name)}
 			<div class="row">
-				<span class="lab" title={ch.label}>{ch.label}</span>
+				<span class="lab mono" title={ch.name}>{ch.name}</span>
 				<input
 					class="grad"
 					type="range"
@@ -74,7 +67,7 @@
 					onpointercancel={onrelease}
 					onkeyup={onrelease}
 					onblur={onrelease}
-					aria-label="{def.label} {ch.label}"
+					aria-label="{info.label} {ch.name}"
 				/>
 				<span class="val mono">{fmtChannel(values[i])}</span>
 			</div>
@@ -110,19 +103,6 @@
 		align-items: center;
 		gap: 7px;
 		margin-bottom: 9px;
-	}
-	.dot {
-		width: 7px;
-		height: 7px;
-		border-radius: 99px;
-		flex-shrink: 0;
-		background: var(--text-faint);
-	}
-	.dot.stable {
-		background: #3fb27f;
-	}
-	.dot.experimental {
-		background: var(--warn);
 	}
 	.name {
 		font-size: 12.5px;

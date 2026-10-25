@@ -1,11 +1,12 @@
 import { test, expect, describe } from 'bun:test';
-import { hex, OKLCH } from '../src/lib/models';
+import { Oklch, Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
 import { contrastRatio, contrastRatioAlpha } from '../src/lib/analysis/contrast';
 import { wcagLevels, wcagColor } from '../src/lib/analysis/wcag';
 import { simulateVision, visionSimulations } from '../src/lib/analysis/cvd';
 
-const white = hex('#ffffff');
-const black = hex('#000000');
+const hexOf = (c: Color) => c.to(Srgb).gamutMap().to(Srgb8).toHex();
+const white = Srgb8.parse('#ffffff');
+const black = Srgb8.parse('#000000');
 
 describe('contrast', () => {
 	test('white vs black ≈ 21:1', () => {
@@ -47,12 +48,12 @@ describe('vision simulation', () => {
 		expect(visionSimulations.length).toBe(10);
 	});
 	test('"none" is identity', () => {
-		const c = OKLCH(0.6, 0.12, 250);
-		expect(simulateVision(c, 'none').hex).toBe(c.hex);
+		const c = new Oklch(0.6, 0.12, 250);
+		expect(hexOf(simulateVision(c, 'none'))).toBe(hexOf(c));
 	});
 	test('deuteranopia and grayscale transform the color', () => {
-		const c = OKLCH(0.6, 0.2, 30);
-		expect(simulateVision(c, 'deuteranopia').hex).not.toBe(c.hex);
-		expect(simulateVision(c, 'grayscale').hex).not.toBe(c.hex);
+		const c = new Oklch(0.6, 0.2, 30);
+		expect(hexOf(simulateVision(c, 'deuteranopia'))).not.toBe(hexOf(c));
+		expect(hexOf(simulateVision(c, 'grayscale'))).not.toBe(hexOf(c));
 	});
 });

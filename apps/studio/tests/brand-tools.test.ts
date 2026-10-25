@@ -1,5 +1,7 @@
 import { test, expect, describe } from 'bun:test';
-import { hex, OKLCH } from '../src/lib/models';
+import { Oklch, Srgb, type Color } from '@lilbunnyrabbit/chromatics';
+import { parse } from '@lilbunnyrabbit/chromatics/all';
+import { evaluate } from '../src/lib/dsl/evaluator';
 import { apcaContrast, apcaUse } from '../src/lib/analysis/apca';
 import { deltaE2000, similarPairs, similarityLevel } from '../src/lib/analysis/similarity';
 import { printProof } from '../src/lib/analysis/print';
@@ -9,11 +11,13 @@ import { colorLiteral, oklchLiteral, uniqueName, appendStatements } from '../src
 import { toSwatchSVG } from '../src/lib/export/swatch';
 import type { Scheme, SchemeEntry } from '../src/lib/scheme/types';
 
-const white = hex('#ffffff');
-const black = hex('#000000');
+const white = parse('#ffffff');
+const black = parse('#000000');
 
 function entry(name: string, h: string): SchemeEntry {
-	return { name, color: hex(h), model: 'hex', deps: [], line: 0, index: 0 };
+	const color = parse(h);
+	Object.freeze(color);
+	return { name, color, deps: [], line: 0, index: 0 };
 }
 function scheme(entries: SchemeEntry[]): Scheme {
 	return {
@@ -72,7 +76,7 @@ describe('print proof', () => {
 		expect(p.richBlack).toBe(false);
 	});
 	test('saturated color over a low ink limit flags overInk', () => {
-		const p = printProof(hex('#102030'), 240);
+		const p = printProof(parse('#102030'), 240);
 		expect(typeof p.totalInk).toBe('number');
 		expect(p.proofHex).toMatch(/^#[0-9a-f]{6}$/);
 	});
@@ -80,11 +84,11 @@ describe('print proof', () => {
 
 describe('color names', () => {
 	test('exact red is "red"', () => {
-		expect(nearestName(hex('#ff0000')).name).toBe('red');
-		expect(nearestName(hex('#ff0000')).deltaE).toBeCloseTo(0, 3);
+		expect(nearestName(parse('#ff0000')).name).toBe('red');
+		expect(nearestName(parse('#ff0000')).deltaE).toBeCloseTo(0, 3);
 	});
 	test('near-steelblue resolves', () => {
-		expect(nearestName(hex('#4682b5')).name).toBe('steelblue');
+		expect(nearestName(parse('#4682b5')).name).toBe('steelblue');
 	});
 });
 
@@ -109,21 +113,33 @@ describe('quantize', () => {
 });
 
 describe('DSL emit', () => {
-	test('in-gamut color → hex literal', () => {
-		expect(colorLiteral(hex('#3366cc'))).toBe('hex("#3366cc")');
+	test('in-gamut color → parse() hex literal', () => {
+		expect(colorLiteral(parse('#3366cc'))).toBe('parse("#3366cc")');
 	});
-	test('out-of-gamut color → OKLCH literal', () => {
-		const wide = OKLCH(0.7, 0.37, 150); // beyond sRGB
+	test('out-of-gamut color → Oklch literal', () => {
+		const wide = new Oklch(0.7, 0.37, 150);
+		expect(wide.to(Srgb).inGamut()).toBe(false);
 		expect(colorLiteral(wide)).toBe(oklchLiteral(wide));
-		expect(oklchLiteral(wide)).toMatch(/^OKLCH\(/);
+		expect(oklchLiteral(wide)).toBe('Oklch(0.7, 0.37, 150)');
+	});
+	test('emitted literals evaluate in the new DSL', () => {
+		for (const c of [parse('#3366cc'), new Oklch(0.7, 0.37, 150)]) {
+			const r = evaluate(`x = ${colorLiteral(c)}`);
+			expect(r.errors).toEqual([]);
+			expect((r.variables.get('x')!.value as Color).to(Oklch).l).toBeCloseTo(c.to(Oklch).l, 4);
+		}
 	});
 	test('unique name avoids collisions', () => {
 		expect(uniqueName('primary', ['primary', 'primary_2'])).toBe('primary_3');
 		expect(uniqueName('2cool', [])).toBe('_2cool');
 	});
 	test('appendStatements adds a gap and comment', () => {
-		const out = appendStatements('seed = OKLCH(0.6, 0.1, 200)', ['x = seed.lighten(0.1)'], 'tint');
-		expect(out).toContain('seed = OKLCH(0.6, 0.1, 200)\n\n// tint\nx = seed.lighten(0.1)');
+		const out = appendStatements(
+			'seed = Oklch(0.6, 0.1, 200)',
+			['x = seed.clone().lighten(0.1)'],
+			'tint'
+		);
+		expect(out).toContain('seed = Oklch(0.6, 0.1, 200)\n\n// tint\nx = seed.clone().lighten(0.1)');
 	});
 });
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	/**
 	 * History tab (CD-14) — checkpoint versions of the working copy and see what a
 	 * change did across the whole derived system. A version is a frozen
@@ -110,7 +111,7 @@
 				const r = deriveSnapshot({ source: v.source, settings: settingsOf(v) });
 				map.set(
 					v.id,
-					r.scheme.entries.slice(0, 10).map((e) => e.color.hex)
+					r.scheme.entries.slice(0, 10).map((e) => e.color.to(Srgb).gamutMap().to(Srgb8).toHex())
 				);
 			} catch {
 				map.set(v.id, []);

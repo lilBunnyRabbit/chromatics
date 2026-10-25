@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { contrastRatio } from '$lib/analysis/contrast';
 	import { wcagLevels, wcagColor } from '$lib/analysis/wcag';
 
@@ -50,7 +51,7 @@
 		if (cols.length === 0) return [];
 		return CHART_HEIGHTS.map((h, i) => ({
 			h,
-			css: cols[i % cols.length].toCSS()
+			css: cols[i % cols.length].to(Oklch).toCss()
 		}));
 	});
 
@@ -61,11 +62,11 @@
 		if (data?.__preview !== 'ui') return null;
 		const { bg, fg, primary } = data;
 		if (!bg || !fg || !primary) return null;
-		const primaryText = primary.channel('ok_l') > 0.6 ? '#000' : '#fff';
+		const primaryText = primary.to(Oklch).l > 0.6 ? '#000' : '#fff';
 		return {
-			bg: bg.toCSS(),
-			fg: fg.toCSS(),
-			primary: primary.toCSS(),
+			bg: bg.to(Oklch).toCss(),
+			fg: fg.to(Oklch).toCss(),
+			primary: primary.to(Oklch).toCss(),
 			primaryText
 		};
 	});
@@ -74,7 +75,7 @@
 	const brand = $derived.by(() => {
 		if (data?.__preview !== 'brandMark') return null;
 		if (!data.color) return null;
-		return data.color.toCSS();
+		return data.color.to(Oklch).toCss();
 	});
 </script>
 
@@ -85,12 +86,12 @@
 		{:else}
 			<div class="pal-bar">
 				{#each paletteColors as c, i (i)}
-					<span class="pal-seg" style:background={c.toCSS()}></span>
+					<span class="pal-seg" style:background={c.to(Oklch).toCss()}></span>
 				{/each}
 			</div>
 			<div class="pal-labels">
 				{#each paletteColors as c, i (i)}
-					<span class="pal-hex">{c.hex}</span>
+					<span class="pal-hex">{c.to(Srgb).gamutMap().to(Srgb8).toHex()}</span>
 				{/each}
 			</div>
 		{/if}
@@ -105,23 +106,24 @@
 							<td class="grid-corner"></td>
 							{#each gridColors as bg, c (c)}
 								<td class="grid-head">
-									<span class="grid-dot" style:background={bg.toCSS()}></span>
+									<span class="grid-dot" style:background={bg.to(Oklch).toCss()}></span>
 								</td>
 							{/each}
 						</tr>
 						{#each gridRows as row, r (r)}
 							<tr>
 								<td class="grid-head grid-head-row">
-									<span class="grid-dot" style:background={gridColors[r].toCSS()}></span>
+									<span class="grid-dot" style:background={gridColors[r].to(Oklch).toCss()}></span>
 								</td>
 								{#each row as cell, c (c)}
 									{#if cell.diagonal}
-										<td class="grid-cell grid-diag" style:background={cell.color.toCSS()}></td>
+										<td class="grid-cell grid-diag" style:background={cell.color.to(Oklch).toCss()}
+										></td>
 									{:else}
 										<td
 											class="grid-cell"
-											style:background={cell.bg.toCSS()}
-											style:color={cell.fg.toCSS()}
+											style:background={cell.bg.to(Oklch).toCss()}
+											style:color={cell.fg.to(Oklch).toCss()}
 											style:--flag={wcagColor(cell.level)}
 											class:fail={cell.level === 'Fail'}
 										>
@@ -153,8 +155,8 @@
 			<div class="legend">
 				{#each chartLegend as c, i (i)}
 					<span class="legend-item">
-						<span class="legend-sw" style:background={c.toCSS()}></span>
-						<span class="legend-lbl">{c.hex}</span>
+						<span class="legend-sw" style:background={c.to(Oklch).toCss()}></span>
+						<span class="legend-lbl">{c.to(Srgb).gamutMap().to(Srgb8).toHex()}</span>
 					</span>
 				{/each}
 			</div>

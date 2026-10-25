@@ -7,13 +7,13 @@ import { evaluate } from '../src/lib/dsl/evaluator';
 
 describe('preview / component blocks', () => {
 	test('a preview block yields the same descriptors as the flat form', () => {
-		const flat = evaluate(`a = OKLCH(0.6,0.12,260)
-b = a.rotate(120).gamutMap()
+		const flat = evaluate(`a = Oklch(0.6,0.12,260)
+b = a.clone().rotateHue(120)
 ramp = preview.ramp(a)
 grad = preview.gradient(a, b)
 pair = preview.pair(a, b)`);
-		const block = evaluate(`a = OKLCH(0.6,0.12,260)
-b = a.rotate(120).gamutMap()
+		const block = evaluate(`a = Oklch(0.6,0.12,260)
+b = a.clone().rotateHue(120)
 preview {
   ramp = ramp(a)
   grad = gradient(a, b)
@@ -29,8 +29,8 @@ preview {
 	});
 
 	test('block outputs are top-level variables in source order, with deps', () => {
-		const r = evaluate(`a = OKLCH(0.6,0.12,260)
-b = OKLCH(0.5,0.1,20)
+		const r = evaluate(`a = Oklch(0.6,0.12,260)
+b = Oklch(0.5,0.1,20)
 preview {
   ramp = ramp(a)
   pair = pair(a, b)
@@ -42,7 +42,7 @@ preview {
 	});
 
 	test('component block produces tagged component specs', () => {
-		const r = evaluate(`primary = OKLCH(0.62, 0.17, 260)
+		const r = evaluate(`primary = Oklch(0.62, 0.17, 260)
 component {
   buttons = button({ variants: [{ name: "primary", bg: "primary", fg: "fg" }] })
   surface_card = card({ bg: "surface", fg: "fg" })
@@ -57,7 +57,7 @@ component {
 	});
 
 	test('line numbers survive desugaring (offsets are preserved)', () => {
-		const r = evaluate(`a = OKLCH(0.6,0.12,260)
+		const r = evaluate(`a = Oklch(0.6,0.12,260)
 
 preview {
   ramp = ramp(a)
@@ -66,7 +66,7 @@ preview {
 	});
 
 	test('an error on one block line does not kill the others', () => {
-		const r = evaluate(`a = OKLCH(0.6,0.12,260)
+		const r = evaluate(`a = Oklch(0.6,0.12,260)
 preview {
   good = ramp(a)
   oops = ramp(undefinedColor)
@@ -77,8 +77,8 @@ preview {
 		expect(r.errors[0].line).toBe(4);
 	});
 
-	test('a tokens block joins the scale generators and token()', () => {
-		const r = evaluate(`brand = hex("#6c5ce7")
+	test('a tokens block joins the token generators and token()', () => {
+		const r = evaluate(`brand = parse("#6c5ce7")
 tokens {
   text   = text(16, 1.25)
   space  = space(4)
@@ -93,41 +93,40 @@ tokens {
 		expect((r.variables.get('font')!.value as Record<string, unknown>).__token).toBe('font');
 	});
 
-	test('tokens block matches the flat scale.*/token() form', () => {
-		const block = evaluate(`b = hex("#6c5ce7")
+	test('tokens block matches the flat tokens.* form', () => {
+		const block = evaluate(`b = parse("#6c5ce7")
 tokens {
   text = text(16, 1.25)
   font = token("font", { sans: "Inter" })
 }`);
-		const flat = evaluate(`b = hex("#6c5ce7")
-text = scale.text(16, 1.25)
-font = token("font", { sans: "Inter" })`);
+		const flat = evaluate(`b = parse("#6c5ce7")
+text = tokens.text(16, 1.25)
+font = tokens.token("font", { sans: "Inter" })`);
 		expect(block.errors).toEqual([]);
 		expect(flat.errors).toEqual([]);
 		expect(block.variables.get('text')!.value).toEqual(flat.variables.get('text')!.value);
 		expect(block.variables.get('font')!.value).toEqual(flat.variables.get('font')!.value);
 	});
 
-	test('scale.* and tokens.* are equivalent (alias kept)', () => {
+	test('the scale.* and free token() aliases are gone (ADR-016 78f)', () => {
 		const r = evaluate(`a = scale.radius(10)
-b = tokens.radius(10)`);
-		expect(r.errors).toEqual([]);
-		expect(r.variables.get('a')!.value).toEqual(r.variables.get('b')!.value);
+b = token("font", { sans: "Inter" })`);
+		expect(r.errors.map((e) => e.line)).toEqual([1, 2]);
 	});
 
 	test('a roles block maps roles to color names like theme({…})', () => {
-		const block = evaluate(`bg = OKLCH(0.18, 0.02, 260)
-fg = OKLCH(0.96, 0.01, 260)
-primary = OKLCH(0.62, 0.17, 260)
+		const block = evaluate(`bg = Oklch(0.18, 0.02, 260)
+fg = Oklch(0.96, 0.01, 260)
+primary = Oklch(0.62, 0.17, 260)
 roles {
   bg        = bg
   fg        = fg
   primary   = primary
   primaryFg = fg
 }`);
-		const flat = evaluate(`bg = OKLCH(0.18, 0.02, 260)
-fg = OKLCH(0.96, 0.01, 260)
-primary = OKLCH(0.62, 0.17, 260)
+		const flat = evaluate(`bg = Oklch(0.18, 0.02, 260)
+fg = Oklch(0.96, 0.01, 260)
+primary = Oklch(0.62, 0.17, 260)
 roles = theme({ bg: "bg", fg: "fg", primary: "primary", primaryFg: "fg" })`);
 		expect(block.errors).toEqual([]);
 		expect(flat.errors).toEqual([]);
@@ -139,7 +138,7 @@ roles = theme({ bg: "bg", fg: "fg", primary: "primary", primaryFg: "fg" })`);
 	});
 
 	test('role keys normalise (snake/camel) and unknown keys drop', () => {
-		const r = evaluate(`a = OKLCH(0.6,0.12,260)
+		const r = evaluate(`a = Oklch(0.6,0.12,260)
 roles {
   primary_fg = a
   nonsense   = a
@@ -155,7 +154,7 @@ roles {
 	});
 
 	test('flat preview.* / component.* calls still work alongside blocks', () => {
-		const r = evaluate(`a = OKLCH(0.6,0.12,260)
+		const r = evaluate(`a = Oklch(0.6,0.12,260)
 flat = preview.ramp(a)
 preview {
   blocked = ramp(a)

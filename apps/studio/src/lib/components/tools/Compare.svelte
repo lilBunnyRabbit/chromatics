@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Oklch } from '@lilbunnyrabbit/chromatics';
 	/**
 	 * Compare — pick a bg / fg / primary trio with a system instead of by eye.
 	 *
@@ -105,7 +106,7 @@
 	function css(name: string): string {
 		const e = app.scheme.byName.get(name);
 		if (!e) return 'transparent';
-		return (sim === 'none' ? e.color : simulateVision(e.color, sim)).toCSS();
+		return (sim === 'none' ? e.color : simulateVision(e.color, sim)).to(Oklch).toCss();
 	}
 
 	function vars(c: Combination): string {

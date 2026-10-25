@@ -1,6 +1,6 @@
 /**
  * Non-color design tokens — the second half of the design system, alongside the
- * color Scheme. A token group authored in the DSL (`scale.text(...)`, `token(...)`)
+ * color Scheme. A token group authored in the DSL (`tokens.text(...)`, `tokens.token(...)`)
  * is a tagged plain object that rides `scheme.nonColorVars` exactly like a
  * `preview.*` descriptor; `tokensFromScheme` overlays every authored group onto
  * `DEFAULT_TOKENS` to produce one render-ready set. `buildTokenVars` emits it as

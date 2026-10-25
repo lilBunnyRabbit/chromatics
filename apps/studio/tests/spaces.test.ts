@@ -1,29 +1,27 @@
 import { test, expect, describe } from 'bun:test';
-import { allModels, ColorValue, hex } from '../src/lib/models';
+import { Cam16, HunterLab, Srgb, Srgb8, Xyy, type Color } from '@lilbunnyrabbit/chromatics';
+import { parse } from '@lilbunnyrabbit/chromatics/all';
+import { evaluate } from '../src/lib/dsl/evaluator';
+import { MODEL_CLASSES } from '../src/lib/dsl/values';
 
-/** Probe colours that sit inside every space we ship. */
 const PROBES = ['#1a8cff', '#7ac26a', '#e49b39', '#b5a2d2'];
-/** RYB's artists' gamut is smaller than sRGB, so its inverse is a best fit. */
-const GAMUT_LIMITED = new Set(['ryb']);
 
-describe('every experimental colour space round-trips through its constructor', () => {
-	const models = allModels().filter(
-		(m) => m.status === 'experimental' && m.ctor && m.channels.length === 3 && m.family !== 'system'
-	);
+const shown = (c: Color) => c.to(Srgb).gamutMap().to(Srgb8).toHex();
 
+describe('every DSL colour space round-trips through its constructor', () => {
 	test('we cover a broad set of spaces', () => {
-		expect(models.length).toBeGreaterThan(25);
+		expect(MODEL_CLASSES.length).toBeGreaterThan(60);
 	});
 
-	for (const m of models) {
-		test(`${m.id} (${m.label}) round-trips to the source hex`, () => {
+	for (const [name] of MODEL_CLASSES) {
+		test(`${name} round-trips to the source hex`, () => {
 			for (const hx of PROBES) {
-				const base = hex(hx);
-				const proj = base.project(m.mode) as unknown as Record<string, number | undefined>;
-				const args = m.channels.map((ch) => (proj[ch.culoriField] ?? 0) * (ch.scale ?? 1));
-				const built = ColorValue.from(m.ctor!.build(args));
-				if (GAMUT_LIMITED.has(m.id)) expect(built).toBeDefined();
-				else expect(built.hex.toLowerCase()).toBe(hx);
+				const native = evaluate(`c = parse("${hx}").to(${name})`).variables.get('c')!
+					.value as Color;
+				const args = native.coords.join(', ');
+				const rebuilt = evaluate(`c = ${name}(${args}, ${native.alpha})`);
+				expect(rebuilt.errors, `${name} ${hx}`).toEqual([]);
+				expect(shown(rebuilt.variables.get('c')!.value as Color), `${name} ${hx}`).toBe(hx);
 			}
 		});
 	}
@@ -31,32 +29,37 @@ describe('every experimental colour space round-trips through its constructor', 
 
 describe('appearance-model reference values', () => {
 	test('CAM16 of pure red matches Material', () => {
-		const r = hex('#ff0000');
-		expect(r.channel('cam16_j')).toBeCloseTo(46.45, 1);
-		expect(r.channel('cam16_c')).toBeCloseTo(113.35, 1);
-		expect(r.channel('cam16_h')).toBeCloseTo(27.41, 1);
+		const r = parse('#ff0000').to(Cam16);
+		expect(r.J).toBeCloseTo(46.45, 1);
+		expect(r.C).toBeCloseTo(113.35, 1);
+		expect(r.h).toBeCloseTo(27.41, 1);
 	});
 	test('xyY of white is the D65 chromaticity', () => {
-		const w = hex('#ffffff');
-		expect(w.channel('xyy_x')).toBeCloseTo(0.3127, 3);
-		expect(w.channel('xyy_y')).toBeCloseTo(0.329, 3);
+		const w = parse('#ffffff').to(Xyy);
+		expect(w.x).toBeCloseTo(0.3127, 3);
+		expect(w.y).toBeCloseTo(0.329, 3);
 	});
 	test('Hunter Lab of white is L≈100, a≈0, b≈0', () => {
-		const w = hex('#ffffff');
-		expect(w.channel('hlab_l')).toBeCloseTo(100, 1);
-		expect(w.channel('hlab_a')).toBeCloseTo(0, 1);
-		expect(w.channel('hlab_b')).toBeCloseTo(0, 1);
+		const w = parse('#ffffff').to(HunterLab);
+		expect(w.l).toBeCloseTo(100, 1);
+		expect(w.a).toBeCloseTo(0, 1);
+		expect(w.b).toBeCloseTo(0, 1);
 	});
 	test('CAM16-UCS ΔE separates near from far colours', () => {
-		const deltaE = hex('#1a8cff').view('cam16ucs').member('deltaE') as (c: ColorValue) => number;
-		expect(deltaE(hex('#1a90ff'))).toBeLessThan(deltaE(hex('#ff0000')));
+		const r = evaluate(
+			'a = parse("#1a8cff").to(Cam16Ucs)\nnear = a.deltaE(parse("#1a90ff").to(Cam16Ucs))\nfar = a.deltaE(parse("#ff0000").to(Cam16Ucs))'
+		);
+		expect(r.errors).toEqual([]);
+		expect(r.variables.get('near')!.value as number).toBeLessThan(
+			r.variables.get('far')!.value as number
+		);
 	});
 });
 
-describe('coming-soon spaces stay honest', () => {
-	test('a conceptual model throws an actionable error', () => {
-		const yjk = allModels().find((m) => m.id === 'yjk')!;
-		expect(yjk.status).toBe('coming-soon');
-		expect(yjk.backed).toBe(false);
+describe('names that left the DSL (ADR-016 78j)', () => {
+	test('coming-soon stubs, RAL and alias ids are not constructors', () => {
+		for (const old of ['YJK', 'yjk', 'RAL', 'ral', 'scRGB', 'Scrgb', 'Rec601', 'Xvycc']) {
+			expect(evaluate(`c = ${old}(0.5, 0.5, 0.5)`).errors, old).toHaveLength(1);
+		}
 	});
 });

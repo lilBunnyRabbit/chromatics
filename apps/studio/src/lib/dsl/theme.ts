@@ -2,7 +2,7 @@
  * The `theme(...)` builtin — maps named colors to theme roles from the DSL.
  * Accepts hyphen, camel or snake keys (`primary-fg` | `primaryFg` | `primary_fg`).
  */
-import type { DSLValue, DSLFunction, PlainObject } from '../models/index.js';
+import type { DSLValue, DSLFunction, PlainObject } from './values.js';
 import type { Roles } from '../scheme/roles.js';
 
 const KEY_ALIASES: Record<string, keyof Roles> = {

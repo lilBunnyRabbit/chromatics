@@ -21,7 +21,8 @@
 import type { Roles, Opacities } from '$lib/scheme/roles';
 import type { VisionSimulation } from '$lib/analysis/cvd';
 
-export const DOC_SCHEMA_VERSION = 1;
+/** 2: documents written for the package DSL (ADR-017); 1 is the old DSL, offered an upgrade on open. */
+export const DOC_SCHEMA_VERSION = 2;
 
 const DOC_PREFIX = 'chromatics:doc:';
 const INDEX_KEY = 'chromatics:index';

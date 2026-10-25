@@ -127,12 +127,12 @@
 	// echoing what the code beside it does. Purely cosmetic (aria-hidden).
 	const HERO_SWATCHES = ['#1b1733', '#2a2350', '#6c5ce7', '#9b8cff', '#d7d0ff'];
 
-	const HERO_CODE = `brand   = hex("#6c5ce7")   // ← edit this
+	const HERO_CODE = `brand   = parse("#6c5ce7")   // ← edit this
 
-primary = brand.oklch.gamutMap()
-accent  = primary.rotate(-150)
-bg      = OKLCH(0.17, brand.ok_c * 0.3, brand.ok_h)
-surface = bg.lighten(0.05)`;
+primary = brand.to(Oklch)
+accent  = primary.clone().rotateHue(-150)
+bg      = Oklch(0.17, primary.c * 0.3, primary.h)
+surface = bg.clone().lighten(0.05)`;
 
 	// ── open / focus management ──
 	let dialogEl = $state<HTMLDivElement | null>(null);

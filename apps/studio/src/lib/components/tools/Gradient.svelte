@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { app } from '$lib/state/app.svelte';
-	import { lerpInMode } from '$lib/models/util';
-	import { INTERP_SPACES, getModelByMode } from '$lib/models';
+	import { INTERP_SPACES, mixIn } from '$lib/color/spaces';
+	import { modelName } from '$lib/dsl/values';
 	import { uniqueName, round } from '$lib/dsl/emit';
 	import { takenNames, insert } from './shared';
 
@@ -13,30 +14,31 @@
 	const a = $derived(entries[ai]);
 	const b = $derived(entries[bi]);
 
-	let spaceId = $state('oklab');
-	const space = $derived(INTERP_SPACES.find((s) => s.id === spaceId) ?? INTERP_SPACES[0]);
-	// The DSL view name for this space's mode (oklab→oklab, lrgb→lin, rgb→srgb…),
-	// so the generated mix() converts both operands into the right model.
-	const viewId = $derived(getModelByMode(space.mode)?.id ?? 'oklch');
+	let spaceId = $state('Oklab');
+	const space = $derived(
+		INTERP_SPACES.find((s) => modelName(s.model) === spaceId) ?? INTERP_SPACES[0]
+	);
 	let stops = $state(3); // intermediate colors
 
 	function expr(t: number): string {
 		const r = round(t, 3);
-		// Mix in the chosen space; convert BOTH operands into it so the same-model
-		// rule holds regardless of how a and b were authored.
-		return `mix(${a.name}.${viewId}, ${b.name}.${viewId}, ${r})`;
+		// Both operands converted: mix is same-model, and to() leaves a and b untouched.
+		return `${a.name}.to(${spaceId}).mix(${b.name}.to(${spaceId}), ${r})`;
 	}
 
 	// Preview = A, the intermediate stops, then B — all gamut-mapped by chroma
 	// (not naive RGB clip) so out-of-gamut endpoints don't hue-twist the bar.
 	const ramp = $derived.by(() => {
 		if (!a || !b) return [];
-		const out = [{ hex: a.color.gamutMapped.hex, t: 0 }];
+		const out = [{ hex: a.color.to(Srgb).gamutMap().to(Srgb8).toHex(), t: 0 }];
 		for (let i = 1; i <= stops; i++) {
 			const t = i / (stops + 1);
-			out.push({ hex: lerpInMode(a.color, b.color, space.mode, t).gamutMapped.hex, t });
+			out.push({
+				hex: mixIn(a.color, b.color, space.model, t).to(Srgb).gamutMap().to(Srgb8).toHex(),
+				t
+			});
 		}
-		out.push({ hex: b.color.gamutMapped.hex, t: 1 });
+		out.push({ hex: b.color.to(Srgb).gamutMap().to(Srgb8).toHex(), t: 1 });
 		return out;
 	});
 	const css = $derived(`linear-gradient(90deg, ${ramp.map((s) => s.hex).join(', ')})`);
@@ -82,7 +84,8 @@
 			<label class="field">
 				<span>Space</span>
 				<select class="select" bind:value={spaceId}>
-					{#each INTERP_SPACES as s (s.id)}<option value={s.id}>{s.label}</option>{/each}
+					{#each INTERP_SPACES as s (s.label)}<option value={modelName(s.model)}>{s.label}</option
+						>{/each}
 				</select>
 			</label>
 			<label class="field">

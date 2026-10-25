@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { DisplayP3, Hsl, Oklch, Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
 	import type { Scheme, SchemeEntry } from '$lib/scheme/types';
-	import { ColorValue, formatOwnModel } from '$lib/models';
 	import type { DSLValue } from '$lib/dsl/evaluator.js';
 	import { nearestName } from '$lib/color-names';
 	import { diffCascade } from '$lib/util/cascade';
@@ -13,28 +13,18 @@
 	const plainVars = $derived(scheme.nonColorVars.filter((v) => !isPreview(v.value)));
 
 	const r2 = (n: number, d: number) => Math.round(n * d) / d;
-	function fmtOklch(c: ColorValue) {
-		return `oklch(${r2(c.channel('ok_l'), 1000)} ${r2(c.channel('ok_c'), 10000)} ${r2(c.channel('ok_h'), 100)})`;
+	function fmtOklch(c: Color) {
+		const { l, c: ch, h } = c.to(Oklch);
+		return `oklch(${r2(l, 1000)} ${r2(ch, 10000)} ${r2(h, 100)})`;
 	}
-	const c01 = (n: number) => Math.max(0, Math.min(1, n));
-	// sRGB-clipped copy — out-of-gamut colors (high chroma) have raw r/g/b that go
-	// negative/>1, so the RGB & HSL readouts are taken from this clipped version
-	// (consistent with the hex). OKLCH still shows the true, unclamped value.
-	function srgbClip(c: ColorValue): ColorValue {
-		return ColorValue.from({
-			mode: 'rgb',
-			r: c01(c.channel('r')),
-			g: c01(c.channel('g')),
-			b: c01(c.channel('b'))
-		} as never);
+	// RGB and HSL read the gamut-mapped colour, like the hex; OKLCH shows the true value.
+	function fmtRgb(c: Color) {
+		const { r, g, b } = c.to(Srgb).gamutMap().to(Srgb8);
+		return `rgb(${r} ${g} ${b})`;
 	}
-	function fmtRgb(c: ColorValue) {
-		const d = srgbClip(c);
-		return `rgb(${Math.round(d.channel('r') * 255)} ${Math.round(d.channel('g') * 255)} ${Math.round(d.channel('b') * 255)})`;
-	}
-	function fmtHsl(c: ColorValue) {
-		const d = srgbClip(c);
-		return `hsl(${Math.round(d.channel('h'))} ${Math.round(d.channel('s') * 100)}% ${Math.round(d.channel('l') * 100)}%)`;
+	function fmtHsl(c: Color) {
+		const { h, s, l } = c.to(Srgb).gamutMap().to(Hsl);
+		return `hsl(${Math.round(h)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%)`;
 	}
 	function fmtVal(v: DSLValue): string {
 		if (typeof v === 'number') return String(r2(v, 10000));
@@ -51,14 +41,15 @@
 		}, 900);
 	}
 	// The four most-common readouts, always shown for reference.
-	const convs = (c: ColorValue): [string, string][] => [
-		['HEX', c.hex],
+	const convs = (c: Color): [string, string][] => [
+		['HEX', c.to(Srgb).gamutMap().to(Srgb8).toHex()],
 		['OKLCH', fmtOklch(c)],
 		['RGB', fmtRgb(c)],
 		['HSL', fmtHsl(c)]
 	];
-	/** The variable's value in its OWN model, shown top-right (e.g. hwb(…), lab(…)). */
-	const modelVal = (e: SchemeEntry): string => formatOwnModel(e.color, e.model);
+	/** The variable's value in its own model, shown top-right (`hwb(…)`, `lab(…)`): CSS-rounded where the model is CSS. */
+	const modelVal = (e: SchemeEntry): string =>
+		(e.color as Color & { toCss?: () => string }).toCss?.() ?? e.color.toString();
 
 	// "Edit a color, watch it cascade" — briefly flag colors whose value changed
 	// after an edit. The diff lives in a pure helper so an invalid intermediate
@@ -71,7 +62,10 @@
 	$effect(() => {
 		const hits = diffCascade(
 			baseline,
-			scheme.entries.map((e) => ({ name: e.name, hex: e.color.hex })),
+			scheme.entries.map((e) => ({
+				name: e.name,
+				hex: e.color.to(Srgb).gamutMap().to(Srgb8).toHex()
+			})),
 			{ hasErrors: scheme.errors.length > 0, primed }
 		);
 		primed = true;
@@ -91,9 +85,9 @@
 				<button
 					class="pal"
 					class:changed={changed.has(e.name)}
-					style="background: {e.color.toCSS()}"
-					title="{e.name} · {e.color.hex}"
-					onclick={() => copy(e.color.hex)}
+					style="background: {e.color.to(Oklch).toCss()}"
+					title="{e.name} · {e.color.to(Srgb).gamutMap().to(Srgb8).toHex()}"
+					onclick={() => copy(e.color.to(Srgb).gamutMap().to(Srgb8).toHex())}
 					aria-label="copy {e.name}"
 				></button>
 			{/each}
@@ -106,11 +100,13 @@
 					<button
 						class="sw"
 						class:changed={changed.has(e.name)}
-						style="background: {e.color.toCSS()}"
-						onclick={() => copy(e.color.hex)}
+						style="background: {e.color.to(Oklch).toCss()}"
+						onclick={() => copy(e.color.to(Srgb).gamutMap().to(Srgb8).toHex())}
 						title="copy hex"
 					>
-						{#if copied === e.color.hex}<span class="sw-copied">copied</span>{/if}
+						{#if copied === e.color.to(Srgb).gamutMap().to(Srgb8).toHex()}<span class="sw-copied"
+								>copied</span
+							>{/if}
 					</button>
 					<div class="meta">
 						<div class="line1">
@@ -118,9 +114,9 @@
 							<span class="chip chip-name" title="nearest CSS color"
 								>≈ {nearestName(e.color).name}</span
 							>
-							{#if !e.color.inGamut}
+							{#if !e.color.to(Srgb).inGamut()}
 								<span class="badge badge-warn">out of gamut</span>
-							{:else if e.color.inP3}
+							{:else if e.color.to(DisplayP3).inGamut()}
 								<span class="badge badge-p3">P3</span>
 							{/if}
 							<button class="model-val mono" title="copy {mv}" onclick={() => copy(mv)}

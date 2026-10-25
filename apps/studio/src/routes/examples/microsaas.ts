@@ -8,44 +8,44 @@ export const source = `// ── microSaaS Dashboard — light + dark from ONE b
 //   Inspector — watch the cascade      Validate — WCAG/APCA audit (passes AA)
 //   Styleguide — toggle Light / Dark   Export   — CSS variables & Tailwind
 
-brand = hex("#4f46e5")        // the one knob. Try #0ea5e9 / #16a34a / #db2777
+brand = parse("#4f46e5")        // the one knob. Try #0ea5e9 / #16a34a / #db2777
 
 // Brand triad — one anchor, vary ONLY the hue; shared by both themes. OKLCH keeps
 // both lightness and chroma equal (no gamutMap); culori maps each hue at display.
-primary   = OKLCH(0.55, brand.ok_c, brand.ok_h)
-secondary = primary.rotateHue(150)
-accent    = primary.rotateHue(-60)
+primary   = Oklch(0.55, brand.to(Oklch).c, brand.to(Oklch).h)
+secondary = primary.clone().rotateHue(150)
+accent    = primary.clone().rotateHue(-60)
 
 // Semantic states — hue carries the meaning, lightness tuned per hue; shared.
-success = OKLCH(0.62, 0.15, 150)
-warning = OKLCH(0.78, 0.15, 85)
-danger  = OKLCH(0.55, 0.19, 27)
-info    = OKLCH(0.58, 0.15, 250)
+success = Oklch(0.62, 0.15, 150)
+warning = Oklch(0.78, 0.15, 85)
+danger  = Oklch(0.55, 0.19, 27)
+info    = Oklch(0.58, 0.15, 250)
 
 // Auto-pick each filled button's label from its fill (same in both themes).
-ink   = OKLCH(0.20, 0.02, brand.ok_h)
-paper = OKLCH(0.99, 0.004, brand.ok_h)
-primary_fg   = paper.srgb.contrastWCAG(primary)   >= 4.5 ? paper : ink
-secondary_fg = paper.srgb.contrastWCAG(secondary) >= 4.5 ? paper : ink
-accent_fg    = paper.srgb.contrastWCAG(accent)    >= 4.5 ? paper : ink
-success_fg   = paper.srgb.contrastWCAG(success)   >= 4.5 ? paper : ink
-danger_fg    = paper.srgb.contrastWCAG(danger)    >= 4.5 ? paper : ink
+ink   = Oklch(0.20, 0.02, brand.to(Oklch).h)
+paper = Oklch(0.99, 0.004, brand.to(Oklch).h)
+primary_fg   = paper.to(Srgb).contrast(primary.to(Srgb))   >= 4.5 ? paper : ink
+secondary_fg = paper.to(Srgb).contrast(secondary.to(Srgb)) >= 4.5 ? paper : ink
+accent_fg    = paper.to(Srgb).contrast(accent.to(Srgb))    >= 4.5 ? paper : ink
+success_fg   = paper.to(Srgb).contrast(success.to(Srgb))   >= 4.5 ? paper : ink
+danger_fg    = paper.to(Srgb).contrast(danger.to(Srgb))    >= 4.5 ? paper : ink
 
 // Light neutrals (the base mapping) — brand-tinted, page < cards < ink.
-background = OKLCH(0.965, 0.005, brand.ok_h)
-surface    = OKLCH(0.999, 0.002, brand.ok_h)
-border     = OKLCH(0.90,  0.008, brand.ok_h)
-foreground = OKLCH(0.27,  0.02,  brand.ok_h)
+background = Oklch(0.965, 0.005, brand.to(Oklch).h)
+surface    = Oklch(0.999, 0.002, brand.to(Oklch).h)
+border     = Oklch(0.90, 0.008, brand.to(Oklch).h)
+foreground = Oklch(0.27, 0.02, brand.to(Oklch).h)
 
 // Dark neutrals — same hue, lightness ladder inverted.
-background_d = OKLCH(0.17, 0.012, brand.ok_h)
-surface_d    = OKLCH(0.21, 0.016, brand.ok_h)
-border_d     = OKLCH(0.32, 0.016, brand.ok_h)
-foreground_d = OKLCH(0.96, 0.012, brand.ok_h)
+background_d = Oklch(0.17, 0.012, brand.to(Oklch).h)
+surface_d    = Oklch(0.21, 0.016, brand.to(Oklch).h)
+border_d     = Oklch(0.32, 0.016, brand.to(Oklch).h)
+foreground_d = Oklch(0.96, 0.012, brand.to(Oklch).h)
 
 // Live a11y checks for both themes (booleans in the Inspector).
-text_aa_light = foreground.srgb.contrastWCAG(background) >= 4.5
-text_aa_dark  = foreground_d.srgb.contrastWCAG(background_d) >= 4.5
+text_aa_light = foreground.to(Srgb).contrast(background.to(Srgb)) >= 4.5
+text_aa_dark  = foreground_d.to(Srgb).contrast(background_d.to(Srgb)) >= 4.5
 
 // Roles: base = light; the nested dark { } re-binds only the neutrals. The brand
 // triad + semantics are shared, so both modes ride one palette and one audit.
@@ -113,7 +113,7 @@ component {
 // Relationships, visualized (Preview tab).
 preview {
   states = palette(primary, success, warning, danger, info)
-  tones  = ramp(primary, "oklch")
+  tones  = ramp(primary, Oklch)
   cta    = pair(primary_fg, primary)
   body   = pair(foreground, background)
   app    = ui(background, foreground, primary)

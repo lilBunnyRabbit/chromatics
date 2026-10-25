@@ -3,6 +3,7 @@
  * read the live scheme, compute new colors with the engine, and write DSL back
  * into the editor through `insert` — keeping the editor the source of truth.
  */
+import { Oklch, type Color } from '@lilbunnyrabbit/chromatics';
 import { app } from '$lib/state/app.svelte';
 import { ui } from '$lib/state/ui.svelte';
 import { appendStatements } from '$lib/dsl/emit';
@@ -26,6 +27,7 @@ export function insert(lines: string[], comment?: string): void {
 const r2 = (n: number, d: number) => Math.round(n * d) / d;
 
 /** A compact `oklch(L C H)` readout for previews. */
-export function oklchText(c: { channel(k: string): number }): string {
-	return `oklch(${r2(c.channel('ok_l'), 100)} ${r2(c.channel('ok_c'), 1000)} ${r2(c.channel('ok_h'), 10)})`;
+export function oklchText(color: Color): string {
+	const { l, c, h } = color.to(Oklch);
+	return `oklch(${r2(l, 100)} ${r2(c, 1000)} ${r2(h, 10)})`;
 }

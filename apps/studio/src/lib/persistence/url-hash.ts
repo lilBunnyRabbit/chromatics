@@ -11,6 +11,8 @@
  *   ~0<b64url>  uncompressed UTF-8 source                          (source-only fallback)
  *   ~2<b64url>  raw DEFLATE of JSON `{ source, settings }`         (with settings; default)
  *   ~3<b64url>  uncompressed JSON `{ source, settings }`           (with settings; fallback)
+ *   ~4 / ~5     as ~2 / ~3, for a source written in the package DSL (ADR-017). ~0–~3 are old-DSL
+ *               links; they still decode, and the studio offers to upgrade them.
  * The version digit lets the format evolve without breaking already-shared
  * links: bump it and keep the old branch. ~2/~3 (CD-14) carry the creator's
  * roles/opacities/CVD so a shared link reproduces the exact rendered system —
@@ -58,11 +60,12 @@ export async function encodeHash(state: ShareState): Promise<string> {
 		const json = JSON.stringify({ source: state.source, settings: state.settings });
 		const bytes = new TextEncoder().encode(json);
 		return canCompress
-			? '~2' + bytesToB64url(await deflateRaw(bytes))
-			: '~3' + bytesToB64url(bytes);
+			? '~4' + bytesToB64url(await deflateRaw(bytes))
+			: '~5' + bytesToB64url(bytes);
 	}
-	const bytes = new TextEncoder().encode(state.source);
-	return canCompress ? '~1' + bytesToB64url(await deflateRaw(bytes)) : '~0' + bytesToB64url(bytes);
+	const json = JSON.stringify({ source: state.source });
+	const bytes = new TextEncoder().encode(json);
+	return canCompress ? '~4' + bytesToB64url(await deflateRaw(bytes)) : '~5' + bytesToB64url(bytes);
 }
 
 export async function decodeHash(hash: string): Promise<ShareState | null> {
@@ -74,8 +77,10 @@ export async function decodeHash(hash: string): Promise<ShareState | null> {
 		if (!payload) return null;
 		if (version === '1') return { source: await inflateRaw(b64urlToBytes(payload)) };
 		if (version === '0') return { source: new TextDecoder().decode(b64urlToBytes(payload)) };
-		if (version === '2') return parseStateJson(await inflateRaw(b64urlToBytes(payload)));
-		if (version === '3') return parseStateJson(new TextDecoder().decode(b64urlToBytes(payload)));
+		if (version === '2' || version === '4')
+			return parseStateJson(await inflateRaw(b64urlToBytes(payload)));
+		if (version === '3' || version === '5')
+			return parseStateJson(new TextDecoder().decode(b64urlToBytes(payload)));
 		return null; // unknown version
 	} catch {
 		return null;

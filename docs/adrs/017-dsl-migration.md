@@ -1,7 +1,16 @@
 # ADR-017: Upgrading old scripts
 
 **Date:** 2026-10-25
-**Status:** Accepted
+**Status:** Implemented
+
+
+> **Revision 2026-10-25: implemented**
+>
+> - `src/lib/dsl/migrate.ts` infers each expression's old model and new class, so a rewrite keeps the old result: `clone()` when the receiver is already in the target class, otherwise `to(Model)` (also a copy). Old OKLCH `saturate(x)` was raw chroma, so it becomes `shift({ c: x })`; HSL-family `rotateHue` returned HSL; culori's ΔE ran in Lab D65 with CMC 1:1.
+> - Units and names that changed (hsluv / hpluv 0–100 → 0–1, the YCbCr family's +0.5 chroma offset, ITP / UVW / CAM16-UCS letters, YCoCg-R order) live in `src/lib/color/legacy.ts`. CAM16, CIECAM02, TSL and XYB can't be carried over and are flagged.
+> - It is a no-op on new-DSL code, which is how the banner detects an old script: it shows whenever `migrate(source)` would change something, for documents, links or pasted code alike. `DOC_SCHEMA_VERSION` is 2 and new share links use `~4` (deflate) / `~5` (plain); `~0`–`~3` still decode.
+> - UI: `UpgradeBanner.svelte` above the editor (desktop and mobile) with a line-by-line review, Apply and Dismiss; "Upgrade script" in the editor header.
+> - Gate: `tests/migrate.test.ts` upgrades the ten pre-package examples (kept in `tests/fixtures/legacy-examples/`) and checks them against the culori baseline; the shipped examples are the upgraded ones, hand-polished.
 
 ## Context
 

@@ -10,14 +10,15 @@
  *   anything else                          → UNRESOLVED     → visible badge
  *
  * `resolveRef` is for rendering/markup (returns a `var(...)`/literal CSS value).
- * `resolveColor` returns the actual ColorValue a color ref points at, for the
+ * `resolveColor` returns the actual Color a color ref points at, for the
  * contrast audit. Both share the same role-fallback chain as `roles.cssVars`.
  */
 import type { Scheme } from '../scheme/types.js';
 import type { StyleTokens } from '../scheme/tokens.js';
 import { TOKEN_VAR_PREFIX, pxOf } from '../scheme/tokens.js';
 import type { Roles, Opacities } from '../scheme/roles.js';
-import { ColorValue, hex } from '../models/index.js';
+import type { Color } from '@lilbunnyrabbit/chromatics';
+import { parse } from '@lilbunnyrabbit/chromatics/all';
 import { kebab } from '../export/index.js';
 
 export interface ResolveCtx {
@@ -121,7 +122,7 @@ export function refAlpha(ref: unknown, opacities?: Opacities): number | null {
 	return Math.max(0, Math.min(1, Number(mod) / 100));
 }
 
-function roleColor(ref: string, ctx: ResolveCtx, depth = 0): ColorValue | null {
+function roleColor(ref: string, ctx: ResolveCtx, depth = 0): Color | null {
 	const def = ROLE_OF[ref];
 	if (!def || depth > 5) return null;
 	const name = ctx.roles[def.key];
@@ -131,7 +132,7 @@ function roleColor(ref: string, ctx: ResolveCtx, depth = 0): ColorValue | null {
 }
 
 /** The actual (opaque) color a color-ref points at — for the contrast audit. */
-export function resolveColor(ref: unknown, ctx: ResolveCtx): ColorValue | null {
+export function resolveColor(ref: unknown, ctx: ResolveCtx): Color | null {
 	if (typeof ref !== 'string' || !ref) return null;
 	const { base } = splitAlpha(ref);
 	if (ROLE_OF[base]) return roleColor(base, ctx);
@@ -139,7 +140,7 @@ export function resolveColor(ref: unknown, ctx: ResolveCtx): ColorValue | null {
 	if (e) return e.color;
 	if (/^#|^(rgb|hsl|oklch|oklab|lab|lch|hwb|color)\(/i.test(base)) {
 		try {
-			return hex(base);
+			return parse(base);
 		} catch {
 			return null;
 		}

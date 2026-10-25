@@ -2,7 +2,7 @@ import { test, expect } from 'bun:test';
 import { evaluate } from '../../src/lib/dsl/evaluator';
 import { source } from '../fixtures/brand-dark';
 import { source as example } from '../../src/routes/examples/brand-dark';
-import { isColorValue, ColorValue } from '../../src/lib/models';
+import { Color, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 import { deriveScheme } from '../../src/lib/scheme/derive';
 import { emptyRoles, DEFAULT_OPACITIES } from '../../src/lib/scheme/roles';
 
@@ -27,7 +27,7 @@ function hexes(src: string) {
 	const out: Record<string, string> = {};
 	for (const n of r.order) {
 		const v = r.variables.get(n)!;
-		if (isColorValue(v.value)) out[n] = (v.value as ColorValue).hex;
+		if (v.value instanceof Color) out[n] = v.value.to(Srgb).gamutMap().to(Srgb8).toHex();
 	}
 	return { out, errors: r.errors };
 }

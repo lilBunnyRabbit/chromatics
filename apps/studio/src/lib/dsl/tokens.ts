@@ -5,8 +5,8 @@
  * `preview.ts` pattern. The scale math lives in `../scheme/tokens.ts`.
  */
 import { textScale, spaceScale, radiusScale, shadowScale } from '../scheme/tokens.js';
-import { num, str, color } from '../models/util.js';
-import type { DSLValue, DSLFunction, PlainObject } from '../models/index.js';
+import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
+import { num, str, color, type DSLValue, type DSLFunction, type PlainObject } from './values.js';
 
 const optNum = (v: DSLValue | undefined, d: number) => (v === undefined ? d : num(v));
 
@@ -25,7 +25,9 @@ export const scale = {
 	shadow: (...a: DSLValue[]) => ({
 		__token: 'shadow',
 		__unit: '',
-		map: shadowScale(a[0] === undefined ? '#000' : color(a[0]).hex)
+		map: shadowScale(
+			a[0] === undefined ? '#000' : color(a[0]).to(Srgb).gamutMap().to(Srgb8).toHex()
+		)
 	})
 } as unknown as Record<string, DSLFunction>;
 
@@ -53,12 +55,7 @@ export const SCALE_SIGNATURES: Record<string, { sig: string; doc: string }> = {
 export const TOKEN_DOC =
 	'token(family, map, unit?) — define an arbitrary token group (e.g. font, border)';
 
-/**
- * The unified `tokens` namespace — the canonical home for non-color design
- * tokens. It joins the `scale.*` generators with `token(…)` for arbitrary
- * groups, so every token surface lives under one name (and one `tokens { … }`
- * block). `scale.*` and the free `token(…)` stay as aliases for compatibility.
- */
+/** The `tokens` namespace: the scale generators plus `token(…)` for arbitrary groups. */
 export const tokens = { ...scale, token: tokenFn } as unknown as Record<string, DSLFunction>;
 
 export const TOKENS_SIGNATURES: Record<string, { sig: string; doc: string }> = {

@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import type { SchemeEntry } from '$lib/scheme/types';
 
 	let { entries }: { entries: SchemeEntry[] } = $props();
 
 	const ok = (c: SchemeEntry['color']) =>
-		`oklch(${c.channel('ok_l').toFixed(2)} ${c.channel('ok_c').toFixed(3)} ${Math.round(c.channel('ok_h'))})`;
+		`oklch(${c.to(Oklch).l.toFixed(2)} ${c.to(Oklch).c.toFixed(3)} ${Math.round(c.to(Oklch).h)})`;
 
 	const lorem =
 		'Jackdaws love my big sphinx of quartz. Pack my box with five dozen liquor jugs and ship the whole lot by morning.';
@@ -40,13 +41,13 @@
 		<div class="swatch-grid">
 			{#each entries as e (e.name + e.index)}
 				<article class="swatch-card">
-					<div class="swatch-block" style="background: {e.color.toCSS()}">
+					<div class="swatch-block" style="background: {e.color.to(Oklch).toCss()}">
 						<span class="aa aa-white">Aa</span>
 						<span class="aa aa-black">Aa</span>
 					</div>
 					<div class="swatch-meta">
 						<div class="swatch-name">{e.name}</div>
-						<div class="swatch-hex">{e.color.hex}</div>
+						<div class="swatch-hex">{e.color.to(Srgb).gamutMap().to(Srgb8).toHex()}</div>
 						<div class="swatch-ok">{ok(e.color)}</div>
 						{#if e.description}
 							<div class="swatch-desc">{e.description}</div>

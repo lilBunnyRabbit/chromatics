@@ -1,18 +1,6 @@
-/**
- * Vision-deficiency & condition simulation (the 10-mode set from master:oklch.ts),
- * re-typed against ColorValue. Applied as a per-surface view transform.
- */
-import { ColorValue } from '../models/index.js';
-import {
-	filterDeficiencyProt,
-	filterDeficiencyDeuter,
-	filterDeficiencyTrit,
-	filterGrayscale,
-	filterContrast,
-	filterBrightness,
-	filterSaturate,
-	type CuloriColor
-} from '../models/registry.js';
+/** Vision-deficiency and condition simulation, applied as a per-surface view transform. */
+import { Srgb, type Color } from '@lilbunnyrabbit/chromatics';
+import { simulateCvd } from '@lilbunnyrabbit/chromatics/cvd';
 
 export type VisionSimulation =
 	| 'none'
@@ -39,23 +27,23 @@ export const visionSimulations: { value: VisionSimulation; label: string }[] = [
 	{ value: 'low-saturation', label: 'Low saturation' }
 ];
 
-type Filter = (c: CuloriColor) => CuloriColor;
+type Filter = (c: Srgb) => Srgb;
 
 const simFilters: Record<VisionSimulation, Filter | null> = {
 	none: null,
-	protanopia: filterDeficiencyProt(1) as Filter,
-	deuteranopia: filterDeficiencyDeuter(1) as Filter,
-	tritanopia: filterDeficiencyTrit(1) as Filter,
-	grayscale: filterGrayscale(1) as Filter,
-	'low-contrast': filterContrast(0.5) as Filter,
-	'high-contrast': filterContrast(1.8) as Filter,
-	'low-brightness': filterBrightness(0.5) as Filter,
-	'high-saturation': filterSaturate(2) as Filter,
-	'low-saturation': filterSaturate(0.3) as Filter
+	protanopia: (c) => simulateCvd(c, 'protan'),
+	deuteranopia: (c) => simulateCvd(c, 'deutan'),
+	tritanopia: (c) => simulateCvd(c, 'tritan'),
+	grayscale: (c) => c.filter('grayscale', 1),
+	'low-contrast': (c) => c.filter('contrast', 0.5),
+	'high-contrast': (c) => c.filter('contrast', 1.8),
+	'low-brightness': (c) => c.filter('brightness', 0.5),
+	'high-saturation': (c) => c.filter('saturate', 2),
+	'low-saturation': (c) => c.filter('saturate', 0.3)
 };
 
-export function simulateVision(color: ColorValue, sim: VisionSimulation): ColorValue {
+/** `color` as seen under `sim`: a new Srgb colour, or `color` itself for normal vision. */
+export function simulateVision(color: Color, sim: VisionSimulation): Color {
 	const filter = simFilters[sim];
-	if (!filter) return color;
-	return ColorValue.from(filter(color.project('oklch')));
+	return filter ? filter(color.to(Srgb)) : color;
 }

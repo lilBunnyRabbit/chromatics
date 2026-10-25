@@ -4,21 +4,24 @@
  * ramp, gradient, auto-fix, eyedropper…) produces DSL statements through here,
  * so the editor stays the single source of truth.
  */
-import type { ColorValue } from '../models/index.js';
+import { type Color, Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 
 export function round(n: number, d = 4): number {
 	const f = 10 ** d;
 	return Math.round(n * f) / f;
 }
 
-/** OKLCH constructor literal — the canonical, gamut-independent form. */
-export function oklchLiteral(c: ColorValue): string {
-	return `OKLCH(${round(c.channel('ok_l'), 4)}, ${round(c.channel('ok_c'), 4)}, ${round(c.channel('ok_h'), 2)})`;
+/** Oklch constructor literal — the canonical, gamut-independent form. */
+export function oklchLiteral(c: Color): string {
+	const { l, c: ch, h } = c.to(Oklch);
+	return `Oklch(${round(l, 4)}, ${round(ch, 4)}, ${round(h, 2)})`;
 }
 
-/** A DSL expression reconstructing this color: hex when displayable, else OKLCH. */
-export function colorLiteral(c: ColorValue): string {
-	return c.inGamut ? `hex("${c.hex}")` : oklchLiteral(c);
+/** A DSL expression reconstructing this color: a hex when it's in sRGB, else Oklch. */
+export function colorLiteral(c: Color): string {
+	return c.to(Srgb).inGamut()
+		? `parse("${c.to(Srgb).gamutMap().to(Srgb8).toHex()}")`
+		: oklchLiteral(c);
 }
 
 function sanitize(name: string): string {

@@ -5,17 +5,18 @@
 	 * with the sRGB / P3 / Rec.2020 gamut boundaries drawn on top. The marker is
 	 * the live color; click / drag to pick. Replaces the heavier 3-D viewer.
 	 */
-	import type { ModelDef } from '$lib/models';
-	import { toMode, inGamut } from '$lib/models/registry';
+	import { DisplayP3, Rec2020, Srgb } from '@lilbunnyrabbit/chromatics';
+	import type { ModelInfo } from '$lib/color/catalog';
+	import { lightIndex } from '$lib/mixer/engine';
 	import { ui } from '$lib/state/ui.svelte';
 
 	let {
-		def,
+		info,
 		vals,
 		markerColor = '#000',
 		onpick
 	}: {
-		def: ModelDef;
+		info: ModelInfo;
 		vals: number[];
 		markerColor?: string;
 		onpick: (xi: number, xVal: number, yi: number, yVal: number) => void;
@@ -32,14 +33,11 @@
 		fixed: number[];
 	}
 	/** Pick the two plane channels + which channels stay fixed. */
-	function planeAxes(d: ModelDef): Axes {
-		const ch = d.channels;
+	function planeAxes(m: ModelInfo): Axes {
+		const ch = m.channels;
 		const n = ch.length;
-		const hueIdx = ch.findIndex((c) => Math.abs(c.range[1] - 360) < 1 || c.localKey === 'h');
-		const lightIdx = ch.findIndex(
-			(c) =>
-				/light|lumin|value|tone|bright|intens/i.test(c.label) || /^(l|j|i|t|v)$/i.test(c.localKey)
-		);
+		const hueIdx = ch.findIndex((c) => c.hue === true);
+		const lightIdx = lightIndex(m);
 		if (hueIdx >= 0) {
 			// cylindrical → lightness vertical, chroma horizontal, hue (+extra) fixed
 			let yi =
@@ -64,7 +62,7 @@
 		};
 	}
 
-	const axes = $derived(planeAxes(def));
+	const axes = $derived(planeAxes(info));
 	// Only the FIXED channel values feed the plane render, so picking (which moves
 	// xi/yi) just moves the marker and never re-renders the whole slice.
 	const fixedVals = $derived(axes.fixed.map((i) => vals[i] ?? 0));
@@ -77,9 +75,7 @@
 		flags: { s: boolean; p: boolean; r: boolean };
 	}
 	const grid = $derived.by<Grid | null>(() => {
-		const ctor = def.ctor;
-		if (!ctor) return null;
-		const ch = def.channels;
+		const ch = info.channels;
 		const [xLo, xHi] = ch[axes.xi].range;
 		const [yLo, yHi] = ch[axes.yi].range;
 		const data = new Uint8ClampedArray(GW * GH * 4);
@@ -88,9 +84,6 @@
 		const rIn = new Uint8Array(GW * GH);
 		const base = ch.map(() => 0);
 		axes.fixed.forEach((idx, k) => (base[idx] = fixedVals[k]));
-		const toRgb = toMode('rgb');
-		const inP3 = inGamut('p3');
-		const inRec = inGamut('rec2020');
 		let anyS = false,
 			anyNotS = false,
 			anyNotP = false,
@@ -110,15 +103,12 @@
 					p = 0,
 					rr = 0;
 				try {
-					const built = ctor.build(probe);
-					const rgb = toRgb(built) as unknown as { r?: number; g?: number; b?: number } | undefined;
-					r = rgb?.r ?? 0;
-					g = rgb?.g ?? 0;
-					b = rgb?.b ?? 0;
-					const e = 1e-4;
-					s = r >= -e && r <= 1 + e && g >= -e && g <= 1 + e && b >= -e && b <= 1 + e ? 1 : 0;
-					p = s ? 1 : inP3(built) ? 1 : 0;
-					rr = p ? 1 : inRec(built) ? 1 : 0;
+					const built = new info.model(...probe);
+					const rgb = built.to(Srgb);
+					[r, g, b] = rgb.coords;
+					s = rgb.inGamut() ? 1 : 0;
+					p = s || built.to(DisplayP3).inGamut() ? 1 : 0;
+					rr = p || built.to(Rec2020).inGamut() ? 1 : 0;
 				} catch {
 					/* leave black + out of gamut */
 				}
@@ -222,11 +212,11 @@
 	}
 
 	const markerX = $derived.by(() => {
-		const [lo, hi] = def.channels[axes.xi]?.range ?? [0, 1];
+		const [lo, hi] = info.channels[axes.xi]?.range ?? [0, 1];
 		return hi === lo ? 0 : ((vals[axes.xi] - lo) / (hi - lo)) * W;
 	});
 	const markerY = $derived.by(() => {
-		const [lo, hi] = def.channels[axes.yi]?.range ?? [0, 1];
+		const [lo, hi] = info.channels[axes.yi]?.range ?? [0, 1];
 		const t = hi === lo ? 0 : (vals[axes.yi] - lo) / (hi - lo);
 		return (axes.invertY ? 1 - t : t) * H;
 	});
@@ -281,8 +271,8 @@
 		const rect = canvas.getBoundingClientRect();
 		const px = Math.min(W, Math.max(0, e.clientX - rect.left));
 		const py = Math.min(H, Math.max(0, e.clientY - rect.top));
-		const [xLo, xHi] = def.channels[axes.xi].range;
-		const [yLo, yHi] = def.channels[axes.yi].range;
+		const [xLo, xHi] = info.channels[axes.xi].range;
+		const [yLo, yHi] = info.channels[axes.yi].range;
 		const xVal = xLo + (px / W) * (xHi - xLo);
 		const ty = py / H;
 		const yVal = axes.invertY ? yHi - ty * (yHi - yLo) : yLo + ty * (yHi - yLo);
@@ -300,13 +290,13 @@
 		dragging = false;
 	}
 
-	const ch = $derived(def.channels);
+	const ch = $derived(info.channels);
 	const fmt = (v: number) => (Number.isInteger(v) ? String(v) : String(+v.toFixed(2)));
 	const caption = $derived(
 		ch[axes.yi] && ch[axes.xi]
-			? `${ch[axes.yi].label} × ${ch[axes.xi].label}` +
+			? `${ch[axes.yi].name} × ${ch[axes.xi].name}` +
 					(axes.fixed.length
-						? ` · ${axes.fixed.map((i) => `${ch[i].label} ${fmt(vals[i])}`).join(', ')}`
+						? ` · ${axes.fixed.map((i) => `${ch[i].name} ${fmt(vals[i])}`).join(', ')}`
 						: '')
 			: ''
 	);
@@ -320,7 +310,7 @@
 </script>
 
 <div class="gp">
-	<div class="gp-axislabel gp-y">{ch[axes.yi]?.label ?? ''} ↑</div>
+	<div class="gp-axislabel gp-y">{ch[axes.yi]?.name ?? ''} ↑</div>
 	<div class="gp-stage" bind:this={host} bind:clientWidth={W} style:height="{H}px">
 		<canvas
 			bind:this={canvas}
@@ -340,7 +330,7 @@
 		{/if}
 	</div>
 	<div class="gp-foot">
-		<span class="gp-axislabel gp-x">{ch[axes.xi]?.label ?? ''} →</span>
+		<span class="gp-axislabel gp-x">{ch[axes.xi]?.name ?? ''} →</span>
 		<span class="gp-cap">{caption}</span>
 	</div>
 </div>

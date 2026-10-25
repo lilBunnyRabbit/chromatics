@@ -4,7 +4,8 @@
  * than precise enough to pick the closest of ~148 names. The LAB table is built
  * lazily once, then reused.
  */
-import { hex, type ColorValue } from './models/index.js';
+import { Lab, type Color } from '@lilbunnyrabbit/chromatics';
+import { parse } from '@lilbunnyrabbit/chromatics/all';
 
 /** CSS Color Module Level 4 named colors. */
 export const CSS_NAMES: Record<string, string> = {
@@ -157,19 +158,16 @@ let table: LabEntry[] | null = null;
 function lab(): LabEntry[] {
 	if (!table) {
 		table = Object.entries(CSS_NAMES).map(([name, h]) => {
-			const l = hex(h).project('lab') as unknown as Record<string, number | undefined>;
-			return { name, L: l.l ?? 0, a: l.a ?? 0, b: l.b ?? 0 };
+			const { l, a, b } = parse(h).to(Lab);
+			return { name, L: l, a, b };
 		});
 	}
 	return table;
 }
 
 /** Closest CSS color name plus its CIE76 ΔE (0 = exact match). */
-export function nearestName(c: ColorValue): { name: string; deltaE: number } {
-	const l = c.project('lab') as unknown as Record<string, number | undefined>;
-	const L = l.l ?? 0,
-		a = l.a ?? 0,
-		b = l.b ?? 0;
+export function nearestName(c: Color): { name: string; deltaE: number } {
+	const { l: L, a, b } = c.to(Lab);
 	let best = lab()[0];
 	let bd = Infinity;
 	for (const n of lab()) {

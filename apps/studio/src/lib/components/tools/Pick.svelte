@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { onMount } from 'svelte';
-	import { hex, type ColorValue } from '$lib/models';
+	import type { Color } from '@lilbunnyrabbit/chromatics';
+	import { parse } from '@lilbunnyrabbit/chromatics/all';
 	import { nearestName } from '$lib/color-names';
 	import { uniqueName } from '$lib/dsl/emit';
 	import { takenNames, insert, oklchText } from './shared';
@@ -17,10 +19,10 @@
 		const v = hexInput.trim().replace(/^#?/, '');
 		return /^[0-9a-fA-F]{6}$/.test(v) || /^[0-9a-fA-F]{3}$/.test(v) ? `#${v}` : null;
 	});
-	const color = $derived.by<ColorValue | null>(() => {
+	const color = $derived.by<Color | null>(() => {
 		if (!normalized) return null;
 		try {
-			return hex(normalized);
+			return parse(normalized);
 		} catch {
 			return null;
 		}
@@ -43,7 +45,7 @@
 	function apply() {
 		if (!color) return;
 		const name = uniqueName(nameInput || 'picked', takenNames());
-		insert([`${name} = hex("${color.hex}")`], 'Picked color');
+		insert([`${name} = parse("${color.to(Srgb).gamutMap().to(Srgb8).toHex()}")`], 'Picked color');
 	}
 </script>
 
@@ -80,10 +82,12 @@
 
 	{#if color && near}
 		<div class="readout">
-			<span class="big-sw" style="background:{color.hex}"></span>
+			<span class="big-sw" style="background:{color.to(Srgb).gamutMap().to(Srgb8).toHex()}"></span>
 			<div class="meta">
 				<div class="line">
-					<b>{color.hex}</b> · nearest <b>{near.name}</b> (ΔE {near.deltaE.toFixed(1)})
+					<b>{color.to(Srgb).gamutMap().to(Srgb8).toHex()}</b> · nearest <b>{near.name}</b> (ΔE {near.deltaE.toFixed(
+						1
+					)})
 				</div>
 				<div class="line mono">{oklchText(color)}</div>
 			</div>

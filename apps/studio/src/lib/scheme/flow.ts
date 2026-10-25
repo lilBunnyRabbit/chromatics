@@ -30,7 +30,7 @@ export interface FlowInput {
 	rolesComplete: boolean;
 	/** A `theme.dark()` mapping is authored. */
 	darkAuthored: boolean;
-	/** At least one `scale.*` / `token(...)` group is authored. */
+	/** At least one `tokens.*` group is authored. */
 	tokensAuthored: boolean;
 	/** Number of `component.*` specs authored. */
 	componentCount: number;
@@ -115,10 +115,10 @@ export function tokensScaffold(scheme: Scheme): Scaffold {
 	return {
 		comment: 'Design tokens — generators expand the scales',
 		lines: [
-			`${text} = scale.text(16, 1.25)`,
-			`${space} = scale.space(4)`,
-			`${radius} = scale.radius(10)`,
-			`${font} = token("font", { sans: "Inter, system-ui, sans-serif", mono: "JetBrains Mono, monospace" })`
+			`${text} = tokens.text(16, 1.25)`,
+			`${space} = tokens.space(4)`,
+			`${radius} = tokens.radius(10)`,
+			`${font} = tokens.token("font", { sans: "Inter, system-ui, sans-serif", mono: "JetBrains Mono, monospace" })`
 		]
 	};
 }
@@ -141,10 +141,10 @@ export function modesScaffold(scheme: Scheme, lightRoles: Roles): Scaffold | nul
 	return {
 		comment: 'Dark mode — re-point bg/fg/surface/border onto inverted-lightness colors',
 		lines: [
-			`${bgD} = OKLCH(0.18, ${bgName}.ok_c, ${bgName}.ok_h)`,
-			`${surfaceD} = ${bgD}.lighten(0.06)`,
-			`${fgD} = OKLCH(0.95, ${fgName}.ok_c, ${fgName}.ok_h)`,
-			`${borderD} = ${surfaceD}.lighten(0.14)`,
+			`${bgD} = ${bgName}.to(Oklch).set({ l: 0.18 })`,
+			`${surfaceD} = ${bgD}.clone().lighten(0.06)`,
+			`${fgD} = ${fgName}.to(Oklch).set({ l: 0.95 })`,
+			`${borderD} = ${surfaceD}.clone().lighten(0.14)`,
 			``,
 			`dark {`,
 			`  bg = ${bgD}`,

@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { app } from '$lib/state/app.svelte';
-	import { RAMP_MODELS, rampColors } from '$lib/models';
+	import { RAMP_MODELS, rampColors } from '$lib/color/spaces';
+	import { modelName } from '$lib/dsl/values';
 	import { uniqueName, round } from '$lib/dsl/emit';
 	import { takenNames, insert } from './shared';
 
@@ -9,33 +11,20 @@
 	const idx = $derived(Math.min(baseIdx, Math.max(0, entries.length - 1)));
 	const base = $derived(entries[idx]);
 
-	let modelId = $state('oklch');
-	const rm = $derived(RAMP_MODELS.find((m) => m.id === modelId) ?? RAMP_MODELS[0]);
+	let modelId = $state('Oklch');
+	const rm = $derived(RAMP_MODELS.find((m) => modelName(m.model) === modelId) ?? RAMP_MODELS[0]);
 
 	const results = $derived.by(() => {
 		if (!base) return [];
-		return rampColors(base.color, modelId).map((s) => ({ k: s.key, color: s.color }));
+		return rampColors(base.color, rm.model).map((s) => ({
+			k: s.key,
+			hex: s.color.to(Srgb).gamutMap().to(Srgb8).toHex()
+		}));
 	});
 
-	// DSL expression for one shade — each model rebuilt from the base's channels
-	// in that model, varying only its lightness axis. Matches rampColors().
-	function stepExpr(id: string, b: string, v: number): string {
-		switch (id) {
-			case 'lab':
-				return `LAB(${round(v, 2)}, ${b}.lab_a, ${b}.lab_b)`;
-			case 'hct':
-				return `${b}.hct.atTone(${round(v, 1)})`;
-			case 'okhsl':
-				return `OKHSL(${b}.okhsl_h, ${b}.okhsl_s, ${round(v, 3)})`;
-			case 'hsluv':
-				return `HSLUV(${b}.hsluv_h, ${b}.hsluv_s, ${round(v, 2)})`;
-			case 'hsl':
-				return `HSL(${b}.h, ${b}.s, ${round(v, 3)})`;
-			case 'hsv':
-				return `HSV(${b}.hsv_h, ${b}.hsv_s, ${round(v, 3)})`;
-			default:
-				return `${b}.oklch.atLightness(${round(v, 3)}).oklch.gamutMap()`;
-		}
+	// Matches rampColors(): the base in the ramp's model, its lightness axis set.
+	function stepExpr(b: string, v: number): string {
+		return `${b}.to(${modelId}).set({ ${rm.channel}: ${round(v, 3)} })`;
 	}
 
 	function apply() {
@@ -45,7 +34,7 @@
 		const lines = results.map((r, i) => {
 			const name = uniqueName(`${prefix}_${r.k}`, taken);
 			taken.add(name);
-			return `${name} = ${stepExpr(modelId, base.name, rm.stops[i])}`;
+			return `${name} = ${stepExpr(base.name, rm.stops[i])}`;
 		});
 		insert(lines, `Tonal ramp (${rm.label}) from ${base.name}`);
 	}
@@ -65,7 +54,8 @@
 			<label class="field">
 				<span>Model</span>
 				<select class="select" bind:value={modelId}>
-					{#each RAMP_MODELS as m (m.id)}<option value={m.id}>{m.label}</option>{/each}
+					{#each RAMP_MODELS as m (m.label)}<option value={modelName(m.model)}>{m.label}</option
+						>{/each}
 				</select>
 			</label>
 			<button class="btn btn-accent" onclick={apply}>Insert {results.length} steps</button>
@@ -74,9 +64,9 @@
 		<div class="ramp">
 			{#each results as r (r.k)}
 				<div class="step">
-					<span class="block" style="background:{r.color.gamutMapped.hex}"></span>
+					<span class="block" style="background:{r.hex}"></span>
 					<span class="lbl">{r.k}</span>
-					<span class="hx">{r.color.gamutMapped.hex}</span>
+					<span class="hx">{r.hex}</span>
 				</div>
 			{/each}
 		</div>

@@ -14,9 +14,9 @@ import {
 } from '../src/lib/export';
 import { encodeHash, decodeHash } from '../src/lib/persistence/url-hash';
 
-const SRC = `bg = OKLCH(0.2, 0.02, 250)
-brand = hex("#6c5ce7")
-bg_dark = bg.oklch.darken(0.05)`;
+const SRC = `bg = Oklch(0.2, 0.02, 250)
+brand = parse("#6c5ce7")
+bg_dark = bg.to(Oklch).darken(0.05)`;
 const scheme = schemeFromEvalResult(evaluate(SRC), SRC);
 
 describe('exporters', () => {
@@ -81,16 +81,16 @@ describe('color representation', () => {
 	});
 
 	test('derived colors track their own model (not the fallback)', () => {
-		const SRC2 = `brand = hex("#6c5ce7")
-primary = brand.oklch.gamutMap()
-accent = primary.rotate(-150)
+		const SRC2 = `brand = parse("#6c5ce7")
+primary = brand.to(Srgb).gamutMap().to(Oklch)
+accent = primary.clone().rotateHue(-150)
 copy = brand`;
 		const s = schemeFromEvalResult(evaluate(SRC2), SRC2);
-		// method-chain derivations report the model they ended up in
-		expect(s.byName.get('primary')!.model).toBe('oklch');
-		expect(s.byName.get('accent')!.model).toBe('oklch');
-		// an sRGB alias reports its friendliest literal form
-		expect(s.byName.get('copy')!.model).toBe('hex');
+		// method-chain derivations are instances of the class they ended up in
+		expect(s.byName.get('primary')!.color.model).toBe('oklch');
+		expect(s.byName.get('accent')!.color.model).toBe('oklch');
+		// an alias is the same Srgb8 instance parse() returned
+		expect(s.byName.get('copy')!.color.model).toBe('srgb8');
 		const fmt: ColorFormat = { mode: 'as-defined', model: 'hex' };
 		// as-defined now keeps the derived oklch colors as oklch(), not hex fallback
 		expect(serializeColor(s.byName.get('primary')!, fmt).startsWith('oklch(')).toBe(true);
@@ -106,34 +106,34 @@ copy = brand`;
 		for (const line of css.split('\n').filter((l) => l.includes('--'))) {
 			expect(line.trim()).toMatch(/: #[0-9a-f]{6};$/i);
 		}
-		const oklchCss = toCssVars(scheme, { mode: 'single', model: 'oklch' });
+		const oklchCss = toCssVars(scheme, { mode: 'single', model: 'Oklch' });
 		for (const line of oklchCss.split('\n').filter((l) => l.includes('--'))) {
 			expect(line).toContain('oklch(');
 		}
 	});
 
 	test('as-defined falls back when the authoring model is not valid CSS', () => {
-		const SRC2 = `vivid = HSV(280, 0.8, 0.9)`;
+		const SRC2 = `vivid = Hsv(280, 0.8, 0.9)`;
 		const s2 = schemeFromEvalResult(evaluate(SRC2), SRC2);
 		const e = s2.byName.get('vivid')!;
-		expect(e.model).toBe('hsv');
-		// HSV serialises as color(--hsv …) → not valid CSS → fallback to hex
+		expect(e.color.model).toBe('hsv');
+		// Hsv has no CSS form (no toCss) → fallback to hex
 		expect(serializeColor(e, { mode: 'as-defined', model: 'hex' })).toMatch(/^#[0-9a-f]{6}$/i);
 		// a different fallback is honoured
-		expect(serializeColor(e, { mode: 'as-defined', model: 'oklch' }).startsWith('oklch(')).toBe(
+		expect(serializeColor(e, { mode: 'as-defined', model: 'Oklch' }).startsWith('oklch(')).toBe(
 			true
 		);
 	});
 
 	test('serialized colors round long floats (clean output)', () => {
-		const css = toCssVars(scheme, { mode: 'single', model: 'oklch' });
+		const css = toCssVars(scheme, { mode: 'single', model: 'Oklch' });
 		expect(css).toContain('oklch(');
 		// no value should carry 6+ decimal places
 		expect(css.match(/\d+\.\d{6,}/g)).toBeNull();
 	});
 
 	test('exportScheme threads the color format through', () => {
-		const fmt: ColorFormat = { mode: 'single', model: 'oklch' };
+		const fmt: ColorFormat = { mode: 'single', model: 'Oklch' };
 		expect(exportScheme(scheme, 'css', fmt)).toBe(toCssVars(scheme, fmt));
 	});
 });
@@ -153,7 +153,7 @@ describe('url-hash round-trip', () => {
 	});
 
 	test('handles unicode', async () => {
-		const state = { source: 'cafe = hex("#fff") // ☕ ünïcödé' };
+		const state = { source: 'cafe = parse("#fff") // ☕ ünïcödé' };
 		expect(await decodeHash('#' + (await encodeHash(state)))).toEqual(state);
 	});
 });

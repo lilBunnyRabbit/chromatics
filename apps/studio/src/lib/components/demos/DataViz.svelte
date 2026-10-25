@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import type { SchemeEntry } from '$lib/scheme/types';
 
 	let { entries }: { entries: SchemeEntry[] } = $props();
 
 	/** CSS color strings for every entry, in source order — the categorical chart scale. */
-	const series = $derived(entries.map((e) => e.color.toCSS()));
+	const series = $derived(entries.map((e) => e.color.to(Oklch).toCss()));
 
 	/** Cycling color accessor: wraps when there are fewer colors than data points. */
 	const at = (i: number): string =>
@@ -280,7 +281,7 @@
 							<span class="dv-chip-swatch" style="background: {at(i)}"></span>
 							<span class="dv-chip-meta">
 								<span class="dv-chip-name">{e.name}</span>
-								<span class="dv-chip-hex">{e.color.hex}</span>
+								<span class="dv-chip-hex">{e.color.to(Srgb).gamutMap().to(Srgb8).toHex()}</span>
 							</span>
 						</div>
 					{/each}

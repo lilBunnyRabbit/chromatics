@@ -1,40 +1,48 @@
 <script lang="ts">
-	import { allModels, getModel, ColorValue, hex, type ModelDef } from '$lib/models';
+	import { Color, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
+	import { parse } from '@lilbunnyrabbit/chromatics/all';
+	import { CATALOG, infoByName, type ModelInfo } from '$lib/color/catalog';
+	import { LEGACY_MODEL_IDS } from '$lib/color/legacy';
+	import { buildFromVals, lightIndex, seedVals } from '$lib/mixer/engine';
 	import { MODEL_DOCS } from '$lib/dsl/model-docs';
 	import { ui } from '$lib/state/ui.svelte';
 
 	let {
 		seed = '#3aa0ff',
-		pinnedId,
+		pinned,
 		compact = false
-	}: { seed?: string; pinnedId?: string; compact?: boolean } = $props();
+	}: { seed?: string | Color; pinned?: string; compact?: boolean } = $props();
 
 	const FAMILY_LABEL: Record<string, string> = {
-		'perceptual-cylindrical': 'Perceptual cylindrical',
+		perceptual: 'Perceptual cylindrical',
 		lab: 'Lab family',
 		hue: 'Hue family',
 		rgb: 'RGB family',
 		tristimulus: 'Tristimulus',
 		video: 'Video / broadcast',
-		subtractive: 'Subtractive'
+		subtractive: 'Subtractive',
+		appearance: 'Color appearance'
 	};
 	const FAMILY_ORDER = [
-		'perceptual-cylindrical',
+		'perceptual',
 		'lab',
 		'hue',
 		'rgb',
 		'tristimulus',
 		'video',
-		'subtractive'
+		'subtractive',
+		'appearance'
 	];
-	const pickable = allModels().filter(
-		(m) =>
-			m.backed && m.ctor && m.channels.length === 3 && m.family !== 'system' && m.family !== 'other'
-	);
+	const pickable = CATALOG.filter((m) => m.channels.length === 3);
 	const grouped = FAMILY_ORDER.map((f) => ({
 		label: FAMILY_LABEL[f] ?? f,
 		models: pickable.filter((m) => m.family === f).sort((a, b) => a.label.localeCompare(b.label))
 	})).filter((g) => g.models.length);
+
+	// MODEL_DOCS is keyed by old studio ids; the first old id per package model owns the write-up.
+	const docIdOf = new Map<string, string>();
+	for (const [id, name] of Object.entries(LEGACY_MODEL_IDS))
+		if (!docIdOf.has(name)) docIdOf.set(name, id);
 
 	const DENSITY = [
 		{ label: 'Coarse', n: 10 },
@@ -44,9 +52,11 @@
 		{ label: 'Max', n: 40 }
 	];
 
-	// Seed from the pinned id when embedded; the $effect below keeps it in sync.
+	const isPickable = (name: string | undefined) => !!name && pickable.some((m) => m.name === name);
+
+	// Seed from the pinned model when embedded; the $effect below keeps it in sync.
 	// svelte-ignore state_referenced_locally
-	let modelId = $state(pinnedId && getModel(pinnedId) ? pinnedId : 'oklch');
+	let modelName = $state(isPickable(pinned) ? pinned! : 'Oklch');
 	let density = $state(22);
 	let vals = $state<number[]>([0.7, 0.15, 250]);
 	let yaw = $state(-0.7);
@@ -56,11 +66,12 @@
 	let lastX = 0;
 	let lastY = 0;
 
-	const def = $derived(getModel(modelId) as ModelDef);
+	const info = $derived(infoByName(modelName) ?? pickable[0]);
+	const about = $derived(MODEL_DOCS[docIdOf.get(modelName) ?? '']?.about);
 
-	// When embedded pinned to one model (encyclopedia), follow the parent's id.
+	// When embedded pinned to one model (encyclopedia), follow the parent's model.
 	$effect(() => {
-		if (pinnedId && pinnedId !== modelId && getModel(pinnedId)) modelId = pinnedId;
+		if (pinned && pinned !== modelName && isPickable(pinned)) modelName = pinned;
 	});
 
 	type Vec3 = { x: number; y: number; z: number };
@@ -70,64 +81,64 @@
 		| { hueIdx: number; kind: 'wb'; wIdx: number; bIdx: number };
 
 	/** How to arrange a hue-based model as a cylinder/cone, or null if cartesian. */
-	function cylInfo(d: ModelDef): CylInfo | null {
-		const ch = d.channels;
-		const hueIdx = ch.findIndex((c) => Math.abs(c.range[1] - 360) < 1 || c.localKey === 'h');
+	function cylInfo(m: ModelInfo): CylInfo | null {
+		const ch = m.channels;
+		const hueIdx = ch.findIndex((c) => c.hue === true);
 		if (hueIdx < 0) return null;
 		// hue + chroma + lightness (OKLCH, HSL, LCh, HCT, CAM16, …)
-		const lightIdx = ch.findIndex(
-			(c, i) =>
-				i !== hueIdx &&
-				(/light|lumin|value|tone|bright|intens/i.test(c.label) || /^(l|j|v|t)$/i.test(c.localKey))
-		);
+		const lightIdx = lightIndex(m);
 		if (lightIdx >= 0) {
 			const chromaIdx = [0, 1, 2].find((i) => i !== hueIdx && i !== lightIdx)!;
 			return { hueIdx, kind: 'lc', lightIdx, chromaIdx };
 		}
 		// hue + whiteness + blackness (HWB) → a bicone
-		const wIdx = ch.findIndex(
-			(c, i) => i !== hueIdx && (c.localKey === 'w' || /white/i.test(c.label))
-		);
-		const bIdx = ch.findIndex(
-			(c, i) => i !== hueIdx && (c.localKey === 'b' || /black/i.test(c.label))
-		);
-		if (wIdx >= 0 && bIdx >= 0 && wIdx !== bIdx) return { hueIdx, kind: 'wb', wIdx, bIdx };
+		const wIdx = ch.findIndex((c, i) => i !== hueIdx && c.name === 'w');
+		const bIdx = ch.findIndex((c, i) => i !== hueIdx && c.name === 'b');
+		if (wIdx >= 0 && bIdx >= 0) return { hueIdx, kind: 'wb', wIdx, bIdx };
 		return null;
 	}
-	const isCyl = $derived(cylInfo(def) !== null);
+	const isCyl = $derived(cylInfo(info) !== null);
 	/** For cartesian models: which channel goes on the vertical axis, plus x/z. */
-	function boxAxes(d: ModelDef): [number, number, number] {
-		const li = d.channels.findIndex(
-			(c) =>
-				/light|lumin|value|tone|bright|intens/i.test(c.label) || /^(l|j|i|t|v)$/i.test(c.localKey)
-		);
+	function boxAxes(m: ModelInfo): [number, number, number] {
+		const li = lightIndex(m);
 		const yi = li < 0 ? 1 : li;
 		const rest = [0, 1, 2].filter((i) => i !== yi);
 		return [rest[0], yi, rest[1]];
 	}
 
-	// Re-seed the sliders whenever the model changes.
-	let lastModel = '';
-	$effect(() => {
-		if (modelId === lastModel) return;
-		lastModel = modelId;
+	function seedColor(): Color | null {
+		if (seed instanceof Color) return seed;
 		try {
-			const c = hex(seed);
-			vals = def.channels.map((ch) => c.channel(ch.key));
-		} catch {
-			vals = def.channels.map((ch) => (ch.range[0] + ch.range[1]) / 2);
-		}
-	});
-
-	const current = $derived.by(() => {
-		try {
-			return ColorValue.from(def.ctor!.build(vals));
+			return parse(seed);
 		} catch {
 			return null;
 		}
+	}
+
+	// Re-seed the sliders whenever the model changes.
+	let lastModel = '';
+	$effect(() => {
+		if (modelName === lastModel) return;
+		lastModel = modelName;
+		const c = seedColor();
+		vals = c ? seedVals(c, info) : info.channels.map((ch) => (ch.range[0] + ch.range[1]) / 2);
 	});
-	const curHex = $derived(current?.hex ?? '#000000');
-	const inGamut = $derived(current?.inGamut ?? false);
+
+	const current = $derived(buildFromVals(info, vals));
+	const curHex = $derived.by(() => {
+		try {
+			return current ? current.to(Srgb).gamutMap().to(Srgb8).toHex() : '#000000';
+		} catch {
+			return '#000000';
+		}
+	});
+	const inGamut = $derived.by(() => {
+		try {
+			return current ? current.to(Srgb).inGamut() : false;
+		} catch {
+			return false;
+		}
+	});
 
 	interface Prim {
 		v: Vec3[];
@@ -135,56 +146,68 @@
 		rgb: [number, number, number];
 	}
 
-	/** Map any color into this model's 3-D layout (polar for cylindrical, box else). */
-	function layoutFor(d: ModelDef): (cv: ColorValue) => Vec3 {
-		const ch = d.channels;
-		const info = cylInfo(d);
-		if (info) {
-			const [hLo, hHi] = ch[info.hueIdx].range;
-			const angle = (cv: ColorValue) =>
-				((cv.channel(ch[info.hueIdx].key) - hLo) / (hHi - hLo)) * 2 * Math.PI;
-			if (info.kind === 'lc') {
-				const [lLo, lHi] = ch[info.lightIdx].range;
-				const [cLo, cHi] = ch[info.chromaIdx].range;
-				return (cv) => {
-					const L = cv.channel(ch[info.lightIdx].key);
-					const C = cv.channel(ch[info.chromaIdx].key);
-					const rad = Math.max(0, (C - cLo) / (cHi - cLo)) * 0.5;
-					const th = angle(cv);
-					return { x: rad * Math.cos(th), y: (L - lLo) / (lHi - lLo) - 0.5, z: rad * Math.sin(th) };
+	/** Map a color into this model's 3-D layout (polar for cylindrical, box else); null if it can't convert. */
+	function layoutFor(m: ModelInfo): (c: Color) => Vec3 | null {
+		const ch = m.channels;
+		const coordsOf = (c: Color): readonly number[] | null => {
+			try {
+				return c.to(m.model).coords;
+			} catch {
+				return null;
+			}
+		};
+		const cyl = cylInfo(m);
+		if (cyl) {
+			const [hLo, hHi] = ch[cyl.hueIdx].range;
+			const angle = (k: readonly number[]) => ((k[cyl.hueIdx] - hLo) / (hHi - hLo)) * 2 * Math.PI;
+			if (cyl.kind === 'lc') {
+				const [lLo, lHi] = ch[cyl.lightIdx].range;
+				const [cLo, cHi] = ch[cyl.chromaIdx].range;
+				return (c) => {
+					const k = coordsOf(c);
+					if (!k) return null;
+					const rad = Math.max(0, (k[cyl.chromaIdx] - cLo) / (cHi - cLo)) * 0.5;
+					const th = angle(k);
+					return {
+						x: rad * Math.cos(th),
+						y: (k[cyl.lightIdx] - lLo) / (lHi - lLo) - 0.5,
+						z: rad * Math.sin(th)
+					};
 				};
 			}
 			// whiteness/blackness bicone: pure hue at the equator, white top, black bottom
-			const [wLo, wHi] = ch[info.wIdx].range;
-			const [bLo, bHi] = ch[info.bIdx].range;
-			return (cv) => {
-				const W = (cv.channel(ch[info.wIdx].key) - wLo) / (wHi - wLo);
-				const B = (cv.channel(ch[info.bIdx].key) - bLo) / (bHi - bLo);
+			const [wLo, wHi] = ch[cyl.wIdx].range;
+			const [bLo, bHi] = ch[cyl.bIdx].range;
+			return (c) => {
+				const k = coordsOf(c);
+				if (!k) return null;
+				const W = (k[cyl.wIdx] - wLo) / (wHi - wLo);
+				const B = (k[cyl.bIdx] - bLo) / (bHi - bLo);
 				const rad = Math.max(0, 1 - W - B) * 0.5;
-				const th = angle(cv);
+				const th = angle(k);
 				return { x: rad * Math.cos(th), y: (W - B) / 2, z: rad * Math.sin(th) };
 			};
 		}
-		const [xi, yi, zi] = boxAxes(d);
+		const [xi, yi, zi] = boxAxes(m);
 		const nrm = (ci: number, v: number) => {
 			const [lo, hi] = ch[ci].range;
 			return hi === lo ? 0 : (v - lo) / (hi - lo) - 0.5;
 		};
-		return (cv) => ({
-			x: nrm(xi, cv.channel(ch[xi].key)),
-			y: nrm(yi, cv.channel(ch[yi].key)),
-			z: nrm(zi, cv.channel(ch[zi].key))
-		});
+		return (c) => {
+			const k = coordsOf(c);
+			if (!k) return null;
+			return { x: nrm(xi, k[xi]), y: nrm(yi, k[yi]), z: nrm(zi, k[zi]) };
+		};
 	}
 
 	// ── geometry: the sRGB gamut as a solid, mapped into the model's space ──
-	const geo = $derived.by(() => buildGamutSurface(def, density));
+	const geo = $derived.by(() => buildGamutSurface(info, density));
 
-	function buildGamutSurface(d: ModelDef, dens: number): Prim[] {
+	function buildGamutSurface(m: ModelInfo, dens: number): Prim[] {
 		const G = Math.max(6, Math.round(dens * 0.9));
-		const layout = layoutFor(d);
+		const layout = layoutFor(m);
 		const node = (r: number, g: number, b: number) => ({
-			p: layout(ColorValue.from({ mode: 'rgb', r, g, b } as never)),
+			p: layout(new Srgb(r, g, b)),
 			rgb: [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)] as [
 				number,
 				number,
@@ -218,7 +241,7 @@
 		];
 		const prims: Prim[] = [];
 		for (const f of faces) {
-			const grid: { p: Vec3; rgb: [number, number, number] }[][] = [];
+			const grid: { p: Vec3 | null; rgb: [number, number, number] }[][] = [];
 			for (let i = 0; i <= G; i++) {
 				grid[i] = [];
 				for (let j = 0; j <= G; j++) {
@@ -232,6 +255,7 @@
 						b = grid[i][j + 1],
 						c = grid[i + 1][j + 1],
 						e = grid[i + 1][j];
+					if (!a.p || !b.p || !c.p || !e.p) continue; // Ryb can't reach a few dark blues
 					prims.push({
 						v: [a.p, b.p, c.p, e.p],
 						n: normal(a.p, b.p, e.p),
@@ -296,9 +320,7 @@
 		}
 
 		// current-color marker, placed in the same layout
-		const mp = layoutFor(def)(
-			current ?? ColorValue.from({ mode: 'rgb', r: 0, g: 0, b: 0 } as never)
-		);
+		const mp = layoutFor(info)(current ?? new Srgb(0, 0, 0)) ?? { x: 0, y: -0.5, z: 0 };
 		const m = rot(mp);
 		ctx.beginPath();
 		ctx.arc(cx + m.x * scale, cy - m.y * scale, 8, 0, 6.2832);
@@ -345,14 +367,14 @@
 	{#if !compact}
 		<div class="mv-controls">
 			<div class="mv-row">
-				{#if !pinnedId}
+				{#if !pinned}
 					<label class="mv-select">
 						<span>Model</span>
-						<select class="select" bind:value={modelId}>
+						<select class="select" bind:value={modelName}>
 							{#each grouped as g (g.label)}
 								<optgroup label={g.label}>
-									{#each g.models as m (m.id)}
-										<option value={m.id}>{m.label}</option>
+									{#each g.models as m (m.name)}
+										<option value={m.name}>{m.label}</option>
 									{/each}
 								</optgroup>
 							{/each}
@@ -369,16 +391,15 @@
 				</label>
 			</div>
 
-			{#if MODEL_DOCS[modelId]?.about}
-				<p class="mv-about">{MODEL_DOCS[modelId]?.about}</p>
+			{#if about}
+				<p class="mv-about">{about}</p>
 			{/if}
 
 			<div class="mv-sliders">
-				{#each def.channels as ch, i (ch.key)}
+				{#each info.channels as ch, i (ch.name)}
 					<div class="mv-slider">
 						<div class="mv-slabel">
-							<code>.{ch.localKey}</code>
-							<span class="mv-chname">{ch.label}</span>
+							<code>.{ch.name}</code>
 							<span class="mv-val">{+vals[i]?.toFixed(ch.range[1] - ch.range[0] <= 2 ? 3 : 1)}</span
 							>
 						</div>
@@ -487,15 +508,8 @@
 		color: var(--syn-prop);
 		font-weight: 600;
 	}
-	.mv-chname {
-		color: var(--text-muted);
-		flex: 1;
-		min-width: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
 	.mv-val {
+		margin-left: auto;
 		font-family: 'JetBrains Mono', ui-monospace, monospace;
 		color: var(--text);
 		font-weight: 600;

@@ -3,7 +3,7 @@ import { tags } from '@lezer/highlight';
 import { manifest } from './manifest.js';
 import { BLOCK_LABELS, BLOCK_MEMBER_NAMES } from './block-scope.js';
 
-// Token sets, derived from the one registry-built manifest (no drift).
+// Token sets, derived from the one package-built manifest (no drift).
 const CONSTRUCTORS = manifest.constructorNames;
 const BUILTINS = manifest.builtinNames;
 const METHODS = manifest.methodNames;
@@ -91,7 +91,8 @@ const parser: StreamParser<State> = {
 
 			if (CONSTRUCTORS.has(word)) return 'ctor';
 			if (BUILTINS.has(word)) return 'builtin';
-			if (word === 'true' || word === 'false') return 'bool';
+			if (word === 'true' || word === 'false' || word === 'null') return 'bool';
+			if (word === 'new') return 'keyword';
 			return 'variable';
 		}
 
@@ -141,6 +142,7 @@ const parser: StreamParser<State> = {
 		string: tags.string,
 		number: tags.number,
 		bool: tags.bool,
+		keyword: tags.keyword,
 		ctor: tags.typeName,
 		builtin: tags.function(tags.variableName),
 		method: tags.function(tags.propertyName),

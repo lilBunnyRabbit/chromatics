@@ -12,6 +12,7 @@
  * (CVD) and `fgOpacity` are presentation knobs applied *downstream* of the
  * canonical scheme; wiring them in here would change exported/audited colors.
  */
+import { Oklch } from '@lilbunnyrabbit/chromatics';
 import { evaluate, type EvalResult } from '../dsl/evaluator.js';
 import { schemeFromEvalResult } from './adapter.js';
 import type { Scheme } from './types.js';
@@ -131,7 +132,7 @@ export function deriveScheme(source: string, settings: DeriveSettings): Rendered
 	const tokens = tokensFromScheme(scheme);
 	const tokenVars = buildTokenVars(tokens);
 	const namedColorVars = scheme.entries
-		.map((e) => `--color-${kebab(e.name)}:${e.color.toCSS()}`)
+		.map((e) => `--color-${kebab(e.name)}:${e.color.to(Oklch).toCss()}`)
 		.join(';');
 
 	const components = componentsFromScheme(scheme);

@@ -5,8 +5,7 @@
  * shared resolver, so a bad reference renders an "unresolved" badge instead of
  * throwing and killing the whole eval pass.
  */
-import { str } from '../models/util.js';
-import type { DSLValue, DSLFunction, PlainObject } from '../models/index.js';
+import { str, type DSLValue, type DSLFunction, type PlainObject } from './values.js';
 import type {
 	ButtonSpec,
 	ButtonVariant,

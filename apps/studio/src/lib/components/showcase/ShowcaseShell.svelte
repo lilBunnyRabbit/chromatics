@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	/**
 	 * The `/showcase` embed surface: a scheme decoded from a share link, shown
 	 * through the same analysis panels as the studio, with no document chrome.
@@ -205,8 +206,8 @@
 						<span
 							class="sc-chip"
 							role="listitem"
-							style="background: {e.color.hex}"
-							title="{e.name} · {e.color.hex}"
+							style="background: {e.color.to(Srgb).gamutMap().to(Srgb8).toHex()}"
+							title="{e.name} · {e.color.to(Srgb).gamutMap().to(Srgb8).toHex()}"
 						></span>
 					{/each}
 				</div>

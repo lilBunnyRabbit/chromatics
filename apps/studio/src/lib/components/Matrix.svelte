@@ -1,13 +1,14 @@
 <script lang="ts">
+	import { DisplayP3, Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { app } from '$lib/state/app.svelte';
 	import { ui } from '$lib/state/ui.svelte';
-	import type { ColorValue } from '$lib/models';
+	import type { Color } from '@lilbunnyrabbit/chromatics';
 	import { contrastRatioAlpha } from '$lib/analysis/contrast';
 	import { wcagLevels, wcagColor } from '$lib/analysis/wcag';
 	import { apcaContrast, apcaUse, apcaColor } from '$lib/analysis/apca';
 	import { simulateVision, visionSimulations } from '$lib/analysis/cvd';
 
-	type Cell = { name: string; color: ColorValue; description?: string };
+	type Cell = { name: string; color: Color; description?: string };
 
 	let selected = $state<{ bgIdx: number; fgIdx: number } | null>(null);
 	let dialogEl = $state<HTMLDialogElement | null>(null);
@@ -50,12 +51,12 @@
 	const selApca = $derived(sel ? apcaContrast(sel.fg.color, sel.bg.color) : 0);
 	const selApcaUse = $derived(apcaUse(selApca));
 
-	function fmtOklch(c: ColorValue): string {
+	function fmtOklch(c: Color): string {
 		const fmt = (v: number, max: number) => {
 			const s = v.toFixed(max);
 			return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
 		};
-		return `oklch(${fmt(c.channel('ok_l'), 5)} ${fmt(c.channel('ok_c'), 5)} ${fmt(c.channel('ok_h'), 5)})`;
+		return `oklch(${fmt(c.to(Oklch).l, 5)} ${fmt(c.to(Oklch).c, 5)} ${fmt(c.to(Oklch).h, 5)})`;
 	}
 
 	function selectCell(bgIdx: number, fgIdx: number) {
@@ -71,7 +72,7 @@
 		if (!colors.length) return '';
 		const rows = colors.map((c) => ({
 			name: c.name,
-			hex: c.color.hex,
+			hex: c.color.to(Srgb).gamutMap().to(Srgb8).toHex(),
 			oklch: fmtOklch(c.color),
 			comment: c.description ?? ''
 		}));
@@ -140,7 +141,7 @@
 				<div class="m-bgpick-row scroll">
 					{#each colors as c, i (c.name + i)}
 						<button class="m-bgchip" class:active={i === safeBgIdx} onclick={() => (mBgIdx = i)}>
-							<span class="m-bgchip-sw" style="background: {c.color.toCSS()}"></span>
+							<span class="m-bgchip-sw" style="background: {c.color.to(Oklch).toCss()}"></span>
 							<span class="m-bgchip-name">{c.name}</span>
 						</button>
 					{/each}
@@ -148,7 +149,7 @@
 			</div>
 
 			{#if mBg}
-				<div class="m-samples" style="background: {mBg.color.toCSS()}">
+				<div class="m-samples" style="background: {mBg.color.to(Oklch).toCss()}">
 					{#each colors as fg, fi (fg.name + fi)}
 						{#if fi !== safeBgIdx}
 							{@const ratio = contrastRatioAlpha(fg.color, mBg.color, fgAlpha)}
@@ -158,11 +159,11 @@
 							<!-- svelte-ignore a11y_click_events_have_key_events -->
 							<button
 								class="m-sample"
-								style="color: {fg.color.toCSS()}; --fg-alpha: {fgAlpha}"
+								style="color: {fg.color.to(Oklch).toCss()}; --fg-alpha: {fgAlpha}"
 								onclick={() => selectCell(safeBgIdx, fi)}
 							>
 								<div class="m-sample-top">
-									<span class="m-sample-sw" style="background: {fg.color.toCSS()}"></span>
+									<span class="m-sample-sw" style="background: {fg.color.to(Oklch).toCss()}"></span>
 									<span class="m-sample-name">{fg.name}</span>
 									<span class="m-sample-metric">
 										{#if contrastModel === 'wcag'}
@@ -195,8 +196,11 @@
 					{#each colGroup.colors as bg (bg.name)}
 						<div class="matrix-col-header">
 							<span class="header-name" title={bg.name}>{bg.name}</span>
-							<span class="header-hex">{bg.color.hex}</span>
-							<div class="header-swatch-wide" style="background: {bg.color.toCSS()}"></div>
+							<span class="header-hex">{bg.color.to(Srgb).gamutMap().to(Srgb8).toHex()}</span>
+							<div
+								class="header-swatch-wide"
+								style="background: {bg.color.to(Oklch).toCss()}"
+							></div>
 						</div>
 					{/each}
 				{/each}
@@ -212,9 +216,9 @@
 						<div class="matrix-row-header">
 							<div class="row-header-text">
 								<div class="header-name" title={fg.name}>{fg.name}</div>
-								<div class="header-hex">{fg.color.hex}</div>
+								<div class="header-hex">{fg.color.to(Srgb).gamutMap().to(Srgb8).toHex()}</div>
 							</div>
-							<div class="row-header-swatch" style="background: {fg.color.toCSS()}"></div>
+							<div class="row-header-swatch" style="background: {fg.color.to(Oklch).toCss()}"></div>
 						</div>
 
 						{#each groups as colGroup, cgi (colGroup.label + cgi)}
@@ -223,7 +227,7 @@
 								{@const bgIdx =
 									groups.slice(0, cgi).reduce((s, g) => s + g.colors.length, 0) + localBi}
 								{#if bgIdx === fgIdx}
-									<div style="background: {bg.color.toCSS()}"></div>
+									<div style="background: {bg.color.to(Oklch).toCss()}"></div>
 								{:else}
 									{@const ratio = contrastRatioAlpha(fg.color, bg.color, fgAlpha)}
 									{@const levels = wcagLevels(ratio)}
@@ -236,7 +240,9 @@
 									<div
 										class="matrix-cell"
 										class:matrix-cell-fail={fail}
-										style="background: {bg.color.toCSS()}; color: {fg.color.toCSS()}; --fg-alpha: {fgAlpha}"
+										style="background: {bg.color.to(Oklch).toCss()}; color: {fg.color
+											.to(Oklch)
+											.toCss()}; --fg-alpha: {fgAlpha}"
 										title="{bg.name} bg + {fg.name} fg — WCAG {ratio.toFixed(
 											2
 										)}:1 ({levels.normal}/{levels.large}) · APCA Lc {Math.round(lc)} ({use})"
@@ -255,7 +261,7 @@
 											<div class="cell-text-lg">Heading</div>
 											<div class="cell-text-md">Body text sample</div>
 											<div class="cell-text-sm">Thin caption</div>
-											<div class="cell-line" style="background: {fg.color.toCSS()}"></div>
+											<div class="cell-line" style="background: {fg.color.to(Oklch).toCss()}"></div>
 										</div>
 									</div>
 								{/if}
@@ -281,18 +287,22 @@
 		<div class="dialog-inner">
 			<div class="dialog-info-bar">
 				<div class="dialog-color-info">
-					<div class="dialog-swatch" style="background: {sel.bg.color.toCSS()}"></div>
+					<div class="dialog-swatch" style="background: {sel.bg.color.to(Oklch).toCss()}"></div>
 					<div>
 						<div class="dialog-color-name">{sel.bg.name}</div>
-						<div class="dialog-color-value">{sel.bg.color.hex}</div>
+						<div class="dialog-color-value">
+							{sel.bg.color.to(Srgb).gamutMap().to(Srgb8).toHex()}
+						</div>
 					</div>
 				</div>
 				<span class="dialog-on">on</span>
 				<div class="dialog-color-info">
-					<div class="dialog-swatch" style="background: {sel.fg.color.toCSS()}"></div>
+					<div class="dialog-swatch" style="background: {sel.fg.color.to(Oklch).toCss()}"></div>
 					<div>
 						<div class="dialog-color-name">{sel.fg.name}</div>
-						<div class="dialog-color-value">{sel.fg.color.hex}</div>
+						<div class="dialog-color-value">
+							{sel.fg.color.to(Srgb).gamutMap().to(Srgb8).toHex()}
+						</div>
 					</div>
 				</div>
 				<div class="dialog-stats">
@@ -326,7 +336,9 @@
 
 			<div
 				class="dialog-preview"
-				style="background: {sel.bg.color.toCSS()}; color: {sel.fg.color.toCSS()}"
+				style="background: {sel.bg.color.to(Oklch).toCss()}; color: {sel.fg.color
+					.to(Oklch)
+					.toCss()}"
 			>
 				<h2 style="font-size: 28px; font-weight: 700; margin: 0">Heading sample</h2>
 				<p style="font-size: 15px; line-height: 1.6; margin: 0">
@@ -337,21 +349,28 @@
 				<div class="dialog-ui-row">
 					<button
 						class="dialog-btn-filled"
-						style="background: {sel.fg.color.toCSS()}; color: {sel.bg.color.toCSS()}">Filled</button
+						style="background: {sel.fg.color.to(Oklch).toCss()}; color: {sel.bg.color
+							.to(Oklch)
+							.toCss()}">Filled</button
 					>
 					<button
 						class="dialog-btn-outline"
-						style="border-color: {sel.fg.color.toCSS()}; color: {sel.fg.color.toCSS()}"
-						>Outline</button
+						style="border-color: {sel.fg.color.to(Oklch).toCss()}; color: {sel.fg.color
+							.to(Oklch)
+							.toCss()}">Outline</button
 					>
 					<span
 						class="dialog-badge-ui"
-						style="background: {sel.fg.color.toCSS()}; color: {sel.bg.color.toCSS()}">Badge</span
+						style="background: {sel.fg.color.to(Oklch).toCss()}; color: {sel.bg.color
+							.to(Oklch)
+							.toCss()}">Badge</span
 					>
 					<span style="text-decoration: underline; font-size: 14px">Link text</span>
 				</div>
 				<hr
-					style="border-color: {sel.fg.color.toCSS()}; border-top-width: 1px; opacity: 1; width: 100%"
+					style="border-color: {sel.fg.color
+						.to(Oklch)
+						.toCss()}; border-top-width: 1px; opacity: 1; width: 100%"
 				/>
 			</div>
 		</div>
@@ -377,15 +396,20 @@
 				<div class="info-group-label">{group.label}</div>
 				{#each group.colors as color (color.name)}
 					<div class="info-color-row">
-						<div class="info-color-swatch" style="background: {color.color.toCSS()}"></div>
+						<div
+							class="info-color-swatch"
+							style="background: {color.color.to(Oklch).toCss()}"
+						></div>
 						<div class="info-color-details">
 							<div class="info-color-name">{color.name}</div>
 							<div class="info-color-values">
-								<span class="info-value">{color.color.hex}</span>
+								<span class="info-value">{color.color.to(Srgb).gamutMap().to(Srgb8).toHex()}</span>
 								<span class="info-value">{fmtOklch(color.color)}</span>
-								{#if !color.color.inGamut}
-									<span class="info-oog">out of sRGB (mapped: {color.color.gamutMapped.hex})</span>
-								{:else if color.color.inP3}
+								{#if !color.color.to(Srgb).inGamut()}
+									<span class="info-oog"
+										>out of sRGB (mapped: {color.color.to(Srgb).gamutMap().to(Srgb8).toHex()})</span
+									>
+								{:else if color.color.to(DisplayP3).inGamut()}
 									<span class="info-p3">P3</span>
 								{/if}
 							</div>

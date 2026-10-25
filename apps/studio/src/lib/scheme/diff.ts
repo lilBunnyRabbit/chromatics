@@ -14,6 +14,7 @@
  * Pure & Svelte-free: the History tab, an embeddable diff card, and any future
  * scriptable `preview.diff()` all consume this one function.
  */
+import { Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 import { deriveScheme, type RenderedScheme, type DeriveSettings } from './derive.js';
 import type { Scheme } from './types.js';
 import { ROLE_KEYS, NONE_ROLE, type Roles, type AuditPair } from './roles.js';
@@ -117,11 +118,15 @@ function paletteDiff(before: Scheme, after: Scheme): PaletteDelta[] {
 		seen.add(e.name);
 		const b = before.byName.get(e.name);
 		if (!b) {
-			out.push({ name: e.name, status: 'added', after: e.color.hex });
+			out.push({
+				name: e.name,
+				status: 'added',
+				after: e.color.to(Srgb).gamutMap().to(Srgb8).toHex()
+			});
 			continue;
 		}
-		const bh = b.color.hex;
-		const ah = e.color.hex;
+		const bh = b.color.to(Srgb).gamutMap().to(Srgb8).toHex();
+		const ah = e.color.to(Srgb).gamutMap().to(Srgb8).toHex();
 		if (bh === ah) {
 			out.push({ name: e.name, status: 'unchanged', before: bh, after: ah });
 		} else {
@@ -131,16 +136,20 @@ function paletteDiff(before: Scheme, after: Scheme): PaletteDelta[] {
 				before: bh,
 				after: ah,
 				deltaE: deltaE2000(b.color, e.color),
-				dL: e.color.channel('ok_l') - b.color.channel('ok_l'),
-				dC: e.color.channel('ok_c') - b.color.channel('ok_c'),
-				dH: hueDelta(b.color.channel('ok_h'), e.color.channel('ok_h'))
+				dL: e.color.to(Oklch).l - b.color.to(Oklch).l,
+				dC: e.color.to(Oklch).c - b.color.to(Oklch).c,
+				dH: hueDelta(b.color.to(Oklch).h, e.color.to(Oklch).h)
 			});
 		}
 	}
 	// Colors that existed before and are now gone.
 	for (const e of before.entries) {
 		if (seen.has(e.name)) continue;
-		out.push({ name: e.name, status: 'removed', before: e.color.hex });
+		out.push({
+			name: e.name,
+			status: 'removed',
+			before: e.color.to(Srgb).gamutMap().to(Srgb8).toHex()
+		});
 	}
 	return out;
 }

@@ -1,56 +1,13 @@
 /**
  * The integration seam that unifies the two apps: turn an EvalResult (a flat,
- * model-agnostic map of variables) into a display-ready Scheme of ColorValues —
- * with the dependency graph, authoring model, and source descriptions preserved.
+ * model-agnostic map of variables) into a display-ready Scheme of package colours —
+ * with the dependency graph and source descriptions preserved.
  */
 import type { EvalResult, Variable } from '../dsl/evaluator.js';
-import { isColorValue, type ColorValue } from '../models/index.js';
-import type { Scheme, SchemeEntry, SchemeGroup, AuthoringModel } from './types.js';
-
-const CTOR_MODEL: Record<string, AuthoringModel> = {
-	OKLCH: 'oklch',
-	OKLAB: 'oklab',
-	HSL: 'hsl',
-	HSV: 'hsv',
-	HWB: 'hwb',
-	LAB: 'lab',
-	LCH: 'lch',
-	RGB: 'srgb',
-	P3: 'p3',
-	hex: 'hex'
-};
-
-// A color's own culori mode → authoring model, used for DERIVED colors (method
-// chains, aliases) that no direct constructor names. The engine carries a value's
-// model through every op ("HSL stays HSL", oklch ops stay oklch), so a derived
-// color reports the space it actually ended up in. sRGB maps to `hex` — its
-// friendliest literal form (an explicit `RGB(…)` still says `srgb` via CTOR_MODEL).
-const MODE_MODEL: Record<string, AuthoringModel> = {
-	oklch: 'oklch',
-	oklab: 'oklab',
-	hsl: 'hsl',
-	hsv: 'hsv',
-	hwb: 'hwb',
-	lab: 'lab',
-	lch: 'lch',
-	rgb: 'hex',
-	p3: 'p3'
-};
+import { isColor } from '../dsl/values.js';
+import type { Scheme, SchemeEntry, SchemeGroup } from './types.js';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-/**
- * The authoring model: a direct constructor call names it outright; otherwise the
- * color is derived, so we report the model the evaluated value ended up in.
- */
-function inferModel(node: unknown, color: ColorValue): AuthoringModel {
-	const rhs = (node as any)?.right;
-	if (rhs?.type === 'CallExpression' && rhs.callee?.type === 'Identifier') {
-		const m = CTOR_MODEL[rhs.callee.name as string];
-		if (m) return m;
-	}
-	return MODE_MODEL[color.model] ?? 'unknown';
-}
 
 /** Source slice of the RHS expression, using acorn's character offsets. */
 function describe(source: string, node: unknown): string | undefined {
@@ -82,11 +39,10 @@ export function schemeFromEvalResult(result: EvalResult, source: string): Scheme
 	for (const name of result.order) {
 		const v = result.variables.get(name);
 		if (!v) continue;
-		if (isColorValue(v.value)) {
+		if (isColor(v.value)) {
 			entries.push({
 				name: v.name,
-				color: v.value as ColorValue,
-				model: inferModel(v.node, v.value as ColorValue),
+				color: v.value,
 				deps: v.deps,
 				line: v.line,
 				description: describe(source, v.node),

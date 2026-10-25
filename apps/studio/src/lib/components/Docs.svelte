@@ -1,39 +1,33 @@
 <script lang="ts">
 	import { manifest, BUILTIN_DOCS, type MemberInfo } from '$lib/dsl/manifest';
 	import { MODEL_DOCS } from '$lib/dsl/model-docs';
-	import type { ModelDef, MethodDef, ChannelDef } from '$lib/models';
+	import { LEGACY_MODEL_IDS } from '$lib/color/legacy';
+	import type { ModelInfo } from '$lib/color/catalog';
 
 	let { onclose }: { onclose?: () => void } = $props();
 	let query = $state('');
 	let showGuide = $state(true);
 
-	const fmtRange = (r: [number, number]) =>
+	const fmtRange = (r: readonly [number, number]) =>
 		`${Number.isInteger(r[0]) ? r[0] : +r[0].toFixed(2)} … ${Number.isInteger(r[1]) ? r[1] : +r[1].toFixed(2)}`;
 
 	const FAMILY_LABEL: Record<string, string> = {
-		root: 'Value shortcuts',
-		'perceptual-cylindrical': 'Perceptual cylindrical',
+		perceptual: 'Perceptual cylindrical',
 		lab: 'Lab family (ΔE)',
 		hue: 'Hue family',
-		rgb: 'RGB family (a11y · CVD)',
+		rgb: 'RGB family (contrast · gamut · filters)',
+		appearance: 'Appearance models',
 		tristimulus: 'Tristimulus',
 		video: 'Video / broadcast',
-		subtractive: 'Subtractive',
-		system: 'Color systems',
-		other: 'Other / concepts'
+		subtractive: 'Subtractive'
 	};
-	const FAMILY_ORDER = [
-		'root',
-		'perceptual-cylindrical',
-		'lab',
-		'hue',
-		'rgb',
-		'tristimulus',
-		'video',
-		'subtractive',
-		'system',
-		'other'
-	];
+	const FAMILY_ORDER = Object.keys(FAMILY_LABEL);
+
+	// The vault write-ups are keyed by the studio's old model ids.
+	const OLD_ID = new Map<string, string>();
+	for (const [old, name] of Object.entries(LEGACY_MODEL_IDS))
+		if (!OLD_ID.has(name)) OLD_ID.set(name, old);
+	const docOf = (m: ModelInfo) => MODEL_DOCS[OLD_ID.get(m.name) ?? ''];
 
 	const q = $derived(query.trim().toLowerCase());
 	const sorted = $derived(
@@ -42,21 +36,22 @@
 		)
 	);
 
-	function modelNameMatch(m: ModelDef) {
-		const aka = MODEL_DOCS[m.id]?.aka?.toLowerCase() ?? '';
-		return m.label.toLowerCase().includes(q) || m.id.includes(q) || aka.includes(q);
+	function modelNameMatch(m: ModelInfo) {
+		const aka = docOf(m)?.aka?.toLowerCase() ?? '';
+		return m.label.toLowerCase().includes(q) || m.name.toLowerCase().includes(q) || aka.includes(q);
 	}
-	function methodList(m: ModelDef): MethodDef[] {
-		const all = Array.from(m.methods.values());
+	function memberList(m: ModelInfo): MemberInfo[] {
+		const channels = new Set(m.channels.map((c) => c.name));
+		const all = (manifest.modelMembers.get(m.name) ?? []).filter((x) => !channels.has(x.name));
 		if (!q || modelNameMatch(m)) return all;
 		return all.filter((d) => d.name.toLowerCase().includes(q));
 	}
-	function channelList(m: ModelDef): ChannelDef[] {
+	function channelList(m: ModelInfo) {
 		if (!q || modelNameMatch(m)) return m.channels;
-		return m.channels.filter((c) => c.localKey.includes(q) || c.key.includes(q));
+		return m.channels.filter((c) => c.name.toLowerCase().includes(q));
 	}
-	function showModel(m: ModelDef) {
-		return !q || modelNameMatch(m) || methodList(m).length > 0 || channelList(m).length > 0;
+	function showModel(m: ModelInfo) {
+		return !q || modelNameMatch(m) || memberList(m).length > 0 || channelList(m).length > 0;
 	}
 
 	const groups = $derived(
@@ -72,11 +67,12 @@
 	);
 	const builtins = $derived(manifest.builtins.filter((b) => !q || b.includes(q)));
 
-	// Namespaces (preview.* / scale.* / component.*) — documented like models so a
-	// member search ("button", "gradient", "ramp") finds them in one place.
 	const NAMESPACES: { id: string; about: string }[] = [
 		{ id: 'preview', about: 'Values that render as live cards in the Inspector & Preview.' },
-		{ id: 'scale', about: 'Non-color token generators — type, spacing, radius, shadow.' },
+		{
+			id: 'tokens',
+			about: 'Non-color design tokens — type, spacing, radius, shadow, custom groups.'
+		},
 		{ id: 'component', about: 'Component specs rendered & auto-audited in the Styleguide tab.' }
 	];
 	function nsMembers(id: string): MemberInfo[] {
@@ -87,12 +83,6 @@
 	const namespaceGroups = $derived(
 		NAMESPACES.map((ns) => ({ ...ns, members: nsMembers(ns.id) })).filter((g) => g.members.length)
 	);
-
-	function sig(def: MethodDef) {
-		return def.kind === 'method'
-			? `(${def.params.map((p) => p.name + (p.optional ? '?' : '')).join(', ')}) → ${def.returns}`
-			: `→ ${def.returns}`;
-	}
 </script>
 
 <div class="docs-overlay">
@@ -134,34 +124,36 @@
 					{#if showGuide}
 						<div class="guide-body">
 							<p>
-								Every value <strong>carries its model</strong>. A color stays in the model it was
-								built in and only changes when you ask — so a color exposes <em>its own</em> model's ops
-								directly, and you name another model only to borrow its math.
+								Every color is an instance of its model's class, the same classes as the
+								<code>@lilbunnyrabbit/chromatics</code> package, and the DSL is plain JavaScript over
+								them.
 							</p>
 							<ul>
 								<li>
-									<strong>A color stays in its model.</strong>
-									<code>HSL(265, 0.6, 0.62)</code> stays HSL — reading <code>.h</code> gives back
-									<code>265</code>. Convert explicitly with <code>c.to("oklch")</code> or
-									<code>OKLCH.from(c)</code> (direct edge where one exists, else routed through culori).
+									<strong>Build</strong> with the class, with or without <code>new</code>:
+									<code>Oklch(0.62, 0.15, 250)</code>, <code>Hsl(265, 0.6, 0.62)</code>, or parse
+									any CSS string: <code>parse("#6c5ce7")</code>.
 								</li>
 								<li>
-									<strong>Ops live on the model you're in</strong> — no prefix needed:
-									<code>okColor.lighten(0.1)</code>, <code>okColor.rotate(30)</code>,
-									<code>hslColor.tint(0.4)</code>. Each returns a new color.
+									<strong>Convert</strong> with <code>c.to(Lab)</code>, which always returns a new
+									color. Channels are plain properties: <code>c.to(Oklch).l</code>.
 								</li>
 								<li>
-									<strong>Borrow another model's math by naming it</strong> (an explicit
-									conversion):
-									<code>brand.oklch.lighten(0.1)</code> thinks in OKLCH from a non-OKLCH color;
-									<code>c.lab.l</code> reads lightness in Lab.
+									<strong>Methods change the color and return it.</strong>
+									<code>bg = brand.lighten(0.3)</code> lightens <code>brand</code> too. Copy first:
+									<code>brand.clone().lighten(0.3)</code>, or work on a conversion,
+									<code>brand.to(Oklch).lighten(0.3)</code>.
 								</li>
 								<li>
-									<strong>Binary ops need the same model.</strong>
-									<code>mix</code>, <code>contrast</code> and <code>deltaE</code> require both
-									colors in one model — <code>mix(a, b)</code> when they already match, else convert
-									first:
-									<code>mix(a.oklab, b.oklab)</code>.
+									<strong>Set channels</strong> with <code>c.l = 0.5</code>,
+									<code>c.set({'{'} l: 0.5 {'}'})</code>
+									or nudge them with <code>c.shift({'{'} l: -0.03 {'}'})</code>.
+								</li>
+								<li>
+									<strong>Two-color operations need one model</strong>:
+									<code>a.to(Oklab).mix(b.to(Oklab), 0.5)</code>,
+									<code>fg.to(Srgb).contrast(bg.to(Srgb))</code>,
+									<code>a.to(Lab).deltaE2000(b.to(Lab))</code>.
 								</li>
 							</ul>
 						</div>
@@ -175,9 +167,7 @@
 					<div class="ctor-grid">
 						{#each ctors as c (c.name)}
 							<div class="ctor">
-								<code class="ctor-name">{c.name}</code><code class="ctor-args"
-									>({c.params.map((p) => p.name).join(', ')})</code
-								>
+								<code class="ctor-name">{c.name}</code><code class="ctor-args">{c.params}</code>
 							</div>
 						{/each}
 					</div>
@@ -227,41 +217,35 @@
 				<section class="block">
 					<h3 class="block-title">{g.label}</h3>
 					<div class="models">
-						{#each g.models as m (m.id)}
+						{#each g.models as m (m.name)}
 							<div class="model">
 								<div class="model-head">
-									<span class="model-label" class:stub={m.status === 'coming-soon'}>{m.label}</span>
-									{#if m.id !== 'root'}<code class="view-chip">.{m.id}</code>{/if}
-									{#if m.status === 'experimental'}<span class="status-badge experimental"
-											>experimental</span
-										>
-									{:else if m.status === 'coming-soon'}<span class="status-badge soon"
-											>coming soon</span
-										>{/if}
+									<span class="model-label">{m.label}</span>
+									<code class="view-chip">{m.name}</code>
 								</div>
-								{#if MODEL_DOCS[m.id]?.about}
-									<p class="model-about">{MODEL_DOCS[m.id]?.about}</p>
+								{#if docOf(m)?.about}
+									<p class="model-about">{docOf(m)?.about}</p>
 								{/if}
-								{#if MODEL_DOCS[m.id]?.aka}
-									<div class="model-aka"><span>aka</span> {MODEL_DOCS[m.id]?.aka}</div>
+								{#if docOf(m)?.aka}
+									<div class="model-aka"><span>aka</span> {docOf(m)?.aka}</div>
 								{/if}
 								{#if channelList(m).length}
 									<div class="chans">
-										{#each channelList(m) as ch (ch.localKey)}
+										{#each channelList(m) as ch (ch.name)}
 											<span class="chan">
-												<code>.{ch.localKey}</code>{ch.label}
+												<code>.{ch.name}</code>
 												<span class="chan-range">{fmtRange(ch.range)}</span>
 											</span>
 										{/each}
 									</div>
 								{/if}
 								<div class="methods">
-									{#each methodList(m) as def (def.name)}
+									{#each memberList(m) as def (def.name)}
 										<div class="method">
 											<code class="m-name {def.kind === 'method' ? 'is-method' : 'is-prop'}"
 												>.{def.name}</code
 											>
-											<code class="m-sig">{sig(def)}</code>
+											<code class="m-sig">{def.detail}</code>
 											<span class="m-doc">{def.doc}</span>
 										</div>
 									{/each}
@@ -410,9 +394,6 @@
 		font-weight: 650;
 		font-size: 13px;
 	}
-	.model-label.stub {
-		opacity: 0.55;
-	}
 	.view-chip {
 		font-family: 'JetBrains Mono', ui-monospace, monospace;
 		font-size: 11px;
@@ -420,24 +401,6 @@
 		background: var(--surface-2);
 		padding: 1px 6px;
 		border-radius: 99px;
-	}
-	.status-badge {
-		margin-left: auto;
-		font-size: 9.5px;
-		font-weight: 600;
-		border-radius: 99px;
-		padding: 0 7px;
-		text-transform: lowercase;
-		letter-spacing: 0.02em;
-	}
-	.status-badge.experimental {
-		color: var(--accent);
-		border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-		background: color-mix(in srgb, var(--accent) 10%, transparent);
-	}
-	.status-badge.soon {
-		color: var(--warn);
-		border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
 	}
 	.chans {
 		display: flex;

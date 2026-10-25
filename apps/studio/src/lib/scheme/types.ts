@@ -1,24 +1,10 @@
-import type { ColorValue } from '../models/index.js';
+import type { Color } from '@lilbunnyrabbit/chromatics';
 import type { Variable, EvalError } from '../dsl/evaluator.js';
-
-/** Which model a variable was authored in (drives the inspector coord readout). */
-export type AuthoringModel =
-	| 'oklch'
-	| 'oklab'
-	| 'hsl'
-	| 'hsv'
-	| 'hwb'
-	| 'lab'
-	| 'lch'
-	| 'srgb'
-	| 'p3'
-	| 'hex'
-	| 'unknown';
 
 export interface SchemeEntry {
 	name: string;
-	color: ColorValue;
-	model: AuthoringModel;
+	/** Frozen (ADR-016 78e): clone before changing it. */
+	color: Color;
 	deps: string[];
 	line: number;
 	/** Source slice of the RHS expression (matrix tooltip + markdown export). */

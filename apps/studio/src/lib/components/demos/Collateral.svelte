@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Oklch } from '@lilbunnyrabbit/chromatics';
 	import type { SchemeEntry } from '$lib/scheme/types';
 
 	let { entries }: { entries: SchemeEntry[] } = $props();
@@ -11,15 +12,17 @@
 	);
 	const secondaryEntry = $derived(entries.find((e) => e !== primaryEntry) ?? entries[1]);
 
-	const primary = $derived(primaryEntry ? primaryEntry.color.toCSS() : 'var(--primary)');
-	const secondary = $derived(secondaryEntry ? secondaryEntry.color.toCSS() : 'var(--secondary)');
+	const primary = $derived(primaryEntry ? primaryEntry.color.to(Oklch).toCss() : 'var(--primary)');
+	const secondary = $derived(
+		secondaryEntry ? secondaryEntry.color.to(Oklch).toCss() : 'var(--secondary)'
+	);
 
 	// Pick a readable foreground for the primary fill by inspecting OKLCH
 	// lightness (0–1). Light brand → dark glyph, dark brand → white glyph.
 	function pickFg(entry: SchemeEntry | undefined): string {
 		if (!entry) return 'var(--primary-fg)';
 		try {
-			const l = entry.color.channel('ok_l');
+			const l = entry.color.to(Oklch).l;
 			return l > 0.62 ? '#111418' : '#ffffff';
 		} catch {
 			return '#ffffff';
@@ -30,7 +33,7 @@
 	// A rotating set of brand accents for the social dots — cycle entries,
 	// padding with the derived primary/secondary so we always have ≥4.
 	const accents = $derived.by(() => {
-		const list = entries.map((e) => e.color.toCSS());
+		const list = entries.map((e) => e.color.to(Oklch).toCss());
 		while (list.length < 4) list.push(list.length % 2 ? secondary : primary);
 		return list;
 	});

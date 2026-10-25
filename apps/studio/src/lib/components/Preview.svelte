@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Oklch, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { app } from '$lib/state/app.svelte';
 	import { ui } from '$lib/state/ui.svelte';
 	import { cssVars, NONE_ROLE, ROLE_KEYS, type Roles } from '$lib/scheme/roles';
@@ -53,7 +54,7 @@
 	/** "name #hex" for a role target, or a placeholder when it resolves to nothing. */
 	function describe(name: string): string {
 		const e = name ? app.scheme.byName.get(name) : undefined;
-		return e ? `${e.name} ${e.color.hex}` : 'none';
+		return e ? `${e.name} ${e.color.to(Srgb).gamutMap().to(Srgb8).toHex()}` : 'none';
 	}
 
 	const roleRows: [keyof Roles, string, boolean][] = [
@@ -138,7 +139,7 @@
 					<div
 						class="role-swatch"
 						style="background: {active
-							? (app.scheme.byName.get(active)?.color.toCSS() ?? 'var(--border-strong)')
+							? (app.scheme.byName.get(active)?.color.to(Oklch).toCss() ?? 'var(--border-strong)')
 							: 'var(--border-strong)'}"
 					></div>
 					<label class="role-label"
@@ -149,7 +150,9 @@
 							<option value="">Auto · {describe(auto)}</option>
 							{#if optional}<option value={NONE_ROLE}>None</option>{/if}
 							{#each app.scheme.entries as e (e.name)}
-								<option value={e.name}>{e.name} ({e.color.hex})</option>
+								<option value={e.name}
+									>{e.name} ({e.color.to(Srgb).gamutMap().to(Srgb8).toHex()})</option
+								>
 							{/each}
 						</select>
 					</label>

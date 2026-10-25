@@ -610,6 +610,17 @@ Owner: "grill first", before the switch. Of 73 studio method names on backed mod
   - `Hsl.tint(t)` / `shade(t)` / `tone(t)`: `l + (1 − l)t`, `l(1 − t)`, `s(1 − t)`; not clamped. These are Sass `color.scale` with `$lightness: ±t` / `$saturation: −t` in HSL, so the Sass docs' examples are the reference vectors (sass-site @5701c5d1 `documentation/modules/color.md`: `#036` shade 0.3 → `#002447`, `#6b717f` tone 0.3 → `#6e727c`, `#e1d7d2` tint 0.3 → `#eae3e0`).
 - **Flagged by the migrator, no API:** invert, suppressCone, deltaExyb (studio inventions, no source); RAL code / name / nearest (dropped, licensing). Predicates and scale-type ops (meetsAA, isGray, isPerceptiblyDifferent, exposure, scaleLuminance, scaleChroma, premultiply, separations, isRichBlack) expand to expressions.
 
+### The switch (implemented 2026-10-25, ADR-016 / ADR-017)
+
+No grill: ADR-016 and ADR-017 specify it. Choices made while implementing, all recorded in the ADR revision notes:
+
+- Hover and autocomplete need the package's JSDoc, which is gone at runtime: a generator (`apps/studio/scripts/package-docs.ts`) extracts it with the TypeScript checker into a packed JSON (135 KB, 28 KB gzip), with a freshness test, like the other generators.
+- Model names come from the package's export names, since a minified build renames classes.
+- The migrator copies with `to(Model)` when the old operation ran in another model and `clone()` when the class already matches; it keeps old raw-unit semantics (`saturate` on OKLCH → `shift({ c })`).
+- Detection of an old script is "the migrator would change it", so documents, links and pastes behave alike; the version bumps are advisory.
+- Bugs found on the way: old YPbPr / YUV / YDbDr / YCgCo had no chroma offset (only the YCbCr family did); culori's ΔE ran in Lab D65; the HSLuv ramp stops were 0–100 against the package's 0–1.
+- Open for the owner: `simulateCvd` isn't reachable from the DSL (78f allows classes and `parse` only).
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

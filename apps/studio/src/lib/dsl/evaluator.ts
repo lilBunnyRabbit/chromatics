@@ -1,10 +1,18 @@
 import * as acorn from 'acorn';
 import type { Node } from 'estree';
-import { isColorValue, ModelView } from '../models/index.js';
-import { num } from '../models/util.js';
 import { createEnvironment } from './environment.js';
 import { rolesConfig } from './theme.js';
-import type { DSLValue, DSLFunction, PlainObject } from '../models/index.js';
+import {
+	freezeColors,
+	isColor,
+	isModel,
+	modelName,
+	num,
+	typeName,
+	type DSLValue,
+	type DSLFunction,
+	type PlainObject
+} from './values.js';
 
 // --- Types ---
 
@@ -77,6 +85,34 @@ class Scope {
 			this.order.push(name);
 		}
 	}
+}
+
+const COMPOUND: Record<string, (a: number, b: number) => number> = {
+	'+=': (a, b) => a + b,
+	'-=': (a, b) => a - b,
+	'*=': (a, b) => a * b,
+	'/=': (a, b) => a / b
+};
+
+// TS `protected` / `private` are erased at runtime, so the package's internals are hidden by name.
+const HIDDEN = new Set([
+	'constructor',
+	'prototype',
+	'__proto__',
+	'assign',
+	'write',
+	'alphaOf',
+	'edges',
+	'terminal'
+]);
+
+function colorMember(obj: object, prop: DSLValue): DSLValue {
+	const owner = isModel(obj) ? `${modelName(obj)}` : typeName(obj);
+	if (typeof prop !== 'string' || prop.startsWith('_') || HIDDEN.has(prop) || !(prop in obj)) {
+		throw new Error(`${owner} has no property: ${String(prop)}`);
+	}
+	const v = (obj as Record<string, unknown>)[prop];
+	return typeof v === 'function' ? (v as DSLFunction).bind(obj) : (v as DSLValue);
 }
 
 function evalNode(node: Node, scope: Scope): DSLValue {
@@ -185,29 +221,15 @@ function evalNode(node: Node, scope: Scope): DSLValue {
 				return el;
 			}
 
-			if (isColorValue(obj) && typeof prop === 'string') {
-				const m = obj.member(prop);
-				if (m === undefined) {
-					throw new Error(`Color has no property: ${prop}`);
-				}
-				return m;
-			}
+			if (isColor(obj) || isModel(obj)) return colorMember(obj, prop);
 
-			if (obj instanceof ModelView && typeof prop === 'string') {
-				const m = obj.member(prop);
-				if (m === undefined) {
-					throw new Error(`'${obj.def.label}' view has no member: ${prop}`);
-				}
-				return m;
-			}
-
-			// Static members on env constructors: OKLCH.from(color), HSL.from(color) …
-			if (typeof obj === 'function' && typeof prop === 'string') {
-				const m = (obj as unknown as Record<string, DSLValue | undefined>)[prop];
-				if (m === undefined) {
-					throw new Error(`'${prop}' is not available on this constructor`);
-				}
-				return m;
+			// Builtin functions that double as namespaces: theme.dark({…}), theme.light({…}).
+			if (
+				typeof obj === 'function' &&
+				typeof prop === 'string' &&
+				Object.prototype.hasOwnProperty.call(obj, prop)
+			) {
+				return (obj as unknown as Record<string, DSLValue>)[prop];
 			}
 
 			// Plain object property access: opts.kL
@@ -222,30 +244,51 @@ function evalNode(node: Node, scope: Scope): DSLValue {
 			throw new Error(`Cannot access property '${String(prop)}' on ${typeof obj}`);
 		}
 
-		case 'CallExpression': {
+		case 'CallExpression':
+		case 'NewExpression': {
 			const n = node as Node & { callee: Node; arguments: Node[] };
 			const fn = evalNode(n.callee, scope);
-			if (typeof fn !== 'function') {
-				throw new Error(`Not a function`);
-			}
 			const args = n.arguments.map((a) => evalNode(a, scope));
+			// ADR-016 78h: a model class is callable without `new`, the DSL's one convenience.
+			if (isModel(fn)) return new fn(...args.map(num));
+			if (node.type === 'NewExpression')
+				throw new Error('`new` takes a color model, such as Oklch');
+			if (typeof fn !== 'function') throw new Error(`Not a function`);
 			return (fn as DSLFunction)(...args);
 		}
 
 		case 'AssignmentExpression': {
-			const n = node as Node & { left: Node & { name: string }; right: Node; operator: string };
-			if (n.operator !== '=') {
-				throw new Error(`Only = assignment is supported, got ${n.operator}`);
+			const n = node as Node & { left: Node; right: Node; operator: string };
+			const op = COMPOUND[n.operator];
+			if (n.operator !== '=' && !op) throw new Error(`Unsupported assignment: ${n.operator}`);
+
+			if (n.left.type === 'MemberExpression') {
+				const m = n.left as Node & {
+					object: Node;
+					property: Node & { name: string };
+					computed: boolean;
+				};
+				const target = evalNode(m.object, scope);
+				if (!isColor(target) || m.computed)
+					throw new Error('Only color channels can be assigned, e.g. c.l = 0.5');
+				const key = m.property.name;
+				const current = colorMember(target, key);
+				if (typeof current !== 'number')
+					throw new Error(`${typeName(target)} has no channel ${key}`);
+				const right = num(evalNode(n.right, scope));
+				const value = op ? op(current, right) : right;
+				(target as unknown as Record<string, number>)[key] = value;
+				return value;
 			}
-			if (n.left.type !== 'Identifier') {
-				throw new Error('Can only assign to variables');
-			}
+			if (n.left.type !== 'Identifier') throw new Error('Can only assign to variables');
+			const name = (n.left as Node & { name: string }).name;
 
 			scope.currentDeps = new Set();
-			const value = evalNode(n.right, scope);
+			const right = evalNode(n.right, scope);
+			const value = op ? op(num(scope.get(name)), num(right)) : right;
 			const deps = Array.from(scope.currentDeps);
 			const line = (node as unknown as { loc?: { start: { line: number } } }).loc?.start.line ?? 0;
-			scope.set(n.left.name, value, deps, line, node);
+			scope.set(name, value, deps, line, node);
 			return value;
 		}
 
@@ -511,5 +554,6 @@ export function evaluate(source: string): EvalResult {
 		scope.set('dark', rolesConfig(darkMap, 'dark'), [], darkLine, darkNode as Node);
 	}
 
+	for (const v of scope.variables.values()) freezeColors(v.value);
 	return { variables: scope.variables, errors, order: scope.order };
 }
