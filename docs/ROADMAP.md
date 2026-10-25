@@ -55,6 +55,7 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
    - [x] Studio culori baseline dump (2026-10-25): `apps/studio/tests/fixtures/baseline/`, every backed model on a 48-colour grid plus its own channel corners, and every example's entries, roles, theme vars and CSS export
    - [x] The switch (2026-10-25, `feat/studio-switch`): culori removed from the studio; baseline review in `apps/studio/tests/fixtures/baseline/review.md`
    - [x] Old-script upgrade (ADR-017, grill 80): `dsl/migrate.ts`, review banner, `~4` share links
+   - [x] `@lilbunnyrabbit/chromatics` 0.1.0 published (2026-10-25, by hand); trusted publishing via `release.yml` from now on
 
 ### Parity gap (2026-10-20)
 

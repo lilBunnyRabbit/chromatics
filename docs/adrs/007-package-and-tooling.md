@@ -32,6 +32,11 @@ The owner's order: build the package on a branch, then turn this repo into a mon
   2. Locally on `master`: `npm login`, `bun run build` in `packages/chromatics`, `npm publish --access public`.
   3. Within 2 days on npmjs.com → the package → Settings → Trusted publisher: GitHub, `lilBunnyRabbit/chromatics`, workflow `release.yml`. Then set publishing access to disallow tokens.
   4. From then on every release is the Version PR; `changeset publish` skips versions already on the registry.
+- **First publish done (2026-10-25):** `@lilbunnyrabbit/chromatics@0.1.0` is on npm (`latest`), with a trusted publisher for `lilBunnyRabbit/chromatics` `release.yml` (npm publish allowed, dist-tag not) and publishing access set to require 2FA and disallow bypass tokens. What the runbook didn't cover:
+  - The repo setting "Allow GitHub Actions to create and approve pull requests" must be on, or `changesets/action` pushes `changeset-release/master` and then fails to open the Version PR. Turned on (default workflow permissions stay read-only).
+  - npm 11.6 won't run its 2FA step without a TTY (`EOTP`, no prompt, no browser link), so the manual publish has to run in a real terminal.
+  - npm's staged publishing put a `0.0.0-stage` placeholder on the registry first; 0.1.0 went live after approval on npmjs.com. The trusted publisher has "Allow npm publish" ticked so CI publishes directly instead of staging.
+  - The Version PR opened by Actions gets no CI run (GitHub doesn't run workflows on `GITHUB_TOKEN` PRs); its contents are the changeset PR's.
 
 ## Alternatives Considered
 
