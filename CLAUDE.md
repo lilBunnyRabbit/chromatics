@@ -131,7 +131,7 @@ A Bun + Turborepo monorepo (ADR-007, grill 76): the studio in `apps/studio` (pri
 ```sh
 bun install
 bun run dev            # studio dev server
-bun run test           # studio bun:test (421 across 31 files) + package Vitest on node and bun (8,672)
+bun run test           # studio bun:test (423 across 32 files) + package Vitest on node and bun (8,672)
 bun run check          # studio svelte-check (expect 0 errors / 0 warnings) + package tsc
 bun run build          # studio static build → apps/studio/build/, package → packages/chromatics/dist/
 bun run lint           # prettier --check: root config for the package and repo files, the studio its own
@@ -140,6 +140,8 @@ bun run changeset      # add a changeset for the package (changesets on Bun)
 ```
 
 One workspace: `bunx turbo run test --filter=studio` (or `--filter=@lilbunnyrabbit/chromatics`). Before calling any change done: **`bun run check` + `bun run test` + `bun run build` + `bun run lint` all green.** CI (`.github/workflows/ci.yml`) runs `lint` and `turbo run check test build --affected` on every push and pull request; `deploy.yml` builds only the studio. `release.yml` (changesets, on `master`) opens the Version Packages PR and publishes on its merge; the package stays `"private": true` until the first publish (ADR-007 runbook). Note: Bun resolves `./x.js` imports to `x.ts`. The studio's `bun test` is scoped to its `tests/` (`apps/studio/bunfig.toml`).
+
+Studio generator (run from `apps/studio`): `bun run baseline` rewrites the culori baseline in `tests/fixtures/baseline/` (ADR-016 gate; `tests/baseline.test.ts` fails when it is stale). Regenerate it only at the switch, then review the diff.
 
 Package generators (run from `packages/chromatics`):
 
@@ -242,7 +244,7 @@ Run from the **repo root** (the Bash shell cwd can drift into subdirs — `cd` f
 ```sh
 bun install
 bun run dev            # dev server
-bun test               # unit tests (bun:test) — currently 421 across 31 files
+bun test               # unit tests (bun:test) — currently 423 across 32 files
 bun run check          # svelte-kit sync + svelte-check (expect 0 errors / 0 warnings)
 bunx vite build        # static build → build/  (also: bun run build)
 bun run format         # prettier --write
