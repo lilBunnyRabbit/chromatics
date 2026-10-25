@@ -56,6 +56,11 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
    - [x] The switch (2026-10-25, `feat/studio-switch`): culori removed from the studio; baseline review in `apps/studio/tests/fixtures/baseline/review.md`
    - [x] Old-script upgrade (ADR-017, grill 80): `dsl/migrate.ts`, review banner, `~4` share links
    - [x] `@lilbunnyrabbit/chromatics` 0.1.0 published (2026-10-25, by hand); trusted publishing via `release.yml` from now on
+7. [-] **The DSL as its own package** (ADR-018, grill 82): `packages/chromatics-dsl`, `@lilbunnyrabbit/chromatics-dsl`
+   - [x] `Srgb.ensureContrast(bg, ratio, { keepChroma })` in the color package, changeset 0.2.0 (2026-10-26)
+   - [x] The package (2026-10-26, `feat/chromatics-dsl`): `evaluate` with source spans, previews, `deriveScheme(source, { roles, pairs, auto })` with host-declared roles and an error for unknown role keys, `modes.light` / `modes.dark` as data, per-mode audit, `toCssVars(mode)` / `toPaletteVars` and the other exporters; Vitest on node and bun
+   - [x] The studio on it: one host with its 12 roles, spellings, overrides and fallbacks; culori baseline and Brand Dark golden hexes unchanged
+   - [ ] First publish by hand (ADR-007 runbook: drop `"private": true`, publish 0.1.0, add the trusted publisher), after the color package's 0.2.0 is out
 
 ### Parity gap (2026-10-20)
 

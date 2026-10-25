@@ -3,6 +3,8 @@
 **Date:** 2026-10-21
 **Status:** Implemented
 
+> **Revision 2026-10-26 (ADR-018):** the language core, previews, design system and exporters moved to `packages/chromatics-dsl`; the studio imports them. `ensureContrast` is no longer a studio builtin but the package's `Srgb.ensureContrast`; the DSL builtin always returns an Oklch now (also when the seed already passes; same displayed hex). `color/contrast-guard.ts` is gone.
+
 > **Revision 2026-10-25:** the baseline is `apps/studio/scripts/baseline.ts` (`bun run baseline`), written to `apps/studio/tests/fixtures/baseline/{models,examples}.json`, one record per line. `models.json`: each backed model (66) read from a 48-colour grid (sRGB cube at 0 / 0.5 / 1, greys, four hexes, twelve OKLCH colours at chroma 0.35, one powerless-hue grey) and built natively at every min / mid / max channel corner; per record the channels, hex, CSS, sRGB gamut flag and `gamutMapped` hex. `examples.json`: each example's entries, light and dark roles, theme vars and CSS export. `tests/baseline.test.ts` pins it until the switch. Two findings already in it: RAL is registered as backed but every culori conversion throws (52 error records), and `gamutMapped` on some in-gamut wide-gamut values shifts them (a98 `#0000ff` → `#0031e5`), from culori's `clampChroma` on tiny negative channels.
 
 
