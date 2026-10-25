@@ -586,6 +586,17 @@ Recorded as [ADR-016](../adrs/016-studio-on-the-package.md). Next: per-feature A
 - **79c, compositing:** `over(backdrop)` on Srgb and LinearSrgb, Porter-Duff source-over (CSS Compositing 1); the class is the compositing space (recommended).
 - **79d, ΔE94 / CMC:** `lab.deltaE94(other, { application })`, default graphic arts (CIE 116-1995); `lab.deltaECmc(other, { l = 2, c = 1 })` (recommended). The receiver is the reference.
 
+### Grill 80: upgrading old scripts (decided 2026-10-25)
+
+Owner, 2026-10-25: "if i have old scripts to modify them and use the new system". ADR-016 breaks every saved document and share link; this gives them a way across. The baseline dump went in first (`b9717db`). Of the studio's 73 method names on backed models, 54 have no package method of the same name: some are renames (`rotate` → `rotateHue`, `gamutMapped` → `gamutMap()`, `deltaECMC` → `deltaECmc`), the rest have no package equivalent (`tint`, `shade`, `tone`, `atLightness`, `withChroma`, `meetsAA`, `isWarm`, `tonalPalette` …).
+
+- **80a, mechanism:** an AST codemod, `dsl/migrate.ts`: old source in, new source plus a change list and leftovers out; the studio shows a before / after diff to apply or dismiss (recommended). Attack: the table of old names survives in the code base, against "no backwards compatibility". Accepted: it is a one-way exit, not an alias.
+- **80b, semantics:** insert `.clone()` on every chain whose receiver is a named colour, so migrated scripts compute what they did under immutable values (recommended). Chains that start with `.to(X)` need none.
+- **80c, no equivalent:** expand to a short package expression where one exists, else leave the call with a `// migrate:` comment so the evaluator errors there and the review lists it (recommended).
+- **80d, trigger:** documents get a DSL version (`DOC_SCHEMA_VERSION` 2, share-link format digit 4). Opening a v1 document or link, or pasting old code, shows a "Written for the old DSL. Review upgrade" banner, and the editor menu gets an "Upgrade script" command. The tool stays (recommended).
+
+Test gate: every current example, migrated, evaluates in the new DSL to the baseline's hexes, except reviewed differences (gamut mapping, CMC default). Built with the switch, since its output must run on the new evaluator. Recorded as [ADR-017](../adrs/017-dsl-migration.md).
+
 ## Key takeaways
 
 - The package is a typed, class-per-model, mutable, chainable API. Every operation is bound to the color's own class, and two-color operations are same-model by type.

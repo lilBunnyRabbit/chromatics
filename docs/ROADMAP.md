@@ -53,6 +53,7 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
    - [x] Gap features in the package (grill 79): `simulateCvd` (`/cvd`), `Srgb.filter`, `over`, `deltaE94` / `deltaECmc`
    - [x] Studio culori baseline dump (2026-10-25): `apps/studio/tests/fixtures/baseline/`, every backed model on a 48-colour grid plus its own channel corners, and every example's entries, roles, theme vars and CSS export
    - [ ] The switch
+   - [ ] Old-script upgrade (ADR-017, grill 80): `dsl/migrate.ts` codemod, review diff, v1 detection banner; built with the switch
 
 ### Parity gap (2026-10-20)
 

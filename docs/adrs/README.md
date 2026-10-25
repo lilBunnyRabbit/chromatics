@@ -41,3 +41,4 @@ When implementation forces a change, add a dated revision note at the top. Code 
 | [014](./014-rgb-working-spaces-and-video.md) | RGB working spaces and video | 2026-10-20 | Implemented |
 | [015](./015-hue-and-subtractive.md) | More hue models and subtractive models | 2026-10-20 | Implemented |
 | [016](./016-studio-on-the-package.md) | The studio on the package | 2026-10-21 | Accepted |
+| [017](./017-dsl-migration.md) | Upgrading old scripts | 2026-10-25 | Accepted |
