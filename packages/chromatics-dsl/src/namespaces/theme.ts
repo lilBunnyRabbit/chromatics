@@ -8,7 +8,10 @@ import type { DSLValue, DSLFunction, PlainObject } from "../values.js";
 /** Where a role key was written, for the unknown-role error. */
 export interface RolePosition {
   line: number;
+  /** The role key. */
   span: { start: number; end: number };
+  /** The color name it maps to. */
+  target: { start: number; end: number };
 }
 
 /** `[role, colorName, where]`: one line of a mapping block, or one key of `theme({…})`. */

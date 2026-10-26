@@ -424,7 +424,8 @@ function parseRoleMap(body: Node[] | undefined, errors: EvalError[], allowNested
       else if (r?.type === "Literal" && typeof r.value === "string") target = r.value;
       else throw new Error(`role '${role}' must map to a color name`);
       const left = e.left as unknown as Node;
-      lines.push([role, target, { line: lineOf(left), span: spanOf(left) }]);
+      const right = r as unknown as Node;
+      lines.push([role, target, { line: lineOf(left), span: spanOf(left), target: spanOf(right) }]);
     } catch (err: unknown) {
       errors.push(errorAt((err as Error).message, inner));
     }

@@ -86,13 +86,30 @@ describe("deriveScheme: host-declared roles", () => {
     expect(r.modes.light.background).toBeUndefined();
   });
 
-  it("a line naming a missing color falls through to the next rule", () => {
-    const r = deriveScheme(`${PALETTE}background = paper\nroles {\n  background = missing\n}`, {
-      roles: ["background"],
-      pairs: [],
-    });
-    expect(r.errors).toEqual([]);
-    expect(r.modes.light.background).toBe(color(r, "background"));
+  it("a roles {} line naming a missing color is an error at the name, and the role stays unbound", () => {
+    const src = `${PALETTE}background = paper\nroles {\n  background = bgg\n}`;
+    const r = deriveScheme(src, { roles: ["background"], pairs: [] });
+    expect(r.errors).toHaveLength(1);
+    expect(r.errors[0]!.message).toBe("Unknown colour 'bgg' for role 'background'");
+    expect(r.errors[0]!.line).toBe(6);
+    const span = r.errors[0]!.span!;
+    expect(src.slice(span.start, span.end)).toBe("bgg");
+    expect(r.modes.light.background).toBeUndefined();
+  });
+
+  it("a dark {} line naming a missing color is an error, and dark doesn't inherit light for it", () => {
+    const src = `${PALETTE}roles {\n  background = paper\n  dark {\n    background = inkk\n  }\n}`;
+    const r = deriveScheme(src, { roles: ["background"], pairs: [] });
+    expect(r.errors.map((e) => [e.message, e.line])).toEqual([["Unknown colour 'inkk' for role 'background'", 7]]);
+    const span = r.errors[0]!.span!;
+    expect(src.slice(span.start, span.end)).toBe("inkk");
+    expect(r.modes.light.background).toBe(color(r, "paper"));
+    expect(r.modes.dark.background).toBeUndefined();
+  });
+
+  it("theme({…}) naming a missing color is an error on its line", () => {
+    const r = deriveScheme(`${PALETTE}t = theme.dark({ background: "nope" })`, { roles: ["background"], pairs: [] });
+    expect(r.errors.map((e) => [e.message, e.line])).toEqual([["Unknown colour 'nope' for role 'background'", 4]]);
   });
 });
 

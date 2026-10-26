@@ -10,7 +10,7 @@ Pre-release (`0.0.0`): the API is still being decided ([ADR-018](../../docs/adrs
 npm install @lilbunnyrabbit/chromatics @lilbunnyrabbit/chromatics-dsl
 ```
 
-`@lilbunnyrabbit/chromatics` is a peer dependency, so your app and the language share one `Color` class.
+`@lilbunnyrabbit/chromatics` is a peer dependency, so your app and the language share one `Color` class. Peer-range policy: every color-package minor comes with a patch release of this package that widens the range (`^0.2.0 || ^0.3.0`); `src/peer-range.test.ts` fails until it does.
 
 ## Quick start: a 17-token theme
 
@@ -72,7 +72,7 @@ toCssVars(theme.modes.dark, { mode: "single", model: "Oklch" });
 // The 12 tokens the program doesn't define stay unbound and aren't written.
 ```
 
-Roles the program doesn't mention bind to the color variable with the same name. Pass `auto` to guess them some other way.
+Roles the program doesn't mention bind to the color variable with the same name. Pass `auto` to guess them some other way. A role key you didn't declare, or a line naming a color that doesn't exist (`roles { background = bgg }`), is an error in `errors` with its line and span; that role stays unbound in that mode.
 
 ## API
 

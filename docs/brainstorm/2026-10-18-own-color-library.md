@@ -648,7 +648,9 @@ All recommended unless noted.
 - **82s, errors:** `EvalError { message, line, span? }`; evaluate still never throws.
 - **82t, PR plan (owner's pick over two PRs):** one PR: `Srgb.ensureContrast` + changeset (0.2.0), the `chromatics-dsl` package, the studio switch, ADR-018. Then the owner's manual first publish and trusted publisher.
 
-Implemented 2026-10-26 on `feat/chromatics-dsl` (ADR-018 revision note lists every choice made on the way). Open for the owner's sign-off: export subpaths (`.`, `./scheme`, `./export`, previews in `.`), the `DerivedScheme` / `ModeColors` / `AuditPair` / `AuditRow` names and shapes, `toPaletteVars`, the exported `audit()` and `createEnvironment()`, role validation in `deriveScheme` (not `evaluate`), `serializeColor(color)`, kept alpha in `ensureContrast`. The studio declares its 22 role spellings so Brand Dark's `background = …` still binds; baseline and golden hexes unchanged.
+Implemented 2026-10-26 on `feat/chromatics-dsl` (ADR-018 revision note lists every choice made on the way). The 10 post-build items: export subpaths (`.`, `./scheme`, `./export`, previews in `.`), the `DerivedScheme` / `ModeColors` names, the `AuditPair` / `AuditRow` shapes, the exported `audit()`, `toPaletteVars`, `serializeColor(color)`, role validation in `deriveScheme` (not `evaluate`), binding precedence, the exported `createEnvironment()` and friends, `ensureContrast` details (kept alpha, always Oklch). The studio declares its 22 role spellings so Brand Dark's `background = …` still binds; baseline and golden hexes unchanged.
+
+- **82u, post-build sign-off (owner, 2026-10-26):** the 10 items accepted as built, with two changes. (1) Item 8: a role line naming a missing colour is an error (`Unknown colour 'bgg' for role 'background'`, line and span), the same rule as an unknown role key, and it doesn't fall through. (2) The peer range is widened by hand: every colour-package minor comes with a DSL patch changeset (`^0.2.0 || ^0.3.0`), changesets config unchanged, guarded by a test that hand-parses caret ranges. ADR-018 updated.
 
 ## Key takeaways
 

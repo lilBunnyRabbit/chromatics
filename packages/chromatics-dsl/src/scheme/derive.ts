@@ -31,21 +31,28 @@ export interface DerivedScheme<R extends string = string> extends EvalResult {
   audit: Readonly<Record<Mode, AuditRow<R>[]>>;
 }
 
-function unknownRoles(result: EvalResult, roles: ReadonlySet<string>): EvalError[] {
+function mappingErrors(result: EvalResult, scheme: Scheme, roles: ReadonlySet<string>): EvalError[] {
   const errors: EvalError[] = [];
   const list = [...roles].join(", ");
   for (const name of result.order) {
     const v = result.variables.get(name);
     if (!v || !isThemeConfig(v.value)) continue;
     const positions = rolePositions(v.value);
-    for (const key of Object.keys(v.value.roles)) {
-      if (roles.has(key)) continue;
+    for (const [key, target] of Object.entries(v.value.roles)) {
       const at = positions?.get(key);
-      errors.push({
-        message: `Unknown role '${key}'. Declared roles: ${list || "none"}.`,
-        line: at?.line ?? v.line,
-        span: at?.span ?? v.span,
-      });
+      if (!roles.has(key)) {
+        errors.push({
+          message: `Unknown role '${key}'. Declared roles: ${list || "none"}.`,
+          line: at?.line ?? v.line,
+          span: at?.span ?? v.span,
+        });
+      } else if (!scheme.byName.has(target)) {
+        errors.push({
+          message: `Unknown colour '${target}' for role '${key}'`,
+          line: at?.line ?? v.line,
+          span: at?.target ?? v.span,
+        });
+      }
     }
   }
   return errors.sort((a, b) => a.line - b.line);
@@ -65,9 +72,9 @@ function bind<R extends string>(names: Partial<Record<R, string>>, scheme: Schem
  *
  * Light: a role takes the color its `roles {}` / `light {}` / `theme()` line names; else `auto`'s guess;
  * without `auto`, the color variable named like the role; else it stays unbound. Dark: the light binding,
- * re-pointed by `dark {}` / `theme.dark()`. A line naming a color that doesn't exist is ignored. A mapping
- * key that isn't a declared role is an error (in `errors`, with its line); `evaluate` alone can't know the
- * roles, so it doesn't report them. Never throws.
+ * re-pointed by `dark {}` / `theme.dark()`. A mapping key that isn't a declared role, and a line naming a color
+ * that doesn't exist, are errors (in `errors`, with line and span); the latter leaves its role unbound in that
+ * mode. `evaluate` alone can't know the roles, so it doesn't report them. Never throws.
  *
  * @example
  * ```ts
@@ -84,23 +91,27 @@ export function deriveScheme<R extends string>(source: string, options: DeriveOp
   const declaredDark = declaredRoles(scheme, roles, "dark");
   const guessed = options.auto?.(scheme.entries);
 
+  // A declared line decides its role even when it names a missing color: that is an error, and the role
+  // stays unbound in that mode rather than silently taking a guess.
   const light: Partial<Record<R, string>> = {};
   for (const role of options.roles) {
-    const candidates = [declaredLight[role], guessed ? guessed[role] : role];
-    const name = candidates.find((n) => n !== undefined && scheme.byName.has(n));
-    if (name !== undefined) light[role] = name;
+    const declared = declaredLight[role];
+    const name = declared ?? (guessed ? guessed[role] : role);
+    if (name !== undefined && scheme.byName.has(name)) light[role] = name;
   }
   const dark: Partial<Record<R, string>> = { ...light };
   for (const role of options.roles) {
-    const name = declaredDark[role];
-    if (name !== undefined && scheme.byName.has(name)) dark[role] = name;
+    const declared = declaredDark[role];
+    if (declared === undefined) continue;
+    if (scheme.byName.has(declared)) dark[role] = declared;
+    else delete dark[role];
   }
 
   const modes = Object.freeze({ light: bind(light, scheme), dark: bind(dark, scheme) });
   return {
     variables: result.variables,
     order: result.order,
-    errors: [...result.errors, ...unknownRoles(result, roles)],
+    errors: [...result.errors, ...mappingErrors(result, scheme, roles)],
     modes,
     audit: Object.freeze({ light: audit(modes.light, options.pairs), dark: audit(modes.dark, options.pairs) }),
   };
