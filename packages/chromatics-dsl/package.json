@@ -1,0 +1,54 @@
+{
+  "name": "@lilbunnyrabbit/chromatics-dsl",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The Chromatics color language: evaluate small color programs, resolve your own roles in light and dark, audit and export them.",
+  "author": "Andraž Mesarič-Sirec <amesaricsirec@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lilBunnyRabbit/chromatics.git",
+    "directory": "packages/chromatics-dsl"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "!dist/**/*.test.*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./scheme": {
+      "types": "./dist/scheme/index.d.ts",
+      "default": "./dist/scheme/index.js"
+    },
+    "./export": {
+      "types": "./dist/export/index.d.ts",
+      "default": "./dist/export/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run && bunx --bun vitest run",
+    "test:node": "vitest run",
+    "test:bun": "bunx --bun vitest run",
+    "test:all": "vitest run && bunx --bun vitest run"
+  },
+  "dependencies": {
+    "acorn": "^8.16.0"
+  },
+  "peerDependencies": {
+    "@lilbunnyrabbit/chromatics": "^0.2.0"
+  },
+  "devDependencies": {
+    "@lilbunnyrabbit/chromatics": "workspace:*",
+    "@types/bun": "1.4.2",
+    "typescript": "^5.9.3",
+    "vitest": "5.0.3"
+  }
+}

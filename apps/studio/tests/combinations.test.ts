@@ -6,7 +6,7 @@
  * and the composite score orders an obviously-good trio above an obviously-bad one.
  */
 import { test, expect, describe } from 'bun:test';
-import { evaluate } from '../src/lib/dsl/evaluator';
+import { evaluate } from '@lilbunnyrabbit/chromatics-dsl';
 import { schemeFromEvalResult } from '../src/lib/scheme/adapter';
 import {
 	combinationCtx,

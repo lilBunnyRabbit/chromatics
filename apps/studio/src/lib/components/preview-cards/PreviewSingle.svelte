@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { modelName } from '$lib/dsl/values';
+	import { modelName } from '@lilbunnyrabbit/chromatics-dsl';
 	import { DisplayP3, Oklch, Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
 	import ModelViewer from '$lib/components/ModelViewer.svelte';
 	import { infoOf } from '$lib/color/catalog';

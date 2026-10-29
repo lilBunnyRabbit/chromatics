@@ -7,14 +7,13 @@
  */
 import { Oklch } from '@lilbunnyrabbit/chromatics';
 import { test, expect, describe } from 'bun:test';
-import { evaluate } from '../src/lib/dsl/evaluator';
+import { evaluate } from '@lilbunnyrabbit/chromatics-dsl';
 import { schemeFromEvalResult } from '../src/lib/scheme/adapter';
 import { themeRolesFromScheme } from '../src/lib/scheme/theme-config';
 import { deriveScheme } from '../src/lib/scheme/derive';
 import { darkRolesFor, modeWarnings, modeFragilePairs } from '../src/lib/scheme/modes';
 import { toStyleguideCss } from '../src/lib/export/styleguide';
-import { tokensFromScheme } from '../src/lib/scheme/tokens';
-import { componentsFromScheme } from '../src/lib/scheme/components';
+import { tokensFromScheme, componentsFromScheme } from '@lilbunnyrabbit/chromatics-dsl/scheme';
 import { emptyRoles, DEFAULT_OPACITIES, type AuditPair } from '../src/lib/scheme/roles';
 import { manifest } from '../src/lib/dsl/manifest';
 
@@ -75,12 +74,16 @@ describe('dark re-binding + warnings', () => {
 		expect(r.modeWarnings.some((w) => w.role === 'border' && w.kind === 'inherited')).toBe(true);
 	});
 
-	test('a dangling dark target keeps the light value and warns', () => {
+	test('a dangling dark target is an error; the preview keeps the light value and warns', () => {
 		const s2 = scheme(`${SRC}\nbad = theme.dark({ surface: "nope" })`);
-		const lightEff = deriveScheme(`${SRC}\nbad = theme.dark({ surface: "nope" })`, {
+		const derived = deriveScheme(`${SRC}\nbad = theme.dark({ surface: "nope" })`, {
 			roles: emptyRoles(),
 			opacities: DEFAULT_OPACITIES
-		}).effectiveRoles;
+		});
+		expect(derived.result.errors.map((e) => e.message)).toEqual([
+			"Unknown colour 'nope' for role 'surface'"
+		]);
+		const lightEff = derived.effectiveRoles;
 		const darkThemeRoles = themeRolesFromScheme(s2, 'dark');
 		const dark = darkRolesFor(s2, lightEff, darkThemeRoles);
 		expect(dark.surface).toBe(lightEff.surface); // dangling → light value

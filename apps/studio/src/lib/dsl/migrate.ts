@@ -14,7 +14,7 @@ import {
 	LEGACY_MODEL_IDS,
 	LEGACY_UNBACKED
 } from '../color/legacy.js';
-import { MODEL_CLASSES } from './values.js';
+import { MODEL_CLASSES } from '@lilbunnyrabbit/chromatics-dsl';
 
 const CLASS_NAMES = new Set(MODEL_CLASSES.map(([name]) => name));
 const HAS_ROTATE = new Set(

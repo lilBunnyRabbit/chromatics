@@ -10,7 +10,7 @@
  */
 import { test, expect, describe } from 'bun:test';
 import { deriveScheme } from '../src/lib/scheme/derive';
-import { evaluate } from '../src/lib/dsl/evaluator';
+import { evaluate } from '@lilbunnyrabbit/chromatics-dsl';
 import { schemeFromEvalResult } from '../src/lib/scheme/adapter';
 import {
 	resolveRoles,
@@ -125,5 +125,28 @@ describe('purity: opacities flow through, nothing else leaks in', () => {
 		expect(a.themeVars).toBe(b.themeVars);
 		expect(a.namedColorVars).toBe(b.namedColorVars);
 		expect(a.scheme.entries.map((e) => e.name)).toEqual(b.scheme.entries.map((e) => e.name));
+	});
+});
+
+describe('the studio as a host of the package (ADR-018)', () => {
+	const SRC = `a = Oklch(0.6, 0.12, 260)
+b = Oklch(0.2, 0.02, 260)
+roles {
+  primary_fg = a
+  background = b
+}`;
+
+	test('hyphen / snake spellings and background / foreground fold onto the 12 roles', () => {
+		const r = deriveScheme(SRC, base);
+		expect(r.result.errors).toEqual([]);
+		expect(r.themeRoles).toEqual({ primaryFg: 'a', bg: 'b' });
+	});
+
+	test('a key outside the studio spellings is an error on its line, not a silent drop', () => {
+		const r = deriveScheme(`${SRC}\nroles {\n  nonsense = a\n}`, base);
+		expect(r.result.errors).toHaveLength(1);
+		expect(r.result.errors[0].message).toContain("Unknown role 'nonsense'");
+		expect(r.result.errors[0].line).toBe(8);
+		expect(r.scheme.errors).toBe(r.result.errors);
 	});
 });

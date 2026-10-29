@@ -8,15 +8,15 @@ For _why_, read [PRINCIPLES.md](PRINCIPLES.md). The app's architecture map lives
 
 ## Where code goes
 
-A Bun + Turborepo monorepo (ADR-007, grill 76): `apps/studio/` (the app, private), `packages/chromatics/` (the package), `docs/` at the root. The studio, under `apps/studio/`:
+A Bun + Turborepo monorepo (ADR-007, grill 76): `apps/studio/` (the app, private), `packages/chromatics/` (the color package), `packages/chromatics-dsl/` (the language, ADR-018), `docs/` at the root. The studio, under `apps/studio/`:
 
 ```
 src/lib/
 ├── models/      # color engine (culori wrapper, to be replaced by our package)
 ├── analysis/    # contrast, APCA, CVD, ΔE, quantize, combinations
-├── dsl/         # the color language: evaluator, manifest, editor bindings
-├── scheme/      # EvalResult → Scheme, roles, tokens, derive spine
-├── export/      # CSS / DTCG / Tailwind / swatch / styleguide
+├── dsl/         # editor tooling: manifest, CodeMirror bindings, migrator (the language is a package)
+├── scheme/      # the studio preset: roles, overrides, groups, derive spine over the package
+├── export/      # Export tab menu, styleguide, diff card
 ├── state/       # runes singletons (*.svelte.ts)
 └── components/  # Svelte UI
 src/routes/      # routes + examples only
@@ -36,6 +36,8 @@ packages/chromatics/
 ```
 
 A folder per model, flat: a model's family lives in its base class, not its path. Package tests sit beside their source; the studio's tests stay in `tests/`.
+
+The language package lives in `packages/chromatics-dsl/` (ADR-018): `src/{evaluator,environment,values,preview}.ts`, `src/namespaces/` (`tokens`, `component`, `theme`), `src/scheme/` (`deriveScheme`, audit, tokens, components), `src/export/`, tests beside their source. It knows no role names; hosts declare them.
 
 ### Three layers of logic
 

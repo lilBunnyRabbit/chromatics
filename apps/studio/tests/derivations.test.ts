@@ -10,8 +10,7 @@ import {
 	rampColors,
 	rotateIn
 } from '../src/lib/color/spaces';
-import { evaluate } from '../src/lib/dsl/evaluator';
-import { MODEL_CLASSES, modelName } from '../src/lib/dsl/values';
+import { evaluate, MODEL_CLASSES, modelName } from '@lilbunnyrabbit/chromatics-dsl';
 
 const base = new Oklch(0.62, 0.16, 264);
 const shown = (c: Color) => c.to(Srgb).gamutMap().to(Srgb8).toHex();
