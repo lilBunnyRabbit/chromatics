@@ -54,3 +54,4 @@ ADR-001 made the DSL an adapter inside the studio. The owner wants to run Chroma
 - The roles, theme and modes code is redesigned around a host role list; the studio becomes one host among others.
 - WebOS can build a theme from a program: declare its 17 tokens, evaluate, read `modes.dark`, export with `toCssVars`.
 - Two npm packages to release and keep compatible within the peer range.
+- First publish: [runbook](../runbooks/chromatics-dsl-first-publish.md) (owner steps: color 0.2.0, drop `private`, manual 0.1.0, trusted publisher).
