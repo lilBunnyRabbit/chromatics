@@ -60,7 +60,17 @@ Agreed with the owner on 2026-10-18 ([brainstorm](brainstorm/2026-10-18-own-colo
    - [x] `Srgb.ensureContrast(bg, ratio, { keepChroma })` in the color package, changeset 0.2.0 (2026-10-26)
    - [x] The package (2026-10-26, `feat/chromatics-dsl`): `evaluate` with source spans, previews, `deriveScheme(source, { roles, pairs, auto })` with host-declared roles and an error for unknown role keys, `modes.light` / `modes.dark` as data, per-mode audit, `toCssVars(mode)` / `toPaletteVars` and the other exporters; Vitest on node and bun
    - [x] The studio on it: one host with its 12 roles, spellings, overrides and fallbacks; culori baseline and Brand Dark golden hexes unchanged
-   - [ ] First publish by hand (ADR-007 runbook: drop `"private": true`, publish 0.1.0, add the trusted publisher), after the color package's 0.2.0 is out
+   - [x] Missing role colours are errors, peer range guarded by a test (grill 82u, 2026-10-26)
+   - [ ] First publish ([runbook](runbooks/chromatics-dsl-first-publish.md)), owner steps in order:
+     - [ ] Merge PR #12, then its Version PR: CI publishes `@lilbunnyrabbit/chromatics@0.2.0` (the DSL's peer needs it first)
+     - [ ] PR dropping `"private": true` from `packages/chromatics-dsl/package.json`; merge its Version PR (DSL 0.1.0; the DSL publish step fails, expected: no trusted publisher yet)
+     - [ ] Real terminal on `master`: `npm login`, `bun run build` + `npm publish --access public` in `packages/chromatics-dsl`; approve the staged release on npmjs.com
+     - [ ] npmjs.com: trusted publisher `lilBunnyRabbit/chromatics` `release.yml` with "Allow npm publish"; publishing access requires 2FA, disallows tokens
+     - [ ] "First publish done" note in ADR-018
+   - Policy from then on: every color-package minor ships with a DSL patch changeset widening the peer range (`^0.2.0 || ^0.3.0`); `peer-range.test.ts` fails until it does
+8. [ ] **Follow-ups**
+   - [ ] `Cmyk` parse ↔ toString not exact for tiny channels (`FC_SEED=1017574771`, see inbox): own PR, seed pinned as a regression test
+   - [ ] WebOS handoff updated for `@lilbunnyrabbit/chromatics-dsl` (host roles for its 17 tokens, `modes`, `toCssVars`)
 
 ### Parity gap (2026-10-20)
 
