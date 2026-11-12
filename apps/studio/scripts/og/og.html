@@ -1,0 +1,157 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..900&display=block" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.css" rel="stylesheet">
+<style>
+:root {
+  --bg-darkest: oklch(0.153 0.014 230.47); --bg-darker: oklch(0.187 0.0171 230.47); --bg-dark: oklch(0.221 0.0202 230.47);
+  --bg: oklch(0.255 0.0233 230.47); --bg-light: oklch(0.289 0.0264 230.47); --bg-lighter: oklch(0.323 0.0295 230.47);
+  --bg-lightest: oklch(0.357 0.0326 230.47); --fg: oklch(0.745 0.0078 50.47); --dim: oklch(0.745 0.0078 50.47 / 0.55);
+  --primary: oklch(0.745 0.0699 122.47); --secondary: oklch(0.745 0.0466 302.47); --accent: oklch(0.745 0.0932 50.47);
+  --tertiary: oklch(0.745 0.0233 176.47); --cottontail: oklch(0.949 0.0939 122.47);
+  --info: oklch(0.745 0.1398 240); --success: oklch(0.745 0.1398 140); --warn: oklch(0.745 0.1398 70); --danger: oklch(0.745 0.1398 30);
+  --light-1: oklch(0.983 0.0086 86.47); --light-2: oklch(0.966 0.0172 86.47); --light-3: oklch(0.949 0.0259 86.47);
+  --light-4: oklch(0.8907 0.0566 86.47); --light-5: oklch(0.8325 0.0777 86.47); --light-6: oklch(0.7742 0.0723 86.47);
+  --sans: Inter, sans-serif; --mono: Hack, Consolas, monospace;
+}
+* { box-sizing: border-box; margin: 0; }
+body { width: 1200px; height: 630px; overflow: hidden; background: var(--bg-darkest); font-family: var(--sans); color: var(--fg); position: relative; }
+.og-glow { position: absolute; inset: 0; background: radial-gradient(60% 70% at 20% 30%, oklch(0.745 0.0699 122.47 / 0.13), transparent 70%), radial-gradient(50% 60% at 85% 90%, oklch(0.745 0.0466 302.47 / 0.10), transparent 70%); }
+.og-frame { position: absolute; inset: 20px; border: 2px solid var(--bg-light); border-radius: 28px; }
+.og-left { position: absolute; left: 76px; top: 0; bottom: 0; width: 470px; display: flex; flex-direction: column; justify-content: center; gap: 24px; }
+.og-brand { display: flex; align-items: center; gap: 0.22em; font-size: 92px; }
+.og-ears { height: 0.9em; width: auto; fill: var(--primary); flex-shrink: 0; }
+.og-left h1 { font-size: 1em; font-weight: 800; letter-spacing: -0.01em; color: var(--cottontail); line-height: 1; }
+.og-tag { font-size: 32px; font-weight: 500; line-height: 1.25; color: var(--fg); }
+.og-tag b { color: var(--primary); font-weight: 600; }
+.og-feat { font-size: 19px; color: oklch(0.745 0.0078 50.47 / 0.7); }
+.og-screen { position: absolute; left: 590px; top: 70px; width: 548px; height: 490px; border-radius: 22px; overflow: hidden; background: var(--bg-darker); border: 1px solid var(--bg-lighter); box-shadow: 0 30px 80px oklch(0 0 0 / 0.5); }
+.bar { height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 16px; background: var(--bg-light); font-size: 14px; font-weight: 600; }
+.bar .sp { flex: 1; }
+.bar s { width: 11px; height: 11px; border-radius: 50%; background: oklch(0.745 0.0078 50.47 / 0.3); display: block; text-decoration: none; }
+.mono { font-family: var(--mono); }
+</style></head>
+<body>
+<div class="og-glow"></div>
+<div class="og-frame"></div>
+<div class="og-left">
+  <div class="og-brand"><svg class="og-ears" viewBox="0 0 200 180" aria-hidden="true"><path d="M 180.78951,9.4642023 C 167.26793,35.862516 153.19234,51.171994 121.3308,74.909274 c -9.83885,7.33009 -20.56801,28.781376 -19.83643,53.665226 0.48749,16.58156 -1.19704,24.10166 16.50142,37.51644 10.04673,7.61505 24.84456,10.73078 37.73503,5.21428 9.15926,-3.91972 14.86134,-10.24668 13.85759,-12.07669 -10.05575,3.27975 -20.2675,4.2772 -31.63206,0.60045 -7.22358,-2.33703 -22.34681,-8.63089 -22.43956,-28.48702 -0.0519,-11.10019 5.77576,-23.5906 15.97731,-26.01239 5.65284,-1.34195 12.04702,-0.34048 13.55827,5.86571 -0.89118,-1.49479 -5.42011,-5.00853 -11.88232,-3.18133 -5.71991,1.61731 -11.0719,8.87864 -11.92516,16.26466 5.76133,5.52566 39.66171,12.5901 57.75466,-13.52407 13.38833,-19.323816 19.37298,-44.595936 20.20369,-68.581476 0.84632,-24.436568 -4.89214,-59.107171 -18.41373,-32.7088617 z"/><path d="M 18.49504,9.4642043 C 32.01662,35.862514 46.09221,51.171994 77.95375,74.909274 c 9.83885,7.33009 20.56801,28.781376 19.83643,53.665226 -0.48749,16.58156 1.19704,24.10166 -16.50142,37.51644 -10.04673,7.61505 -24.84456,10.73078 -37.73503,5.21428 -9.15926,-3.91972 -14.86134,-10.24668 -13.85759,-12.07669 10.05575,3.27975 20.2675,4.2772 31.63206,0.60045 7.22358,-2.33703 22.34681,-8.63089 22.43956,-28.48702 0.0519,-11.10019 -5.77576,-23.5906 -15.97731,-26.01239 -5.65284,-1.34195 -12.04702,-0.34048 -13.55827,5.86571 0.89118,-1.49479 5.42011,-5.00853 11.88232,-3.18133 5.71991,1.61731 11.0719,8.87864 11.92516,16.26466 C 72.27833,129.80427 38.37795,136.86871 20.285,110.75454 6.8966696,91.430724 0.91201967,66.158604 0.08130967,42.173064 -0.76501033,17.736494 4.9734496,-16.93411 18.49504,9.4642043 Z"/></svg><h1>
+Chromatics</h1></div>
+  <p class="og-tag">Colour as code. <b>One brand color in, a whole palette out.</b></p>
+  <p class="og-feat">~100 color models · WCAG &amp; APCA · live preview</p>
+</div>
+<div class="og-screen">
+<style>
+	.code {
+		padding: 20px 22px;
+		font: 16px/1.8 var(--mono);
+		border-bottom: 1px solid var(--bg-lighter);
+	}
+	.k {
+		color: var(--secondary);
+	}
+	.s {
+		color: var(--accent);
+	}
+	.d {
+		color: var(--dim);
+	}
+	.f {
+		color: var(--primary);
+	}
+	.ramp {
+		display: grid;
+		grid-template-columns: repeat(7, 1fr);
+		gap: 8px;
+		padding: 24px 22px 8px;
+	}
+	.ramp i {
+		height: 92px;
+		border-radius: 10px;
+		display: block;
+	}
+	.lbl {
+		display: grid;
+		grid-template-columns: repeat(7, 1fr);
+		gap: 8px;
+		padding: 0 22px;
+		font: 11px var(--mono);
+		color: var(--dim);
+		text-align: center;
+	}
+	.prev {
+		margin: 22px 22px 0;
+		display: grid;
+		grid-template-columns: 1fr auto;
+		gap: 14px;
+		align-items: center;
+		padding: 16px 18px;
+		border-radius: 14px;
+		background: oklch(0.93 0.05 122.47);
+	}
+	.prev b {
+		display: block;
+		font-size: 17px;
+		color: oklch(0.25 0.04 122.47);
+	}
+	.prev span {
+		font-size: 13px;
+		color: oklch(0.38 0.04 122.47);
+	}
+	.prev .btn {
+		padding: 8px 18px;
+		border-radius: 9px;
+		background: oklch(0.36 0.06 122.47);
+		color: oklch(0.97 0.03 122.47);
+		font-weight: 600;
+		font-size: 14px;
+	}
+	.badges {
+		display: flex;
+		gap: 8px;
+		padding: 18px 22px;
+	}
+	.badge {
+		font: 600 12.5px var(--mono);
+		padding: 4px 10px;
+		border-radius: 8px;
+		background: oklch(0.745 0.0699 122.47 / 0.16);
+		color: var(--primary);
+	}
+</style>
+<div class="bar">palette.chroma<span class="sp"></span><s></s><s></s><s></s></div>
+<pre
+	class="code"
+><span class="f">brand</span>   <span class="d">=</span> <span class="k">hex</span>(<span class="s">"#a4b483"</span>)
+<span class="f">primary</span> <span class="d">=</span> brand.oklch.<span class="k">gamutMap</span>()
+<span class="f">ramp</span>    <span class="d">=</span> primary.<span class="k">steps</span>(<span class="s">7</span>)</pre>
+<div class="ramp">
+	<i style="background: oklch(0.25 0.04 122.47)"></i
+	><i style="background: oklch(0.36 0.06 122.47)"></i
+	><i style="background: oklch(0.47 0.07 122.47)"></i
+	><i style="background: oklch(0.58 0.075 122.47)"></i
+	><i style="background: oklch(0.7 0.07 122.47)"></i
+	><i style="background: oklch(0.82 0.06 122.47)"></i
+	><i style="background: oklch(0.93 0.05 122.47)"></i>
+</div>
+<div class="lbl">
+	<span>900</span><span>800</span><span>700</span><span>500</span><span>300</span><span>200</span
+	><span>100</span>
+</div>
+<div class="prev">
+	<div><b>Preview in real UI</b><span>text on 100, button on 700</span></div>
+	<span class="btn">Save</span>
+</div>
+<div class="badges">
+	<span class="badge">WCAG 9.8 AAA</span><span class="badge">APCA Lc 88</span
+	><span class="badge">in sRGB gamut</span>
+</div>
+</div>
+<script>
+document.fonts.ready.then(() => {
+  const b = document.querySelector(".og-brand");
+  let s = 92;
+  while (b.scrollWidth > 470 && s > 48) b.style.fontSize = --s + "px";
+});
+</script>
+</body></html>

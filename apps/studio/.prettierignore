@@ -3,3 +3,4 @@ build/
 static/
 tests/fixtures/baseline/
 src/lib/dsl/package-docs.json
+scripts/og/og.html
