@@ -6,7 +6,7 @@
  */
 import { Srgb, Srgb8, type Color, type ColorModel } from '@lilbunnyrabbit/chromatics';
 import { app } from '$lib/state/app.svelte';
-import { isColor, modelName } from './values';
+import { isColor, modelName } from '@lilbunnyrabbit/chromatics-dsl';
 import { chromaCompletions } from './complete';
 import { chromaHover } from './hover';
 import { chromaSwatches, type SwatchMode } from './swatch-deco';

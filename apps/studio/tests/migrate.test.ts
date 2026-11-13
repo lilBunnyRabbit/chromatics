@@ -7,8 +7,7 @@ import { join } from 'node:path';
 import { Lab65, Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 import { parse } from '@lilbunnyrabbit/chromatics/all';
 import { migrate } from '../src/lib/dsl/migrate';
-import { evaluate } from '../src/lib/dsl/evaluator';
-import { isColor } from '../src/lib/dsl/values';
+import { evaluate, isColor } from '@lilbunnyrabbit/chromatics-dsl';
 import { examples } from '../src/routes/examples';
 
 interface BaselineEntry {

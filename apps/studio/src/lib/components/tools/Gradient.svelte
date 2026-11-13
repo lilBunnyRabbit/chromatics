@@ -2,7 +2,7 @@
 	import { Srgb, Srgb8 } from '@lilbunnyrabbit/chromatics';
 	import { app } from '$lib/state/app.svelte';
 	import { INTERP_SPACES, mixIn } from '$lib/color/spaces';
-	import { modelName } from '$lib/dsl/values';
+	import { modelName } from '@lilbunnyrabbit/chromatics-dsl';
 	import { uniqueName, round } from '$lib/dsl/emit';
 	import { takenNames, insert } from './shared';
 

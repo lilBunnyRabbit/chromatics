@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { modelName } from '$lib/dsl/values';
+	import { modelName } from '@lilbunnyrabbit/chromatics-dsl';
 	import { Oklab, Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
 	import {
 		interpSpace,

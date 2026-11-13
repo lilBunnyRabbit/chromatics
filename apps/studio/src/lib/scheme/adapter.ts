@@ -1,24 +1,10 @@
 /**
- * The integration seam that unifies the two apps: turn an EvalResult (a flat,
- * model-agnostic map of variables) into a display-ready Scheme of package colours —
- * with the dependency graph and source descriptions preserved.
+ * The package's EvalResult → Scheme split, plus the studio's display groups: a name heuristic that buckets
+ * colors into Core / Background / Foreground / Accents / Semantic.
  */
-import type { EvalResult, Variable } from '../dsl/evaluator.js';
-import { isColor } from '../dsl/values.js';
+import type { EvalResult } from '@lilbunnyrabbit/chromatics-dsl';
+import { schemeFromEvalResult as split } from '@lilbunnyrabbit/chromatics-dsl/scheme';
 import type { Scheme, SchemeEntry, SchemeGroup } from './types.js';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-/** Source slice of the RHS expression, using acorn's character offsets. */
-function describe(source: string, node: unknown): string | undefined {
-	const rhs = (node as any)?.right;
-	if (rhs && typeof rhs.start === 'number' && typeof rhs.end === 'number') {
-		return source.slice(rhs.start, rhs.end).trim();
-	}
-	return undefined;
-}
-
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 function groupLabel(name: string): string {
 	const n = name.toLowerCase();
@@ -32,31 +18,10 @@ function groupLabel(name: string): string {
 const GROUP_ORDER = ['Core', 'Background', 'Foreground', 'Accents', 'Semantic'];
 
 export function schemeFromEvalResult(result: EvalResult, source: string): Scheme {
-	const entries: SchemeEntry[] = [];
-	const nonColorVars: Variable[] = [];
-	let index = 0;
-
-	for (const name of result.order) {
-		const v = result.variables.get(name);
-		if (!v) continue;
-		if (isColor(v.value)) {
-			entries.push({
-				name: v.name,
-				color: v.value,
-				deps: v.deps,
-				line: v.line,
-				description: describe(source, v.node),
-				index: index++
-			});
-		} else {
-			nonColorVars.push(v);
-		}
-	}
-
-	const byName = new Map(entries.map((e) => [e.name, e]));
+	const scheme = split(result, source);
 
 	const buckets = new Map<string, SchemeEntry[]>();
-	for (const e of entries) {
+	for (const e of scheme.entries) {
 		const label = groupLabel(e.name);
 		const arr = buckets.get(label);
 		if (arr) arr.push(e);
@@ -72,5 +37,5 @@ export function schemeFromEvalResult(result: EvalResult, source: string): Scheme
 		if (!GROUP_ORDER.includes(label) && es.length) groups.push({ label, entries: es });
 	}
 
-	return { groups, entries, byName, errors: result.errors, nonColorVars };
+	return { groups, ...scheme };
 }

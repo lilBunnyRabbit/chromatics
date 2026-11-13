@@ -13,27 +13,33 @@
  * canonical scheme; wiring them in here would change exported/audited colors.
  */
 import { Oklch } from '@lilbunnyrabbit/chromatics';
-import { evaluate, type EvalResult } from '../dsl/evaluator.js';
+import type { EvalResult } from '@lilbunnyrabbit/chromatics-dsl';
+import {
+	deriveScheme as derivePackageScheme,
+	tokensFromScheme,
+	buildTokenVars,
+	componentsFromScheme,
+	type StyleTokens,
+	type NamedComponent
+} from '@lilbunnyrabbit/chromatics-dsl/scheme';
+import { kebab } from '@lilbunnyrabbit/chromatics-dsl/export';
 import { schemeFromEvalResult } from './adapter.js';
 import type { Scheme } from './types.js';
-import { tokensFromScheme, buildTokenVars, type StyleTokens } from './tokens.js';
-import {
-	componentsFromScheme,
-	auditPairsFromComponents,
-	type NamedComponent
-} from './components.js';
+import { auditPairsFromComponents } from './components.js';
 import {
 	resolveRoles,
 	applyOverrides,
+	autoAssign,
 	cssVars,
 	auditPairs,
 	emptyRoles,
+	studioPairs,
 	ROLE_KEYS,
 	type Roles,
 	type Opacities,
 	type AuditPair
 } from './roles.js';
-import { themeRolesFromScheme } from './theme-config.js';
+import { STUDIO_ROLE_NAMES, themeRolesFromScheme } from './theme-config.js';
 import {
 	darkRolesFor,
 	modeWarnings,
@@ -41,7 +47,6 @@ import {
 	type ModeWarning,
 	type ModeFragilePair
 } from './modes.js';
-import { kebab } from '../export/index.js';
 
 /** The minimal inputs the derivation actually consumes (a subset of DocSettings). */
 export interface DeriveSettings {
@@ -116,7 +121,18 @@ export function deriveScheme(source: string, settings: DeriveSettings): Rendered
 	const { roles, opacities } = settings;
 	const darkRoles = settings.darkRoles ?? emptyRoles();
 
-	const result = evaluate(source);
+	// The studio is one host of the package (ADR-018): it declares its role spellings and pairs, then
+	// rebuilds its own bindings, since UI overrides and the role fallbacks are studio concepts.
+	const derived = derivePackageScheme(source, {
+		roles: STUDIO_ROLE_NAMES,
+		pairs: studioPairs(opacities),
+		auto: (entries) => ({ ...autoAssign(entries) })
+	});
+	const result: EvalResult = {
+		variables: derived.variables,
+		errors: derived.errors,
+		order: derived.order
+	};
 	const scheme = schemeFromEvalResult(result, source);
 
 	const themeRoles = themeRolesFromScheme(scheme);

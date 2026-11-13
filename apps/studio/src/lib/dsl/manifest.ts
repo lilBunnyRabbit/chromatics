@@ -5,10 +5,16 @@
  */
 import docsJson from './package-docs.json' with { type: 'json' };
 import { CATALOG, type ModelInfo } from '../color/catalog.js';
-import { PREVIEW_SIGNATURES } from './preview.js';
-import { TOKENS_SIGNATURES, TOKENS_DOC } from './tokens.js';
-import { COMPONENT_SIGNATURES } from './components.js';
-import { THEME_DOC, ROLES_DOC, THEME_SIGNATURES } from './theme.js';
+import {
+	PREVIEW_SIGNATURES,
+	TOKENS_SIGNATURES,
+	TOKENS_DOC,
+	COMPONENT_SIGNATURES,
+	THEME_DOC,
+	ROLES_DOC,
+	THEME_SIGNATURES,
+	type Signature
+} from './builtin-docs.js';
 
 type PackedMember = [kind: 0 | 1, sig: number, doc: number];
 interface PackedDocs {
@@ -85,7 +91,7 @@ const unpack = (name: string, [kind, sig, doc]: PackedMember, owner: string): Me
 	owner
 });
 
-function namespace(id: string, sigs: Record<string, { sig: string; doc: string }>): MemberInfo[] {
+function namespace(id: string, sigs: Record<string, Signature>): MemberInfo[] {
 	return Object.entries(sigs).map(([name, s]) => ({
 		name,
 		kind: 'method',

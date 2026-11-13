@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { DisplayP3, Hsl, Oklch, Srgb, Srgb8, type Color } from '@lilbunnyrabbit/chromatics';
 	import type { Scheme, SchemeEntry } from '$lib/scheme/types';
-	import type { DSLValue } from '$lib/dsl/evaluator.js';
+	import { type DSLValue, isPreview } from '@lilbunnyrabbit/chromatics-dsl';
 	import { nearestName } from '$lib/color-names';
 	import { diffCascade } from '$lib/util/cascade';
-	import { isPreview } from '$lib/dsl/preview';
 	import PreviewCard from './preview-cards/PreviewCard.svelte';
 
 	let { scheme }: { scheme: Scheme } = $props();

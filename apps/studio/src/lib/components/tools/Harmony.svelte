@@ -3,7 +3,7 @@
 	import { app } from '$lib/state/app.svelte';
 	import type { Color } from '@lilbunnyrabbit/chromatics';
 	import { HUE_MODELS, rotateIn } from '$lib/color/spaces';
-	import { modelName } from '$lib/dsl/values';
+	import { modelName } from '@lilbunnyrabbit/chromatics-dsl';
 	import { uniqueName } from '$lib/dsl/emit';
 	import { takenNames, insert, oklchText } from './shared';
 

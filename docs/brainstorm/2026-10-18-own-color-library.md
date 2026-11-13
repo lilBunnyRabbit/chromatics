@@ -619,7 +619,38 @@ No grill: ADR-016 and ADR-017 specify it. Choices made while implementing, all r
 - The migrator copies with `to(Model)` when the old operation ran in another model and `clone()` when the class already matches; it keeps old raw-unit semantics (`saturate` on OKLCH → `shift({ c })`).
 - Detection of an old script is "the migrator would change it", so documents, links and pastes behave alike; the version bumps are advisory.
 - Bugs found on the way: old YPbPr / YUV / YDbDr / YCgCo had no chroma offset (only the YCbCr family did); culori's ΔE ran in Lab D65; the HSLuv ramp stops were 0–100 against the package's 0–1.
-- Open for the owner: `simulateCvd` isn't reachable from the DSL (78f allows classes and `parse` only).
+- Open for the owner: `simulateCvd` isn't reachable from the DSL (78f allows classes and `parse` only). Resolved: the owner added it as a builtin (PR #10).
+
+### Grill 82: the DSL as its own package (decided 2026-10-26, ADR-018)
+
+Owner: "was there thought of deploying the dsl as a package? i could then use it in the webos". It wasn't: ADR-001 has the DSL as an adapter in the app. An investigation of `origin/master` @ `60e8c0b` found almost all of it moves as is: no Svelte across `dsl/`, `scheme/`, `export/`, `render/`, `color/`, `analysis/`; the one app import is `dsl/editor-bindings.ts:8`; runtime deps are `acorn` and the package. In the way: block labels hard-coded in the evaluator, a fixed 12-role web-UI vocabulary whose `rolesConfig` silently drops unknown keys (`dsl/theme.ts:49`, so WebOS's 17 tokens can't re-bind for dark), catalog and manifest throwing on an unknown model, and `isColor` using `instanceof`. WebOS theme = one-mode `Record<17 snake_case tokens, CSS string>`.
+
+All recommended unless noted.
+
+- **82a, location:** a separate package `@lilbunnyrabbit/chromatics-dsl` in `packages/`. The colour package keeps ADR-001 / ADR-007 (only runtime dep `@lilbunnyrabbit/optional`). Attack accepted: a second trusted publisher, manual first publish, release filter extended.
+- **82b, scope:** headless: language core, design system (`deriveScheme`), previews as descriptors, exporters. Editor tooling (CodeMirror, docs JSON), migrator, flow, diff and the encyclopedia stay in the studio.
+- **82c, colour package dependency:** peer, `^0.2.0`. Two copies would break `instanceof Color`.
+- **82d, roles:** host-declared. The host passes its role list and audit pairs; `roles {}` / `dark {}` accept declared keys, an unknown key is an error instead of a silent drop. Attack: a redesign of roles / theme / modes / audit.
+- **82e, name:** `chromatics-dsl`.
+- **82f, result:** data first. `deriveScheme` returns variables, errors, `modes.{light,dark}: Record<role, Color>` and per-mode audits; CSS strings move to `export/`. The studio rebuilds its `RenderedScheme` fields from that.
+- **82g, modes:** light and dark only (today's blocks). N named modes rejected as speculation.
+- **82h, builtins:** fixed environment, identical in every host, so programs stay portable.
+- **82i, preset (owner's pick over "package exports a web preset"):** the studio's 12 roles, ~21 pairs and `autoAssign` stay in the studio. The package knows no role names.
+- **82j, ensureContrast (owner's pick over "DSL package, APCA stays studio"):** moves into the colour package. APCA stays in studio `analysis/` (licence, grill 44).
+- **82k, exporters:** two: `toCssVars(mode)` emits exactly the declared roles; a palette exporter emits every colour variable (today's behaviour) for the studio.
+- **82l, tests:** Vitest on node and bun (ADR-008). Example-pinned tests (Brand Dark golden hexes, culori baseline, migrate) stay in the studio.
+- **82m, ensureContrast shape:** `Srgb.ensureContrast(bg: Srgb, ratio: number, opts?)`, mutates and returns `this`, in gamut. Hue held in OKLCH; lightness, then chroma searched. The DSL builtin keeps `ensureContrast(fg, bg, "AAA")` and returns OKLCH as today.
+- **82n, unreachable target:** best effort: the better of black and white, documented. Bends ADR-003's "no silent" rule on purpose so live editing never breaks; callers check with `contrast()`.
+- **82o, auto roles:** `deriveScheme(src, { roles, pairs, auto? })`. Without `auto`, a role binds to the variable of the same name, else unassigned. The studio passes `autoAssign`.
+- **82p, AST:** `Variable.node` (estree) is replaced by `span: { start, end }`; no estree types in the public `.d.ts`.
+- **82q, options (owner's pick over "drop both"):** `{ keepChroma?: boolean }`, default false (today's `allowChroma: true`). `step` dropped; scan granularity is a model detail.
+- **82r, versioning:** independent 0.x. An unknown colour model works in programs with no docs label (no throw); the monorepo test still demands studio labels.
+- **82s, errors:** `EvalError { message, line, span? }`; evaluate still never throws.
+- **82t, PR plan (owner's pick over two PRs):** one PR: `Srgb.ensureContrast` + changeset (0.2.0), the `chromatics-dsl` package, the studio switch, ADR-018. Then the owner's manual first publish and trusted publisher.
+
+Implemented 2026-10-26 on `feat/chromatics-dsl` (ADR-018 revision note lists every choice made on the way). The 10 post-build items: export subpaths (`.`, `./scheme`, `./export`, previews in `.`), the `DerivedScheme` / `ModeColors` names, the `AuditPair` / `AuditRow` shapes, the exported `audit()`, `toPaletteVars`, `serializeColor(color)`, role validation in `deriveScheme` (not `evaluate`), binding precedence, the exported `createEnvironment()` and friends, `ensureContrast` details (kept alpha, always Oklch). The studio declares its 22 role spellings so Brand Dark's `background = …` still binds; baseline and golden hexes unchanged.
+
+- **82u, post-build sign-off (owner, 2026-10-26):** the 10 items accepted as built, with two changes. (1) Item 8: a role line naming a missing colour is an error (`Unknown colour 'bgg' for role 'background'`, line and span), the same rule as an unknown role key, and it doesn't fall through. (2) The peer range is widened by hand: every colour-package minor comes with a DSL patch changeset (`^0.2.0 || ^0.3.0`), changesets config unchanged, guarded by a test that hand-parses caret ranges. ADR-018 updated.
 
 ## Key takeaways
 

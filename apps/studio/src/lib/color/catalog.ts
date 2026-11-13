@@ -1,5 +1,5 @@
 import type { Channel, ColorModel } from '@lilbunnyrabbit/chromatics';
-import { MODEL_CLASSES } from '../dsl/values.js';
+import { MODEL_CLASSES } from '@lilbunnyrabbit/chromatics-dsl';
 
 export type Family =
 	| 'perceptual'

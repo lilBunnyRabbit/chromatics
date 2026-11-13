@@ -14,12 +14,11 @@
  * contrast audit. Both share the same role-fallback chain as `roles.cssVars`.
  */
 import type { Scheme } from '../scheme/types.js';
-import type { StyleTokens } from '../scheme/tokens.js';
-import { TOKEN_VAR_PREFIX, pxOf } from '../scheme/tokens.js';
+import { TOKEN_VAR_PREFIX, pxOf, type StyleTokens } from '@lilbunnyrabbit/chromatics-dsl/scheme';
+import { kebab } from '@lilbunnyrabbit/chromatics-dsl/export';
 import type { Roles, Opacities } from '../scheme/roles.js';
 import type { Color } from '@lilbunnyrabbit/chromatics';
 import { parse } from '@lilbunnyrabbit/chromatics/all';
-import { kebab } from '../export/index.js';
 
 export interface ResolveCtx {
 	tokens: StyleTokens;

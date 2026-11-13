@@ -3,14 +3,16 @@
 	import { app } from '$lib/state/app.svelte';
 	import {
 		exportScheme,
-		toSwatchSVG,
 		EXPORT_FORMATS,
 		COLOR_FORMATTED,
 		CSS_COLOR_MODELS,
-		type ExportFormat,
+		type ExportFormat
+	} from '$lib/export';
+	import {
+		toSwatchSVG,
 		type ColorFormat,
 		type ColorFormatMode
-	} from '$lib/export';
+	} from '@lilbunnyrabbit/chromatics-dsl/export';
 	import { toStyleguideCss, toStyleguideHtml, type StyleguideInput } from '$lib/export/styleguide';
 	import { base } from '$app/paths';
 	import { encodeHash } from '$lib/persistence/url-hash';

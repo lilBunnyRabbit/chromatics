@@ -5,7 +5,7 @@
 	 * design system off DEFAULT_TOKENS. Values come straight from the merged
 	 * StyleTokens, themed by the surrounding container's CSS vars.
 	 */
-	import type { StyleTokens } from '$lib/scheme/tokens';
+	import type { StyleTokens } from '@lilbunnyrabbit/chromatics-dsl/scheme';
 
 	let { tokens }: { tokens: StyleTokens } = $props();
 

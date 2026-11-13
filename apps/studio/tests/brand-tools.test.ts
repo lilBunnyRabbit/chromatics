@@ -1,14 +1,14 @@
 import { test, expect, describe } from 'bun:test';
 import { Oklch, Srgb, type Color } from '@lilbunnyrabbit/chromatics';
 import { parse } from '@lilbunnyrabbit/chromatics/all';
-import { evaluate } from '../src/lib/dsl/evaluator';
+import { evaluate } from '@lilbunnyrabbit/chromatics-dsl';
 import { apcaContrast, apcaUse } from '../src/lib/analysis/apca';
 import { deltaE2000, similarPairs, similarityLevel } from '../src/lib/analysis/similarity';
 import { printProof } from '../src/lib/analysis/print';
 import { nearestName } from '../src/lib/color-names';
 import { quantize, rgbToHex } from '../src/lib/analysis/quantize';
 import { colorLiteral, oklchLiteral, uniqueName, appendStatements } from '../src/lib/dsl/emit';
-import { toSwatchSVG } from '../src/lib/export/swatch';
+import { toSwatchSVG } from '@lilbunnyrabbit/chromatics-dsl/export';
 import type { Scheme, SchemeEntry } from '../src/lib/scheme/types';
 
 const white = parse('#ffffff');

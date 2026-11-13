@@ -2,7 +2,7 @@
  * Standalone SVG "scheme diff" card (CD-14) — a shareable/embeddable image of what
  * a brand change did across the system. Self-contained markup (system font, no
  * external refs) so it rasterizes cleanly to PNG via an <img>/canvas round-trip,
- * exactly like `export/swatch.ts`. Headline-first: contrast band crossings, then
+ * exactly like the package's `toSwatchSVG`. Headline-first: contrast band crossings, then
  * the changed/added/removed colors.
  */
 import type { SchemeDiff, PaletteDelta, ContrastDelta } from '../scheme/diff.js';

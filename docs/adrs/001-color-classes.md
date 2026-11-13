@@ -3,6 +3,8 @@
 **Date:** 2026-10-18
 **Status:** Implemented
 
+> **Revision 2026-10-26 (ADR-018):** the DSL is no longer an adapter in the app: its headless layers are `@lilbunnyrabbit/chromatics-dsl`, with the color package as a peer. The color package still doesn't bend for it; `Srgb.ensureContrast` moved in as a color operation.
+
 > **Revision 2026-10-19** ([brainstorm](../brainstorm/2026-10-18-own-color-library.md) grills 18, 19)
 >
 > - **Channels are accessors over private backing fields**, not plain fields, so a write can validate (ADR-003: throw on `NaN` / `Infinity`, wrap hue). Measured cost over 10M read+write ops: plain fields 25 ms on V8 and 60 ms on JSC, accessors 100 ms and 250 ms. Accepted by the owner; a batch type can win it back. `toJSON()` returns `{ model, ...channels, alpha }`.

@@ -11,11 +11,16 @@ import { Oklch } from '@lilbunnyrabbit/chromatics';
 import type { Scheme } from '../scheme/types.js';
 import type { Roles, Opacities } from '../scheme/roles.js';
 import { cssVars } from '../scheme/roles.js';
-import type { StyleTokens } from '../scheme/tokens.js';
-import { buildTokenVars } from '../scheme/tokens.js';
-import type { NamedComponent, ButtonSpec, CardSpec, TypeSpec } from '../scheme/components.js';
+import {
+	buildTokenVars,
+	type StyleTokens,
+	type NamedComponent,
+	type ButtonSpec,
+	type CardSpec,
+	type TypeSpec
+} from '@lilbunnyrabbit/chromatics-dsl/scheme';
+import { kebab } from '@lilbunnyrabbit/chromatics-dsl/export';
 import { resolveRef, type ResolveCtx } from '../render/resolve.js';
-import { kebab } from './index.js';
 
 export interface StyleguideInput {
 	scheme: Scheme;

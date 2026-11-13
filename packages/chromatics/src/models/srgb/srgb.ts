@@ -9,6 +9,18 @@ import { linearToSrgb, srgbToLinear } from "../../core/transfer.js";
 import { applyFilter, type FilterName } from "../../core/filter.js";
 import { sourceOver } from "../../core/composite.js";
 import { LinearSrgb } from "../linear-srgb/linear-srgb.js";
+import { Oklch } from "../oklch/oklch.js";
+
+/** Options for {@link Srgb.ensureContrast}. */
+export interface EnsureContrastOptions {
+  /** Search lightness only, at the original OkLCh chroma. Default `false`: chroma may drop too. */
+  readonly keepChroma?: boolean;
+}
+
+// The search is a heuristic with no published reference: lightness steps of 0.005 in OkLCh (200 per
+// unit, finer than a just-noticeable step), and chroma tried at 100 / 75 / 50 / 25 / 0 % of the original.
+const LIGHTNESS_STEP = 0.005;
+const CHROMA_SCALES = [1, 0.75, 0.5, 0.25, 0];
 
 // WCAG 2.2 #dfn-relative-luminance, Note 1: "L = 0.2126 * R + 0.7152 * G + 0.0722 * B", with the sRGB
 // transfer at threshold 0.04045 (the same curve as `srgbToLinear`).
@@ -117,6 +129,64 @@ export class Srgb extends RgbColor {
     const a = wcagLuminance(this);
     const b = wcagLuminance(other);
     return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  }
+
+  /**
+   * Moves this color to the one nearest it that reaches WCAG 2 contrast `ratio` against `bg`, and returns
+   * this color (mutates). Both sides are measured gamut-mapped, as a screen shows them. The result is
+   * always in gamut; alpha is untouched (contrast ignores it).
+   *
+   * The OkLCh hue is held. Lightness is searched outward from the original in steps of 0.005, at the
+   * original chroma and, unless `keepChroma`, at 75 / 50 / 25 / 0 % of it; the hit closest to the original
+   * in (lightness, chroma) wins. A color that already passes is only gamut-mapped (unchanged when in
+   * gamut). When no lightness reaches `ratio`, the result is black or white, whichever contrasts more:
+   * best effort, never an error, so check `contrast()` when the target matters. The search is a heuristic
+   * with no published reference; the targets are WCAG 2.2's.
+   *
+   * @param ratio 1–21. WCAG 2.2 SC 1.4.3 (AA): 4.5 for text, 3 for large text; SC 1.4.6 (AAA): 7 and 4.5.
+   * @throws {RangeError} when `ratio` is outside [1, 21] or `NaN`.
+   * @see https://www.w3.org/TR/WCAG22/#contrast-minimum
+   *
+   * @example
+   * ```ts
+   * const text = brand.to(Srgb).ensureContrast(bg.to(Srgb), 4.5);
+   * text.contrast(bg.to(Srgb)); // ≥ 4.5 unless the target can't be reached
+   * ```
+   */
+  ensureContrast(bg: Srgb, ratio: number, options: EnsureContrastOptions = {}): this {
+    if (!(ratio >= 1 && ratio <= 21)) throw new RangeError(`ensureContrast: ratio must be 1–21, got ${ratio}`);
+    const backdrop = bg.clone().gamutMap();
+    const meets = (c: Srgb) => c.contrast(backdrop) >= ratio;
+    const alpha = this.alpha;
+    const shown = this.clone().gamutMap();
+    if (meets(shown)) return this.assign(shown.coords, alpha);
+
+    const { l: l0, c: c0, h } = this.to(Oklch);
+    const at = (l: number, c: number) => new Oklch(Math.min(1, Math.max(0, l)), Math.max(0, c), h).to(Srgb).gamutMap();
+    const nearestLightness = (c: number): { srgb: Srgb; l: number } | null => {
+      for (let i = 0; i * LIGHTNESS_STEP <= 1 + 1e-9; i++) {
+        const d = i * LIGHTNESS_STEP;
+        for (const l of d === 0 ? [l0] : [l0 - d, l0 + d]) {
+          if (l < 0 || l > 1) continue;
+          const srgb = at(l, c);
+          if (meets(srgb)) return { srgb, l };
+        }
+      }
+      return null;
+    };
+
+    let best: { srgb: Srgb; distance: number } | null = null;
+    for (const scale of options.keepChroma ? [1] : CHROMA_SCALES) {
+      const c = c0 * scale;
+      const hit = nearestLightness(c);
+      if (!hit) continue;
+      const distance = Math.hypot(hit.l - l0, c - c0);
+      if (!best || distance < best.distance) best = { srgb: hit.srgb, distance };
+    }
+    if (best) return this.assign(best.srgb.coords, alpha);
+    const white = new Srgb(1, 1, 1);
+    const black = new Srgb(0, 0, 0);
+    return this.assign((white.contrast(backdrop) >= black.contrast(backdrop) ? white : black).coords, alpha);
   }
 
   /**
